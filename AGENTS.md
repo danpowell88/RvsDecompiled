@@ -2,7 +2,7 @@ This is a decompliation project for Tom Clancys Rainbow Six Ravenshield.
 
 The goal is a maintainable, readable and as close to byte accurate version of the game as possible that can be rebuilt and played. Byte accuracy should not come at the expensive of complicated code, where possible keep it accurate but readability and maintainability / simplicity should be preferred. Document any divergences from byte parity.
 
-Keep a dev blog as progress continues in the /blog folder. The dev blog should be aimed at someone who is a programmer but not used to unmanaged and c++  and game engine code. Introduce concepts before delving deep into the technical implementation and ensure its explained and then when it is you may continue to go into technical detail. A dev blog should be created when anything interesting is completed or a new milestone is achieved. They can be both long and short and should be informative and light hearted while still providing some good technical and educational information.
+Keep a dev blog as progress continues in the /blog folder. The dev blog should be aimed at someone who is a programmer but not used to unmanaged and c++  and game engine code. Introduce concepts before delving deep into the technical implementation and ensure its explained and then when it is you may continue to go into technical detail. A dev blog should be created when anything interesting is completed or a new milestone is achieved. They can be both long and short and should be informative and light hearted while still providing some good technical and educational information. Include a section that outlines how much of the decomp project is left to do at the end of every post
 
 The build must always compile and link.
 
@@ -10,9 +10,6 @@ Commit frequently when small pieces of work are done.
 
 The blog uses Docusaurus with MDX. In blog post prose (outside of code blocks), bare `<` and `>` characters are interpreted as JSX tags and will cause build failures. Always wrap operators like `<=`, `>=`, `<<`, `>>`, or any angle-bracket expressions in backticks when writing them in markdown text.
 
-Blog post titles must follow the format `"NN. Title Text"` where NN is the post number matching the filename prefix (e.g. file `47-foo.md` → title `"47. Foo"`). Do not use alternative prefixes like "Batch NNN:", "Dev Blog #NN:", or "Post NN:".
-
-**Post number collisions cause broken pages.** Two posts with the same number (e.g. two `244-*.md` files) will cause Docusaurus to fail to render one of them. Always check the highest existing number before creating a new post — the `new_blog_post.py` script does this automatically.
 
 ## ⚠️ Blog Post Creation — ALWAYS use the script
 
@@ -57,7 +54,8 @@ When there is any conflict between the SDK headers and Ghidra analysis of the re
 
 1. **Ghidra is always the ground truth.** Function signatures, struct sizes, member offsets, calling conventions — all come from Ghidra analysis of the retail DLLs, not the SDK.
 
-2. **The SDK is a useful starting point / cross-reference only.** It can help identify parameter names and intent, but must not be blindly trusted for signatures, types, or struct layouts.
+2. **The unoffical Ravenshield C SDK is a useful starting point / cross-reference only.** It can help identify parameter names and intent, but must not be blindly trusted for signatures, types, or struct layouts.
+3. **UT99** Check Ut99PubSrc for a guide as to what things could look like, its an earlier engine version and the Ravenshield engine could have additional modifications so its not always correct.
 
 3. **When adding a new declaration or shim** (e.g. adding a missing function to `EnginePrivate.h` or `CorePrivate.h`), derive the signature from Ghidra's decompilation output in `ghidra/exports/`, not from the SDK. Document the Ghidra address in a comment.
 

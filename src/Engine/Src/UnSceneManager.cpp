@@ -1085,18 +1085,63 @@ void ASceneManager::SetSceneStartTime()
 
 // =============================================================================
 // --- AInterpolationPoint ---
-IMPL_TODO("Ghidra 0x1040ba00: all deps available (FLineBatcher, FCoords, FVector, GMath); complex 8-vertex wireframe coordinate math needs reconstruction from decompiled float layout")
+IMPL_TODO("Ghidra 0x1040ba00: algorithm reconstructed — wireframe box with 8 vertices and 12 edges. XAxis forward-offset scalar in FVector::operator* calls is obscured by Ghidra hidden-return-pointer confusion; currently using 0.0f (vertices at Location). Needs disassembly verification of the FPU scalar parameter.")
 void AInterpolationPoint::RenderEditorSelected(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
 	guard(AInterpolationPoint::RenderEditorSelected);
-	// Retail 0x1040ba00 (ordinal 4303): creates FLineBatcher(RI,1,0), decomposes
-	// Rotation via GMath.UnitCoords / Rotation into XAxis/YAxis/ZAxis, computes
-	// 8 box vertices (4 inner at 32 units, 4 outer at 64 units) from SafeNormal'd
-	// combinations of +/-YAxis +/-ZAxis, draws 12 edges (inner face, outer face,
-	// 4 connecting) via FLineBatcher::DrawLine(FVector,FVector,FColor(white)),
-	// then calls AActor::RenderEditorSelected. Editor-only visualisation path.
-	// No FUN_ calls — all functions are resolved. Blocked on painstaking
-	// float-layout reconstruction to match Ghidra's register-reuse pattern.
+	// Retail 0x1040ba00 (2837 bytes, ordinal 4303): draws a wireframe double-box
+	// around this interpolation point.  Decomposes Rotation into coordinate axes,
+	// computes 4 inner vertices (32-unit scale) and 4 outer vertices (64-unit scale)
+	// from SafeNormal'd combinations of +/-YAxis +/-ZAxis, draws 12 edges
+	// (inner face, outer face, 4 connecting) via FLineBatcher::DrawLine with white.
+
+	FLineBatcher Lines(RI, 1, 0);
+
+	FCoords Coords = GMath.UnitCoords / Rotation;
+	FVector XAxis = Coords.XAxis;
+	FVector YAxis = Coords.YAxis;
+	FVector ZAxis = Coords.ZAxis;
+	FVector NegY  = FVector(-YAxis.X, -YAxis.Y, -YAxis.Z);
+
+	// Corner directions: ±ZAxis ± YAxis
+	FVector Dir0 = FVector(ZAxis.X + NegY.X, ZAxis.Y + NegY.Y, ZAxis.Z + NegY.Z);  // Z - Y
+	FVector Dir1 = FVector(ZAxis.X - NegY.X, ZAxis.Y - NegY.Y, ZAxis.Z - NegY.Z);  // Z + Y
+	FVector NegZ = FVector(-ZAxis.X, -ZAxis.Y, -ZAxis.Z);
+	FVector Dir2 = FVector(NegZ.X - NegY.X, NegZ.Y - NegY.Y, NegZ.Z - NegY.Z);    // -Z + Y
+	FVector Dir3 = FVector(NegZ.X + NegY.X, NegZ.Y + NegY.Y, NegZ.Z + NegY.Z);    // -Z - Y
+
+	// 4 inner vertices at 32-unit perpendicular offset from Location
+	FVector V0 = Location + Dir0.SafeNormal() * 32.0f;
+	FVector V1 = Location + Dir1.SafeNormal() * 32.0f;
+	FVector V2 = Location + Dir2.SafeNormal() * 32.0f;
+	FVector V3 = Location + Dir3.SafeNormal() * 32.0f;
+
+	// 4 outer vertices at 64-unit perpendicular offset from Location
+	FVector V4 = Location + Dir0.SafeNormal() * 64.0f;
+	FVector V5 = Location + Dir1.SafeNormal() * 64.0f;
+	FVector V6 = Location + Dir2.SafeNormal() * 64.0f;
+	FVector V7 = Location + Dir3.SafeNormal() * 64.0f;
+
+	FColor White(0xFFFFFFFF);
+
+	// Inner face
+	Lines.DrawLine(V0, V1, White);
+	Lines.DrawLine(V1, V2, White);
+	Lines.DrawLine(V2, V3, White);
+	Lines.DrawLine(V3, V0, White);
+
+	// Outer face
+	Lines.DrawLine(V4, V5, White);
+	Lines.DrawLine(V5, V6, White);
+	Lines.DrawLine(V6, V7, White);
+	Lines.DrawLine(V7, V4, White);
+
+	// Connecting edges
+	Lines.DrawLine(V0, V4, White);
+	Lines.DrawLine(V1, V5, White);
+	Lines.DrawLine(V2, V6, White);
+	Lines.DrawLine(V3, V7, White);
+
 	AActor::RenderEditorSelected(SceneNode, RI, DA);
 	unguard;
 }

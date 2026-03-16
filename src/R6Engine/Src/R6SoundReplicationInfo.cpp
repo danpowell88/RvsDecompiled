@@ -50,7 +50,7 @@ INT AR6SoundReplicationInfo::IsNetRelevantFor(APlayerController* Viewer, AActor*
 	return 1;
 }
 
-IMPL_DIVERGE("audio dispatch via vtable (AudioSub+0x84) and per-case sound refs (weapon info offsets 0x3a0..0x460) not reconstructed; AudioSub object layout unmapped — play calls permanently omitted")
+IMPL_TODO("blocked by FUN_1001bc10 (silencer IsA check at 0x1001bc10); piSilencer forced NULL — silencer sounds disabled")
 void AR6SoundReplicationInfo::PlayWeaponSound(enum EWeaponSound WeaponSound, BYTE CurrentWeapon)
 {
 	guard(AR6SoundReplicationInfo::PlayWeaponSound);
@@ -71,23 +71,122 @@ void AR6SoundReplicationInfo::PlayWeaponSound(enum EWeaponSound WeaponSound, BYT
 	if (((BYTE*)this)[0x39c] == 6 && (INT)WeaponSound != 10)
 		PlayWeaponSound((enum EWeaponSound)10, CurrentWeapon);
 
-	// Get audio subsystem from engine
-	INT* AudioSub = *(INT**)(*(INT*)((BYTE*)g_pEngine) + 0x48);
+	// Get audio subsystem from engine (UEngine + 0x48)
+	INT* AudioSub = *(INT**)((BYTE*)g_pEngine + 0x48);
 	if (AudioSub == NULL)
 		goto Done;
 
-	// DIVERGENCE: audio dispatch via vtable call (*(code**)(*AudioSub + 0x84)) not
-	// reconstructed — the AudioSub object layout is not fully mapped. The sound
-	// references at weapon info offsets (0x3a0..0x460) and the per-case logic below
-	// are documented but the actual play calls are omitted:
-	//   case 2: fire sound
-	//   case 3: fire + echo (+ silencer echo if equipped)
-	//   case 4: reload sound
-	//   case 5: fire + suppressed (+ silencer suppressed if equipped)
-	//   case 6: looping fire sound (start)
-	//   case 7: fire + echo + alt-fire sound
-	//   case 8/9: special fire / alt-fire sound
-	//   case 10: stop looping fire, play stop sound
+	{
+		INT weaponInfo = *(INT*)((BYTE*)this + 0x3b0);
+
+		// TODO: FUN_1001bc10 does IsA class-walk on *(INT*)(weaponInfo + 0x39c)
+		// against an unresolved PrivateStaticClass; returns the object ptr if match,
+		// else NULL. The result gates silencer echo/suppressed sound playback via
+		// vtable[0x19c] check. Forced NULL until the class reference is resolved.
+		INT* piSilencer = NULL;
+
+		switch ((INT)WeaponSound) {
+		case 2: // Fire sound
+			(*(void (__thiscall**)(INT*, AActor*, INT, INT, INT))(*(INT*)AudioSub + 0x84))
+				(AudioSub, this, *(INT*)(weaponInfo + 0x3a0 + (UINT)CurrentWeapon * 4), 2, 0);
+			break;
+
+		case 3: // Fire + echo (+ silencer echo if equipped)
+		{
+			UINT uWeapon = (UINT)CurrentWeapon;
+			(*(void (__thiscall**)(INT*, AActor*, INT, INT, INT))(*(INT*)AudioSub + 0x84))
+				(AudioSub, this, *(INT*)(weaponInfo + 0x3a0 + uWeapon * 4), 2, 0);
+			(*(void (__thiscall**)(INT*, AActor*, INT, INT, INT))(*(INT*)AudioSub + 0x84))
+				(AudioSub, this, *(INT*)(*(INT*)((BYTE*)this + 0x3b0) + 0x3b0 + uWeapon * 4), 2, 0);
+			if (piSilencer != NULL &&
+				(*(INT (__thiscall**)(INT*))(*(INT*)piSilencer + 0x19c))(piSilencer) != 0)
+			{
+				(*(void (__thiscall**)(INT*, AActor*, INT, INT, INT))(*(INT*)AudioSub + 0x84))
+					(AudioSub, this, *(INT*)(*(INT*)((BYTE*)this + 0x3b0) + 0x430 + uWeapon * 4), 2, 0);
+			}
+			break;
+		}
+
+		case 4: // Reload sound
+			(*(void (__thiscall**)(INT*, AActor*, INT, INT, INT))(*(INT*)AudioSub + 0x84))
+				(AudioSub, this, *(INT*)(weaponInfo + 0x3c0 + (UINT)CurrentWeapon * 4), 2, 0);
+			break;
+
+		case 5: // Fire + suppressed (+ silencer suppressed if equipped)
+		{
+			UINT uWeapon = (UINT)CurrentWeapon;
+			(*(void (__thiscall**)(INT*, AActor*, INT, INT, INT))(*(INT*)AudioSub + 0x84))
+				(AudioSub, this, *(INT*)(weaponInfo + 0x3a0 + uWeapon * 4), 2, 0);
+			(*(void (__thiscall**)(INT*, AActor*, INT, INT, INT))(*(INT*)AudioSub + 0x84))
+				(AudioSub, this, *(INT*)(*(INT*)((BYTE*)this + 0x3b0) + 0x3d0 + uWeapon * 4), 2, 0);
+			if (piSilencer != NULL &&
+				(*(INT (__thiscall**)(INT*))(*(INT*)piSilencer + 0x19c))(piSilencer) != 0)
+			{
+				(*(void (__thiscall**)(INT*, AActor*, INT, INT, INT))(*(INT*)AudioSub + 0x84))
+					(AudioSub, this, *(INT*)(*(INT*)((BYTE*)this + 0x3b0) + 0x440 + uWeapon * 4), 2, 0);
+			}
+			break;
+		}
+
+		case 6: // Looping fire sound (start)
+			if (((BYTE*)this)[0x39c] != 6 && (*(BYTE*)(weaponInfo + 0x398) & 2) == 0)
+			{
+				UINT uWeapon = (UINT)CurrentWeapon;
+				(*(void (__thiscall**)(INT*, AActor*, INT, INT, INT))(*(INT*)AudioSub + 0x84))
+					(AudioSub, this, *(INT*)(weaponInfo + 0x3a0 + uWeapon * 4), 2, 0);
+				(*(void (__thiscall**)(INT*, AActor*, INT, INT, INT))(*(INT*)AudioSub + 0x84))
+					(AudioSub, this, *(INT*)(*(INT*)((BYTE*)this + 0x3b0) + 0x3e0 + uWeapon * 4), 2, 0);
+				if (piSilencer != NULL &&
+					(*(INT (__thiscall**)(INT*))(*(INT*)piSilencer + 0x19c))(piSilencer) != 0)
+				{
+					(*(void (__thiscall**)(INT*, AActor*, INT, INT, INT))(*(INT*)AudioSub + 0x84))
+						(AudioSub, this, *(INT*)(*(INT*)((BYTE*)this + 0x3b0) + 0x450 + uWeapon * 4), 2, 0);
+				}
+			}
+			break;
+
+		case 7: // Fire + echo + alt-fire
+		{
+			UINT uWeapon = (UINT)CurrentWeapon;
+			(*(void (__thiscall**)(INT*, AActor*, INT, INT, INT))(*(INT*)AudioSub + 0x84))
+				(AudioSub, this, *(INT*)(weaponInfo + 0x3a0 + uWeapon * 4), 2, 0);
+			(*(void (__thiscall**)(INT*, AActor*, INT, INT, INT))(*(INT*)AudioSub + 0x84))
+				(AudioSub, this, *(INT*)(*(INT*)((BYTE*)this + 0x3b0) + 0x3b0 + uWeapon * 4), 2, 0);
+			(*(void (__thiscall**)(INT*, AActor*, INT, INT, INT))(*(INT*)AudioSub + 0x84))
+				(AudioSub, this, *(INT*)(*(INT*)((BYTE*)this + 0x3b0) + 0x400 + uWeapon * 4), 2, 0);
+			break;
+		}
+
+		case 8: // Special fire sound
+			(*(void (__thiscall**)(INT*, AActor*, INT, INT, INT))(*(INT*)AudioSub + 0x84))
+				(AudioSub, this, *(INT*)(weaponInfo + 0x410 + (UINT)CurrentWeapon * 4), 2, 0);
+			break;
+
+		case 9: // Alt-fire sound
+			(*(void (__thiscall**)(INT*, AActor*, INT, INT, INT))(*(INT*)AudioSub + 0x84))
+				(AudioSub, this, *(INT*)(weaponInfo + 0x420 + (UINT)CurrentWeapon * 4), 2, 0);
+			break;
+
+		case 10: // Stop looping fire / play stop sound
+			if (((BYTE*)this)[0x39c] == 6)
+			{
+				(*(void (__thiscall**)(INT*, AActor*, INT, INT, INT))(*(INT*)AudioSub + 0x84))
+					(AudioSub, this, *(INT*)(weaponInfo + 0x3f0 + (UINT)CurrentWeapon * 4), 2, 0);
+				if (piSilencer != NULL &&
+					(*(INT (__thiscall**)(INT*))(*(INT*)piSilencer + 0x19c))(piSilencer) != 0)
+				{
+					(*(void (__thiscall**)(INT*, AActor*, INT, INT, INT))(*(INT*)AudioSub + 0x84))
+						(AudioSub, this, *(INT*)(*(INT*)((BYTE*)this + 0x3b0) + 0x460 + (UINT)CurrentWeapon * 4), 2, 0);
+				}
+			}
+			else if ((~(*(DWORD*)(weaponInfo + 0x398) >> 1) & *(DWORD*)((BYTE*)this + 0x3a0) >> 1 & 1) != 0)
+			{
+				*(DWORD*)((BYTE*)this + 0x3a0) &= 0xfffffffd;
+				PlayWeaponSound((enum EWeaponSound)3, CurrentWeapon);
+			}
+			break;
+		}
+	}
 
 Done:
 	*(DWORD*)((BYTE*)this + 0x3a0) |= 1;
@@ -96,7 +195,7 @@ Done:
 	unguard;
 }
 
-IMPL_DIVERGE("retail checks weapon owner via IsA; decodes m_NewWeaponSound (low nibble = sound enum, bit 4 = fire flag); AudioSub vtable dispatch not reconstructed — weapon sound play permanently omitted")
+IMPL_TODO("blocked by PrivateStaticClass ref in inline IsA weapon-type check (same FUN_1001bc10 blocker); weapon-class gating skipped")
 void AR6SoundReplicationInfo::PostNetReceive()
 {
 	guard(AR6SoundReplicationInfo::PostNetReceive);
@@ -114,10 +213,40 @@ void AR6SoundReplicationInfo::PostNetReceive()
 	// Process weapon sound changes
 	if (*(INT*)((BYTE*)this + 0x3b0) != 0)
 	{
-		// DIVERGENCE: retail checks weapon owner via IsA on class hierarchy,
-		// decodes m_NewWeaponSound byte (low nibble = sound enum, bit 4 = fire flag),
-		// and calls PlayWeaponSound if not already playing. AudioSub vtable layout
-		// not fully reconstructed — sound dispatch omitted for PostNetReceive path.
+		// TODO: retail does an IsA walk on the object at *(INT*)(weaponInfo + 0x39c),
+		// checking against an unresolved PrivateStaticClass. If the class matches and
+		// vtable[0x19c]() returns non-zero, the entire weapon sound block is skipped.
+		// This gating is omitted until the PrivateStaticClass reference is identified.
+
+		// If current weapon changed and we're in looping fire, stop the loop
+		if (GSoundRepInfo_OldCurrentWeapon != ((BYTE*)this)[0x394] &&
+			((BYTE*)this)[0x39c] == 6)
+		{
+			PlayWeaponSound((enum EWeaponSound)10, GSoundRepInfo_OldCurrentWeapon);
+		}
+
+		// Decode and process replicated weapon sound byte
+		BYTE NewSound = ((BYTE*)this)[0x395];
+		if (GSoundRepInfo_OldNewWeaponSound != NewSound &&
+			*(INT*)((BYTE*)this + 0x3b0) != 0 &&
+			(*(BYTE*)(*(INT*)((BYTE*)this + 0x3b0) + 0x398) & 2) == 0)
+		{
+			DWORD soundFlags = *(DWORD*)((BYTE*)this + 0x3a0);
+			BYTE soundEnum = NewSound & 0xf;
+
+			if ((soundFlags & 1) == 0 && soundEnum != 6)
+			{
+				// Not yet initialized or non-looping: set state without playing
+				*(DWORD*)((BYTE*)this + 0x3a0) = soundFlags | 1;
+				((BYTE*)this)[0x39c] = soundEnum;
+			}
+			else
+			{
+				// Update fire flag (bit 1) from NewSound bit 4, then play
+				*(DWORD*)((BYTE*)this + 0x3a0) = ((NewSound >> 3 ^ soundFlags) & 2) ^ soundFlags;
+				PlayWeaponSound((enum EWeaponSound)soundEnum, ((BYTE*)this)[0x394]);
+			}
+		}
 	}
 
 	// Sync replicated location to actual Location
@@ -128,6 +257,15 @@ void AR6SoundReplicationInfo::PostNetReceive()
 		*(FLOAT*)((BYTE*)this + 0x234) = *(FLOAT*)((BYTE*)this + 0x3b4);
 		*(FLOAT*)((BYTE*)this + 0x238) = *(FLOAT*)((BYTE*)this + 0x3b8);
 		*(FLOAT*)((BYTE*)this + 0x23c) = *(FLOAT*)((BYTE*)this + 0x3bc);
+
+		// Update physics position via Level vtable[0x9c/4] (FarMoveActor-like call)
+		(*(void (__thiscall**)(void*, AActor*, INT, INT, INT, INT, INT, INT, INT))
+			(*(INT*)*(void**)((BYTE*)this + 0x328) + 0x9c))
+			(*(void**)((BYTE*)this + 0x328), this,
+			 *(INT*)((BYTE*)this + 0x3b4),
+			 *(INT*)((BYTE*)this + 0x3b8),
+			 *(INT*)((BYTE*)this + 0x3bc),
+			 0, 0, 0, 0);
 	}
 
 	unguard;

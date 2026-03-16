@@ -1,0 +1,5398 @@
+================================================================================
+Address: 0x1047FEC0 - UChannel::AssertInSequenced
+================================================================================
+// Address: 1047fec0
+// Size: 110 bytes
+
+
+/* public: void __thiscall UChannel::AssertInSequenced(void) */
+
+
+
+void __thiscall UChannel::AssertInSequenced(UChannel *this)
+
+
+
+{
+
+  int iVar1;
+
+  void *local_10;
+
+  undefined1 *puStack_c;
+
+  undefined4 local_8;
+
+  
+
+                    /* 0x17fec0  2294  ?AssertInSequenced@UChannel@@QAEXXZ */
+
+  puStack_c = &LAB_10518da0;
+
+  local_10 = ExceptionList;
+
+  iVar1 = *(int *)(this + 0x58);
+
+  local_8 = 0;
+
+  ExceptionList = &local_10;
+
+  for (; (iVar1 != 0 && (*(int *)(iVar1 + 0x58) != 0)); iVar1 = *(int *)(iVar1 + 0x58)) {
+
+    if (*(int *)(*(int *)(iVar1 + 0x58) + 0x68) <= *(int *)(iVar1 + 0x68)) {
+
+      appFailAssert("In->Next->ChSequence>In->ChSequence",".\\UnChan.cpp",0x108);
+
+    }
+
+  }
+
+  ExceptionList = local_10;
+
+  return;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x1047FB90 - UChannel::RouteDestroy
+================================================================================
+// Address: 1047fb90
+// Size: 139 bytes
+
+
+/* public: int __thiscall UChannel::RouteDestroy(void) */
+
+
+
+int __thiscall UChannel::RouteDestroy(UChannel *this)
+
+
+
+{
+
+  ulong uVar1;
+
+  int iVar2;
+
+  void *local_10;
+
+  undefined1 *puStack_c;
+
+  undefined4 local_8;
+
+  
+
+                    /* 0x17fb90  4343  ?RouteDestroy@UChannel@@QAEHXZ */
+
+  puStack_c = &LAB_10518d70;
+
+  local_10 = ExceptionList;
+
+  local_8 = 0;
+
+  if (*(UObject **)(this + 0x2c) != (UObject *)0x0) {
+
+    ExceptionList = &local_10;
+
+    uVar1 = UObject::GetFlags(*(UObject **)(this + 0x2c));
+
+    if ((uVar1 & 2) != 0) {
+
+      UObject::ClearFlags((UObject *)this,0x800000);
+
+      iVar2 = UObject::ConditionalDestroy(*(UObject **)(this + 0x2c));
+
+      if (iVar2 != 0) {
+
+        ExceptionList = local_10;
+
+        return 1;
+
+      }
+
+      UObject::SetFlags((UObject *)this,0x800000);
+
+    }
+
+  }
+
+  ExceptionList = local_10;
+
+  return 0;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x1047FB60 - UChannel::Init
+================================================================================
+// Address: 1047fb60
+// Size: 40 bytes
+
+
+/* public: virtual void __thiscall UChannel::Init(class UNetConnection *,int,int) */
+
+
+
+void __thiscall UChannel::Init(UChannel *this,UNetConnection *param_1,int param_2,int param_3)
+
+
+
+{
+
+                    /* 0x17fb60  3335  ?Init@UChannel@@UAEXPAVUNetConnection@@HH@Z */
+
+  *(int *)(this + 0x38) = param_2;
+
+  *(UNetConnection **)(this + 0x2c) = param_1;
+
+  *(int *)(this + 0x3c) = param_3;
+
+  *(undefined4 *)(this + 0x40) = 0xffffffff;
+
+  *(undefined4 *)(this + 0x54) = *(undefined4 *)(param_1 + 0xe0);
+
+  return;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x1047FC50 - UChannel::SetClosingFlag
+================================================================================
+// Address: 1047fc50
+// Size: 8 bytes
+
+
+/* public: virtual void __thiscall UChannel::SetClosingFlag(void) */
+
+
+
+void __thiscall UChannel::SetClosingFlag(UChannel *this)
+
+
+
+{
+
+                    /* 0x17fc50  4450  ?SetClosingFlag@UChannel@@UAEXXZ */
+
+  *(undefined4 *)(this + 0x34) = 1;
+
+  return;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x1047FC60 - UChannel::ReceivedAcks
+================================================================================
+// Address: 1047fc60
+// Size: 244 bytes
+
+
+/* public: void __thiscall UChannel::ReceivedAcks(void) */
+
+
+
+void __thiscall UChannel::ReceivedAcks(UChannel *this)
+
+
+
+{
+
+  undefined4 *puVar1;
+
+  byte bVar2;
+
+  int iVar3;
+
+  void *local_10;
+
+  undefined1 *puStack_c;
+
+  undefined4 local_8;
+
+  
+
+                    /* 0x17fc60  4253  ?ReceivedAcks@UChannel@@QAEXXZ */
+
+  puStack_c = &LAB_10518d80;
+
+  local_10 = ExceptionList;
+
+  local_8 = 0;
+
+  ExceptionList = &local_10;
+
+  if (*(UChannel **)(*(int *)(this + 0x2c) + 0xeb0 + *(int *)(this + 0x38) * 4) != this) {
+
+    ExceptionList = &local_10;
+
+    appFailAssert("Connection->Channels[ChIndex]==this",".\\UnChan.cpp",0xb8);
+
+  }
+
+  for (iVar3 = *(int *)(this + 0x5c); (iVar3 != 0 && (*(int *)(iVar3 + 0x54) != 0));
+
+      iVar3 = *(int *)(iVar3 + 0x54)) {
+
+    if (*(int *)(*(int *)(iVar3 + 0x54) + 0x70) <= *(int *)(iVar3 + 0x70)) {
+
+      appFailAssert("Out->Next->ChSequence>Out->ChSequence",".\\UnChan.cpp",0xbc);
+
+    }
+
+  }
+
+  bVar2 = 0;
+
+  while ((puVar1 = *(undefined4 **)(this + 0x5c), puVar1 != (undefined4 *)0x0 && (puVar1[0x19] != 0)
+
+         )) {
+
+    bVar2 = bVar2 | *(byte *)((int)puVar1 + 0x79);
+
+    *(undefined4 *)(this + 0x5c) = puVar1[0x15];
+
+    if (puVar1 != (undefined4 *)0x0) {
+
+      (**(code **)*puVar1)(1);
+
+    }
+
+    *(int *)(this + 0x50) = *(int *)(this + 0x50) + -1;
+
+  }
+
+  if ((bVar2 != 0) || ((*(int *)(this + 0x44) != 0 && (*(int *)(this + 0x30) != 0)))) {
+
+    if (*(int *)(this + 0x5c) != 0) {
+
+      appFailAssert("!OutRec",".\\UnChan.cpp",0xcc);
+
+    }
+
+    (**(code **)(*(int *)this + 0xc))(1);
+
+  }
+
+  ExceptionList = local_10;
+
+  return;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x1047FD90 - UChannel::Tick
+================================================================================
+// Address: 1047fd90
+// Size: 247 bytes
+
+
+/* public: virtual void __thiscall UChannel::Tick(void) */
+
+
+
+void __thiscall UChannel::Tick(UChannel *this)
+
+
+
+{
+
+  FOutBunch *pFVar1;
+
+  void *local_10;
+
+  undefined1 *puStack_c;
+
+  undefined4 local_8;
+
+  
+
+                    /* 0x17fd90  4864  ?Tick@UChannel@@UAEXXZ */
+
+  puStack_c = &LAB_10518d90;
+
+  local_10 = ExceptionList;
+
+  local_8 = 0;
+
+  ExceptionList = &local_10;
+
+  if (*(UChannel **)(*(int *)(this + 0x2c) + 0xeb0 + *(int *)(this + 0x38) * 4) != this) {
+
+    ExceptionList = &local_10;
+
+    appFailAssert("Connection->Channels[ChIndex]==this",".\\UnChan.cpp",0xe9);
+
+  }
+
+  if ((*(int *)(this + 0x38) == 0) && (*(int *)(this + 0x30) == 0)) {
+
+    for (pFVar1 = *(FOutBunch **)(this + 0x5c); pFVar1 != (FOutBunch *)0x0;
+
+        pFVar1 = *(FOutBunch **)(pFVar1 + 0x54)) {
+
+      if ((*(int *)(pFVar1 + 100) == 0) &&
+
+         (1.0 < *(double *)(*(int *)(*(int *)(this + 0x2c) + 0x7c) + 0x48) -
+
+                *(double *)(pFVar1 + 0x5c))) {
+
+        FOutputDevice::Logf(*(FOutputDevice **)GLog_exref,(EName)*(FOutputDevice **)GLog_exref,
+
+                            (ushort *)0x306);
+
+        if (pFVar1[0x7a] == (FOutBunch)0x0) {
+
+          appFailAssert("Out->bReliable",".\\UnChan.cpp",0xf6);
+
+        }
+
+        UNetConnection::SendRawBunch(*(UNetConnection **)(this + 0x2c),pFVar1,0);
+
+      }
+
+    }
+
+  }
+
+  ExceptionList = local_10;
+
+  return;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x1047FF60 - UChannel::ReceivedSequencedBunch
+================================================================================
+// Address: 1047ff60
+// Size: 216 bytes
+
+
+/* public: int __thiscall UChannel::ReceivedSequencedBunch(class FInBunch &) */
+
+
+
+int __thiscall UChannel::ReceivedSequencedBunch(UChannel *this,FInBunch *param_1)
+
+
+
+{
+
+  void *local_10;
+
+  undefined1 *puStack_c;
+
+  undefined4 local_8;
+
+  
+
+                    /* 0x17ff60  4263  ?ReceivedSequencedBunch@UChannel@@QAEHAAVFInBunch@@@Z */
+
+  puStack_c = &LAB_10518db0;
+
+  local_10 = ExceptionList;
+
+  local_8 = 0;
+
+  ExceptionList = &local_10;
+
+  if (param_1[0x6e] != (FInBunch)0x0) {
+
+    ExceptionList = &local_10;
+
+    *(undefined4 *)(*(int *)(this + 0x2c) + 0x3728 + *(int *)(this + 0x38) * 4) =
+
+         *(undefined4 *)(param_1 + 0x68);
+
+  }
+
+  if (*(int *)(this + 0x34) == 0) {
+
+    (**(code **)(*(int *)this + 0x74))(param_1);
+
+  }
+
+  if (param_1[0x6d] != (FInBunch)0x0) {
+
+    if (*(int *)(this + 0x58) != 0) {
+
+      FOutputDevice::Logf(*(FOutputDevice **)GNull_exref,(ushort *)*(FOutputDevice **)GNull_exref);
+
+    }
+
+    FOutputDevice::Logf(*(FOutputDevice **)GLog_exref,(EName)*(FOutputDevice **)GLog_exref,
+
+                        (ushort *)0x306);
+
+    (**(code **)(*(int *)this + 0xc))();
+
+    ExceptionList = local_10;
+
+    return 1;
+
+  }
+
+  ExceptionList = local_10;
+
+  return 0;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x10480070 - UChannel::ReceivedRawBunch
+================================================================================
+// Address: 10480070
+// Size: 465 bytes
+
+
+/* public: void __thiscall UChannel::ReceivedRawBunch(class FInBunch &) */
+
+
+
+void __thiscall UChannel::ReceivedRawBunch(UChannel *this,FInBunch *param_1)
+
+
+
+{
+
+  FInBunch *pFVar1;
+
+  int iVar2;
+
+  FOutputDevice *extraout_ECX;
+
+  FOutputDevice *pFVar3;
+
+  UChannel *pUVar4;
+
+  void *local_10;
+
+  undefined1 *puStack_c;
+
+  undefined4 local_8;
+
+  
+
+                    /* 0x180070  4261  ?ReceivedRawBunch@UChannel@@QAEXAAVFInBunch@@@Z */
+
+  puStack_c = &LAB_10518dc0;
+
+  local_10 = ExceptionList;
+
+  local_8 = 0;
+
+  ExceptionList = &local_10;
+
+  if (*(UChannel **)(*(int *)(this + 0x2c) + 0xeb0 + *(int *)(this + 0x38) * 4) != this) {
+
+    ExceptionList = &local_10;
+
+    appFailAssert("Connection->Channels[ChIndex]==this",".\\UnChan.cpp",0x131);
+
+  }
+
+  if ((param_1[0x6e] == (FInBunch)0x0) ||
+
+     (*(int *)(param_1 + 0x68) ==
+
+      *(int *)(*(int *)(this + 0x2c) + 0x3728 + *(int *)(this + 0x38) * 4) + 1)) {
+
+    local_8 = CONCAT31(local_8._1_3_,3);
+
+    iVar2 = ReceivedSequencedBunch(this,param_1);
+
+    if (iVar2 == 0) {
+
+      local_8 = 5;
+
+      while ((*(int *)(this + 0x58) != 0 &&
+
+             (pFVar3 = (FOutputDevice *)
+
+                       (*(int *)(*(int *)(this + 0x2c) + 0x3728 + *(int *)(this + 0x38) * 4) + 1),
+
+             *(FOutputDevice **)(*(int *)(this + 0x58) + 0x68) == pFVar3))) {
+
+        FOutputDevice::Logf(pFVar3,*(EName *)GLog_exref,(ushort *)0x306);
+
+        pFVar1 = *(FInBunch **)(this + 0x58);
+
+        *(undefined4 *)(this + 0x58) = *(undefined4 *)(pFVar1 + 0x58);
+
+        *(int *)(this + 0x4c) = *(int *)(this + 0x4c) + -1;
+
+        iVar2 = ReceivedSequencedBunch(this,pFVar1);
+
+        if (pFVar1 != (FInBunch *)0x0) {
+
+          (*(code *)**(undefined4 **)pFVar1)();
+
+        }
+
+        if (iVar2 != 0) {
+
+          ExceptionList = local_10;
+
+          return;
+
+        }
+
+        AssertInSequenced(this);
+
+      }
+
+    }
+
+  }
+
+  else {
+
+    pFVar3 = *(FOutputDevice **)(param_1 + 0x68);
+
+    local_8 = CONCAT31(local_8._1_3_,1);
+
+    if ((int)pFVar3 <= *(int *)(*(int *)(this + 0x2c) + 0x3728 + *(int *)(this + 0x38) * 4)) {
+
+      appFailAssert("Bunch.ChSequence>Connection->InReliable[ChIndex]",".\\UnChan.cpp",0x140);
+
+      pFVar3 = extraout_ECX;
+
+    }
+
+    FOutputDevice::Logf(pFVar3,*(EName *)GLog_exref,(ushort *)0x306);
+
+    pUVar4 = this + 0x58;
+
+    while (iVar2 = *(int *)pUVar4, iVar2 != 0) {
+
+      if (*(int *)(param_1 + 0x68) == *(int *)(iVar2 + 0x68)) {
+
+        ExceptionList = local_10;
+
+        return;
+
+      }
+
+      if (*(int *)(param_1 + 0x68) < *(int *)(iVar2 + 0x68)) break;
+
+      pUVar4 = (UChannel *)(iVar2 + 0x58);
+
+    }
+
+    pFVar1 = (FInBunch *)(**(code **)**(undefined4 **)GMalloc_exref)();
+
+    if (pFVar1 == (FInBunch *)0x0) {
+
+      iVar2 = 0;
+
+    }
+
+    else {
+
+      iVar2 = FInBunch::FInBunch(pFVar1,param_1);
+
+    }
+
+    *(int *)(iVar2 + 0x58) = *(int *)pUVar4;
+
+    *(int *)pUVar4 = iVar2;
+
+    iVar2 = *(int *)(this + 0x4c);
+
+    *(int *)(this + 0x4c) = iVar2 + 1;
+
+    if (0x80 < iVar2 + 1) {
+
+      appFailAssert("NumInRec<=RELIABLE_BUFFER",".\\UnChan.cpp",0x156);
+
+    }
+
+    AssertInSequenced(this);
+
+  }
+
+  ExceptionList = local_10;
+
+  return;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x10480780 - UChannel::IsNetReady
+================================================================================
+// Address: 10480780
+// Size: 101 bytes
+
+
+/* public: int __thiscall UChannel::IsNetReady(int) */
+
+
+
+int __thiscall UChannel::IsNetReady(UChannel *this,int param_1)
+
+
+
+{
+
+  int iVar1;
+
+  void *local_10;
+
+  undefined1 *puStack_c;
+
+  undefined4 local_8;
+
+  
+
+                    /* 0x180780  3651  ?IsNetReady@UChannel@@QAEHH@Z */
+
+  puStack_c = &LAB_10518e10;
+
+  local_10 = ExceptionList;
+
+  local_8 = 0;
+
+  if (0x7e < *(int *)(this + 0x50)) {
+
+    return 0;
+
+  }
+
+  ExceptionList = &local_10;
+
+  iVar1 = (**(code **)(**(int **)(this + 0x2c) + 0x88))(param_1);
+
+  ExceptionList = local_10;
+
+  return iVar1;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x10480820 - UChannel::IsKnownChannelType
+================================================================================
+// Address: 10480820
+// Size: 33 bytes
+
+
+/* public: static int __cdecl UChannel::IsKnownChannelType(int) */
+
+
+
+int __cdecl UChannel::IsKnownChannelType(int param_1)
+
+
+
+{
+
+                    /* 0x180820  3646  ?IsKnownChannelType@UChannel@@SAHH@Z */
+
+  if (((-1 < param_1) && (param_1 < 8)) && ((&ChannelClasses)[param_1] != (UClass **)0x0)) {
+
+    return 1;
+
+  }
+
+  return 0;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x10480850 - UChannel::ReceivedNak
+================================================================================
+// Address: 10480850
+// Size: 171 bytes
+
+
+/* public: virtual void __thiscall UChannel::ReceivedNak(int) */
+
+
+
+void __thiscall UChannel::ReceivedNak(UChannel *this,int param_1)
+
+
+
+{
+
+  FOutBunch *pFVar1;
+
+  void *local_10;
+
+  undefined1 *puStack_c;
+
+  undefined4 local_8;
+
+  
+
+                    /* 0x180850  4258  ?ReceivedNak@UChannel@@UAEXH@Z */
+
+  puStack_c = &LAB_10518e20;
+
+  local_10 = ExceptionList;
+
+  pFVar1 = *(FOutBunch **)(this + 0x5c);
+
+  local_8 = 0;
+
+  ExceptionList = &local_10;
+
+  for (; pFVar1 != (FOutBunch *)0x0; pFVar1 = *(FOutBunch **)(pFVar1 + 0x54)) {
+
+    if ((*(int *)(pFVar1 + 0x74) == param_1) && (*(int *)(pFVar1 + 100) == 0)) {
+
+      if (pFVar1[0x7a] == (FOutBunch)0x0) {
+
+        appFailAssert("Out->bReliable",".\\UnChan.cpp",0x203);
+
+      }
+
+      FOutputDevice::Logf(*(FOutputDevice **)GLog_exref,(EName)*(FOutputDevice **)GLog_exref,
+
+                          (ushort *)0x306);
+
+      UNetConnection::SendRawBunch(*(UNetConnection **)(this + 0x2c),pFVar1,0);
+
+    }
+
+  }
+
+  ExceptionList = local_10;
+
+  return;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x104806C0 - UChannel::Describe
+================================================================================
+// Address: 104806c0
+// Size: 132 bytes
+
+
+/* public: virtual class FString __thiscall UChannel::Describe(void) */
+
+
+
+ushort * __thiscall UChannel::Describe(UChannel *this)
+
+
+
+{
+
+  FString *this_00;
+
+  ushort *in_stack_00000004;
+
+  FString local_2c [20];
+
+  undefined4 local_18;
+
+  undefined1 *local_14;
+
+  void *local_10;
+
+  undefined1 *puStack_c;
+
+  undefined4 local_8;
+
+  
+
+                    /* 0x1806c0  2467  ?Describe@UChannel@@UAE?AVFString@@XZ */
+
+  puStack_c = &LAB_10518e03;
+
+  local_10 = ExceptionList;
+
+  local_18 = 0;
+
+  local_14 = &stack0xffffffc8;
+
+  local_8 = 1;
+
+  ExceptionList = &local_10;
+
+  this_00 = (FString *)FString::FString(local_2c,(ushort *)L"State=");
+
+  local_8._0_1_ = 2;
+
+  FString::operator+(this_00,in_stack_00000004);
+
+  local_18 = 1;
+
+  local_8 = CONCAT31(local_8._1_3_,1);
+
+  FString::~FString(local_2c);
+
+  ExceptionList = local_10;
+
+  return in_stack_00000004;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x104809E0 - UControlChannel::ReceivedBunch
+================================================================================
+// Address: 104809e0
+// Size: 188 bytes
+
+
+/* public: virtual void __thiscall UControlChannel::ReceivedBunch(class FInBunch &) */
+
+
+
+void __thiscall UControlChannel::ReceivedBunch(UControlChannel *this,FInBunch *param_1)
+
+
+
+{
+
+  undefined1 *puVar1;
+
+  int iVar2;
+
+  ushort *puVar3;
+
+  FString local_28 [20];
+
+  undefined1 *local_14;
+
+  void *local_10;
+
+  undefined1 *puStack_c;
+
+  int local_8;
+
+  
+
+                    /* 0x1809e0  4255  ?ReceivedBunch@UControlChannel@@UAEXAAVFInBunch@@@Z */
+
+  puStack_c = &LAB_10518e49;
+
+  local_10 = ExceptionList;
+
+  local_14 = &stack0xffffffcc;
+
+  local_8 = 0;
+
+  ExceptionList = &local_10;
+
+  puVar1 = &stack0xffffffcc;
+
+  if (*(int *)(this + 0x34) != 0) {
+
+    ExceptionList = &local_10;
+
+    appFailAssert("!Closing",".\\UnChan.cpp",0x234);
+
+    puVar1 = local_14;
+
+  }
+
+  while( true ) {
+
+    local_14 = puVar1;
+
+    FString::FString(local_28);
+
+    local_8._0_1_ = 1;
+
+    ::operator<<((FArchive *)param_1,local_28);
+
+    iVar2 = FArchive::IsError((FArchive *)param_1);
+
+    if (iVar2 != 0) break;
+
+    puVar3 = FString::operator*(local_28);
+
+    (**(code **)(**(int **)(*(int *)(*(int *)(this + 0x2c) + 0x7c) + 0x40) + 0x10))
+
+              (*(int *)(this + 0x2c),puVar3);
+
+    local_8 = (uint)local_8._1_3_ << 8;
+
+    FString::~FString(local_28);
+
+    puVar1 = local_14;
+
+  }
+
+  local_8 = (uint)local_8._1_3_ << 8;
+
+  FString::~FString(local_28);
+
+  ExceptionList = local_10;
+
+  return;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x10480960 - UControlChannel::Init
+================================================================================
+// Address: 10480960
+// Size: 76 bytes
+
+
+/* public: virtual void __thiscall UControlChannel::Init(class UNetConnection *,int,int) */
+
+
+
+void __thiscall
+
+UControlChannel::Init(UControlChannel *this,UNetConnection *param_1,int param_2,int param_3)
+
+
+
+{
+
+  void *local_10;
+
+  undefined1 *puStack_c;
+
+  undefined4 local_8;
+
+  
+
+                    /* 0x180960  3337  ?Init@UControlChannel@@UAEXPAVUNetConnection@@HH@Z */
+
+  puStack_c = &LAB_10518e30;
+
+  local_10 = ExceptionList;
+
+  local_8 = 0;
+
+  ExceptionList = &local_10;
+
+  UChannel::Init((UChannel *)this,param_1,param_2,param_3);
+
+  ExceptionList = local_10;
+
+  return;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x10480AD0 - UControlChannel::Serialize
+================================================================================
+// Address: 10480ad0
+// Size: 186 bytes
+
+
+/* public: virtual void __thiscall UControlChannel::Serialize(unsigned short const *,enum EName) */
+
+
+
+void __thiscall UControlChannel::Serialize(UControlChannel *this,ushort *param_1,EName param_2)
+
+
+
+{
+
+  int iVar1;
+
+  FOutBunch local_a4 [122];
+
+  undefined1 local_2a;
+
+  FString local_28 [20];
+
+  undefined1 *local_14;
+
+  void *local_10;
+
+  undefined1 *puStack_c;
+
+  int local_8;
+
+  
+
+                    /* 0x180ad0  4372  ?Serialize@UControlChannel@@UAEXPBGW4EName@@@Z */
+
+  puStack_c = &LAB_10518e74;
+
+  local_10 = ExceptionList;
+
+  local_14 = &stack0xffffff50;
+
+  local_8 = 0;
+
+  ExceptionList = &local_10;
+
+  FOutBunch::FOutBunch(local_a4,(UChannel *)(this + -0x68),0);
+
+  local_8._0_1_ = 1;
+
+  local_2a = 1;
+
+  FString::FString(local_28,param_1);
+
+  local_8 = CONCAT31(local_8._1_3_,2);
+
+  ::operator<<((FArchive *)local_a4,local_28);
+
+  iVar1 = FArchive::IsError((FArchive *)local_a4);
+
+  if (iVar1 == 0) {
+
+    UChannel::SendBunch((UChannel *)(this + -0x68),local_a4,1);
+
+  }
+
+  local_8._0_1_ = 1;
+
+  FString::~FString(local_28);
+
+  local_8 = (uint)local_8._1_3_ << 8;
+
+  FBitWriter::~FBitWriter((FBitWriter *)local_a4);
+
+  ExceptionList = local_10;
+
+  return;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x10480BC0 - UControlChannel::Describe
+================================================================================
+// Address: 10480bc0
+// Size: 144 bytes
+
+
+/* public: virtual class FString __thiscall UControlChannel::Describe(void) */
+
+
+
+FString * __thiscall UControlChannel::Describe(UControlChannel *this)
+
+
+
+{
+
+  FString *this_00;
+
+  FString *in_stack_00000004;
+
+  FString local_38 [12];
+
+  FString local_2c [20];
+
+  undefined4 local_18;
+
+  undefined1 *local_14;
+
+  void *local_10;
+
+  undefined1 *puStack_c;
+
+  undefined4 local_8;
+
+  
+
+                    /* 0x180bc0  2468  ?Describe@UControlChannel@@UAE?AVFString@@XZ */
+
+  puStack_c = &LAB_10518eac;
+
+  local_10 = ExceptionList;
+
+  local_14 = &stack0xffffffbc;
+
+  local_18 = 0;
+
+  local_8 = 1;
+
+  ExceptionList = &local_10;
+
+  UChannel::Describe((UChannel *)this);
+
+  local_8._0_1_ = 2;
+
+  this_00 = (FString *)FString::FString(local_2c,(ushort *)L"Text ");
+
+  local_8._0_1_ = 3;
+
+  FString::operator+(this_00,in_stack_00000004);
+
+  local_18 = 1;
+
+  local_8._0_1_ = 2;
+
+  FString::~FString(local_2c);
+
+  local_8 = CONCAT31(local_8._1_3_,1);
+
+  FString::~FString(local_38);
+
+  ExceptionList = local_10;
+
+  return in_stack_00000004;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x10480C90 - UActorChannel::Init
+================================================================================
+// Address: 10480c90
+// Size: 137 bytes
+
+
+/* public: virtual void __thiscall UActorChannel::Init(class UNetConnection *,int,int) */
+
+
+
+void __thiscall
+
+UActorChannel::Init(UActorChannel *this,UNetConnection *param_1,int param_2,int param_3)
+
+
+
+{
+
+  float fVar1;
+
+  double dVar2;
+
+  int iVar3;
+
+  undefined4 uVar4;
+
+  void *local_10;
+
+  undefined1 *puStack_c;
+
+  undefined4 local_8;
+
+  
+
+                    /* 0x180c90  3333  ?Init@UActorChannel@@UAEXPAVUNetConnection@@HH@Z */
+
+  puStack_c = &LAB_10518ec0;
+
+  local_10 = ExceptionList;
+
+  local_8 = 0;
+
+  ExceptionList = &local_10;
+
+  UChannel::Init((UChannel *)this,param_1,param_2,param_3);
+
+  uVar4 = (**(code **)(**(int **)(*(int *)(*(int *)(this + 0x2c) + 0x7c) + 0x40) + 0xc))();
+
+  *(undefined4 *)(this + 0x68) = uVar4;
+
+  *(undefined8 *)(this + 0x74) = *(undefined8 *)(*(int *)(*(int *)(this + 0x2c) + 0x7c) + 0x48);
+
+  iVar3 = *(int *)(*(int *)(this + 0x2c) + 0x7c);
+
+  fVar1 = *(float *)(iVar3 + 0x60);
+
+  dVar2 = *(double *)(iVar3 + 0x48);
+
+  *(undefined4 *)(this + 0x88) = 0;
+
+  *(undefined4 *)(this + 0x8c) = 0;
+
+  *(undefined4 *)(this + 0x90) = 0;
+
+  *(double *)(this + 0x7c) = (double)((float)dVar2 - fVar1);
+
+  ExceptionList = local_10;
+
+  return;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x10480D50 - UActorChannel::Tick
+================================================================================
+// Address: 10480d50
+// Size: 62 bytes
+
+
+/* public: virtual void __thiscall UActorChannel::Tick(void) */
+
+
+
+void __thiscall UActorChannel::Tick(UActorChannel *this)
+
+
+
+{
+
+  void *local_10;
+
+  undefined1 *puStack_c;
+
+  undefined4 local_8;
+
+  
+
+                    /* 0x180d50  4862  ?Tick@UActorChannel@@UAEXXZ */
+
+  puStack_c = &LAB_10518ed0;
+
+  local_10 = ExceptionList;
+
+  local_8 = 0;
+
+  ExceptionList = &local_10;
+
+  UChannel::Tick((UChannel *)this);
+
+  ExceptionList = local_10;
+
+  return;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x10480DC0 - UActorChannel::Describe
+================================================================================
+// Address: 10480dc0
+// Size: 277 bytes
+
+
+/* public: virtual class FString __thiscall UActorChannel::Describe(void) */
+
+
+
+FString * __thiscall UActorChannel::Describe(UActorChannel *this)
+
+
+
+{
+
+  ushort *puVar1;
+
+  FString *pFVar2;
+
+  FString *in_stack_00000004;
+
+  FString local_50 [12];
+
+  FString local_44 [12];
+
+  FString local_38 [12];
+
+  FString local_2c [20];
+
+  undefined4 local_18;
+
+  undefined1 *local_14;
+
+  void *local_10;
+
+  undefined1 *puStack_c;
+
+  undefined4 local_8;
+
+  
+
+                    /* 0x180dc0  2466  ?Describe@UActorChannel@@UAE?AVFString@@XZ */
+
+  puStack_c = &LAB_10518f1e;
+
+  local_10 = ExceptionList;
+
+  local_18 = 0;
+
+  local_14 = &stack0xffffffa4;
+
+  local_8 = 1;
+
+  if ((*(int *)(this + 0x34) == 0) && (*(int *)(this + 0x6c) != 0)) {
+
+    ExceptionList = &local_10;
+
+    local_14 = &stack0xffffffa4;
+
+    UChannel::Describe((UChannel *)this);
+
+    local_8._0_1_ = 4;
+
+    puVar1 = UObject::GetFullName(*(UObject **)(this + 0x6c),(ushort *)0x0);
+
+    pFVar2 = (FString *)
+
+             FString::Printf((ushort *)local_2c,L"Actor=%s (Role=%i RemoteRole=%i) ",puVar1,
+
+                             (uint)*(byte *)(*(int *)(this + 0x6c) + 0x2d),
+
+                             (uint)*(byte *)(*(int *)(this + 0x6c) + 0x2e));
+
+    local_8._0_1_ = 5;
+
+    FString::operator+(pFVar2,in_stack_00000004);
+
+    local_18 = 1;
+
+    local_8._0_1_ = 4;
+
+    FString::~FString(local_2c);
+
+    pFVar2 = local_38;
+
+  }
+
+  else {
+
+    ExceptionList = &local_10;
+
+    UChannel::Describe((UChannel *)this);
+
+    local_8._0_1_ = 2;
+
+    pFVar2 = (FString *)FString::FString(local_44,(ushort *)L"Actor=None ");
+
+    local_8._0_1_ = 3;
+
+    FString::operator+(pFVar2,in_stack_00000004);
+
+    local_18 = 1;
+
+    local_8._0_1_ = 2;
+
+    FString::~FString(local_44);
+
+    pFVar2 = local_50;
+
+  }
+
+  local_8 = CONCAT31(local_8._1_3_,1);
+
+  FString::~FString(pFVar2);
+
+  ExceptionList = local_10;
+
+  return in_stack_00000004;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x10480F30 - UFileChannel::Init
+================================================================================
+// Address: 10480f30
+// Size: 76 bytes
+
+
+/* public: virtual void __thiscall UFileChannel::Init(class UNetConnection *,int,int) */
+
+
+
+void __thiscall
+
+UFileChannel::Init(UFileChannel *this,UNetConnection *param_1,int param_2,int param_3)
+
+
+
+{
+
+  void *local_10;
+
+  undefined1 *puStack_c;
+
+  undefined4 local_8;
+
+  
+
+                    /* 0x180f30  3339  ?Init@UFileChannel@@UAEXPAVUNetConnection@@HH@Z */
+
+  puStack_c = &LAB_10518f30;
+
+  local_10 = ExceptionList;
+
+  local_8 = 0;
+
+  ExceptionList = &local_10;
+
+  UChannel::Init((UChannel *)this,param_1,param_2,param_3);
+
+  ExceptionList = local_10;
+
+  return;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x104802C0 - UChannel::SendBunch
+================================================================================
+// Address: 104802c0
+// Size: 965 bytes
+
+
+/* public: int __thiscall UChannel::SendBunch(class FOutBunch *,int) */
+
+
+
+int __thiscall UChannel::SendBunch(UChannel *this,FOutBunch *param_1,int param_2)
+
+
+
+{
+
+  int *piVar1;
+
+  undefined1 *puVar2;
+
+  int iVar3;
+
+  int iVar4;
+
+  uchar *puVar5;
+
+  undefined4 *puVar6;
+
+  UChannel *pUVar7;
+
+  FOutBunch *pFVar8;
+
+  FBitWriterMark local_24 [16];
+
+  undefined1 *local_14;
+
+  void *local_10;
+
+  undefined1 *puStack_c;
+
+  undefined4 local_8;
+
+  
+
+                    /* 0x1802c0  4362  ?SendBunch@UChannel@@QAEHPAVFOutBunch@@H@Z */
+
+  puStack_c = &LAB_10518dd0;
+
+  local_10 = ExceptionList;
+
+  local_14 = &stack0xffffffd0;
+
+  local_8 = 0;
+
+  ExceptionList = &local_10;
+
+  puVar2 = &stack0xffffffd0;
+
+  if (*(int *)(this + 0x34) != 0) {
+
+    ExceptionList = &local_10;
+
+    appFailAssert("!Closing",".\\UnChan.cpp",0x17e);
+
+    puVar2 = local_14;
+
+  }
+
+  local_14 = puVar2;
+
+  if (*(UChannel **)(*(int *)(this + 0x2c) + 0xeb0 + *(int *)(this + 0x38) * 4) != this) {
+
+    appFailAssert("Connection->Channels[ChIndex]==this",".\\UnChan.cpp",0x17f);
+
+  }
+
+  iVar3 = FArchive::IsError((FArchive *)param_1);
+
+  if (iVar3 != 0) {
+
+    appFailAssert("!Bunch->IsError()",".\\UnChan.cpp",0x180);
+
+  }
+
+  if ((*(int *)(this + 0x40) == -1) && (*(int *)(this + 0x3c) != 0)) {
+
+    param_1[0x78] = (FOutBunch)0x1;
+
+    *(uint *)(this + 0x44) = (uint)(param_1[0x7a] == (FOutBunch)0x0);
+
+  }
+
+  if ((*(int *)(this + 0x44) != 0) && (param_1[0x7a] != (FOutBunch)0x0)) {
+
+    appFailAssert("!Bunch->bReliable",".\\UnChan.cpp",399);
+
+  }
+
+  pFVar8 = (FOutBunch *)0x0;
+
+  if (((param_2 != 0) &&
+
+      (iVar3 = *(int *)(this + 0x2c), *(int *)(iVar3 + 0x1a4) == *(int *)(param_1 + 0x68))) &&
+
+     (*(int *)(iVar3 + 0x130) != 0)) {
+
+    iVar3 = FBitWriterMark::GetNumBits((FBitWriterMark *)(iVar3 + 0x128));
+
+    if (iVar3 != 0) {
+
+      iVar3 = FBitWriterMark::GetNumBits((FBitWriterMark *)(*(int *)(this + 0x2c) + 0x128));
+
+      iVar4 = FBitWriter::GetNumBits((FBitWriter *)(*(int *)(this + 0x2c) + 0x250));
+
+      if (iVar3 == iVar4) {
+
+        iVar3 = FBitWriter::GetNumBytes((FBitWriter *)(*(int *)(this + 0x2c) + 0x250));
+
+        iVar4 = FBitWriter::GetNumBytes((FBitWriter *)param_1);
+
+        if (iVar4 + 9 + iVar3 <= *(int *)(*(int *)(this + 0x2c) + 0xd0)) {
+
+          iVar3 = FArchive::IsError((FArchive *)(*(int *)(this + 0x2c) + 0x13c));
+
+          if (iVar3 != 0) {
+
+            appFailAssert("!Connection->LastOut.IsError()",".\\UnChan.cpp",0x19c);
+
+          }
+
+          iVar3 = FBitWriter::GetNumBits((FBitWriter *)param_1);
+
+          puVar5 = FBitWriter::GetData((FBitWriter *)param_1);
+
+          (**(code **)(*(int *)(*(int *)(this + 0x2c) + 0x13c) + 8))(puVar5,iVar3);
+
+          *(byte *)(*(int *)(this + 0x2c) + 0x1b6) =
+
+               *(byte *)(*(int *)(this + 0x2c) + 0x1b6) | (byte)param_1[0x7a];
+
+          *(byte *)(*(int *)(this + 0x2c) + 0x1b4) =
+
+               *(byte *)(*(int *)(this + 0x2c) + 0x1b4) | (byte)param_1[0x78];
+
+          *(byte *)(*(int *)(this + 0x2c) + 0x1b5) =
+
+               *(byte *)(*(int *)(this + 0x2c) + 0x1b5) | (byte)param_1[0x79];
+
+          pFVar8 = *(FOutBunch **)(*(int *)(this + 0x2c) + 0x138);
+
+          param_1 = (FOutBunch *)(*(int *)(this + 0x2c) + 0x13c);
+
+          iVar3 = FArchive::IsError((FArchive *)param_1);
+
+          if (iVar3 != 0) {
+
+            appFailAssert("!Bunch->IsError()",".\\UnChan.cpp",0x1a3);
+
+          }
+
+          FBitWriterMark::Pop((FBitWriterMark *)(*(int *)(this + 0x2c) + 0x120),
+
+                              (FBitWriter *)(*(int *)(this + 0x2c) + 0x250));
+
+          *(int *)(*(int *)(this + 0x2c) + 0x210) = *(int *)(*(int *)(this + 0x2c) + 0x210) + -1;
+
+        }
+
+      }
+
+    }
+
+  }
+
+  if (param_1[0x7a] == (FOutBunch)0x0) {
+
+    *(undefined4 *)(*(int *)(this + 0x2c) + 0x138) = 0;
+
+  }
+
+  else if (pFVar8 == (FOutBunch *)0x0) {
+
+    if ((int)((byte)param_1[0x79] + 0x7f) <= *(int *)(this + 0x50)) {
+
+      appFailAssert("NumOutRec<RELIABLE_BUFFER-1+Bunch->bClose",".\\UnChan.cpp",0x1af);
+
+    }
+
+    *(undefined4 *)(param_1 + 0x54) = 0;
+
+    piVar1 = (int *)(*(int *)(this + 0x2c) + 0x22ec + *(int *)(this + 0x38) * 4);
+
+    *piVar1 = *piVar1 + 1;
+
+    *(undefined4 *)(param_1 + 0x70) =
+
+         *(undefined4 *)(*(int *)(this + 0x2c) + 0x22ec + *(int *)(this + 0x38) * 4);
+
+    *(int *)(this + 0x50) = *(int *)(this + 0x50) + 1;
+
+    pFVar8 = (FOutBunch *)(**(code **)**(undefined4 **)GMalloc_exref)(0x7c,L"FOutBunch");
+
+    if (pFVar8 == (FOutBunch *)0x0) {
+
+      param_1 = (FOutBunch *)0x0;
+
+    }
+
+    else {
+
+      param_1 = (FOutBunch *)FOutBunch::FOutBunch(pFVar8,param_1);
+
+    }
+
+    for (pUVar7 = this + 0x5c; *(int *)pUVar7 != 0; pUVar7 = (UChannel *)(*(int *)pUVar7 + 0x54)) {
+
+    }
+
+    *(FOutBunch **)pUVar7 = param_1;
+
+    *(FOutBunch **)(*(int *)(this + 0x2c) + 0x138) = param_1;
+
+  }
+
+  else {
+
+    *(undefined4 *)(param_1 + 0x54) = *(undefined4 *)(pFVar8 + 0x54);
+
+    FOutBunch::operator=(pFVar8,param_1);
+
+    *(FOutBunch **)(*(int *)(this + 0x2c) + 0x138) = pFVar8;
+
+    param_1 = pFVar8;
+
+  }
+
+  *(undefined4 *)(param_1 + 100) = 0;
+
+  iVar3 = UNetConnection::SendRawBunch(*(UNetConnection **)(this + 0x2c),param_1,1);
+
+  if ((*(int *)(this + 0x40) == -1) && (*(int *)(this + 0x3c) != 0)) {
+
+    *(int *)(this + 0x40) = iVar3;
+
+  }
+
+  if (param_1[0x79] != (FOutBunch)0x0) {
+
+    (**(code **)(*(int *)this + 0x68))();
+
+  }
+
+  iVar4 = *(int *)(this + 0x2c);
+
+  FBitWriter::operator=((FBitWriter *)(iVar4 + 0x13c),(FBitWriter *)param_1);
+
+  *(undefined4 *)(iVar4 + 400) = *(undefined4 *)(param_1 + 0x54);
+
+  *(undefined4 *)(iVar4 + 0x194) = *(undefined4 *)(param_1 + 0x58);
+
+  *(undefined8 *)(iVar4 + 0x198) = *(undefined8 *)(param_1 + 0x5c);
+
+  *(undefined4 *)(iVar4 + 0x1a0) = *(undefined4 *)(param_1 + 100);
+
+  *(undefined4 *)(iVar4 + 0x1a4) = *(undefined4 *)(param_1 + 0x68);
+
+  *(undefined4 *)(iVar4 + 0x1a8) = *(undefined4 *)(param_1 + 0x6c);
+
+  *(undefined4 *)(iVar4 + 0x1ac) = *(undefined4 *)(param_1 + 0x70);
+
+  *(undefined4 *)(iVar4 + 0x1b0) = *(undefined4 *)(param_1 + 0x74);
+
+  *(FOutBunch *)(iVar4 + 0x1b4) = param_1[0x78];
+
+  *(FOutBunch *)(iVar4 + 0x1b5) = param_1[0x79];
+
+  *(FOutBunch *)(iVar4 + 0x1b6) = param_1[0x7a];
+
+  puVar6 = (undefined4 *)
+
+           FBitWriterMark::FBitWriterMark(local_24,(FBitWriter *)(*(int *)(this + 0x2c) + 0x250));
+
+  iVar4 = *(int *)(this + 0x2c);
+
+  *(undefined4 *)(iVar4 + 0x128) = *puVar6;
+
+  *(undefined4 *)(iVar4 + 300) = puVar6[1];
+
+  ExceptionList = local_10;
+
+  return iVar3;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x104811F0 - UChannel::Close
+================================================================================
+// Address: 104811f0
+// Size: 252 bytes
+
+
+/* public: virtual void __thiscall UChannel::Close(void) */
+
+
+
+void __thiscall UChannel::Close(UChannel *this)
+
+
+
+{
+
+  undefined1 *puVar1;
+
+  int iVar2;
+
+  FOutBunch local_98 [121];
+
+  char local_1f;
+
+  undefined1 local_1e;
+
+  undefined1 *local_14;
+
+  void *local_10;
+
+  undefined1 *puStack_c;
+
+  uint local_8;
+
+  
+
+                    /* 0x1811f0  2422  ?Close@UChannel@@UAEXXZ */
+
+  puStack_c = &LAB_10518f4b;
+
+  local_10 = ExceptionList;
+
+  local_14 = &stack0xffffff5c;
+
+  local_8 = 0;
+
+  ExceptionList = &local_10;
+
+  puVar1 = &stack0xffffff5c;
+
+  if (*(UChannel **)(*(int *)(this + 0x2c) + 0xeb0 + *(int *)(this + 0x38) * 4) != this) {
+
+    ExceptionList = &local_10;
+
+    appFailAssert("Connection->Channels[ChIndex]==this",".\\UnChan.cpp",0x8b);
+
+    puVar1 = local_14;
+
+  }
+
+  local_14 = puVar1;
+
+  if ((*(int *)(this + 0x34) == 0) &&
+
+     ((*(int *)(*(int *)(this + 0x2c) + 0x80) == 3 || (*(int *)(*(int *)(this + 0x2c) + 0x80) == 2))
+
+     )) {
+
+    FOutBunch::FOutBunch(local_98,this,1);
+
+    local_8 = CONCAT31(local_8._1_3_,1);
+
+    iVar2 = FArchive::IsError((FArchive *)local_98);
+
+    if (iVar2 != 0) {
+
+      appFailAssert("!CloseBunch.IsError()",".\\UnChan.cpp",0x92);
+
+    }
+
+    if (local_1f == '\0') {
+
+      appFailAssert("CloseBunch.bClose",".\\UnChan.cpp",0x93);
+
+    }
+
+    local_1e = 1;
+
+    SendBunch(this,local_98,0);
+
+    local_8 = local_8 & 0xffffff00;
+
+    FBitWriter::~FBitWriter((FBitWriter *)local_98);
+
+  }
+
+  ExceptionList = local_10;
+
+  return;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x104813E0 - UActorChannel::Close
+================================================================================
+// Address: 104813e0
+// Size: 71 bytes
+
+
+/* public: virtual void __thiscall UActorChannel::Close(void) */
+
+
+
+void __thiscall UActorChannel::Close(UActorChannel *this)
+
+
+
+{
+
+  void *local_10;
+
+  undefined1 *puStack_c;
+
+  undefined4 local_8;
+
+  
+
+                    /* 0x1813e0  2421  ?Close@UActorChannel@@UAEXXZ */
+
+  puStack_c = &LAB_10518f70;
+
+  local_10 = ExceptionList;
+
+  local_8 = 0;
+
+  ExceptionList = &local_10;
+
+  UChannel::Close((UChannel *)this);
+
+  *(undefined4 *)(this + 0x6c) = 0;
+
+  ExceptionList = local_10;
+
+  return;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x10481320 - UChannel::MaxSendBytes
+================================================================================
+// Address: 10481320
+// Size: 140 bytes
+
+
+/* public: int __thiscall UChannel::MaxSendBytes(void) */
+
+
+
+int __thiscall UChannel::MaxSendBytes(UChannel *this)
+
+
+
+{
+
+  int iVar1;
+
+  int iVar2;
+
+  uint uVar3;
+
+  void *local_10;
+
+  undefined1 *puStack_c;
+
+  undefined4 local_8;
+
+  
+
+                    /* 0x181320  3773  ?MaxSendBytes@UChannel@@QAEHXZ */
+
+  puStack_c = &LAB_10518f60;
+
+  local_10 = ExceptionList;
+
+  local_8 = 0;
+
+  ExceptionList = &local_10;
+
+  iVar1 = FBitWriter::GetNumBits((FBitWriter *)(*(int *)(this + 0x2c) + 0x250));
+
+  iVar2 = FBitWriter::GetNumBits((FBitWriter *)(*(int *)(this + 0x2c) + 0x250));
+
+  iVar1 = ((*(int *)(*(int *)(this + 0x2c) + 0xd0) * 8 - ((iVar1 != 0) - 1 & 0x10)) - iVar2) + -0x41
+
+  ;
+
+  uVar3 = (int)(iVar1 + (iVar1 >> 0x1f & 7U)) >> 3;
+
+  ExceptionList = local_10;
+
+  return uVar3 & ((int)uVar3 < 1) - 1;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x10481460 - UFileChannel::Tick
+================================================================================
+// Address: 10481460
+// Size: 453 bytes
+
+
+/* WARNING: Function: __chkstk replaced with injection: alloca_probe */
+
+/* public: virtual void __thiscall UFileChannel::Tick(void) */
+
+
+
+void __thiscall UFileChannel::Tick(UFileChannel *this)
+
+
+
+{
+
+  ushort *puVar1;
+
+  int iVar2;
+
+  int iVar3;
+
+  undefined1 *puVar4;
+
+  FOutBunch local_98 [121];
+
+  char local_1f;
+
+  undefined1 local_1e;
+
+  undefined1 *local_14;
+
+  void *local_10;
+
+  undefined1 *puStack_c;
+
+  undefined1 local_8;
+
+  undefined3 uStack_7;
+
+  
+
+                    /* 0x181460  4866  ?Tick@UFileChannel@@UAEXXZ */
+
+  puStack_c = &LAB_10518f99;
+
+  local_10 = ExceptionList;
+
+  local_14 = &stack0xffffff5c;
+
+  local_8 = 0;
+
+  uStack_7 = 0;
+
+  ExceptionList = &local_10;
+
+  UChannel::Tick((UChannel *)this);
+
+  *(undefined4 *)(*(int *)(this + 0x2c) + 0x134) = 1;
+
+  if ((DAT_107a2578 & 1) == 0) {
+
+    DAT_107a2578 = DAT_107a2578 | 1;
+
+    local_8 = 1;
+
+    puVar1 = appCmdLine();
+
+    DAT_107a2574 = ParseParam(puVar1,(ushort *)L"lanplay");
+
+    local_8 = 0;
+
+  }
+
+  while( true ) {
+
+    if ((*(int *)(this + 0x3c) != 0) || (*(int *)(this + 0x6c) == 0)) {
+
+      ExceptionList = local_10;
+
+      return;
+
+    }
+
+    iVar2 = UChannel::IsNetReady((UChannel *)this,DAT_107a2574);
+
+    if (iVar2 == 0) {
+
+      ExceptionList = local_10;
+
+      return;
+
+    }
+
+    iVar2 = UChannel::MaxSendBytes((UChannel *)this);
+
+    if (iVar2 == 0) break;
+
+    iVar3 = *(int *)(*(int *)(this + 0x270) * 0x44 + 0x24 +
+
+                    *(int *)(*(int *)(*(int *)(this + 0x2c) + 200) + 0x2c)) - *(int *)(this + 0x274)
+
+    ;
+
+    FOutBunch::FOutBunch(local_98,(UChannel *)this,(uint)(iVar3 <= iVar2));
+
+    _local_8 = CONCAT31(uStack_7,2);
+
+    if (iVar3 < iVar2) {
+
+      iVar2 = iVar3;
+
+    }
+
+    if (iVar2 == 0) {
+
+      puVar4 = (undefined1 *)0x0;
+
+    }
+
+    else {
+
+      local_14 = &stack0xffffff5c;
+
+      puVar4 = &stack0xffffff5c;
+
+    }
+
+    (**(code **)(**(int **)(this + 0x6c) + 4))(puVar4,iVar2);
+
+    FArchive::IsError(*(FArchive **)(this + 0x6c));
+
+    *(int *)(this + 0x274) = *(int *)(this + 0x274) + iVar2;
+
+    FBitWriter::Serialize((FBitWriter *)local_98,puVar4,iVar2);
+
+    local_1e = 1;
+
+    iVar2 = FArchive::IsError((FArchive *)local_98);
+
+    if (iVar2 != 0) {
+
+      appFailAssert("!Bunch.IsError()",".\\UnChan.cpp",0x659);
+
+    }
+
+    UChannel::SendBunch((UChannel *)this,local_98,0);
+
+    (**(code **)(**(int **)(this + 0x2c) + 0x80))();
+
+    if (local_1f != '\0') {
+
+      if (*(undefined4 **)(this + 0x6c) != (undefined4 *)0x0) {
+
+        (**(code **)**(undefined4 **)(this + 0x6c))(1);
+
+      }
+
+      *(undefined4 *)(this + 0x6c) = 0;
+
+    }
+
+    local_8 = 0;
+
+    FBitWriter::~FBitWriter((FBitWriter *)local_98);
+
+  }
+
+  ExceptionList = local_10;
+
+  return;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x10481660 - UFileChannel::Describe
+================================================================================
+// Address: 10481660
+// Size: 268 bytes
+
+
+/* public: virtual class FString __thiscall UFileChannel::Describe(void) */
+
+
+
+FString * __thiscall UFileChannel::Describe(UFileChannel *this)
+
+
+
+{
+
+  int iVar1;
+
+  int iVar2;
+
+  FString *this_00;
+
+  undefined4 uVar3;
+
+  UFileChannel *pUVar4;
+
+  FString *in_stack_00000004;
+
+  FString local_40 [12];
+
+  FString local_34 [20];
+
+  undefined4 local_20;
+
+  undefined4 local_1c;
+
+  wchar_t *local_18;
+
+  undefined1 *local_14;
+
+  void *local_10;
+
+  undefined1 *puStack_c;
+
+  undefined4 local_8;
+
+  
+
+                    /* 0x181660  2469  ?Describe@UFileChannel@@UAE?AVFString@@XZ */
+
+  puStack_c = &LAB_10518fdc;
+
+  local_10 = ExceptionList;
+
+  local_20 = 0;
+
+  iVar1 = *(int *)(this + 0x270);
+
+  local_14 = &stack0xffffffb4;
+
+  iVar2 = *(int *)(*(int *)(*(int *)(this + 0x2c) + 200) + 0x2c);
+
+  local_8 = 1;
+
+  if (*(int *)(this + 0x3c) == 0) {
+
+    uVar3 = *(undefined4 *)(this + 0x274);
+
+  }
+
+  else if (*(int *)(this + 0x68) == 0) {
+
+    uVar3 = 0;
+
+  }
+
+  else {
+
+    uVar3 = *(undefined4 *)(*(int *)(this + 0x68) + 0x44c);
+
+  }
+
+  local_18 = L"Received";
+
+  if (*(int *)(this + 0x3c) == 0) {
+
+    local_18 = L"Sent";
+
+    pUVar4 = this + 0x70;
+
+  }
+
+  else if (*(int *)(this + 0x68) == 0) {
+
+    pUVar4 = (UFileChannel *)&DAT_10529f90;
+
+  }
+
+  else {
+
+    pUVar4 = (UFileChannel *)(*(int *)(this + 0x68) + 0x4c);
+
+  }
+
+  ExceptionList = &local_10;
+
+  local_1c = UChannel::Describe((UChannel *)this);
+
+  local_8._0_1_ = 2;
+
+  this_00 = (FString *)
+
+            FString::Printf((ushort *)local_34,L"File=\'%s\', %s=%i/%i ",pUVar4,local_18,uVar3,
+
+                            *(undefined4 *)(iVar1 * 0x44 + iVar2 + 0x24));
+
+  local_8._0_1_ = 3;
+
+  FString::operator+(this_00,in_stack_00000004);
+
+  local_20 = 1;
+
+  local_8._0_1_ = 2;
+
+  FString::~FString(local_34);
+
+  local_8 = CONCAT31(local_8._1_3_,1);
+
+  FString::~FString(local_40);
+
+  ExceptionList = local_10;
+
+  return in_stack_00000004;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x10481890 - UFileChannel::ReceivedBunch
+================================================================================
+// Address: 10481890
+// Size: 1243 bytes
+
+
+/* public: virtual void __thiscall UFileChannel::ReceivedBunch(class FInBunch &) */
+
+
+
+void __thiscall UFileChannel::ReceivedBunch(UFileChannel *this,FInBunch *param_1)
+
+
+
+{
+
+  undefined1 *puVar1;
+
+  int iVar2;
+
+  uchar *puVar3;
+
+  ushort *puVar4;
+
+  int *piVar5;
+
+  FInBunch *pFVar6;
+
+  int iVar7;
+
+  FBitWriter *this_00;
+
+  FInBunch *pFVar8;
+
+  FInBunch *pFVar9;
+
+  FString *this_01;
+
+  FOutBunch local_154 [124];
+
+  FOutBunch local_d8 [122];
+
+  undefined1 local_5e;
+
+  FGuid local_5c [24];
+
+  undefined4 local_44;
+
+  undefined4 local_40;
+
+  undefined4 local_3c;
+
+  undefined4 local_38;
+
+  int *local_30;
+
+  FString local_28 [12];
+
+  UFileChannel *local_1c;
+
+  UFileChannel *local_18;
+
+  undefined1 *local_14;
+
+  void *local_10;
+
+  undefined1 *puStack_c;
+
+  int local_8;
+
+  
+
+                    /* 0x181890  4256  ?ReceivedBunch@UFileChannel@@UAEXAAVFInBunch@@@Z */
+
+  puStack_c = &LAB_10519023;
+
+  local_10 = ExceptionList;
+
+  local_14 = &stack0xfffffea0;
+
+  local_8 = 0;
+
+  ExceptionList = &local_10;
+
+  local_18 = this;
+
+  puVar1 = &stack0xfffffea0;
+
+  if (*(int *)(this + 0x34) != 0) {
+
+    ExceptionList = &local_10;
+
+    appFailAssert("!Closing",".\\UnChan.cpp",0x5b0);
+
+    puVar1 = local_14;
+
+  }
+
+  local_14 = puVar1;
+
+  if (*(int *)(this + 0x3c) == 0) {
+
+    if (*(int *)(*(int *)(*(int *)(this + 0x2c) + 0x7c) + 0x74) == 0) {
+
+      FOutBunch::FOutBunch(local_d8,(UChannel *)this,1);
+
+      local_8._0_1_ = 1;
+
+      UChannel::SendBunch((UChannel *)this,local_d8,0);
+
+      this_00 = (FBitWriter *)local_d8;
+
+    }
+
+    else {
+
+      if (*(int *)(this + 0x6c) == 0) {
+
+        FGuid::FGuid((FGuid *)&local_44);
+
+        FUN_103bef40(param_1,&local_44);
+
+        iVar2 = FUN_103bef10(&local_44,SpecialGUIDArmPatches_exref);
+
+        if (iVar2 != 0) {
+
+          local_8._0_1_ = 3;
+
+          FGuid::FGuid(local_5c);
+
+          FUN_103bef40(param_1,local_5c);
+
+          puVar4 = FGuid::String(local_5c);
+
+          FString::Printf((ushort *)local_28,L"..\\ArmPatches\\Cache\\%s._AP",puVar4);
+
+          local_8 = CONCAT31(local_8._1_3_,4);
+
+          puVar4 = FString::operator*(local_28);
+
+          piVar5 = (int *)(**(code **)(**(int **)GFileManager_exref + 4))
+
+                                    (puVar4,0,*(undefined4 *)GNull_exref);
+
+          local_30 = piVar5;
+
+          if (piVar5 != (int *)0x0) {
+
+            param_1 = (FInBunch *)(**(code **)(*piVar5 + 0x2c))();
+
+            if ((param_1 != (FInBunch *)0x0) &&
+
+               (local_18 = (UFileChannel *)
+
+                           (**(code **)**(undefined4 **)GMalloc_exref)(param_1,L"ARMPATCH"),
+
+               local_18 != (UFileChannel *)0x0)) {
+
+              (**(code **)(*piVar5 + 4))(local_18,param_1);
+
+              iVar2 = *(int *)(*(int *)(this + 0x2c) + 0xd0) * 8 + -0x51;
+
+              pFVar8 = (FInBunch *)((int)(iVar2 + (iVar2 >> 0x1f & 7U)) >> 3);
+
+              local_1c = local_18;
+
+              while (0 < (int)param_1) {
+
+                FOutBunch::FOutBunch(local_d8,(UChannel *)this,0);
+
+                local_8 = CONCAT31(local_8._1_3_,5);
+
+                pFVar9 = param_1;
+
+                if ((int)pFVar8 < (int)param_1) {
+
+                  pFVar9 = pFVar8;
+
+                }
+
+                pFVar6 = (FInBunch *)UChannel::MaxSendBytes((UChannel *)this);
+
+                if ((int)pFVar6 <= (int)pFVar9) {
+
+                  pFVar9 = pFVar6;
+
+                }
+
+                FBitWriter::Serialize((FBitWriter *)local_d8,local_1c,(int)pFVar9);
+
+                local_1c = local_1c + (int)pFVar9;
+
+                local_5e = 1;
+
+                iVar2 = FArchive::IsError((FArchive *)local_d8);
+
+                if (iVar2 == 0) {
+
+                  UChannel::SendBunch((UChannel *)this,local_d8,0);
+
+                }
+
+                param_1 = param_1 + -(int)pFVar9;
+
+                local_8 = CONCAT31(local_8._1_3_,4);
+
+                FBitWriter::~FBitWriter((FBitWriter *)local_d8);
+
+              }
+
+              (**(code **)(**(int **)GMalloc_exref + 8))(local_18);
+
+              piVar5 = local_30;
+
+            }
+
+            if (piVar5 != (int *)0x0) {
+
+              (**(code **)*piVar5)(1);
+
+            }
+
+          }
+
+          (**(code **)(*(int *)this + 0x6c))();
+
+          local_8 = CONCAT31(local_8._1_3_,3);
+
+          FString::~FString(local_28);
+
+          ExceptionList = local_10;
+
+          return;
+
+        }
+
+        local_8 = 0;
+
+        iVar2 = FArchive::IsError((FArchive *)param_1);
+
+        if (iVar2 == 0) {
+
+          for (iVar2 = 0;
+
+              iVar7 = FArray::Num((FArray *)(*(int *)(*(int *)(this + 0x2c) + 200) + 0x2c)),
+
+              iVar2 < iVar7; iVar2 = iVar2 + 1) {
+
+            this_01 = (FString *)
+
+                      (iVar2 * 0x44 + *(int *)(*(int *)(*(int *)(this + 0x2c) + 200) + 0x2c));
+
+            iVar7 = FUN_103bef10(this_01 + 0x14,&local_44);
+
+            if ((iVar7 != 0) &&
+
+               (iVar7 = FString::operator!=(this_01,(ushort *)&DAT_10529f90), iVar7 != 0)) {
+
+              if (0 < *(int *)(*(int *)(*(int *)(this + 0x2c) + 0x7c) + 0x8c)) {
+
+                puVar4 = FString::operator*(this_01);
+
+                iVar7 = (**(code **)(**(int **)GFileManager_exref + 0xc))(puVar4);
+
+                if (*(int *)(*(int *)(*(int *)(this + 0x2c) + 0x7c) + 0x8c) < iVar7) break;
+
+              }
+
+              puVar4 = FString::operator*(this_01);
+
+              appStrncpy((ushort *)(this + 0x70),puVar4,0x100);
+
+              iVar7 = (**(code **)(**(int **)(*(int *)(*(int *)(this + 0x2c) + 0x7c) + 0x40) + 0x14)
+
+                      )(*(int *)(this + 0x2c),local_44,local_40,local_3c,local_38);
+
+              this = local_18;
+
+              if (iVar7 != 0) {
+
+                if (*(int *)(this_01 + 0xc) == 0) {
+
+                  appFailAssert("Info.Linker",".\\UnChan.cpp",0x627);
+
+                }
+
+                this = local_18;
+
+                iVar7 = (**(code **)(**(int **)GFileManager_exref + 4))
+
+                                  (local_18 + 0x70,0,*(undefined4 *)GNull_exref);
+
+                *(int *)(this + 0x6c) = iVar7;
+
+                if (iVar7 != 0) {
+
+                  *(int *)(this + 0x270) = iVar2;
+
+                  ExceptionList = local_10;
+
+                  return;
+
+                }
+
+              }
+
+            }
+
+          }
+
+        }
+
+      }
+
+      else {
+
+        FString::FString(local_28);
+
+        local_8._0_1_ = 2;
+
+        ::operator<<((FArchive *)param_1,local_28);
+
+        iVar2 = FArchive::IsError((FArchive *)param_1);
+
+        if ((iVar2 == 0) && (iVar2 = FString::operator==(local_28,(ushort *)L"SKIP"), iVar2 != 0)) {
+
+          FOutputDevice::Logf((FOutputDevice *)(this + 0x70),*(ushort **)GLog_exref);
+
+          FUN_103bfaf0(*(undefined4 *)(this + 0x270));
+
+          local_8 = (uint)local_8._1_3_ << 8;
+
+          FString::~FString(local_28);
+
+          ExceptionList = local_10;
+
+          return;
+
+        }
+
+        local_8 = (uint)local_8._1_3_ << 8;
+
+        FString::~FString(local_28);
+
+      }
+
+      FOutBunch::FOutBunch(local_154,(UChannel *)this,1);
+
+      local_8._0_1_ = 7;
+
+      UChannel::SendBunch((UChannel *)this,local_154,0);
+
+      this_00 = (FBitWriter *)local_154;
+
+    }
+
+    local_8 = (uint)local_8._1_3_ << 8;
+
+    FBitWriter::~FBitWriter(this_00);
+
+  }
+
+  else if (*(int *)(this + 0x68) != 0) {
+
+    iVar2 = FBitReader::GetNumBytes((FBitReader *)param_1);
+
+    puVar3 = FBitReader::GetData((FBitReader *)param_1);
+
+    (**(code **)(**(int **)(this + 0x68) + 0x6c))(puVar3,iVar2);
+
+    ExceptionList = local_10;
+
+    return;
+
+  }
+
+  ExceptionList = local_10;
+
+  return;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x10481F20 - UChannel::Destroy
+================================================================================
+// Address: 10481f20
+// Size: 272 bytes
+
+
+/* public: virtual void __thiscall UChannel::Destroy(void) */
+
+
+
+void __thiscall UChannel::Destroy(UChannel *this)
+
+
+
+{
+
+  undefined4 *puVar1;
+
+  int iVar2;
+
+  int iVar3;
+
+  undefined4 *puVar4;
+
+  int iVar5;
+
+  void *local_10;
+
+  undefined1 *puStack_c;
+
+  undefined4 local_8;
+
+  
+
+                    /* 0x181f20  2479  ?Destroy@UChannel@@UAEXXZ */
+
+  puStack_c = &LAB_10519030;
+
+  local_10 = ExceptionList;
+
+  iVar5 = 0;
+
+  local_8 = 0;
+
+  ExceptionList = &local_10;
+
+  if (*(int *)(this + 0x2c) == 0) {
+
+    ExceptionList = &local_10;
+
+    appFailAssert("Connection",".\\UnChan.cpp",0xa0);
+
+  }
+
+  if (*(UChannel **)(*(int *)(this + 0x2c) + 0xeb0 + *(int *)(this + 0x38) * 4) != this) {
+
+    appFailAssert("Connection->Channels[ChIndex]==this",".\\UnChan.cpp",0xa1);
+
+  }
+
+  puVar4 = *(undefined4 **)(this + 0x5c);
+
+  while (puVar4 != (undefined4 *)0x0) {
+
+    puVar1 = (undefined4 *)*puVar4;
+
+    puVar4 = (undefined4 *)puVar4[0x15];
+
+    (*(code *)*puVar1)(1);
+
+  }
+
+  puVar4 = *(undefined4 **)(this + 0x58);
+
+  while (puVar4 != (undefined4 *)0x0) {
+
+    puVar1 = (undefined4 *)*puVar4;
+
+    puVar4 = (undefined4 *)puVar4[0x16];
+
+    (*(code *)*puVar1)(1);
+
+  }
+
+  iVar2 = *(int *)(this + 0x2c);
+
+  iVar3 = *(int *)(iVar2 + 0x4b80);
+
+  for (; iVar5 < *(int *)(iVar2 + 0x4b80); iVar5 = iVar5 + 1) {
+
+    if (*(UChannel **)(*(int *)(iVar2 + 0x4b7c) + iVar5 * 4) == this) {
+
+      FUN_1037a200(iVar5,1);
+
+      iVar5 = iVar5 + -1;
+
+    }
+
+  }
+
+  if (iVar3 - *(int *)(iVar2 + 0x4b80) != 1) {
+
+    appFailAssert("Connection->OpenChannels.RemoveItem(this)==1",".\\UnChan.cpp",0xaa);
+
+  }
+
+  *(undefined4 *)(*(int *)(this + 0x2c) + 0xeb0 + *(int *)(this + 0x38) * 4) = 0;
+
+  *(undefined4 *)(this + 0x2c) = 0;
+
+  UObject::Destroy((UObject *)this);
+
+  ExceptionList = local_10;
+
+  return;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x10482070 - UControlChannel::Destroy
+================================================================================
+// Address: 10482070
+// Size: 147 bytes
+
+
+/* public: virtual void __thiscall UControlChannel::Destroy(void) */
+
+
+
+void __thiscall UControlChannel::Destroy(UControlChannel *this)
+
+
+
+{
+
+  int iVar1;
+
+  void *local_10;
+
+  undefined1 *puStack_c;
+
+  undefined4 local_8;
+
+  
+
+                    /* 0x182070  2482  ?Destroy@UControlChannel@@UAEXXZ */
+
+  puStack_c = &LAB_10519040;
+
+  local_10 = ExceptionList;
+
+  local_8 = 0;
+
+  ExceptionList = &local_10;
+
+  if (*(int *)(this + 0x2c) == 0) {
+
+    ExceptionList = &local_10;
+
+    appFailAssert("Connection",".\\UnChan.cpp",0x225);
+
+  }
+
+  iVar1 = UChannel::RouteDestroy((UChannel *)this);
+
+  if (iVar1 == 0) {
+
+    if (*(UControlChannel **)(*(int *)(this + 0x2c) + 0xeb0 + *(int *)(this + 0x38) * 4) != this) {
+
+      appFailAssert("Connection->Channels[ChIndex]==this",".\\UnChan.cpp",0x228);
+
+    }
+
+    UChannel::Destroy((UChannel *)this);
+
+  }
+
+  ExceptionList = local_10;
+
+  return;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x10482260 - UActorChannel::Destroy
+================================================================================
+// Address: 10482260
+// Size: 549 bytes
+
+
+/* public: virtual void __thiscall UActorChannel::Destroy(void) */
+
+
+
+void __thiscall UActorChannel::Destroy(UActorChannel *this)
+
+
+
+{
+
+  int iVar1;
+
+  void *local_10;
+
+  undefined1 *puStack_c;
+
+  undefined4 local_8;
+
+  
+
+                    /* 0x182260  2477  ?Destroy@UActorChannel@@UAEXXZ */
+
+  puStack_c = &LAB_105190a0;
+
+  local_10 = ExceptionList;
+
+  local_8 = 0;
+
+  ExceptionList = &local_10;
+
+  if (*(int *)(this + 0x2c) == 0) {
+
+    ExceptionList = &local_10;
+
+    appFailAssert("Connection",".\\UnChan.cpp",0x2a6);
+
+  }
+
+  iVar1 = UChannel::RouteDestroy((UChannel *)this);
+
+  if (iVar1 == 0) {
+
+    if (*(UActorChannel **)(*(int *)(this + 0x2c) + 0xeb0 + *(int *)(this + 0x38) * 4) != this) {
+
+      appFailAssert("Connection->Channels[ChIndex]==this",".\\UnChan.cpp",0x2ae);
+
+    }
+
+    (**(code **)(*(int *)this + 0x68))();
+
+    iVar1 = FArray::Num((FArray *)(this + 0x94));
+
+    if (iVar1 != 0) {
+
+      if (*(int *)(this + 0x70) == 0) {
+
+        appFailAssert("ActorClass",".\\UnChan.cpp",0x2b6);
+
+      }
+
+      UObject::ExitProperties(*(uchar **)(this + 0x94),*(UClass **)(this + 0x70));
+
+    }
+
+    local_8 = CONCAT31(local_8._1_3_,1);
+
+    if (*(int *)(*(int *)(*(int *)(this + 0x2c) + 0x7c) + 0x3c) == 0) {
+
+      if ((*(int *)(this + 0x6c) != 0) && (*(int *)(this + 0x30) == 0)) {
+
+        FUN_103db080(this + 0x6c);
+
+      }
+
+    }
+
+    else {
+
+      if (*(UObject **)(this + 0x6c) != (UObject *)0x0) {
+
+        iVar1 = UObject::IsValid(*(UObject **)(this + 0x6c));
+
+        if (iVar1 == 0) {
+
+          appFailAssert("!Actor || Actor->IsValid()",".\\UnChan.cpp",0x2be);
+
+        }
+
+      }
+
+      if (*(int *)(this + 0x68) == 0) {
+
+        appFailAssert("Level",".\\UnChan.cpp",0x2bf);
+
+      }
+
+      iVar1 = UObject::IsValid(*(UObject **)(this + 0x68));
+
+      if (iVar1 == 0) {
+
+        appFailAssert("Level->IsValid()",".\\UnChan.cpp",0x2c0);
+
+      }
+
+      if (*(int *)(this + 0x2c) == 0) {
+
+        appFailAssert("Connection",".\\UnChan.cpp",0x2c1);
+
+      }
+
+      iVar1 = UObject::IsValid(*(UObject **)(this + 0x2c));
+
+      if (iVar1 == 0) {
+
+        appFailAssert("Connection->IsValid()",".\\UnChan.cpp",0x2c2);
+
+      }
+
+      if (*(int *)(*(int *)(this + 0x2c) + 0x7c) == 0) {
+
+        appFailAssert("Connection->Driver",".\\UnChan.cpp",0x2c3);
+
+      }
+
+      iVar1 = UObject::IsValid(*(UObject **)(*(int *)(this + 0x2c) + 0x7c));
+
+      if (iVar1 == 0) {
+
+        appFailAssert("Connection->Driver->IsValid()",".\\UnChan.cpp",0x2c4);
+
+      }
+
+      iVar1 = *(int *)(this + 0x6c);
+
+      if (iVar1 != 0) {
+
+        if ((*(byte *)(iVar1 + 0xa4) & 0x10) == 0) {
+
+          if ((*(uint *)(iVar1 + 0xa0) & 0x10000000) == 0) {
+
+            (**(code **)(**(int **)(iVar1 + 0x328) + 0xa0))(iVar1,1);
+
+          }
+
+        }
+
+        else {
+
+          *(undefined1 *)(iVar1 + 0x2d) = 4;
+
+          *(undefined1 *)(*(int *)(this + 0x6c) + 0x2e) = 0;
+
+        }
+
+      }
+
+    }
+
+    local_8 = 0;
+
+    UChannel::Destroy((UChannel *)this);
+
+  }
+
+  ExceptionList = local_10;
+
+  return;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x104821D0 - UActorChannel::SetClosingFlag
+================================================================================
+// Address: 104821d0
+// Size: 91 bytes
+
+
+/* public: virtual void __thiscall UActorChannel::SetClosingFlag(void) */
+
+
+
+void __thiscall UActorChannel::SetClosingFlag(UActorChannel *this)
+
+
+
+{
+
+  void *local_10;
+
+  undefined1 *puStack_c;
+
+  undefined4 local_8;
+
+  
+
+                    /* 0x1821d0  4449  ?SetClosingFlag@UActorChannel@@UAEXXZ */
+
+  puStack_c = &LAB_10519090;
+
+  local_10 = ExceptionList;
+
+  local_8 = 0;
+
+  ExceptionList = &local_10;
+
+  if (*(int *)(this + 0x6c) != 0) {
+
+    ExceptionList = &local_10;
+
+    FUN_10481e90(this + 0x6c);
+
+  }
+
+  UChannel::SetClosingFlag((UChannel *)this);
+
+  ExceptionList = local_10;
+
+  return;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x104824D0 - UActorChannel::ReceivedNak
+================================================================================
+// Address: 104824d0
+// Size: 142 bytes
+
+
+/* public: virtual void __thiscall UActorChannel::ReceivedNak(int) */
+
+
+
+void __thiscall UActorChannel::ReceivedNak(UActorChannel *this,int param_1)
+
+
+
+{
+
+  int iVar1;
+
+  int iVar2;
+
+  int local_18;
+
+  undefined1 *local_14;
+
+  void *local_10;
+
+  undefined1 *puStack_c;
+
+  undefined4 local_8;
+
+  
+
+                    /* 0x1824d0  4257  ?ReceivedNak@UActorChannel@@UAEXH@Z */
+
+  puStack_c = &LAB_105190b0;
+
+  local_10 = ExceptionList;
+
+  local_14 = &stack0xffffffd4;
+
+  local_8 = 0;
+
+  ExceptionList = &local_10;
+
+  UChannel::ReceivedNak((UChannel *)this,param_1);
+
+  if (*(int *)(this + 0x70) != 0) {
+
+    iVar2 = FArray::Num((FArray *)(this + 0xb8));
+
+    while (iVar2 = iVar2 + -1, -1 < iVar2) {
+
+      iVar1 = *(int *)(this + 0xb8) + iVar2 * 0xc;
+
+      if ((*(int *)(iVar1 + 4) == param_1) && (*(char *)(iVar1 + 8) == '\0')) {
+
+        local_18 = iVar2;
+
+        FUN_10481dd0(&local_18);
+
+      }
+
+    }
+
+  }
+
+  ExceptionList = local_10;
+
+  return;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x104827F0 - UActorChannel::ReceivedBunch
+================================================================================
+// Address: 104827f0
+// Size: 2931 bytes
+
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+/* public: virtual void __thiscall UActorChannel::ReceivedBunch(class FInBunch &) */
+
+
+
+void __thiscall UActorChannel::ReceivedBunch(UActorChannel *this,FInBunch *param_1)
+
+
+
+{
+
+  UActorChannel *pUVar1;
+
+  undefined1 uVar2;
+
+  byte bVar3;
+
+  ushort uVar4;
+
+  undefined1 *puVar5;
+
+  uchar uVar6;
+
+  UObject *pUVar7;
+
+  UStruct *pUVar8;
+
+  int iVar9;
+
+  AActor *pAVar10;
+
+  FOutputDevice *pFVar11;
+
+  FClassNetCache *pFVar12;
+
+  ulong uVar13;
+
+  UClass *pUVar14;
+
+  UFunction *pUVar15;
+
+  UFunction *pUVar16;
+
+  uint uVar17;
+
+  FOutputDevice *this_00;
+
+  uint uVar18;
+
+  UObject *this_01;
+
+  FFieldNetCache *pFVar19;
+
+  uint uVar20;
+
+  uchar *puVar21;
+
+  int *piVar22;
+
+  undefined4 uStack_110;
+
+  undefined4 uStack_10c;
+
+  undefined4 uStack_108;
+
+  undefined4 uStack_104;
+
+  undefined4 uStack_100;
+
+  UFunction *pUStack_fc;
+
+  FFrame local_d4 [24];
+
+  FFrame local_bc [52];
+
+  FMemMark local_88 [48];
+
+  int local_58;
+
+  undefined4 local_54;
+
+  undefined4 local_50;
+
+  undefined4 local_4c;
+
+  undefined4 local_48;
+
+  UFunction *local_44;
+
+  UObject *local_40;
+
+  int local_3c;
+
+  uint local_38;
+
+  UStruct *local_34;
+
+  uchar *local_30;
+
+  FName local_2c [4];
+
+  FClassNetCache *local_28;
+
+  UActorChannel *local_24;
+
+  UFunction *local_20;
+
+  uchar *local_1c;
+
+  byte local_15;
+
+  undefined1 *local_14;
+
+  void *local_10;
+
+  undefined1 *puStack_c;
+
+  undefined4 local_8;
+
+  
+
+                    /* 0x1827f0  4254  ?ReceivedBunch@UActorChannel@@UAEXAAVFInBunch@@@Z */
+
+  puStack_c = &LAB_105190d0;
+
+  local_10 = ExceptionList;
+
+  local_14 = &stack0xffffff20;
+
+  local_8 = 0;
+
+  ExceptionList = &local_10;
+
+  local_24 = this;
+
+  puVar5 = &stack0xffffff20;
+
+  if (*(int *)(this + 0x34) != 0) {
+
+    ExceptionList = &local_10;
+
+    appFailAssert("!Closing",".\\UnChan.cpp",0x328);
+
+    puVar5 = local_14;
+
+  }
+
+  local_14 = puVar5;
+
+  if (*(int *)(this + 0x60) != 0) {
+
+    ExceptionList = local_10;
+
+    return;
+
+  }
+
+  if (*(int *)(this + 100) != 0) {
+
+    ExceptionList = local_10;
+
+    return;
+
+  }
+
+  local_3c = 0;
+
+  local_1c = (uchar *)FBitReader::GetNumBits((FBitReader *)param_1);
+
+  if (*(int *)(this + 0x6c) == 0) {
+
+    local_8 = CONCAT31(local_8._1_3_,1);
+
+    if (param_1[0x6c] == (FInBunch)0x0) {
+
+      FOutputDevice::Logf((FOutputDevice *)(uint)(byte)param_1[0x6d],*(ushort **)GWarn_exref);
+
+LAB_10482896:
+
+      *(undefined4 *)(this + 0x60) = 1;
+
+      ExceptionList = local_10;
+
+      return;
+
+    }
+
+    (**(code **)(*(int *)param_1 + 0x18))();
+
+    pUVar7 = (UObject *)FUN_10365970();
+
+    if (pUVar7 == (UObject *)0x0) {
+
+      pUVar8 = (UStruct *)FUN_1039f040();
+
+      local_34 = pUVar8;
+
+      if ((pUVar8 == (UStruct *)0x0) ||
+
+         (iVar9 = UStruct::IsChildOf(pUVar8,(UStruct *)&AActor::PrivateStaticClass), iVar9 == 0)) {
+
+        FOutputDevice::Logf((FOutputDevice *)GWarn_exref,*(ushort **)GWarn_exref);
+
+        goto LAB_10482896;
+
+      }
+
+      iVar9 = UStruct::IsChildOf(pUVar8,(UStruct *)&AActor::PrivateStaticClass);
+
+      if (iVar9 == 0) {
+
+        appFailAssert("ActorClass->IsChildOf(AActor::StaticClass())",".\\UnChan.cpp",0x34e);
+
+      }
+
+      FVector::FVector((FVector *)&local_54);
+
+      FRotator::FRotator((FRotator *)&local_48,0,0,0);
+
+      pAVar10 = UClass::GetDefaultActor((UClass *)pUVar8);
+
+      uVar17 = *(uint *)(pAVar10 + 0xa4);
+
+      FUN_10481010();
+
+      if ((uVar17 >> 9 & 1) != 0) {
+
+        FUN_1047fa50();
+
+      }
+
+      uStack_100 = local_48;
+
+      pUStack_fc = local_44;
+
+      uStack_10c = local_54;
+
+      local_30 = (uchar *)&uStack_110;
+
+      uStack_110 = local_4c;
+
+      uStack_108 = local_50;
+
+      uStack_104 = local_4c;
+
+      FName::FName((FName *)&uStack_110,0);
+
+      pUVar7 = (UObject *)(**(code **)(**(int **)(this + 0x68) + 0xa8))(local_34);
+
+      local_3c = 1;
+
+      if (pUVar7 == (UObject *)0x0) {
+
+        appFailAssert("InActor",".\\UnChan.cpp",0x359);
+
+      }
+
+    }
+
+    if (((byte)pUVar7[0xab] & 1) == 0) {
+
+      FBitReader::GetNumBits((FBitReader *)param_1);
+
+      pFVar11 = (FOutputDevice *)UObject::GetFullName(pUVar7,(ushort *)0x0);
+
+      FOutputDevice::Logf(pFVar11,*(EName *)GLog_exref,(ushort *)0x306);
+
+      SetChannelActor(this,(AActor *)pUVar7);
+
+      local_8 = 0;
+
+    }
+
+    else {
+
+      FBitReader::GetNumBits((FBitReader *)param_1);
+
+      UObject::GetFullName(pUVar7,(ushort *)0x0);
+
+      FOutputDevice::Logf(*(FOutputDevice **)GLog_exref,(ushort *)*(FOutputDevice **)GLog_exref);
+
+      SetChannelActor(this,(AActor *)pUVar7);
+
+      local_8 = 0;
+
+    }
+
+  }
+
+  else if ((*(byte *)(*(int *)(this + 0x6c) + 0xab) & 1) == 0) {
+
+    FBitReader::GetNumBits((FBitReader *)param_1);
+
+    pFVar11 = (FOutputDevice *)UObject::GetFullName(*(UObject **)(this + 0x6c),(ushort *)0x0);
+
+    FOutputDevice::Logf(pFVar11,*(EName *)GLog_exref,(ushort *)0x306);
+
+  }
+
+  else {
+
+    FBitReader::GetNumBits((FBitReader *)param_1);
+
+    UObject::GetFullName(*(UObject **)(this + 0x6c),(ushort *)0x0);
+
+    FOutputDevice::Logf(*(FOutputDevice **)GLog_exref,(ushort *)*(FOutputDevice **)GLog_exref);
+
+  }
+
+  pFVar12 = (FClassNetCache *)(**(code **)(**(int **)(*(int *)(this + 0x2c) + 200) + 0x84))();
+
+  *(uint *)(*(int *)(this + 0x6c) + 0xac) = *(uint *)(*(int *)(this + 0x6c) + 0xac) & 0xffffffbf;
+
+  local_8 = CONCAT31(local_8._1_3_,3);
+
+  pUVar7 = *(UObject **)(this + 0x6c);
+
+  do {
+
+    this_01 = pUVar7;
+
+    pUVar7 = *(UObject **)(this_01 + 0x140);
+
+  } while (*(UObject **)(this_01 + 0x140) != (UObject *)0x0);
+
+  local_28 = pFVar12;
+
+  iVar9 = UObject::IsA(this_01,&APlayerController::PrivateStaticClass);
+
+  if (iVar9 == 0) {
+
+    pUVar7 = (UObject *)0x0;
+
+  }
+
+  else {
+
+    pUVar7 = *(UObject **)(this_01 + 0x5b4);
+
+  }
+
+  if (*(int *)(*(int *)(*(UObject **)(this + 0x2c) + 0x7c) + 0x3c) == 0) {
+
+    if (pUVar7 != *(UObject **)(this + 0x2c)) goto LAB_10482bf7;
+
+  }
+
+  else if ((pUVar7 == (UObject *)0x0) ||
+
+          (iVar9 = UObject::IsA(pUVar7,&UViewport::PrivateStaticClass), iVar9 == 0))
+
+  goto LAB_10482bf7;
+
+  *(uint *)(*(int *)(this + 0x6c) + 0xac) = *(uint *)(*(int *)(this + 0x6c) + 0xac) | 0x40;
+
+LAB_10482bf7:
+
+  local_8 = 5;
+
+  uVar13 = FClassNetCache::GetMaxIndex(pFVar12);
+
+  uVar13 = FBitReader::ReadInt((FBitReader *)param_1,uVar13);
+
+  local_1c = (uchar *)uVar13;
+
+  iVar9 = FArchive::IsError((FArchive *)param_1);
+
+  if (iVar9 == 0) {
+
+    pFVar19 = FClassNetCache::GetFromIndex(local_28,uVar13);
+
+  }
+
+  else {
+
+    pFVar19 = (FFieldNetCache *)0x0;
+
+  }
+
+  while (pFVar19 != (FFieldNetCache *)0x0) {
+
+    (**(code **)(**(int **)(this + 0x6c) + 0x94))();
+
+    local_8 = CONCAT31(local_8._1_3_,6);
+
+    while ((pFVar19 != (FFieldNetCache *)0x0 &&
+
+           (pUVar7 = *(UObject **)pFVar19, pUVar7 != (UObject *)0x0))) {
+
+      pUVar14 = UProperty::StaticClass();
+
+      iVar9 = UObject::IsA(pUVar7,pUVar14);
+
+      if (iVar9 == 0) break;
+
+      local_15 = 0;
+
+      if (*(int *)(pUVar7 + 0x38) != 1) {
+
+        (**(code **)(*(int *)param_1 + 4))();
+
+      }
+
+      local_1c = *(uchar **)(this + 0x6c);
+
+      iVar9 = FArray::Num((FArray *)(this + 0x94));
+
+      if (iVar9 == 0) {
+
+        local_20 = (UFunction *)0x0;
+
+      }
+
+      else {
+
+        local_20 = *(UFunction **)(this + 0x94);
+
+      }
+
+      if (*(int *)(*(int *)(*(int *)(this + 0x2c) + 0x7c) + 0x3c) == 0) {
+
+        iVar9 = *(int *)(this + 0x6c);
+
+        uVar2 = *(undefined1 *)(iVar9 + 0x2d);
+
+        *(undefined1 *)(iVar9 + 0x2d) = *(undefined1 *)(iVar9 + 0x2e);
+
+        *(undefined1 *)(iVar9 + 0x2e) = uVar2;
+
+        local_8 = CONCAT31(local_8._1_3_,7);
+
+        local_58 = 0;
+
+        pUVar8 = (UStruct *)(**(code **)(*(int *)pUVar7 + 0x70))();
+
+        iVar9 = FFrame::FFrame(local_bc,*(UObject **)(this + 0x6c),pUVar8,
+
+                               (uint)*(ushort *)(pUVar7 + 0x48),(void *)0x0);
+
+        bVar3 = **(byte **)(iVar9 + 0xc);
+
+        *(byte **)(iVar9 + 0xc) = *(byte **)(iVar9 + 0xc) + 1;
+
+        (**(code **)(GNatives_exref + (uint)bVar3 * 4))();
+
+        iVar9 = *(int *)(this + 0x6c);
+
+        uVar2 = *(undefined1 *)(iVar9 + 0x2d);
+
+        *(undefined1 *)(iVar9 + 0x2d) = *(undefined1 *)(iVar9 + 0x2e);
+
+        *(undefined1 *)(iVar9 + 0x2e) = uVar2;
+
+        if ((local_58 == 0) || ((*(byte *)(*(int *)(this + 0x6c) + 0xac) & 0x40) == 0)) {
+
+          local_1c = (uchar *)0x0;
+
+          local_20 = (UFunction *)0x0;
+
+        }
+
+      }
+
+      piVar22 = (int *)(*(int *)(this + 0xb8) +
+
+                       ((uint)*(ushort *)(pUVar7 + 0x4a) + (uint)local_15) * 0xc);
+
+      if (*(int *)(param_1 + 0x54) < *piVar22) {
+
+        local_1c = (uchar *)0x0;
+
+        local_20 = (UFunction *)0x0;
+
+      }
+
+      else {
+
+        *piVar22 = *(int *)(param_1 + 0x54);
+
+      }
+
+      local_8 = 9;
+
+      FMemMark::FMemMark((FMemMark *)&local_54,(FMemStack *)GMem_exref);
+
+      uVar17 = *(uint *)(pUVar7 + 0x3c);
+
+      local_30 = (uchar *)(local_15 * uVar17 + *(int *)(pUVar7 + 0x4c));
+
+      if (local_1c == (uchar *)0x0) {
+
+        local_38 = uVar17;
+
+        local_1c = FMemStack::PushBytes((FMemStack *)GMem_exref,uVar17,8);
+
+        uVar18 = local_38 & 3;
+
+        puVar21 = local_1c;
+
+        for (uVar17 = local_38 >> 2; uVar17 != 0; uVar17 = uVar17 - 1) {
+
+          puVar21[0] = '\0';
+
+          puVar21[1] = '\0';
+
+          puVar21[2] = '\0';
+
+          puVar21[3] = '\0';
+
+          puVar21 = puVar21 + 4;
+
+        }
+
+        for (; uVar18 != 0; uVar18 = uVar18 - 1) {
+
+          *puVar21 = '\0';
+
+          puVar21 = puVar21 + 1;
+
+        }
+
+      }
+
+      local_1c = (uchar *)FBitReader::GetPosBits((FBitReader *)param_1);
+
+      (**(code **)(*(int *)pUVar7 + 0x8c))();
+
+      if (local_20 != (UFunction *)0x0) {
+
+        (**(code **)(*(int *)pUVar7 + 0x9c))();
+
+      }
+
+      FMemMark::Pop((FMemMark *)&local_54);
+
+      local_8 = 6;
+
+      if ((*(byte *)(*(int *)(local_24 + 0x6c) + 0xab) & 1) == 0) {
+
+        FBitReader::GetNumBits((FBitReader *)param_1);
+
+        UObject::GetName(pUVar7);
+
+        pUStack_fc = (UFunction *)0x10482eda;
+
+        FOutputDevice::Logf(*(FOutputDevice **)GLog_exref,(EName)*(FOutputDevice **)GLog_exref,
+
+                            (ushort *)0x306);
+
+      }
+
+      else {
+
+        FBitReader::GetNumBits((FBitReader *)param_1);
+
+        UObject::GetName(pUVar7);
+
+        FOutputDevice::Logf((FOutputDevice *)GLog_exref,*(ushort **)GLog_exref);
+
+      }
+
+      pFVar12 = local_28;
+
+      uVar13 = FClassNetCache::GetMaxIndex(local_28);
+
+      uVar13 = FBitReader::ReadInt((FBitReader *)param_1,uVar13);
+
+      local_1c = (uchar *)uVar13;
+
+      iVar9 = FArchive::IsError((FArchive *)param_1);
+
+      if (iVar9 == 0) {
+
+        pFVar19 = FClassNetCache::GetFromIndex(pFVar12,uVar13);
+
+        this = local_24;
+
+      }
+
+      else {
+
+        pFVar19 = (FFieldNetCache *)0x0;
+
+        this = local_24;
+
+      }
+
+    }
+
+    local_8 = 5;
+
+    (**(code **)(**(int **)(this + 0x6c) + 0x98))();
+
+    if (local_3c != 0) {
+
+      pUVar7 = *(UObject **)(this + 0x6c);
+
+      local_3c = 0;
+
+      UObject::FindFunctionChecked(pUVar7);
+
+      (**(code **)(*(int *)pUVar7 + 0x10))();
+
+    }
+
+    if (pFVar19 == (FFieldNetCache *)0x0) break;
+
+    pUVar7 = *(UObject **)pFVar19;
+
+    if (pUVar7 == (UObject *)0x0) {
+
+LAB_10483311:
+
+      UObject::GetFullName(*(UObject **)(this + 0x6c),(ushort *)0x0);
+
+      FOutputDevice::Logf(*(FOutputDevice **)GNull_exref,(ushort *)*(FOutputDevice **)GNull_exref);
+
+      ExceptionList = local_10;
+
+      return;
+
+    }
+
+    pUVar14 = UFunction::StaticClass();
+
+    iVar9 = UObject::IsA(pUVar7,pUVar14);
+
+    if (iVar9 == 0) goto LAB_10483311;
+
+    local_8 = CONCAT31(local_8._1_3_,0xc);
+
+    UObject::GetFName(*(UObject **)pFVar19);
+
+    pUVar15 = UObject::FindFunction(*(UObject **)(this + 0x6c));
+
+    local_20 = pUVar15;
+
+    if (pUVar15 == (UFunction *)0x0) {
+
+      appFailAssert("Function",".\\UnChan.cpp",0x3ff);
+
+    }
+
+    local_1c = (uchar *)0x0;
+
+    while (pUVar16 = UFunction::GetSuperFunction(pUVar15), pUVar16 != (UFunction *)0x0) {
+
+      pUVar15 = UFunction::GetSuperFunction(pUVar15);
+
+    }
+
+    if (*(int *)(*(int *)(*(int *)(this + 0x2c) + 0x7c) + 0x3c) == 0) {
+
+      iVar9 = *(int *)(this + 0x6c);
+
+      uVar2 = *(undefined1 *)(iVar9 + 0x2d);
+
+      *(undefined1 *)(iVar9 + 0x2d) = *(undefined1 *)(iVar9 + 0x2e);
+
+      *(undefined1 *)(iVar9 + 0x2e) = uVar2;
+
+      local_8 = CONCAT31(local_8._1_3_,0xd);
+
+      local_34 = (UStruct *)0x0;
+
+      pUVar8 = (UStruct *)(**(code **)(*(int *)pUVar15 + 0x70))();
+
+      iVar9 = FFrame::FFrame(local_d4,*(UObject **)(this + 0x6c),pUVar8,
+
+                             (uint)*(ushort *)(pUVar15 + 0x7a),(void *)0x0);
+
+      bVar3 = **(byte **)(iVar9 + 0xc);
+
+      *(byte **)(iVar9 + 0xc) = *(byte **)(iVar9 + 0xc) + 1;
+
+      (**(code **)(GNatives_exref + (uint)bVar3 * 4))();
+
+      iVar9 = *(int *)(this + 0x6c);
+
+      uVar2 = *(undefined1 *)(iVar9 + 0x2d);
+
+      *(undefined1 *)(iVar9 + 0x2d) = *(undefined1 *)(iVar9 + 0x2e);
+
+      *(undefined1 *)(iVar9 + 0x2e) = uVar2;
+
+      if ((local_34 == (UStruct *)0x0) || ((*(byte *)(*(int *)(this + 0x6c) + 0xac) & 0x40) == 0)) {
+
+        if (((byte)(*(UObject **)(this + 0x6c))[0xab] & 1) != 0) {
+
+          UObject::GetFullName(*(UObject **)(this + 0x6c),(ushort *)0x0);
+
+          FName::operator*(local_2c);
+
+          FOutputDevice::Logf((FOutputDevice *)GLog_exref,*(ushort **)GLog_exref);
+
+        }
+
+        local_1c = (uchar *)0x1;
+
+      }
+
+    }
+
+    local_8 = 0xc;
+
+    if ((*(byte *)(*(int *)(this + 0x6c) + 0xab) & 1) == 0) {
+
+      FName::operator*(local_2c);
+
+      FOutputDevice::Logf(this_00,*(EName *)GLog_exref,(ushort *)0x306);
+
+    }
+
+    else {
+
+      FName::operator*(local_2c);
+
+      FOutputDevice::Logf(*(FOutputDevice **)GLog_exref,(ushort *)*(FOutputDevice **)GLog_exref);
+
+    }
+
+    FMemMark::FMemMark(local_88,(FMemStack *)GMem_exref);
+
+    uVar4 = *(ushort *)(local_20 + 0x7e);
+
+    uVar20 = (uint)uVar4;
+
+    local_30 = FMemStack::PushBytes((FMemStack *)GMem_exref,uVar20,8);
+
+    uVar18 = uVar20 & 3;
+
+    puVar21 = local_30;
+
+    for (uVar17 = (uint)(uVar4 >> 2); uVar17 != 0; uVar17 = uVar17 - 1) {
+
+      puVar21[0] = '\0';
+
+      puVar21[1] = '\0';
+
+      puVar21[2] = '\0';
+
+      puVar21[3] = '\0';
+
+      puVar21 = puVar21 + 4;
+
+    }
+
+    for (; uVar18 != 0; uVar18 = uVar18 - 1) {
+
+      *puVar21 = '\0';
+
+      puVar21 = puVar21 + 1;
+
+    }
+
+    local_44 = local_20;
+
+    local_40 = *(UObject **)(local_20 + 0x40);
+
+    local_38 = uVar20;
+
+    while ((FUN_1038d780(), pUVar15 = local_20, pUVar7 = local_40, local_40 != (UObject *)0x0 &&
+
+           ((*(uint *)(local_40 + 0x40) & 0x480) == 0x80))) {
+
+      iVar9 = (**(code **)(**(int **)(*(int *)(local_24 + 0x2c) + 200) + 0x70))();
+
+      if (iVar9 != -1) {
+
+        pUVar14 = UBoolProperty::StaticClass();
+
+        iVar9 = UObject::IsA(pUVar7,pUVar14);
+
+        if ((iVar9 != 0) || (uVar6 = FBitReader::ReadBit((FBitReader *)param_1), uVar6 != '\0')) {
+
+          (**(code **)(*(int *)pUVar7 + 0x8c))();
+
+        }
+
+      }
+
+      local_40 = *(UObject **)(pUVar7 + 0x30);
+
+    }
+
+    if (local_1c == (uchar *)0x0) {
+
+      *(uint *)(*(int *)(local_24 + 0x6c) + 0xac) =
+
+           *(uint *)(*(int *)(local_24 + 0x6c) + 0xac) | 0x400;
+
+      (**(code **)(**(int **)(local_24 + 0x6c) + 0x10))();
+
+    }
+
+    for (piVar22 = *(int **)(pUVar15 + 0x70); piVar22 != (int *)0x0; piVar22 = (int *)piVar22[0x16])
+
+    {
+
+      if (piVar22[0x13] < (int)(uint)*(ushort *)(pUVar15 + 0x7e)) {
+
+        (**(code **)(*piVar22 + 0xa4))();
+
+      }
+
+    }
+
+    FMemMark::Pop(local_88);
+
+    pFVar12 = local_28;
+
+    uVar13 = FClassNetCache::GetMaxIndex(local_28);
+
+    uVar13 = FBitReader::ReadInt((FBitReader *)param_1,uVar13);
+
+    local_1c = (uchar *)uVar13;
+
+    iVar9 = FArchive::IsError((FArchive *)param_1);
+
+    if (iVar9 == 0) {
+
+      pFVar19 = FClassNetCache::GetFromIndex(pFVar12,uVar13);
+
+      local_8 = 5;
+
+      this = local_24;
+
+    }
+
+    else {
+
+      pFVar19 = (FFieldNetCache *)0x0;
+
+      local_8 = 5;
+
+      this = local_24;
+
+    }
+
+  }
+
+  pUVar7 = *(UObject **)(this + 0x6c);
+
+  pUVar1 = this + 0x6c;
+
+  local_8 = 0;
+
+  if ((((byte)pUVar7[0xa4] & 0x10) != 0) && (*(char *)(*(int *)(pUVar7 + 0x144) + 0x425) == '\x03'))
+
+  {
+
+    pUVar7[0x2d] = (UObject)0x4;
+
+    *(undefined1 *)(*(int *)pUVar1 + 0x2e) = 0;
+
+    *(undefined4 *)(this + 100) = 1;
+
+    FUN_10481e90();
+
+    pUVar7 = *(UObject **)pUVar1;
+
+    UObject::FindFunctionChecked(pUVar7);
+
+    (**(code **)(*(int *)pUVar7 + 0x10))();
+
+    *(int *)pUVar1 = 0;
+
+    ExceptionList = local_10;
+
+    return;
+
+  }
+
+  iVar9 = *(int *)(this + 0x2c);
+
+  if ((((iVar9 != 0) && (*(int *)(iVar9 + 0x7c) != 0)) &&
+
+      (iVar9 == *(int *)(*(int *)(iVar9 + 0x7c) + 0x3c))) &&
+
+     (((*(int *)(iVar9 + 0x80) == 2 && (((byte)pUVar7[0xac] & 0x40) != 0)) &&
+
+      (iVar9 = UObject::IsA(pUVar7,&APlayerController::PrivateStaticClass), iVar9 != 0)))) {
+
+    FUN_10481830();
+
+    (**(code **)(**(int **)(this + 0x2c) + 0x8c))();
+
+    AActor::eventPostNetBeginPlay(*(AActor **)pUVar1);
+
+    ExceptionList = local_10;
+
+    return;
+
+  }
+
+  ExceptionList = local_10;
+
+  return;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x10482590 - UActorChannel::SetChannelActor
+================================================================================
+// Address: 10482590
+// Size: 558 bytes
+
+
+/* public: void __thiscall UActorChannel::SetChannelActor(class AActor *) */
+
+
+
+void __thiscall UActorChannel::SetChannelActor(UActorChannel *this,AActor *param_1)
+
+
+
+{
+
+  FArray *this_00;
+
+  undefined1 *puVar1;
+
+  UClass *pUVar2;
+
+  FClassNetCache *this_01;
+
+  int iVar3;
+
+  uint uVar4;
+
+  int iVar5;
+
+  uint uVar6;
+
+  UObject *this_02;
+
+  undefined4 *puVar7;
+
+  UActorChannel *local_18;
+
+  undefined1 *local_14;
+
+  void *local_10;
+
+  undefined1 *puStack_c;
+
+  undefined4 local_8;
+
+  
+
+                    /* 0x182590  4445  ?SetChannelActor@UActorChannel@@QAEXPAVAActor@@@Z */
+
+  puStack_c = &LAB_105190c0;
+
+  local_10 = ExceptionList;
+
+  local_14 = &stack0xffffffd0;
+
+  local_8 = 0;
+
+  ExceptionList = &local_10;
+
+  puVar1 = &stack0xffffffd0;
+
+  if (*(int *)(this + 0x34) != 0) {
+
+    ExceptionList = &local_10;
+
+    appFailAssert("!Closing",".\\UnChan.cpp",0x2ef);
+
+    puVar1 = local_14;
+
+  }
+
+  local_14 = puVar1;
+
+  if (*(int *)(this + 0x6c) != 0) {
+
+    appFailAssert("Actor==NULL",".\\UnChan.cpp",0x2f0);
+
+  }
+
+  *(AActor **)(this + 0x6c) = param_1;
+
+  pUVar2 = UObject::GetClass((UObject *)param_1);
+
+  *(UClass **)(this + 0x70) = pUVar2;
+
+  this_01 = (FClassNetCache *)(**(code **)(**(int **)(*(int *)(this + 0x2c) + 200) + 0x84))(pUVar2);
+
+  local_18 = this;
+
+  FUN_10481e10(this + 0x6c,&local_18);
+
+  iVar3 = FClassNetCache::GetRepConditionCount(this_01);
+
+  FArray::AddZeroed((FArray *)(this + 0xa0),1,iVar3);
+
+  if ((*(uint *)(param_1 + 0xa0) & 0x10000000) == 0) {
+
+    iVar3 = FArray::Num((FArray *)(*(int *)(this + 0x70) + 0x4dc));
+
+    FArray::Add((FArray *)(this + 0x94),iVar3,1);
+
+    UObject::InitProperties
+
+              (*(uchar **)(this + 0x94),iVar3,*(UClass **)(this + 0x70),(uchar *)0x0,0,
+
+               (UObject *)0x0,0);
+
+    this_02 = *(UObject **)(*(int *)(this + 0x70) + 0x6c);
+
+    while (this_02 != (UObject *)0x0) {
+
+      if ((*(uint *)(this_02 + 0x40) & 0x400000) != 0) {
+
+        (**(code **)(*(int *)this_02 + 0xa4))(*(int *)(this_02 + 0x4c) + *(int *)(this + 0x94));
+
+      }
+
+      pUVar2 = UBoolProperty::StaticClass();
+
+      iVar3 = UObject::IsA(this_02,pUVar2);
+
+      if (iVar3 == 0) {
+
+        iVar3 = *(int *)(this_02 + 0x4c);
+
+        iVar5 = *(int *)(this + 0x94);
+
+        local_18 = (UActorChannel *)UProperty::GetSize((UProperty *)this_02);
+
+        uVar6 = (uint)local_18 & 3;
+
+        puVar7 = (undefined4 *)(iVar3 + iVar5);
+
+        for (uVar4 = (uint)local_18 >> 2; uVar4 != 0; uVar4 = uVar4 - 1) {
+
+          *puVar7 = 0;
+
+          puVar7 = puVar7 + 1;
+
+        }
+
+        for (; uVar6 != 0; uVar6 = uVar6 - 1) {
+
+          *(undefined1 *)puVar7 = 0;
+
+          puVar7 = (undefined4 *)((int)puVar7 + 1);
+
+        }
+
+        this_02 = *(UObject **)(this_02 + 0x54);
+
+      }
+
+      else {
+
+        *(uint *)(*(int *)(this + 0x94) + *(int *)(this_02 + 0x4c)) =
+
+             *(uint *)(*(int *)(this + 0x94) + *(int *)(this_02 + 0x4c)) &
+
+             ~*(uint *)(this_02 + 0x70);
+
+        this_02 = *(UObject **)(this_02 + 0x54);
+
+      }
+
+    }
+
+  }
+
+  iVar3 = FArray::Num((FArray *)(*(int *)(this + 0x70) + 0x4ac));
+
+  for (iVar5 = 0; iVar5 < *(int *)(this + 0xbc); iVar5 = iVar5 + 1) {
+
+  }
+
+  FArray::Empty((FArray *)(this + 0xb8),0xc,iVar3);
+
+  while( true ) {
+
+    this_00 = (FArray *)(this + 0xb8);
+
+    iVar3 = FArray::Num(this_00);
+
+    iVar5 = FArray::Num((FArray *)(*(int *)(this + 0x70) + 0x4ac));
+
+    if (iVar5 <= iVar3) break;
+
+    iVar3 = FArray::Add(this_00,1,0xc);
+
+    puVar7 = (undefined4 *)(*(int *)this_00 + iVar3 * 0xc);
+
+    if (puVar7 != (undefined4 *)0x0) {
+
+      *puVar7 = 0xffffffff;
+
+      puVar7[1] = 0xffffffff;
+
+    }
+
+  }
+
+  ExceptionList = local_10;
+
+  return;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x104834D0 - UActorChannel::ReplicateActor
+================================================================================
+// Address: 104834d0
+// Size: 2840 bytes
+
+
+/* public: void __thiscall UActorChannel::ReplicateActor(void) */
+
+
+
+void __thiscall UActorChannel::ReplicateActor(UActorChannel *this)
+
+
+
+{
+
+  UActorChannel *pUVar1;
+
+  uint *puVar2;
+
+  byte bVar3;
+
+  bool bVar4;
+
+  undefined1 *puVar5;
+
+  int iVar6;
+
+  int *piVar7;
+
+  UClass *pUVar8;
+
+  int iVar9;
+
+  uint uVar10;
+
+  UObject *pUVar11;
+
+  UStruct *pUVar12;
+
+  int *piVar13;
+
+  FName *pFVar14;
+
+  FFieldNetCache *pFVar15;
+
+  ulong uVar16;
+
+  FOutputDevice *this_00;
+
+  undefined4 uVar17;
+
+  uint uVar18;
+
+  undefined4 *puVar19;
+
+  UActorChannel *this_01;
+
+  FArray *pFVar20;
+
+  UObject *pUVar21;
+
+  FFrame local_11c [24];
+
+  int local_104 [30];
+
+  byte local_8b;
+
+  byte local_8a;
+
+  FBitWriterMark local_80 [16];
+
+  FMemMark local_70 [36];
+
+  int local_4c;
+
+  undefined4 *local_48;
+
+  int local_44;
+
+  int *local_40;
+
+  FArray *local_3c;
+
+  UObject *local_38;
+
+  undefined1 local_31;
+
+  int local_30;
+
+  char local_29;
+
+  byte *local_28;
+
+  int *local_24;
+
+  FArray *local_20;
+
+  int *local_1c;
+
+  UActorChannel *local_18;
+
+  undefined1 *local_14;
+
+  void *local_10;
+
+  undefined1 *puStack_c;
+
+  int local_8;
+
+  
+
+                    /* 0x1834d0  4318  ?ReplicateActor@UActorChannel@@QAEXXZ */
+
+  puStack_c = &LAB_105190eb;
+
+  local_10 = ExceptionList;
+
+  local_14 = &stack0xfffffed8;
+
+  local_8 = 0;
+
+  ExceptionList = &local_10;
+
+  local_18 = this;
+
+  puVar5 = &stack0xfffffed8;
+
+  if (*(int *)(this + 0x6c) == 0) {
+
+    ExceptionList = &local_10;
+
+    appFailAssert("Actor",".\\UnChan.cpp",0x47a);
+
+    puVar5 = local_14;
+
+  }
+
+  local_14 = puVar5;
+
+  if (*(int *)(this + 0x34) != 0) {
+
+    appFailAssert("!Closing",".\\UnChan.cpp",0x47b);
+
+  }
+
+  FOutBunch::FOutBunch((FOutBunch *)local_104,(UChannel *)this,0);
+
+  local_8._0_1_ = 1;
+
+  iVar6 = FArchive::IsError((FArchive *)local_104);
+
+  if (iVar6 == 0) {
+
+    local_8 = CONCAT31(local_8._1_3_,2);
+
+    if (*(int *)(this + 0x40) == -1) {
+
+      puVar2 = (uint *)(*(int *)(this + 0x6c) + 0xac);
+
+      *puVar2 = *puVar2 | 0x20;
+
+      local_8b = (byte)((uint)*(undefined4 *)(*(int *)(this + 0x6c) + 0xa0) >> 0x1c) & 1;
+
+      local_8a = ~(byte)((uint)*(undefined4 *)(*(int *)(this + 0x6c) + 0xa0) >> 0x1c) & 1;
+
+    }
+
+    else {
+
+      puVar2 = (uint *)(*(int *)(this + 0x6c) + 0xac);
+
+      *puVar2 = *puVar2 & 0xffffffdf;
+
+      if ((*(int *)(this + 0x84) == 0) && (*(int *)(this + 0x30) != 0)) {
+
+        *(undefined4 *)(this + 0x84) = 1;
+
+        piVar7 = (int *)FArray::Num((FArray *)(this + 0xb8));
+
+        while (piVar7 = (int *)((int)piVar7 + -1), local_40 = piVar7, -1 < (int)piVar7) {
+
+          iVar6 = *(int *)(this + 0xb8) + (int)piVar7 * 0xc;
+
+          if ((*(int *)(iVar6 + 4) != -1) && (*(char *)(iVar6 + 8) == '\0')) {
+
+            FUN_10481dd0(&local_40);
+
+          }
+
+        }
+
+      }
+
+    }
+
+    local_8 = 1;
+
+    pUVar8 = UObject::GetClass(*(UObject **)(this + 0x6c));
+
+    local_3c = (FArray *)(**(code **)(**(int **)(*(int *)(this + 0x2c) + 200) + 0x84))(pUVar8);
+
+    if (local_3c == (FArray *)0x0) {
+
+      appFailAssert("ClassCache",".\\UnChan.cpp",0x4a5);
+
+    }
+
+    *(uint *)(*(int *)(this + 0x6c) + 0xac) = *(uint *)(*(int *)(this + 0x6c) + 0xac) & 0xffffffbf;
+
+    pUVar11 = *(UObject **)(this + 0x6c);
+
+    do {
+
+      pUVar21 = pUVar11;
+
+      pUVar11 = *(UObject **)(pUVar21 + 0x140);
+
+    } while (*(UObject **)(pUVar21 + 0x140) != (UObject *)0x0);
+
+    iVar6 = UObject::IsA(pUVar21,&APlayerController::PrivateStaticClass);
+
+    if (iVar6 == 0) {
+
+      pUVar11 = (UObject *)0x0;
+
+    }
+
+    else {
+
+      pUVar11 = *(UObject **)(pUVar21 + 0x5b4);
+
+    }
+
+    iVar6 = UObject::IsA(*(UObject **)(*(int *)(this + 0x2c) + 0x7c),
+
+                         &UDemoRecDriver::PrivateStaticClass);
+
+    if ((iVar6 == 0) || (*(char *)(*(int *)(*(int *)(this + 0x6c) + 0x144) + 0x425) != '\x03')) {
+
+      bVar4 = false;
+
+    }
+
+    else {
+
+      bVar4 = true;
+
+    }
+
+    if (iVar6 == 0) {
+
+      if (*(int *)(*(int *)(*(UObject **)(this + 0x2c) + 0x7c) + 0x3c) == 0) {
+
+        uVar10 = (uint)(pUVar11 == *(UObject **)(this + 0x2c));
+
+      }
+
+      else if ((pUVar11 == (UObject *)0x0) ||
+
+              (iVar9 = UObject::IsA(pUVar11,&UViewport::PrivateStaticClass), iVar9 == 0)) {
+
+        uVar10 = 0;
+
+      }
+
+      else {
+
+        uVar10 = (uint)(pUVar11 != (UObject *)0x0);
+
+      }
+
+    }
+
+    else if ((bVar4) && ((pUVar11 == (UObject *)0x0 || (iVar9 = FUN_1037a3b0(pUVar11), iVar9 == 0)))
+
+            ) {
+
+      uVar10 = 0;
+
+    }
+
+    else {
+
+      uVar10 = 1;
+
+    }
+
+    uVar18 = *(uint *)(*(int *)(this + 0x6c) + 0xac);
+
+    pUVar1 = this + 0x6c;
+
+    *(uint *)(*(int *)(this + 0x6c) + 0xac) = uVar18 ^ (uVar10 << 6 ^ uVar18) & 0x40;
+
+    if (((*(byte *)(*(int *)pUVar1 + 0xac) & 0x20) != 0) && (*(int *)(this + 0x3c) != 0)) {
+
+      local_8 = CONCAT31(local_8._1_3_,4);
+
+      if ((*(byte *)(*(int *)pUVar1 + 0xa0) & 5) == 0) {
+
+        (**(code **)(local_104[0] + 0x18))(this + 0x70);
+
+        iVar9 = *(int *)pUVar1;
+
+        FUN_10481160(iVar9 + 0x234,iVar9 + 0x240,*(uint *)(iVar9 + 0xa4) >> 9 & 1);
+
+      }
+
+      else {
+
+        (**(code **)(local_104[0] + 0x18))(pUVar1);
+
+      }
+
+    }
+
+    iVar9 = *(int *)pUVar1;
+
+    local_29 = *(char *)(iVar9 + 0x2e);
+
+    local_8 = 1;
+
+    if ((local_29 == '\x03') &&
+
+       ((((*(int *)(iVar9 + 0x148) != 0 && ((*(byte *)(*(int *)(iVar9 + 0x148) + 0xac) & 0x40) == 0)
+
+          ) && ((*(byte *)(iVar9 + 0xac) & 0x40) == 0)) || (iVar6 != 0)))) {
+
+      *(undefined1 *)(iVar9 + 0x2e) = 2;
+
+    }
+
+    if ((*(int *)(this + 0x88) == 0) && ((*(byte *)(*(int *)pUVar1 + 0xac) & 0x20) == 0)) {
+
+      iVar6 = 0;
+
+    }
+
+    else {
+
+      iVar6 = 1;
+
+    }
+
+    uVar10 = *(uint *)(*(int *)pUVar1 + 0xa0);
+
+    *(uint *)(*(int *)pUVar1 + 0xa0) = uVar10 ^ (iVar6 << 0x1e ^ uVar10) & 0x40000000;
+
+    iVar6 = *(int *)pUVar1;
+
+    if (((*(byte *)(iVar6 + 0xac) & 0x20) == 0) && (*(int *)(this + 0x90) == 0)) {
+
+      iVar9 = 0;
+
+    }
+
+    else {
+
+      iVar9 = 1;
+
+    }
+
+    *(uint *)(iVar6 + 0xac) =
+
+         *(uint *)(iVar6 + 0xac) ^ (iVar9 << 5 ^ *(uint *)(iVar6 + 0xac)) & 0x20;
+
+    *(undefined4 *)(this + 0x8c) = 0;
+
+    *(undefined4 *)(this + 0x90) = 0;
+
+    UObject::GetName(*(UObject **)(this + 0x70));
+
+    FOutputDevice::Logf((FOutputDevice *)(*(uint *)(*(int *)pUVar1 + 0xa0) >> 0x1e & 1),
+
+                        *(EName *)GLog_exref,(ushort *)0x306);
+
+    FMemMark::FMemMark(local_70,(FMemStack *)GMem_exref);
+
+    local_48 = *(undefined4 **)(this + 0xa0);
+
+    uVar10 = FArray::Num((FArray *)(this + 0xa0));
+
+    uVar18 = uVar10 & 3;
+
+    puVar19 = local_48;
+
+    for (uVar10 = uVar10 >> 2; uVar10 != 0; uVar10 = uVar10 - 1) {
+
+      *puVar19 = 0;
+
+      puVar19 = puVar19 + 1;
+
+    }
+
+    for (; uVar18 != 0; uVar18 = uVar18 - 1) {
+
+      *(undefined1 *)puVar19 = 0;
+
+      puVar19 = (undefined4 *)((int)puVar19 + 1);
+
+    }
+
+    local_20 = (FArray *)(local_18 + 0xb8);
+
+    iVar6 = FArray::Num(local_20);
+
+    local_40 = (int *)FMemStack::PushBytes((FMemStack *)GMem_exref,iVar6 << 2,8);
+
+    this_01 = local_18;
+
+    pFVar20 = (FArray *)(local_18 + 0x94);
+
+    local_48 = (undefined4 *)0x0;
+
+    local_8 = CONCAT31(local_8._1_3_,6);
+
+    iVar6 = FArray::Num(pFVar20);
+
+    if (iVar6 == 0) {
+
+      iVar6 = *(int *)(*(int *)(this_01 + 0x70) + 0x4dc);
+
+    }
+
+    else {
+
+      iVar6 = *(int *)pFVar20;
+
+    }
+
+    local_4c = iVar6;
+
+    local_30 = FArray::Num(local_3c);
+
+    local_24 = (int *)(**(code **)(**(int **)pUVar1 + 100))
+
+                                (iVar6,*(undefined4 *)local_20,local_40,
+
+                                 *(undefined4 *)(*(int *)(this_01 + 0x2c) + 200));
+
+    if ((*(uint *)(*(int *)pUVar1 + 0xa0) & 0x40000000) != 0) {
+
+      for (local_1c = (int *)0x0; (int)local_1c < local_30; local_1c = (int *)((int)local_1c + 1)) {
+
+        puVar19 = *(undefined4 **)(*(int *)local_3c + (int)local_1c * 4);
+
+        pUVar11 = (UObject *)FUN_10480fb0(*puVar19);
+
+        local_28 = (byte *)(puVar19[2] + *(int *)(local_18 + 0xa0));
+
+        if (*local_28 != 2) {
+
+          if (pUVar11 == (UObject *)0x0) {
+
+LAB_10483a18:
+
+            local_38 = (UObject *)0x0;
+
+          }
+
+          else {
+
+            pUVar8 = UObjectProperty::StaticClass();
+
+            iVar6 = UObject::IsA(pUVar11,pUVar8);
+
+            local_38 = pUVar11;
+
+            if (iVar6 == 0) goto LAB_10483a18;
+
+          }
+
+          for (local_44 = 0; local_44 < *(int *)(pUVar11 + 0x38); local_44 = local_44 + 1) {
+
+            iVar6 = *(int *)(pUVar11 + 0x3c) * local_44 + *(int *)(pUVar11 + 0x4c);
+
+            puVar19 = (undefined4 *)(*(int *)(local_18 + 0x6c) + iVar6);
+
+            if ((local_38 != (UObject *)0x0) &&
+
+               (iVar9 = (**(code **)(**(int **)(*(int *)(local_18 + 0x2c) + 200) + 100))(*puVar19),
+
+               iVar9 == 0)) {
+
+              *(undefined4 *)(local_18 + 0x8c) = 1;
+
+              puVar19 = (undefined4 *)0x0;
+
+            }
+
+            iVar6 = (**(code **)(*(int *)pUVar11 + 0x7c))(iVar6 + local_4c,puVar19);
+
+            pUVar1 = local_18;
+
+            if (iVar6 == 0) {
+
+              if ((*local_28 & 2) == 0) {
+
+                local_20 = (FArray *)0x0;
+
+                pUVar12 = (UStruct *)(**(code **)(**(int **)(pUVar11 + 0x60) + 0x70))();
+
+                iVar6 = FFrame::FFrame(local_11c,*(UObject **)(pUVar1 + 0x6c),pUVar12,
+
+                                       (uint)*(ushort *)(*(int *)(pUVar11 + 0x60) + 0x48),
+
+                                       (void *)0x0);
+
+                bVar3 = **(byte **)(iVar6 + 0xc);
+
+                *(byte **)(iVar6 + 0xc) = *(byte **)(iVar6 + 0xc) + 1;
+
+                (**(code **)(GNatives_exref + (uint)bVar3 * 4))(iVar6,&local_20);
+
+                *local_28 = (byte)local_20 | 2;
+
+              }
+
+              if ((*local_28 & 1) != 0) {
+
+                *local_24 = (uint)*(ushort *)(pUVar11 + 0x4a) + local_44;
+
+                local_24 = local_24 + 1;
+
+              }
+
+            }
+
+          }
+
+        }
+
+        this_01 = local_18;
+
+      }
+
+    }
+
+    piVar7 = local_24;
+
+    iVar6 = FArchive::IsError((FArchive *)local_104);
+
+    if (iVar6 != 0) {
+
+      appFailAssert("!Bunch.IsError()",".\\UnChan.cpp",0x505);
+
+    }
+
+    local_8 = 8;
+
+    iVar6 = FArray::Num((FArray *)(this_01 + 0xac));
+
+    while (iVar6 = iVar6 + -1, -1 < iVar6) {
+
+      iVar9 = *(int *)(*(int *)(this_01 + 0xac) + iVar6 * 4);
+
+      for (piVar13 = local_40; (piVar13 < piVar7 && (*piVar13 != iVar9)); piVar13 = piVar13 + 1) {
+
+      }
+
+      if (piVar13 == piVar7) {
+
+        *piVar7 = iVar9;
+
+        piVar7 = piVar7 + 1;
+
+        local_24 = piVar7;
+
+      }
+
+    }
+
+    local_8 = 10;
+
+    for (local_1c = local_40; local_1c < piVar7; local_1c = local_1c + 1) {
+
+      pUVar11 = *(UObject **)(*(int *)(*(int *)(this_01 + 0x70) + 0x4ac) + *local_1c * 8);
+
+      local_38 = *(UObject **)(*(int *)(*(int *)(this_01 + 0x70) + 0x4ac) + 4 + *local_1c * 8);
+
+      local_28 = (byte *)(*(int *)(pUVar11 + 0x3c) * (int)local_38 + *(int *)(pUVar11 + 0x4c));
+
+      FName::FName((FName *)&local_30,0x2e6);
+
+      pFVar14 = (FName *)UObject::GetFName(pUVar11);
+
+      pUVar21 = (UObject *)0x10483be3;
+
+      iVar6 = FName::operator==(pFVar14,(FName *)&local_30);
+
+      if (iVar6 == 0) {
+
+        FName::FName((FName *)&local_4c,0x2e7);
+
+        pFVar14 = (FName *)UObject::GetFName(pUVar11);
+
+        iVar6 = FName::operator==(pFVar14,(FName *)&local_4c);
+
+        pUVar21 = pUVar11;
+
+        if (iVar6 != 0) {
+
+          pUVar21 = *(UObject **)(*(int *)(*(int *)(this_01 + 0x2c) + 0x7c) + 0x7c);
+
+        }
+
+      }
+
+      pFVar15 = FClassNetCache::GetFromField((FClassNetCache *)local_3c,pUVar21);
+
+      if (pFVar15 == (FFieldNetCache *)0x0) {
+
+        appFailAssert("FieldCache",".\\UnChan.cpp",0x527);
+
+      }
+
+      FBitWriterMark::FBitWriterMark(local_80,(FBitWriter *)local_104);
+
+      local_20 = (FArray *)FBitWriter::GetNumBits((FBitWriter *)local_104);
+
+      uVar16 = FClassNetCache::GetMaxIndex((FClassNetCache *)local_3c);
+
+      FBitWriter::WriteInt((FBitWriter *)local_104,*(ulong *)(pFVar15 + 4),uVar16);
+
+      if (*(int *)(pUVar11 + 0x38) != 1) {
+
+        local_31 = local_38._0_1_;
+
+        (**(code **)(local_104[0] + 4))(&local_31,1);
+
+      }
+
+      pUVar1 = local_18;
+
+      iVar6 = (**(code **)(*(int *)pUVar11 + 0x8c))
+
+                        (local_104,*(undefined4 *)(*(int *)(local_18 + 0x2c) + 200),
+
+                         local_28 + *(int *)(local_18 + 0x6c));
+
+      if ((*(byte *)(*(int *)(pUVar1 + 0x6c) + 0xab) & 1) == 0) {
+
+        FBitWriter::GetNumBits((FBitWriter *)local_104);
+
+        this_00 = (FOutputDevice *)UObject::GetName(pUVar11);
+
+        FOutputDevice::Logf(this_00,*(EName *)GLog_exref,(ushort *)0x306);
+
+      }
+
+      else {
+
+        FBitWriter::GetNumBits((FBitWriter *)local_104);
+
+        UObject::GetName(pUVar11);
+
+        FOutputDevice::Logf(*(FOutputDevice **)GLog_exref,(ushort *)*(FOutputDevice **)GLog_exref);
+
+      }
+
+      iVar9 = FArchive::IsError((FArchive *)local_104);
+
+      if (iVar9 != 0) {
+
+        FBitWriterMark::Pop(local_80,(FBitWriter *)local_104);
+
+        local_24 = local_1c;
+
+        local_48 = (undefined4 *)0x1;
+
+        this_01 = local_18;
+
+        piVar7 = local_1c;
+
+        break;
+
+      }
+
+      pFVar20 = (FArray *)(local_18 + 0x94);
+
+      iVar9 = FArray::Num(pFVar20);
+
+      if (iVar9 != 0) {
+
+        if (iVar6 == 0) {
+
+          local_38 = *(UObject **)(pUVar11 + 0x3c);
+
+          local_20 = (FArray *)(local_28 + *(int *)pFVar20);
+
+          uVar18 = (uint)local_38 & 3;
+
+          pFVar20 = local_20;
+
+          for (uVar10 = (uint)local_38 >> 2; uVar10 != 0; uVar10 = uVar10 - 1) {
+
+            *(undefined4 *)pFVar20 = 0;
+
+            pFVar20 = pFVar20 + 4;
+
+          }
+
+          for (; uVar18 != 0; uVar18 = uVar18 - 1) {
+
+            *pFVar20 = (FArray)0x0;
+
+            pFVar20 = pFVar20 + 1;
+
+          }
+
+        }
+
+        else {
+
+          (**(code **)(*(int *)pUVar11 + 0x9c))
+
+                    (local_28 + *(int *)pFVar20,local_28 + *(int *)(local_18 + 0x6c),0);
+
+        }
+
+      }
+
+      *(int *)(DAT_10799554 + DAT_107997c4 * 4) = *(int *)(DAT_10799554 + DAT_107997c4 * 4) + 1;
+
+      this_01 = local_18;
+
+      piVar7 = local_24;
+
+    }
+
+    local_8 = 1;
+
+    iVar6 = FBitWriter::GetNumBits((FBitWriter *)local_104);
+
+    if (iVar6 != 0) {
+
+      local_8 = CONCAT31(local_8._1_3_,0xc);
+
+      local_30 = UChannel::SendBunch((UChannel *)this_01,(FOutBunch *)local_104,1);
+
+      local_1c = local_40;
+
+      while (local_1c < piVar7) {
+
+        for (iVar6 = 0; iVar6 < *(int *)((UChannel *)this_01 + 0xb0); iVar6 = iVar6 + 1) {
+
+          if (*(int *)(*(int *)((UChannel *)this_01 + 0xac) + iVar6 * 4) == *local_1c) {
+
+            if (iVar6 < 0) {
+
+              appFailAssert("Index>=0","d:\\ravenshield\\412\\core\\inc\\UnTemplate.h",0x201);
+
+            }
+
+            if (*(int *)((UChannel *)this_01 + 0xb0) < iVar6) {
+
+              appFailAssert("Index<=ArrayNum","d:\\ravenshield\\412\\core\\inc\\UnTemplate.h",0x202)
+
+              ;
+
+            }
+
+            if (*(int *)((UChannel *)this_01 + 0xb0) < iVar6 + 1) {
+
+              appFailAssert("Index+Count<=ArrayNum","d:\\ravenshield\\412\\core\\inc\\UnTemplate.h",
+
+                            0x203);
+
+            }
+
+            FArray::Remove((FArray *)((UChannel *)this_01 + 0xac),iVar6,1,4);
+
+            iVar6 = iVar6 + -1;
+
+          }
+
+        }
+
+        iVar6 = *(int *)((UChannel *)this_01 + 0xb8) + *local_1c * 0xc;
+
+        *(int *)(iVar6 + 4) = local_30;
+
+        local_1c = local_1c + 1;
+
+        *(byte *)(iVar6 + 8) = local_8a;
+
+        piVar7 = local_24;
+
+      }
+
+      if ((*(uint *)(*(int *)((UChannel *)this_01 + 0x6c) + 0xa0) & 0x10000000) != 0) {
+
+        iVar6 = *(int *)((UChannel *)this_01 + 0x2c);
+
+        iVar9 = FArray::Add((FArray *)(iVar6 + 0x4b88),1,4);
+
+        *(undefined4 *)(*(int *)(iVar6 + 0x4b88) + iVar9 * 4) =
+
+             *(undefined4 *)((UChannel *)this_01 + 0x6c);
+
+      }
+
+    }
+
+    puVar19 = local_48;
+
+    local_8._0_1_ = 1;
+
+    local_8._1_3_ = 0;
+
+    if (local_48 == (undefined4 *)0x0) {
+
+      *(undefined8 *)((UChannel *)this_01 + 0x7c) =
+
+           *(undefined8 *)(*(int *)(*(int *)((UChannel *)this_01 + 0x2c) + 0x7c) + 0x48);
+
+    }
+
+    else {
+
+      UObject::GetName(*(UObject **)((UChannel *)this_01 + 0x6c));
+
+      FOutputDevice::Logf(*(FOutputDevice **)GLog_exref,(EName)*(FOutputDevice **)GLog_exref,
+
+                          (ushort *)0x306);
+
+    }
+
+    if (((*(byte *)(*(int *)((UChannel *)this_01 + 0x6c) + 0xac) & 0x20) == 0) ||
+
+       ((puVar19 == (undefined4 *)0x0 && (*(int *)((UChannel *)this_01 + 0x8c) == 0)))) {
+
+      uVar17 = 0;
+
+    }
+
+    else {
+
+      uVar17 = 1;
+
+    }
+
+    *(undefined4 *)((UChannel *)this_01 + 0x90) = uVar17;
+
+    if ((*(int *)((UChannel *)this_01 + 0x8c) == 0) && (puVar19 == (undefined4 *)0x0)) {
+
+      uVar17 = 0;
+
+    }
+
+    else {
+
+      uVar17 = 1;
+
+    }
+
+    *(undefined4 *)((UChannel *)this_01 + 0x88) = uVar17;
+
+    puVar2 = (uint *)(*(int *)((UChannel *)this_01 + 0x6c) + 0xac);
+
+    *puVar2 = *puVar2 & 0xffffffbf;
+
+    *(char *)(*(int *)((UChannel *)this_01 + 0x6c) + 0x2e) = local_29;
+
+    *(uint *)(*(int *)((UChannel *)this_01 + 0x6c) + 0xa0) =
+
+         *(uint *)(*(int *)((UChannel *)this_01 + 0x6c) + 0xa0) & 0xbfffffff;
+
+    FMemMark::Pop(local_70);
+
+  }
+
+  local_8 = (uint)local_8._1_3_ << 8;
+
+  FBitWriter::~FBitWriter((FBitWriter *)local_104);
+
+  ExceptionList = local_10;
+
+  return;
+
+}
+
+
+
+
+
+
+
+================================================================================
+Address: 0x10484100 - UFileChannel::Destroy
+================================================================================
+// Address: 10484100
+// Size: 200 bytes
+
+
+/* public: virtual void __thiscall UFileChannel::Destroy(void) */
+
+
+
+void __thiscall UFileChannel::Destroy(UFileChannel *this)
+
+
+
+{
+
+  int iVar1;
+
+  void *local_10;
+
+  undefined1 *puStack_c;
+
+  undefined4 local_8;
+
+  
+
+                    /* 0x184100  2486  ?Destroy@UFileChannel@@UAEXXZ */
+
+  puStack_c = &LAB_10519100;
+
+  local_10 = ExceptionList;
+
+  local_8 = 0;
+
+  ExceptionList = &local_10;
+
+  if (*(int *)(this + 0x2c) == 0) {
+
+    ExceptionList = &local_10;
+
+    appFailAssert("Connection",".\\UnChan.cpp",0x668);
+
+  }
+
+  iVar1 = UChannel::RouteDestroy((UChannel *)this);
+
+  if (iVar1 == 0) {
+
+    if (*(UFileChannel **)(*(int *)(this + 0x2c) + 0xeb0 + *(int *)(this + 0x38) * 4) != this) {
+
+      appFailAssert("Connection->Channels[ChIndex]==this",".\\UnChan.cpp",0x66b);
+
+    }
+
+    if (*(undefined4 **)(this + 0x6c) != (undefined4 *)0x0) {
+
+      (**(code **)**(undefined4 **)(this + 0x6c))(1);
+
+      *(undefined4 *)(this + 0x6c) = 0;
+
+    }
+
+    if ((*(int *)(this + 0x3c) != 0) && (*(int **)(this + 0x68) != (int *)0x0)) {
+
+      (**(code **)(**(int **)(this + 0x68) + 0x78))();
+
+      if (*(int **)(this + 0x68) != (int *)0x0) {
+
+        (**(code **)(**(int **)(this + 0x68) + 0xc))(1);
+
+      }
+
+    }
+
+    UChannel::Destroy((UChannel *)this);
+
+  }
+
+  ExceptionList = local_10;
+
+  return;
+
+}
+
+
+
+
+
+
+
