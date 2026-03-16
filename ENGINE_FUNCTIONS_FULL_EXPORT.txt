@@ -1,0 +1,269 @@
+=============================================================================
+
+COMPLETE GHIDRA DECOMPILATION EXPORTS - Engine.dll Functions
+
+=============================================================================
+
+
+Address: 0x103dfe90
+
+Size: 387 bytes
+
+
+/* public: virtual int __thiscall AEmitter::CheckForProjectors(void) */
+
+
+122345. // Address: 103dfe90
+
+122346. // Size: 387 bytes
+
+122347. 
+
+122348. 
+
+122349. /* public: virtual int __thiscall AEmitter::CheckForProjectors(void) */
+
+122350. 
+
+122351. 
+
+122352. 
+
+122353. int __thiscall AEmitter::CheckForProjectors(AEmitter *this)
+
+122354. 
+
+122355. 
+
+122356. 
+
+122357. {
+
+122358. 
+
+122359.   UObject *this_00;
+
+122360. 
+
+122361.   undefined4 *puVar1;
+
+122362. 
+
+122363.   int iVar2;
+
+122364. 
+
+122365.   undefined1 *puVar3;
+
+122366. 
+
+122367.   undefined1 local_48 [12];
+
+122368. 
+
+122369.   FMemMark local_3c [28];
+
+122370. 
+
+122371.   FName local_20 [4];
+
+122372. 
+
+122373.   undefined4 *local_1c;
+
+122374. 
+
+122375.   int local_18;
+
+122376. 
+
+122377.   undefined1 *local_14;
+
+122378. 
+
+122379.   void *local_10;
+
+122380. 
+
+122381.   undefined1 *puStack_c;
+
+122382. 
+
+122383.   undefined4 local_8;
+
+122384. 
+
+122385.   
+
+122386. 
+
+122387.                     /* 0xdfe90  2380  ?CheckForProjectors@AEmitter@@UAEHXZ */
+
+122388. 
+
+122389.   puStack_c = &LAB_10513b70;
+
+122390. 
+
+122391.   local_10 = ExceptionList;
+
+122392. 
+
+122393.   local_14 = &stack0xffffffac;
+
+122394. 
+
+122395.   local_18 = 0;
+
+122396. 
+
+122397.   local_8 = 1;
+
+122398. 
+
+122399.   if (*(int *)(*(int *)(*(int *)(this + 0x144) + 0x328) + 0xf0) != 0) {
+
+122400. 
+
+122401.     ExceptionList = &local_10;
+
+122402. 
+
+122403.     FMemMark::FMemMark(local_3c,(FMemStack *)GMem_exref);
+
+122404. 
+
+122405.     puVar3 = local_48;
+
+122406. 
+
+122407.     puVar1 = (undefined4 *)FBox::GetExtent((FBox *)(this + 0x3dc));
+
+122408. 
+
+122409.     for (local_1c = (undefined4 *)
+
+122410. 
+
+122411.                     (**(code **)(**(int **)(*(int *)(*(int *)(this + 0x144) + 0x328) + 0xf0) + 0x14)
+
+122412. 
+
+122413.                     )(GMem_exref,*(undefined4 *)(this + 0x234),*(undefined4 *)(this + 0x238),
+
+122414. 
+
+122415.                       *(undefined4 *)(this + 0x23c),*puVar1,puVar1[1],puVar1[2],0x4000,0,0,0,puVar3)
+
+122416. 
+
+122417.         ; local_1c != (undefined4 *)0x0; local_1c = (undefined4 *)*local_1c) {
+
+122418. 
+
+122419.       this_00 = (UObject *)local_1c[1];
+
+122420. 
+
+122421.       if (((this_00 != (UObject *)0x0) &&
+
+122422. 
+
+122423.           (iVar2 = UObject::IsA(this_00,&AProjector::PrivateStaticClass), iVar2 != 0)) &&
+
+122424. 
+
+122425.          (((byte)this_00[0x3a0] & 8) != 0)) {
+
+122426. 
+
+122427.         FName::FName(local_20,0);
+
+122428. 
+
+122429.         iVar2 = FName::operator==((FName *)(this_00 + 0x3ac),local_20);
+
+122430. 
+
+122431.         if ((iVar2 != 0) ||
+
+122432. 
+
+122433.            (iVar2 = FName::operator==((FName *)(this + 0x19c),(FName *)(this_00 + 0x3ac)),
+
+122434. 
+
+122435.            iVar2 != 0)) {
+
+122436. 
+
+122437.           (**(code **)(*(int *)this_00 + 0x194))(*(undefined4 *)(this + 0x3d8),local_18);
+
+122438. 
+
+122439.           local_18 = local_18 + 1;
+
+122440. 
+
+122441.         }
+
+122442. 
+
+122443.       }
+
+122444. 
+
+122445.     }
+
+122446. 
+
+122447.     FMemMark::Pop(local_3c);
+
+122448. 
+
+122449.     if (local_18 < 0) {
+
+122450. 
+
+122451.       local_18 = 0;
+
+122452. 
+
+122453.     }
+
+122454. 
+
+122455.     else if (3 < local_18) {
+
+122456. 
+
+122457.       local_18 = 4;
+
+122458. 
+
+122459.     }
+
+122460. 
+
+122461.   }
+
+122462. 
+
+122463.   *(int *)(*(int *)(this + 0x3d8) + 0x80) = local_18;
+
+122464. 
+
+122465.   ExceptionList = local_10;
+
+122466. 
+
+122467.   return *(int *)(*(int *)(this + 0x3d8) + 0x80);
+
+122468. 
+
+122469. }
+
+
+
+
+
