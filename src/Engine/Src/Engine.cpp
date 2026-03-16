@@ -281,9 +281,14 @@ INT UGameEngine::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
             *dst = 0;
         }
 
-        // IsMoviePlaying check: GRenDev vtable slot 39 (offset 0x9c); retail calls it twice
-        if ( pRenDev ) ((tVoidV)(*(void***)pRenDev)[0x9c/4])(pRenDev);
-        if ( pRenDev ) ((tVoidV)(*(void***)pRenDev)[0x9c/4])(pRenDev);
+        // IsMoviePlaying: vtable[0x9c/4=39]; retail calls second time only when not playing
+        if ( pRenDev )
+        {
+            typedef INT (__thiscall *tIsPlaying)(void*);
+            tIsPlaying pfIs = (tIsPlaying)(*(void***)pRenDev)[0x9c/4];
+            if ( !pfIs(pRenDev) )
+                pfIs(pRenDev);
+        }
 
         // PlayMovie: GRenDev vtable slot 42 (offset 0xa8)
         if ( pRenDev ) ((tVoidV)(*(void***)pRenDev)[0xa8/4])(pRenDev);
@@ -302,13 +307,12 @@ INT UGameEngine::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
     // ── SERVER ────────────────────────────────────────────────────────────────
     if ( ParseCommand(&Cmd, TEXT("SERVER")) )
     {
-        // GSys+0x2c holds a raw function pointer (retail-specific launch helper).
-        // Intentionally returns 0 (command not consumed by game engine, passed on).
+        // Ghidra: (*(code *)**(undefined4 **)(GSys + 0x2c))() — double-deref raw fn pointer.
+        // Intentionally returns 0 (command not consumed by game engine).
         if ( GSys )
         {
             typedef void (*tVoidVoid)();
-            tVoidVoid pfn = *(tVoidVoid*)((BYTE*)GSys + 0x2c);
-            pfn();
+            ((tVoidVoid)**(void****)((BYTE*)GSys + 0x2c))();
         }
         return 0;
     }
@@ -326,8 +330,8 @@ INT UGameEngine::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
             FString Error;
             if ( pClient && pClient->Viewports.Num() )
             {
-                // With an active viewport: for START/STARTMINIMIZED, flush viewport first
-                if ( bStart || bStartMin )
+                // START only: flush viewport before travel (OPEN/STARTMINIMIZED skip this)
+                if ( bStart )
                 {
                     UViewport* vp = pClient->Viewports(0);
                     // Viewport vtable slot 43 (0xac): flush or stop-movie
@@ -339,8 +343,7 @@ INT UGameEngine::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
             // No active viewport: construct URL and Browse
             ETravelType tt = bStartMin ? TRAVEL_Partial : TRAVEL_Absolute;
             FURL URL(pLastURL, Cmd, tt);
-            Browse(URL, NULL, Error);
-            if ( *Error ) Ar.Logf(TEXT("%s"), *Error);
+            if ( !Browse(URL, NULL, Error) && *Error ) Ar.Logf(TEXT("%s"), *Error);
             return 1;
         }
     }
@@ -394,29 +397,9 @@ INT UGameEngine::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
     }
     else if ( GIsServer )
     {
-        // SERVERQUIT on a dedicated server: close all network connections and quit
+        // SERVERQUIT on a dedicated server: close all network connections
         CloseNetLevel((BYTE*)pLevel);
         CloseNetLevel((BYTE*)pPending);
-        // Close GPendingLevel's own pending-net as well (retail closes it twice via two loops)
-        if ( pPending )
-        {
-            BYTE* pl = (BYTE*)pPending;
-            INT driver = *(INT*)(pl + 0x40);
-            if ( driver )
-            {
-                INT conn = *(INT*)(driver + 0x3c);
-                if ( conn )
-                {
-                    INT obj = *(INT*)(conn + 0xeb0);
-                    if ( obj )
-                    {
-                        typedef void (__thiscall *tClose)(void*);
-                        ((tClose)(*(void***)obj )[0x6c/4])((void*)obj);
-                        ((tClose)(*(void***)conn)[0x80/4])((void*)conn);
-                    }
-                }
-            }
-        }
         return 1;
     }
 
@@ -455,25 +438,29 @@ INT UGameEngine::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
         return 1;
     }
 
-    // ── GETCURRENTTICKRATE / GETMAXTICKRATE ───────────────────────────────────
-    // Both commands log GetMaxTickRate() — GETCURRENTTICKRATE and GETMAXTICKRATE share code path
-    if ( ParseCommand(&Cmd, TEXT("GETCURRENTTICKRATE")) || ParseCommand(&Cmd, TEXT("GETMAXTICKRATE")) )
+    // ── GETCURRENTTICKRATE ────────────────────────────────────────────────────
+    if ( ParseCommand(&Cmd, TEXT("GETCURRENTTICKRATE")) )
     {
         Ar.Logf(TEXT("%f"), GetMaxTickRate());
         return 1;
     }
 
     // ── BIGHEAD (cheat: scale actor bone sizes) ───────────────────────────────
+    // IMPL_TODO: FUN_103a0540 (actor iterator, retail 0x103a0540) not yet identified;
+    // bone-scale loop body omitted until helper is reconstructed.
     {
         ALevelInfo* LI = pLevel ? pLevel->GetLevelInfo() : NULL;
         // Only available in standalone (NetMode==0)
         BYTE nmLocal = LI ? *(BYTE*)((BYTE*)LI + 0x425) : 0xff;
         if ( LI && nmLocal == 0 && ParseCommand(&Cmd, TEXT("BIGHEAD")) )
-        {
-            // IMPL_TODO: FUN_103a0540 (actor iterator, retail 0x103a0540) not yet identified;
-            // bone-scale loop body omitted until helper is reconstructed.
             return 1;
-        }
+    }
+
+    // ── GETMAXTICKRATE ────────────────────────────────────────────────────────
+    if ( ParseCommand(&Cmd, TEXT("GETMAXTICKRATE")) )
+    {
+        Ar.Logf(TEXT("%f"), GetMaxTickRate());
+        return 1;
     }
 
     // ── GSPYLITE — launch GameSpy Lite ────────────────────────────────────────
@@ -514,8 +501,8 @@ INT UGameEngine::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
                 s_bIsCanceling = 0;
                 return 1;
             }
-            LocalizeProgress(TEXT("CancelledConnect"), TEXT("Engine"), NULL);
-            SetProgress(TEXT(""), TEXT(""), 0.f);
+            SetProgress(LocalizeProgress(TEXT("CancelledConnect"), TEXT("Engine"), NULL),
+                        TEXT(""), 0.f);
         }
         CancelPending();
         s_bIsCanceling = 0;
@@ -523,29 +510,40 @@ INT UGameEngine::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
     }
 
     // ── SET gametype class validation (NM_Client guard) ───────────────────────
-    // Retail: on network clients (NM_Client=3), validate that a SET target class is not
-    // a non-GameInfo actor (prevents clients from changing the game type).
-    // FUN_1038d760 (class lookup) is not exported; validation skipped with comment.
     // IMPL_TODO: FUN_1038d760 (retail 0x1038d760) not yet identified; SET class check omitted.
+    // Retail: on NM_Client, SET <ActorSubclass (not AGameInfo)> returns 0.
     if ( pLevel )
     {
-        ALevelInfo* LI = pLevel ? pLevel->GetLevelInfo() : NULL;
+        ALevelInfo* LI = pLevel->GetLevelInfo();
         BYTE nm = *(BYTE*)((BYTE*)LI + 0x425);
         if ( nm == 3 )   // NM_Client
         {
-            // Retail would: ParseToken → FUN_1038d760(className) → IsChildOf(AActor) && !IsChildOf(AGameInfo) → return 0
-            // We fall through to ULevel::Exec and then Super::Exec below.
+            // Retail: ParseToken → FUN_1038d760(className) → IsChildOf(AActor) && !IsChildOf(AGameInfo) → return 0
         }
     }
 
-    // ── GLevel command forwarding ─────────────────────────────────────────────
+    // ── GLevel vtable[0x84/4=33] guard — no-arg check ─────────────────────────
     if ( pLevel )
     {
-        // ULevel vtable slot 33 (0x84): Exec — forward unknown commands to the level
-        typedef INT (__thiscall *tExec)(void*, const TCHAR*, FOutputDevice&);
-        tExec pfExec = (tExec)(*(void***)pLevel)[0x84/4];
-        if ( pfExec(pLevel, Cmd, Ar) )
+        // Ghidra: (**(code **)(**(int **)(this+0x42c) + 0x84))() — no args, returns INT
+        typedef INT (__thiscall *tCheck)(ULevel*);
+        if ( ((tCheck)(*(void***)pLevel)[0x84/4])(pLevel) )
             return 1;
+    }
+
+    // ── LI->Game vtable[0x4c/4=19] guard — no-arg check ──────────────────────
+    if ( pLevel )
+    {
+        ALevelInfo* LI   = pLevel->GetLevelInfo();
+        AGameInfo*  Game = *(AGameInfo**)((BYTE*)LI + 0x4cc);
+        if ( Game )
+        {
+            LI   = pLevel->GetLevelInfo();
+            Game = *(AGameInfo**)((BYTE*)LI + 0x4cc);
+            typedef INT (__thiscall *tGameCheck)(AGameInfo*);
+            if ( ((tGameCheck)(*(void***)Game)[0x4c/4])(Game) )
+                return 1;
+        }
     }
 
     // ── Fallthrough to UEngine::Exec ──────────────────────────────────────────
