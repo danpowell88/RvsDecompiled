@@ -111,8 +111,44 @@ void UInput::Serialize( FArchive& Ar )
 }
 IMPL_TODO("Ghidra 0x103b3f50 (344b): sets Viewport at this+0xEA4, iterates 40 alias slots checking AXIS+FIRE keywords via FString::Caps/InStr, clears fire-axis bindings; blocked by: alias slot layout at this+0x34 (FName+FString per 0x10-byte slot) and vtable call at offset 0x7c (ResetInput?)")
 void UInput::Init( UViewport* InViewport ) {}
-IMPL_TODO("Ghidra 0x103b5b30 (289b): checks GIsRunning, releases held keys via Process vtable call, scales axis values by 20/DeltaSeconds, uses FUN_103b5740 property cache; blocked by: FUN_103b5740 (GCache-based property-list cache helper — replicable locally)")
-void UInput::ReadInput( FLOAT DeltaSeconds, FOutputDevice& Ar ) {}
+IMPL_MATCH("Engine.dll", 0x103b5b30)
+void UInput::ReadInput( FLOAT DeltaSeconds, FOutputDevice& Ar )
+{
+	guard(UInput::ReadInput);
+	if (GIsRunning)
+	{
+		FMemCache::FCacheItem* Item = NULL;
+		UViewport* Viewport = *(UViewport**)((BYTE*)this + 0xEA4);
+		AActor* Actor = *(AActor**)((BYTE*)Viewport + 0x34);
+		FInputPropertyCache* Cache = GetInputPropertyCache(Actor->GetClass(), Item);
+
+		const UBOOL bProcessHeldKeys = !appIsNan(DeltaSeconds) && (DeltaSeconds != -1.0f);
+		if (bProcessHeldKeys)
+		{
+			BYTE* KeyDownMap = (BYTE*)this + 0xEB4;
+			for (INT Key = 0; Key < 0xFF; ++Key)
+			{
+				if (KeyDownMap[Key])
+				{
+					Process(*GLog, (EInputKey)Key, IST_Hold, DeltaSeconds);
+				}
+			}
+		}
+
+		const FLOAT Scale = bProcessHeldKeys ? (20.0f / DeltaSeconds) : 0.0f;
+		for (INT Index = 0; Index < Cache->Count; ++Index)
+		{
+			UProperty* Property = Cache->Properties[Index];
+			if (Property && Property->IsA(UFloatProperty::StaticClass()))
+			{
+				*(FLOAT*)((BYTE*)Actor + Property->Offset) *= Scale;
+			}
+		}
+
+		Item->Unlock();
+	}
+	unguard;
+}
 IMPL_TODO("Ghidra 0x103b5c90 (297b): asserts Viewport, clears KeyDownMap[0..254], walks UClass property chain zeroing UByteProperty and UFloatProperty members; blocked by: FUN_103b43e0/FUN_103b4430 (byte/float property iterators — replicable locally) and vtable call at offset 0x90")
 void UInput::ResetInput() {}
 IMPL_MATCH("Engine.dll", 0x103b4130)
