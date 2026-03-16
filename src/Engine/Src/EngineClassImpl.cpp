@@ -877,11 +877,13 @@ void ASceneManager::execGetTotalSceneTime( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( ASceneManager, INDEX_NONE, execGetTotalSceneTime );
 
-IMPL_TODO("FUN_103db080 (scene manager teardown helper) confirmed in _unnamed.cpp — tractable; pending implementation")
+IMPL_MATCH("Engine.dll", 0x1041f610)
 void ASceneManager::execSceneDestroyed( FFrame& Stack, RESULT_DECL )
 {
 	guard(ASceneManager::execSceneDestroyed);
 	P_FINISH;
+	debugf(NAME_Log, TEXT("SceneManager Removed"));
+	GSceneManagers.RemoveItem(this);
 	unguard;
 }
 IMPLEMENT_FUNCTION( ASceneManager, 2909, execSceneDestroyed );

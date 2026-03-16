@@ -75,4 +75,8 @@ ENGINE_API extern UEngine* g_pEngine;
 // Set by game logic to select nightmare-specific behaviour (e.g. larger blood/dirt decals).
 CORE_API extern UBOOL GIsNightmare;
 
+// Global scene-manager registry (retail data at 0x1061b828 / count at 0x1061b82c).
+// ASceneManager::PostBeginPlay, SetSceneStartTime, and execSceneDestroyed keep this in sync.
+ENGINE_API extern TArray<ASceneManager*> GSceneManagers;
+
 #endif
