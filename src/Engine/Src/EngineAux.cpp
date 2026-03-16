@@ -26,10 +26,10 @@ void KME2UVecCopy(FVector* Out, float const * const In) {
 }
 
 // ?KTermGameKarma@@YAXXZ  (Engine.dll 0x10357cf0, 565 bytes)
-// Tears down the Karma physics world: destroys geometry manager, asset DB,
-// framework, and frees KGData global. Calls MeSDK internal functions that
-// have not yet been fully decompiled into src/MeSDK/.
-IMPL_DIVERGE("KTermGameKarma calls MeSDK internals FUN_104f0110/FUN_104f00e0/FUN_104f1560/FUN_104a9ff0 not yet in MeSDK")
+// Tears down the Karma physics globals after validating the retail geometry/model
+// counters. The retail body is known in Ghidra, but the MeSDK teardown/query
+// chain it calls has not been ported into src/MeSDK yet.
+IMPL_TODO("Ghidra 0x10357cf0: blocked on unported MeSDK teardown/query helpers FUN_104f0110/FUN_104f00e0/FUN_104f1560/FUN_104a9ff0 and their FUN_104f1890/FUN_104f1580 support chain")
 void KTermGameKarma() {}
 
 // ?KU2MEPosition@@YAXQAMVFVector@@@Z  (Engine.dll 0x1036a290)
@@ -49,10 +49,10 @@ void KU2MEVecCopy(float * const Out, FVector In) {
 }
 
 // ?KUpdateMassProps@@YAXPAVUKMeshProps@@@Z  (Engine.dll 0x1036af30, 396 bytes)
-// Computes mass properties by creating a temporary Karma world, instantiating
-// the aggregate geometry, calling McdGeomGetMassProperties, then tearing down.
-// Calls MeSDK internals FUN_104a9ee0/FUN_104f0080/FUN_104ac5a0 etc.
-IMPL_DIVERGE("KUpdateMassProps calls MeSDK internals (FUN_104a9ee0 and related) not yet in MeSDK")
+// Computes mass properties by creating a temporary Me world/geometry manager,
+// instantiating the aggregate geometry, querying mass properties, then tearing
+// the temporary objects back down. The retail wrapper is known in Ghidra.
+IMPL_TODO("Ghidra 0x1036af30: blocked on unported MeSDK temp-world helpers FUN_104a9ee0/FUN_104f0080/FUN_104ac5a0 plus the registration/query chain around FUN_104ac520/FUN_104aa720/FUN_104f0500 and KAggregateGeomInstance")
 void KUpdateMassProps(UKMeshProps * p0) {}
 
 // ?KarmaTriListDataInit@@YAXPAU_KarmaTriListData@@@Z  (Engine.dll 0x10369b80, 25 bytes)
@@ -79,9 +79,10 @@ struct McdGeomMan;
 
 // ?KAggregateGeomInstance@@YAPAU_McdGeometry@@PAVFKAggregateGeom@@VFVector@@PAUMcdGeomMan@@PBG@Z
 // (Engine.dll 0x1036a890, 1632 bytes)
-// Builds aggregate Karma geometry from FKAggregateGeom (spheres, boxes,
-// cylinders, convex elements). Calls many MeSDK geometry-creation internals.
-IMPL_DIVERGE("KAggregateGeomInstance calls MeSDK geometry internals (FUN_104c3xxx, FUN_104a8xxx etc.) not yet in MeSDK")
+// Builds aggregate Karma geometry from FKAggregateGeom by allocating a Me
+// aggregate and appending sphere/box/cylinder/convex children. The retail body
+// is known in Ghidra, but the MeSDK geometry-construction chain is still absent.
+IMPL_TODO("Ghidra 0x1036a890: blocked on unported MeSDK aggregate/shape helpers FUN_104a86c0/FUN_104a8720/FUN_104acb00/FUN_104ad2f0/FUN_104ad990/FUN_104c3340/FUN_104f3630/FUN_104aa6c0")
 _McdGeometry* KAggregateGeomInstance(FKAggregateGeom*, FVector, McdGeomMan*, const _WORD*) { return NULL; }
 
 // ?KME2UCoords@@YAXPAVFCoords@@QAY03$$CBM@Z  (Engine.dll 0x1036a0d0, 158 bytes)
@@ -118,9 +119,10 @@ void KME2UTransform(FVector* OutPos, FRotator* OutRot, const FLOAT (* const tm)[
 }
 
 // ?KModelToHulls@@YAXPAVFKAggregateGeom@@PAVUModel@@VFVector@@@Z  (Engine.dll 0x1036c810, 143 bytes)
-// Decomposes a BSP UModel into convex hulls stored in FKAggregateGeom.
-// Calls FUN_1033ac90 (lock BSP), FUN_1036c5a0 (extract hulls), FUN_10323b40 (unlock).
-IMPL_TODO("FUN_1033ac90 (BSP lock), FUN_1036c5a0 (hull extractor), FUN_10323b40 (BSP unlock) all confirmed in _unnamed.cpp — tractable; pending implementation")
+// Decomposes a BSP UModel into convex hulls stored in FKAggregateGeom. Retail
+// first clears AggGeom->ConvexElems (0x58 stride), then uses a local TArray<FPlane>
+// scratch stack while recursing the BSP and emitting FKConvexElem hulls.
+IMPL_TODO("Ghidra 0x1036c810: wrapper is known, but the BSP-to-convex helper chain FUN_1036c5a0/FUN_1036be00/FUN_1036b6c0 is not yet ported and FKConvexElem's +0x4C FPlane array layout must be used")
 void KModelToHulls(FKAggregateGeom*, UModel*, FVector) {}
 
 // ?KU2MEMatrixCopy@@YAXQAY03MPAVFMatrix@@@Z  (Engine.dll 0x1036a330, same body as KME2UMatrixCopy)
@@ -149,7 +151,7 @@ void KU2METransform(FLOAT (* const tm)[4], FVector Pos, FRotator Rot) {
 // Local helper to force TLazyArray<BYTE> out-of-line template instantiation.
 // This function does NOT exist in the retail Engine.dll binary; it is our
 // mechanism for emitting the symbols that retail compiled from an unknown TU.
-IMPL_DIVERGE("template instantiation helper; no retail equivalent function")
+IMPL_DIVERGE("non-retail helper: forces TLazyArray<BYTE> symbol emission; retail exports the instantiated methods but has no standalone function")
 void _ForceTLazyArrayByteEmit() {
     TLazyArray<BYTE>* p = new TLazyArray<BYTE>[1];
     TLazyArray<BYTE> copy(*p);

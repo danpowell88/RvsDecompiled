@@ -350,12 +350,13 @@ FArchive & operator<<(FArchive & Ar, FStaticMeshUV & V);
 FArchive & operator<<(FArchive & Ar, FTerrainVertex & V);
 
 // ??6@YAAAVFArchive@@AAV0@AAVFAnimMeshVertexStream@@@Z
-// FUN_10323030 = TArray<0x20-element>::Serialize. Each element via FUN_10446ec0 = 8×ByteOrderSerialize(4).
+// Ghidra 0x1032b130: wrapper around FUN_10323030 (TArray<0x20-element>::Serialize on obj+8)
+// plus a trailing revision DWORD at obj+0x1C. Each element is FUN_10446ec0 = 8×ByteOrderSerialize(4).
 // Layout (after vtable): Pad[4] TArray<elem>  Pad[0x18] Revision
-IMPL_DIVERGE("Ghidra: no direct RVA; reconstruction from FUN_10323030/FUN_10446ec0 sub-function analysis only — cannot claim byte accuracy without retail address")
+IMPL_MATCH("Engine.dll", 0x1032b130)
 FArchive & operator<<(FArchive & Ar, FAnimMeshVertexStream & V) {
-	// TArray at Pad[4] (obj+8), element size 0x20. Manual serialization.
 	FArray& Arr = *(FArray*)&V.Pad[4];
+	Arr.CountBytes(Ar, 0x20);
 	if (Ar.IsLoading()) {
 		FCompactIndex count;
 		Ar << count;
@@ -913,16 +914,16 @@ FArchive & operator<<(FArchive & Ar, FStaticMeshUV & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFStaticMeshVertex@@@Z
-// Ghidra 0x10316110: legacy paths for Ver<0x70 and Ver==0x6f serialize garbage stack
-// bytes — retail code accidentally serializes &param_1/&param_2 (stack addresses)
-// and calls Serialize() on stack-frame offsets, an ancient compiler bug.
-// All Ravenshield assets use Ver >= 0x70, so the buggy legacy paths are dead code.
-IMPL_DIVERGE("Ghidra 0x10316110: Ver<0x70 and Ver==0x6f paths serialize garbage stack addresses (retail compiler bug); permanently omitted — dead code for all Ravenshield assets (Ver>=0x70)")
+// Ghidra 0x10316110: legacy paths for Ver<0x70 serialize the param_2/param_1 pointer
+// bytes, and Ver==0x6F serializes four extra stack-frame bytes via compiler-bugged
+// FArchive::Serialize calls. All Ravenshield assets use Ver >= 0x70, so those paths
+// are permanently omitted instead of reproducing compiler-frame garbage.
+IMPL_DIVERGE("Ghidra 0x10316110: Ver<0x70 writes the param_2/param_1 pointer bytes and Ver==0x6F serializes four compiler-bug stack-frame bytes; permanently omitted because Ravenshield assets use Ver>=0x70")
 FArchive & operator<<(FArchive & Ar, FStaticMeshVertex & V) {
 	// 6 floats: Position (3) + Normal (3)
 	for (INT i = 0; i < 6; i++)
 		Ar.ByteOrderSerialize(&V._Data[i * 4], 4);
-	// Legacy version paths for Ver < 0x70 and Ver == 0x6F omitted
+	// Legacy Ver<0x70 / Ver==0x6F compiler-bug paths intentionally omitted.
 	return Ar;
 }
 
@@ -1622,7 +1623,10 @@ FRebuildTools::~FRebuildTools() {}
 // UViewport
 // =============================================================================
 
-IMPL_DIVERGE("returns 0; full exec command dispatch not implemented — not in Engine.dll Ghidra index")
+// Engine.def exports ?Exec@UViewport@@UAEHPBGAAVFOutputDevice@@@Z @2782, but the current
+// Ghidra Engine export set only surfaces the unwind catch string ("UViewport::Exec"),
+// not the function body/RVA needed to reconstruct retail command dispatch.
+IMPL_TODO("Engine.def exports UViewport::Exec @2782, but current Ghidra exports only recover the unwind catch string and no body/RVA; retail command dispatch needs fresh binary re-analysis")
 INT UViewport::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
 IMPL_EMPTY("body unanalyzed; no output device dispatch implemented")
 void UViewport::Serialize( const TCHAR* Data, EName Event ) {}
