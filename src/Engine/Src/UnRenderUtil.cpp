@@ -587,11 +587,12 @@ FLineBatcher& FLineBatcher::operator=(const FLineBatcher& Other)
 	return *this;
 }
 
-IMPL_TODO("retail 0x10415560 (985b): FPoly plane iteration; FPoly class incomplete")
+IMPL_TODO("Ghidra 0x10415560 (985b): FPoly class is forward-declared only in EngineClasses.h; needs full FPoly definition (vertex array + methods) before this can be implemented")
 void FLineBatcher::DrawConvexVolume(FConvexVolume Volume, FColor Color)
 {
-	// Ghidra 0x115560: too complex to fully decompile (FPoly + plane iteration); left empty.
-	// TODO: implement FLineBatcher::DrawConvexVolume (Ghidra 0x115560: FPoly + plane iteration)
+	// Ghidra 0x115560: iterates FConvexVolume planes, builds FPoly per plane,
+	// uses FindBestAxisVectors to generate quad corners, calls DrawLine for each edge.
+	// Blocked: FPoly is forward-declared only.
 }
 
 // (merged from earlier occurrence)
@@ -1398,10 +1399,11 @@ int FStaticTexture::GetRevision()
 	}
 	return *(INT*)&Pad[12];
 }
-IMPL_TODO("retail 0x10469da0 (1462b): complex DXT decompression and format conversion pipeline; pending full decompilation")
+IMPL_TODO("Ghidra 0x10469da0 (1462b): FUN_1050557c confirmed in _unnamed.cpp; complex DXT/format decompression pipeline — pending full decompilation")
 void FStaticTexture::GetTextureData(int,void *,int,ETextureFormat,int)
 {
-	// TODO: implement FStaticTexture::GetTextureData (Ghidra: complex lazy-load path)
+	// TODO: implement FStaticTexture::GetTextureData (Ghidra 0x169da0: lazy-load path,
+	// format dispatch for TEXF_DXT1/DXT3/DXT5/RGBA8 etc.; uses FUN_1050557c confirmed in _unnamed.cpp)
 }
 IMPL_MATCH("Engine.dll", 0x10468ce0)
 ETexClampMode FStaticTexture::GetUClamp()
@@ -1610,7 +1612,7 @@ FDynamicActor::FDynamicActor(const FDynamicActor& Other)
 	appMemcpy(this, &Other, 0x80);
 }
 
-IMPL_TODO("0x103ffb70 confirmed; complex transform/bounds setup requires unresolved FUN_* helpers")
+IMPL_TODO("Ghidra 0x103ffb70 (1798b): no FUN_ blockers; complex vtable-dispatch for mesh/physics bounding box — actor vtable offsets 0xac/0xc0 and mesh vtable 0x6c/0x70 not yet mapped to named methods")
 FDynamicActor::FDynamicActor(AActor* Actor)
 {
 	// Ghidra 0xffb70: construct sub-objects, store actor pointer, compute transform/bounds.
@@ -1619,7 +1621,9 @@ FDynamicActor::FDynamicActor(AActor* Actor)
 	new ((BYTE*)this + 0x48) FBox();
 	new ((BYTE*)this + 0x64) FSphere();
 	*(AActor**)this = Actor;
-	// DIVERGENCE: mesh/physics transform setup requires unresolved FUN_* helpers.
+	// Remaining: vtable dispatch for mesh/physics bounding box not yet mapped to named methods.
+	//   actor vtable+0xac = GetRenderBoundingBox, +0xc0 = GetMesh, mesh vtable+0x6c = GetBoundingBox.
+	//   Emitter/SkeletalMesh paths also have specialised bounds logic.
 }
 
 IMPL_MATCH("Engine.dll", 0x10309a70)
@@ -1763,7 +1767,7 @@ FDynamicLight::FDynamicLight(FDynamicLight const& Other)
 	appMemcpy( this, &Other, sizeof(FDynamicLight) );
 }
 
-IMPL_TODO("0x1040ff20 confirmed; complex light-color/direction setup (FGetHSV + LightEffect dispatch) not yet reconstructed")
+IMPL_TODO("Ghidra 0x1040ff20 (1485b): FGetHSV (defined in UnCamera.cpp) and FUN_1050557c/FUN_1038a4f0 (confirmed in _unnamed.cpp) all accessible; LightEffect dispatch complex but tractable — pending full decompilation")
 FDynamicLight::FDynamicLight(AActor* Actor)
 {
 	// Ghidra 0x10ff20: construct sub-objects, store actor, compute light color/direction.
@@ -1772,7 +1776,10 @@ FDynamicLight::FDynamicLight(AActor* Actor)
 	new ((BYTE*)this + 0x14) FVector();
 	new ((BYTE*)this + 0x20) FVector();
 	*(AActor**)this = Actor;
-	// DIVERGENCE: complex light-effect and color setup omitted (requires FGetHSV + LightEffect dispatch).
+	// Remaining: FGetHSV(actor->LightHue, actor->LightSaturation, ...) to build base color,
+	// then LightEffect switch (LT_Pulse/Subtractive/Flicker/Strobe etc.) to modulate it,
+	// then scale by actor->LightBrightness/255 and store to this->Color (FPlane at +4).
+	// Direction at this+0x20 set from actor rotation for LT_Directional/LT_Spot.
 }
 
 IMPL_MATCH("Engine.dll", 0x103135b0)

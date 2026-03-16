@@ -371,7 +371,7 @@ void UCanvas::execTextSize( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execTextSize );
 
-IMPL_TODO("stub body (3 line(s)) — Ghidra 0x103897b0 is 760 bytes, not fully reconstructed")
+IMPL_TODO("Ghidra 0x103897b0 (760b): projects WorldLoc via FCameraSceneNode + FCanvasUtil; scene-node setup required — pending full implementation")
 void UCanvas::execGetScreenCoordinate( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execGetScreenCoordinate);
@@ -1060,7 +1060,7 @@ IMPL_MATCH("Engine.dll", 0x10301a90)
 FWarpZoneSceneNode* FWarpZoneSceneNode::GetWarpZoneSceneNode() { return this; }
 
 // FLevelSceneNode
-IMPL_TODO("stub body (1 line(s)) — Ghidra 0x10400290 is 2966 bytes, not fully reconstructed")
+IMPL_TODO("Ghidra 0x10400290 (2966b): frustum planes built from view-corner Deproject loop; no FUN_ blockers — pending full decompilation")
 FConvexVolume FLevelSceneNode::GetViewFrustum() { return FConvexVolume(); }
 
 // FLightMapSceneNode
@@ -1076,11 +1076,11 @@ INT FLightMapSceneNode::FilterActor(AActor* Actor)
 }
 
 // FDirectionalLightMapSceneNode
-IMPL_TODO("stub body (1 line(s)) — Ghidra 0x103d25d0 is 1896 bytes, not fully reconstructed")
+IMPL_TODO("Ghidra 0x103d25d0 (1896b): frustum planes built from 8 corner Deproject loops; no FUN_ blockers — pending full decompilation")
 FConvexVolume FDirectionalLightMapSceneNode::GetViewFrustum() { return FConvexVolume(); }
 
 // FPointLightMapSceneNode
-IMPL_TODO("stub body (1 line(s)) — Ghidra 0x103d1740 is 1492 bytes, not fully reconstructed")
+IMPL_TODO("Ghidra 0x103d1740 (1492b): frustum planes built from 4 corner Deproject loops; no FUN_ blockers — pending full decompilation")
 FConvexVolume FPointLightMapSceneNode::GetViewFrustum() { return FConvexVolume(); }
 
 // ============================================================================
