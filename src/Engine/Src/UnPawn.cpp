@@ -196,7 +196,7 @@ IMPLEMENT_FUNCTION( AController, 502, execMoveToward );
 // approximated by moveToward result.  PHYS_Spider Z-offset calls FUN_10301350 (not
 // reconstructed); omitted.  PHYS_Flying adds CollisionHeight*0.7 to Destination Z
 // (Ghidra: MoveTarget+0xfc = CollisionHeight; vtable[26] guard omitted → always applied).
-IMPL_TODO("Ghidra 0x1038d110: bAdjusting vtable[97] approx'd as moveToward; PHYS_Spider FUN_10301350 omitted; PHYS_Flying vtable[26] guard omitted")
+IMPL_TODO("Ghidra 0x1038d110: bAdjusting vtable[97] approx'd as moveToward; PHYS_Spider FUN_10301350 (37-byte vector-scale helper, identifiable) not yet inlined; PHYS_Flying vtable[26] (byte 0x68, first AActor-exclusive slot) guard omitted")
 void AController::execPollMoveToward( FFrame& Stack, RESULT_DECL )
 {
 	if( !MoveTarget || !Pawn || MoveTimer < 0.0f )
@@ -538,7 +538,7 @@ void AController::execPickTarget( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 531, execPickTarget );
 
-IMPL_TODO("Ghidra 0x1038dc20; 688b — vtable[0x1a] actor sub-type gate (before targetable check) unidentified; omitted")
+IMPL_TODO("Ghidra 0x1038dc20; 688b — vtable[0x1a] (slot 26, byte 0x68, first AActor-exclusive vtable slot after UObject's 26 slots) actor sub-type gate (before targetable check) not yet identified; omitted")
 void AController::execPickAnyTarget( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPickAnyTarget);
@@ -1597,7 +1597,7 @@ void APawn::PostNetReceive()
 	AActor::PostNetReceive();
 }
 
-IMPL_TODO("Ghidra 0x10378250; 883b — complex location smoothing/interpolation with velocity blending; stub delegates to AActor::PostNetReceiveLocation")
+IMPL_TODO("Ghidra 0x10378250; 883b — complex location smoothing/interpolation with velocity blending; DAT_106666f4/f8/fc are module-level float state globals (smoothed-position XYZ buffer, not profiling); stub delegates to AActor::PostNetReceiveLocation")
 void APawn::PostNetReceiveLocation()
 {
 	guard(APawn::PostNetReceiveLocation);
@@ -2285,7 +2285,7 @@ void APawn::processLanded( FVector HitNormal, AActor* HitActor, FLOAT RemainingT
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103eea80; 2043b — AR6ColBox::CanStepUp and capsule geometry adjustments for crouch state omitted; unconditionally delegates to AActor::stepUp")
+IMPL_TODO("Ghidra 0x103eea80; 2043b — capsule geometry adjustments for crouch state and FUN_10317620 (24-byte fabsf helper) inlining omitted; AR6ColBox::CanStepUp is implemented (R6EngineIntegration.cpp); unconditionally delegates to AActor::stepUp")
 void APawn::stepUp( FVector GravDir, FVector DesiredDir, FVector Delta, FCheckResult& Hit )
 {
 	guard(APawn::stepUp);
@@ -2502,7 +2502,7 @@ INT APawn::Pick3DWallAdjust(FVector WallHitNormal)
 	unguard;
 }
 
-IMPL_TODO("stub body (1 line(s)) — Ghidra 0x103eb2e0 is 2629 bytes, not fully reconstructed")
+IMPL_TODO("Ghidra 0x103eb2e0; 2629b — PickWallAdjust: complex wall-adjust path selection; FUN_1035a3d0 (54-byte __thiscall struct-init helper) not yet named; not fully reconstructed")
 INT APawn::PickWallAdjust(FVector WallHitNormal)
 {
 	guard(APawn::PickWallAdjust);
@@ -2510,7 +2510,7 @@ INT APawn::PickWallAdjust(FVector WallHitNormal)
 	unguard;
 }
 
-IMPL_TODO("stub body — Ghidra 0x103F0AE0 shows 1723-byte implementation not yet reconstructed")
+IMPL_TODO("Ghidra 0x103F0AE0; 1723b — SpiderstepUp: spider-mode step-up with iterative FVector geometry checks; no DAT_/FUN_ blockers; not yet reconstructed")
 void APawn::SpiderstepUp(FVector Delta, FVector HitNormal, FCheckResult& Hit)
 {
 	guard(APawn::SpiderstepUp);
