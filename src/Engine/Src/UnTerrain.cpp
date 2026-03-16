@@ -250,23 +250,24 @@ void ATerrainInfo::SetTextureColor(int,int,UTexture *,FColor &)
 	guard(ATerrainInfo::SetTextureColor);
 	unguard;
 }
-IMPL_TODO("Ghidra 0x1045C3C0 (1445b): per-sector terrain ray test; FUN_1050557c confirmed as __ftol2_sse (FPU rounding helper — not a blocker); full sector iteration + rdtsc profiling pending")
+IMPL_TODO("Ghidra 0x1045C3C0 (1445b): FUN_1050557c=__ftol2_sse (use INT cast), all FUN_ helpers confirmed in _unnamed.cpp; blocked by garbled MSVC FPU register tracking in coord-transform section — ray-traverse loop structure understood but exact float variable mapping unclear")
 int ATerrainInfo::LineCheck(FCheckResult &,FVector,FVector,FVector,int)
 {
 	guard(ATerrainInfo::LineCheck);
-	// Ghidra 0x15c3c0, 1445 bytes: ray-terrain intersection test across all heightmap sectors.
-	// DIVERGENCE: FUN_1050557c (per-sector ray test), rdtsc perf counters, and full sector
-	// iteration tree are unresolved; returns 1 (no hit) pending full implementation.
+	// Ghidra 0x15c3c0, 1445 bytes: transform ray to heightmap space, iterate quads, call
+	// LineCheckWithQuad. FUN_1050557c = __ftol2_sse = (INT)(float). All FUN_ in _unnamed.cpp.
+	// Blocked: MSVC x87 FPU register allocation confuses Ghidra's coord-transform decompilation.
+	// Algorithm is understood; floating-point variable mapping cannot be verified without disasm.
 	return 1;
 	unguard;
 }
-IMPL_TODO("Ghidra 0x1045A480 (7911b): per-quad ray intersection helper called from LineCheck; sector/quad struct offsets partially mapped; complex but no permanent FUN_ blockers")
+IMPL_TODO("Ghidra 0x1045A480 (7911b): all FUN_ helpers confirmed in _unnamed.cpp; 7911 bytes of optimised MSVC FP/SSE code with heavy register aliasing — full per-quad triangle intersection math, not tractable from Ghidra alone")
 int ATerrainInfo::LineCheckWithQuad(int,int,FCheckResult &,FVector,FVector,FVector,int)
 {
 	guard(ATerrainInfo::LineCheckWithQuad);
-	// Ghidra 0x15a480, 7911 bytes: per-quad ray intersection (called from LineCheck).
-	// Requires undeciphered sector/quad data structures and many unresolved FUN_ calls.
-	// DIVERGENCE: returns 1 (no hit) pending full implementation.
+	// Ghidra 0x15a480, 7911 bytes: per-quad ray-triangle intersection (called from LineCheck).
+	// All FUN_ helpers in _unnamed.cpp (no permanent blockers). Blocked by 7911 bytes of
+	// heavily-optimised FPU/SSE code with register aliasing; not tractable from Ghidra alone.
 	return 1;
 	unguard;
 }
@@ -612,16 +613,163 @@ FVector ATerrainInfo::HeightmapToWorld(FVector In)
 	// Retail: 29b. ECX=this+0x1300 (world FCoords), call FVector::TransformPointBy.
 	return In.TransformPointBy(*(FCoords*)((BYTE*)this + 0x1300));
 }
-IMPL_TODO("Ghidra 0x10464CF0: serializes terrain dimensions plus full sector/coord data; legacy version paths omitted — only dims serialized")
+// Helper: serialize a TArray with FCompactIndex count + bulk POD data.
+// Matches the pattern used by all FUN_104xxxxx TArray helpers (stride = element size).
+static void SerializeFixedTArray(FArchive& Ar, FArray& A, INT Stride)
+{
+	if (Ar.IsLoading())
+	{
+		FCompactIndex ci;
+		Ar << ci;
+		INT n = *(INT*)&ci;
+		A.Empty(Stride, 0);
+		if (n > 0) A.Add(n, Stride);
+		if (n > 0) Ar.Serialize(A.GetData(), n * Stride);
+	}
+	else
+	{
+		Ar << *(FCompactIndex*)((BYTE*)&A + 4);  // FArray.ArrayNum as compact index
+		INT n = A.Num();
+		if (n > 0) Ar.Serialize(A.GetData(), n * Stride);
+	}
+}
+
+// Helper: serialize a TArray<UObject*> (stride 4, each element via Ar << UObject*&).
+// Matches FUN_1045e240.
+static void SerializeUObjTArray(FArchive& Ar, FArray& A)
+{
+	if (Ar.IsLoading())
+	{
+		FCompactIndex ci;
+		Ar << ci;
+		INT n = *(INT*)&ci;
+		A.Empty(4, 0);
+		if (n > 0) A.Add(n, 4);
+		for (INT i = 0; i < n; i++)
+			Ar << *(UObject**)((BYTE*)A.GetData() + i * 4);
+	}
+	else
+	{
+		Ar << *(FCompactIndex*)((BYTE*)&A + 4);
+		INT n = A.Num();
+		for (INT i = 0; i < n; i++)
+			Ar << *(UObject**)((BYTE*)A.GetData() + i * 4);
+	}
+}
+
+// Helper: serialize a TArray<WORD> (stride 2).  Matches FUN_1031e600.
+static void SerializeWordTArray(FArchive& Ar, FArray& A)
+{
+	if (Ar.IsLoading())
+	{
+		FCompactIndex ci;
+		Ar << ci;
+		INT n = *(INT*)&ci;
+		A.Empty(2, 0);
+		if (n > 0) A.Add(n, 2);
+		for (INT i = 0; i < n; i++)
+			Ar.ByteOrderSerialize((BYTE*)A.GetData() + i * 2, 2);
+	}
+	else
+	{
+		Ar << *(FCompactIndex*)((BYTE*)&A + 4);
+		INT n = A.Num();
+		for (INT i = 0; i < n; i++)
+			Ar.ByteOrderSerialize((BYTE*)A.GetData() + i * 2, 2);
+	}
+}
+
+IMPL_DIVERGE("Counting-path render buffers omitted; legacy ver<0x4c/0x52/0x53 paths omitted (Ravenshield always ver>=0x73). Ghidra 0x10464CF0")
 void ATerrainInfo::Serialize(FArchive& Ar)
 {
-	// Retail: 0x164cf0. Calls AActor::Serialize then serializes terrain dimensions,
-	// sector data, FCoords transforms, and heightmap/alpha data arrays.
-	// Divergence: omits legacy version-gated paths (ver < 0x4c / 0x52 / 0x53).
+	guard(ATerrainInfo::Serialize);
+	// Ghidra 0x164cf0 (891b).
+	// DIVERGENCE: legacy version-gated paths (ver < 0x4c / 0x52 / 0x53) omitted.
+	// The "neither loading nor saving" (counting) path is omitted; it serializes
+	// render data structures (this+0x1360, 0x12bc, 0x136c, 0x344, 0x12f0, 0x1394, 0x13ac, 5000)
+	// that are runtime-only and not needed for load/save correctness.
+
 	AActor::Serialize(Ar);
-	// Terrain dimensions (HeightmapX/Y at +0x12E0/+0x12E4)
+
+	// Sectors: TArray<UTerrainSector*> at +0x12C8 (stride 4, UObject* each).
+	// FUN_1045e240
+	SerializeUObjTArray(Ar, *(FArray*)((BYTE*)this + 0x12C8));
+
+	// Vertices: TArray<FVector> at +0x12D4 (stride 12).
+	// FUN_10321a80
+	SerializeFixedTArray(Ar, *(FArray*)((BYTE*)this + 0x12D4), 12);
+
+	// HeightmapX-related INT fields at +0x12E8/+0x12EC.
+	Ar.ByteOrderSerialize((BYTE*)this + 0x12E8, 4);
+	Ar.ByteOrderSerialize((BYTE*)this + 0x12EC, 4);
+
+	// Vertex normals: TArray<{FVector,FVector}> at +0x12F4 (stride 24 = 2×FVector).
+	// FUN_1045e340
+	SerializeFixedTArray(Ar, *(FArray*)((BYTE*)this + 0x12F4), 0x18);
+
+	// Legacy < ver 0x53: temp TArray<FPlane> (stride 0x10); read and discard.
+	if (Ar.Ver() < 0x53)
+	{
+		FArray tmp;
+		appMemzero(&tmp, sizeof(tmp));
+		SerializeFixedTArray(Ar, tmp, 0x10);
+		tmp.Empty(0x10, 0);
+	}
+
+	// FCoords HeightmapToWorld at +0x1300 and WorldToHeightmap at +0x1330 (48 bytes each).
+	// FUN_103cbaa0: serializes all 12 floats of FCoords via ByteOrderSerialize.
+	Ar.ByteOrderSerialize((BYTE*)this + 0x1300, 48);
+	Ar.ByteOrderSerialize((BYTE*)this + 0x1330, 48);
+
+	// Legacy < ver 0x4C: TArray<WORD> at +0x13BC.
+	// FUN_1031e600
+	if (Ar.Ver() < 0x4C)
+		SerializeWordTArray(Ar, *(FArray*)((BYTE*)this + 0x13BC));
+
+	// HeightmapX/Y dimensions at +0x12E0/+0x12E4.
 	Ar.ByteOrderSerialize((BYTE*)this + 0x12E0, 4);
 	Ar.ByteOrderSerialize((BYTE*)this + 0x12E4, 4);
+
+	// Legacy 0x4A < ver < 0x52: 16 temporary layer entries with 7 floats + FString each.
+	// DIVERGENCE: omitted (ancient format; Ravenshield ships ver >= 0x73).
+
+	// On load: propagate heightmap ref to +0x13B8.
+	if (Ar.IsLoading())
+		*(DWORD*)((BYTE*)this + 0x13B8) = *(DWORD*)((BYTE*)this + 0x398);
+
+	// Ver 0x56 / 0x57 only: QuadVisibilityBitmap at +0x1370 (stride 4).
+	// FUN_1037fbd0
+	if (Ar.Ver() == 0x56 || Ar.Ver() == 0x57)
+		SerializeFixedTArray(Ar, *(FArray*)((BYTE*)this + 0x1370), 4);
+
+	// Legacy < ver 0x73: zero render-cache entries in sectors array at +0x12A8.
+	if (Ar.Ver() < 0x73)
+	{
+		FArray* sectors2 = (FArray*)((BYTE*)this + 0x12A8);
+		for (INT i = 0; i < sectors2->Num(); i++)
+		{
+			BYTE* e = (BYTE*)sectors2->GetData() + i * 0x58;
+			*(DWORD*)(e + 0x50) = 0;
+			*(DWORD*)(e + 0x54) = 0;
+		}
+	}
+
+	// Ver > 0x74: TArray at +0x13A0 (stride 4).
+	// FUN_104170d0
+	if (Ar.Ver() > 0x74)
+		SerializeFixedTArray(Ar, *(FArray*)((BYTE*)this + 0x13A0), 4);
+
+	// PlanningFloorMap: TArray<INT> at +0x13C8 (stride 4); empty on old licensee ver.
+	// FUN_1037fbd0
+	if (Ar.LicenseeVer() < 10)
+		((FArray*)((BYTE*)this + 0x13C8))->Empty(4, 0);
+	else
+		SerializeFixedTArray(Ar, *(FArray*)((BYTE*)this + 0x13C8), 4);
+
+	// Mark terrain dirty for rebuild.
+	*(DWORD*)((BYTE*)this + 0x12B4) |= 4;
+
+	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x103977b0)
 void ATerrainInfo::CheckForErrors()
@@ -1009,8 +1157,124 @@ FBox UTerrainPrimitive::GetRenderBoundingBox(const AActor* Owner, INT /*bDetaile
 	return FBox(*(FVector*)((BYTE*)Owner + 0x234), *(FVector*)((BYTE*)Owner + 0x234));
 }
 
-IMPL_TODO("Ghidra 0x10460b60: calls UObject::Serialize then serializes all sector vertex/triangle data; FUN_ blockers for mesh data TArrays")
-void UTerrainSector::Serialize(FArchive& Ar) { UObject::Serialize(Ar); }
+IMPL_DIVERGE("Counting-path (neither loading nor saving) serializes runtime render buffers; FRawColorStream has no FArchive op<<; Ravenshield packages are always ver>=0x75 so legacy branch is unreachable. Ghidra 0x10460b60")
+void UTerrainSector::Serialize(FArchive& Ar)
+{
+	guard(UTerrainSector::Serialize);
+	// Ghidra 0x160b60 (583b).
+	// DIVERGENCE: The "neither loading nor saving" (counting) path serializes render
+	// buffers (FRawIndexBuffer at +0x98, TArrays at +0x84/+0x2c) and is omitted here;
+	// these are runtime-only GPU resources and not loaded from disk.
+
+	UObject::Serialize(Ar);
+
+	// Legacy < ver 0x5E: read/discard stale bounding-box + sphere not stored in struct.
+	if (Ar.Ver() < 0x5E)
+	{
+		FBox   tmpBox;
+		FSphere tmpSphere;
+		Ar << tmpBox << tmpSphere;
+	}
+
+	// Serialize TerrainInfo reference (UObject* at +0x44).
+	Ar << *(UObject**)((BYTE*)this + 0x44);
+
+	// Sector geometry: +0x64 = SectorSizeX, +0x68 = SectorSizeY, +0x6C = OffsetX, +0x70 = OffsetY.
+	Ar.ByteOrderSerialize((BYTE*)this + 0x64, 4);
+	Ar.ByteOrderSerialize((BYTE*)this + 0x68, 4);
+	Ar.ByteOrderSerialize((BYTE*)this + 0x6C, 4);
+	Ar.ByteOrderSerialize((BYTE*)this + 0x70, 4);
+
+	// Bounding box at +0x48.
+	FBox& bbox = *(FBox*)((BYTE*)this + 0x48);
+	if (Ar.Ver() < 0x75)
+	{
+		// Legacy: bbox was not stored directly; reconstruct from 8 corner vectors.
+		// FUN_10301400 was used in modern path; here we accumulate from serialized corners.
+		bbox.Init();
+		FVector corner;
+		for (INT i = 0; i < 8; i++)
+		{
+			Ar.ByteOrderSerialize(&corner.X, 4);
+			Ar.ByteOrderSerialize(&corner.Y, 4);
+			Ar.ByteOrderSerialize(&corner.Z, 4);
+			bbox += corner;
+		}
+	}
+	else
+	{
+		// Modern: bbox serialized directly (6 floats + 1-byte valid flag).
+		// Matches FUN_10301400: 6×ByteOrderSerialize(4) + ByteOrderSerialize(1).
+		Ar.ByteOrderSerialize(&bbox.Min.X, 4);
+		Ar.ByteOrderSerialize(&bbox.Min.Y, 4);
+		Ar.ByteOrderSerialize(&bbox.Min.Z, 4);
+		Ar.ByteOrderSerialize(&bbox.Max.X, 4);
+		Ar.ByteOrderSerialize(&bbox.Max.Y, 4);
+		Ar.ByteOrderSerialize(&bbox.Max.Z, 4);
+		Ar.ByteOrderSerialize(&bbox.IsValid, 1);
+	}
+
+	// TArray at +0x38 (stride 0x10: UObject* + TArray<float>).
+	// FUN_104607f0.
+	{
+		FArray& A = *(FArray*)((BYTE*)this + 0x38);
+		if (Ar.IsLoading())
+		{
+			FCompactIndex ci;
+			Ar << ci;
+			INT n = *(INT*)&ci;
+			A.Empty(0x10, 0);
+			if (n > 0) { A.Add(n, 0x10); appMemzero(A.GetData(), n * 0x10); }
+			for (INT i = 0; i < n; i++)
+			{
+				BYTE* elem = (BYTE*)A.GetData() + i * 0x10;
+				Ar << *(UObject**)(elem + 0);
+				// Inner TArray<float> at elem+4 (already zero-init from appMemzero above).
+				FArray& inner = *(FArray*)(elem + 4);
+				FCompactIndex ci2;
+				Ar << ci2;
+				INT m = *(INT*)&ci2;
+				inner.Empty(4, 0);
+				if (m > 0) { inner.Add(m, 4); Ar.Serialize(inner.GetData(), m * 4); }
+			}
+		}
+		else
+		{
+			Ar << *(FCompactIndex*)((BYTE*)&A + 4);
+			INT n = A.Num();
+			for (INT i = 0; i < n; i++)
+			{
+				BYTE* elem = (BYTE*)A.GetData() + i * 0x10;
+				Ar << *(UObject**)(elem + 0);
+				FArray& inner = *(FArray*)(elem + 4);
+				Ar << *(FCompactIndex*)((BYTE*)&inner + 4);
+				INT m = inner.Num();
+				if (m > 0) Ar.Serialize(inner.GetData(), m * 4);
+			}
+		}
+	}
+
+	// Legacy < ver 0x59: read/discard a stale UObject* ref.
+	if (Ar.Ver() < 0x59)
+	{
+		UObject* discard = NULL;
+		Ar << discard;
+	}
+
+	// Legacy < ver 0x75: read/discard a FRawColorStream (not stored in struct).
+	// DIVERGENCE: FRawColorStream has no FArchive operator<<; Ravenshield packages
+	// are always ver >= 0x75 so this branch is never executed in practice.
+	if (Ar.Ver() < 0x75 && !Ar.IsLoading())
+	{
+		// nothing to write for the old stream (unreachable for Ravenshield content)
+	}
+
+	// On load: mark render cache dirty (+0x90 = 0xFFFFFFFF).
+	if (Ar.IsLoading())
+		*(DWORD*)((BYTE*)this + 0x90) = 0xFFFFFFFF;
+
+	unguard;
+}
 IMPL_EMPTY("virtual base no-op — subclass overrides")
 void UTerrainSector::PostLoad() {}
 IMPL_EMPTY("virtual base no-op — subclass overrides")
