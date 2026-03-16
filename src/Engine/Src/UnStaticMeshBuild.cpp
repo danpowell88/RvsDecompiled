@@ -55,12 +55,32 @@ void UStaticMesh::StaticConstructor()
 	unguard;
 }
 
-IMPL_EMPTY("editor-only: rebuilds mesh collision/render data on property change")
+IMPL_MATCH("Engine.dll", 0x10446e10)
 void UStaticMesh::PostEditChange()
 {
 	guard(UStaticMesh::PostEditChange);
-	// Retail: rebuilds the static mesh collision/render data.
-	// Divergence: not fully reconstructed from Ghidra.
+	// Ghidra 0x10446e10 (121b): calls UObject::PostEditChange, then iterates
+	// Materials TArray at this+0xfc (stride 0xc). For each entry, compares
+	// field +4 (EnableCollision) against field +8 (shadow copy). On first
+	// mismatch, copies the new value and triggers Build().
+	UObject::PostEditChange();
+	INT i = 0;
+	for (;;)
+	{
+		FArray* mats = (FArray*)((BYTE*)this + 0xfc);
+		if (mats->Num() <= i)
+			break;
+		BYTE* data = (BYTE*)mats->GetData();
+		BYTE* entry = data + i * 0x0c;
+		INT valA = *(INT*)(entry + 4);
+		if (valA != *(INT*)(entry + 8))
+		{
+			*(INT*)(entry + 8) = valA;
+			Build();
+			break;
+		}
+		i++;
+	}
 	unguard;
 }
 
@@ -272,21 +292,23 @@ void UStaticMesh::PostLoad()
 }
 
 // (merged from earlier occurrence)
-IMPL_DIVERGE("permanent: FUN_104487d0/FUN_10448ba0 (OPCODE BVH node test/traverse helpers) absent from Ghidra decompilation — likely in OPCODE binary-only library region; BVH traversal permanently unimplementable; Ghidra 0x1044CDA0")
+IMPL_TODO("Ghidra 0x1044CDA0 (1017b) fully decompiled; BVH node walk uses CollisionNodes at this+0x114 / CollisionTriangles at this+0x108 with FBox::Intersect + FPlane::PlaneDot; needs FUN_1037a200 (TArray<INT>::Remove) and FUN_10322eb0 (TArray<INT>::~TArray) inlined")
 void UStaticMesh::TriangleSphereQuery(AActor *,FSphere &,TArray<FStaticMeshCollisionTriangle *> &)
 {
 	guard(UStaticMesh::TriangleSphereQuery);
-	// Retail: uses Actor->WorldToLocal() to transform sphere, then traverses the OPCODE
-	// collision BVH tree at this+0x124, collecting triangles that overlap the sphere.
-	// DIVERGENCE: BVH traversal helpers (FUN_104487d0, FUN_10448ba0) are unresolved.
+	// Retail: transforms sphere bbox to local space via Actor->WorldToLocal(),
+	// then walks BVH node tree (this+0x114, stride 0x2c) testing FBox overlap
+	// and plane-dot distance. Matching leaf triangles (this+0x108, stride 0x54)
+	// are appended to the output TArray.
 	unguard;
 }
-IMPL_EMPTY("editor tool: builds static mesh geometry and collision data")
+IMPL_TODO("Ghidra 0x1044AD30 (3910b) fully decompiled; rebuilds vertex/index/section/collision data from source triangles at this+0x144; many internal helpers (FUN_10449ee0, FUN_10448ca0, FUN_1044a860 etc.) need decompilation")
 void UStaticMesh::Build()
 {
 	guard(UStaticMesh::Build);
-	// Retail: builds geometry/collision data for the static mesh.
-	// Divergence: not fully reconstructed from Ghidra.
+	// Retail: full static mesh geometry rebuild — clears sections/vertices/UVs/collision,
+	// iterates source triangles, builds per-material sections, computes bounding box,
+	// generates collision BVH tree, and creates index buffers.
 	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x1031C9F0)
@@ -485,24 +507,26 @@ void UStaticMesh::Serialize(FArchive& Ar)
 
 	unguard;
 }
-IMPL_DIVERGE("permanent: FUN_104487d0/FUN_10448ba0 (OPCODE BVH ray-triangle traversal helpers) absent from Ghidra decompilation; permanently unimplementable; returns 1 (no hit); Ghidra 0x1044EB60")
+IMPL_TODO("Ghidra 0x1044EB60 (931b) fully decompiled; needs FUN_1044c480/FUN_1044bf80 (line-vs-BVH setup helpers) and FUN_1044e6e0/FUN_1044caf0 (BVH traversal+result gather); also uses rdtsc perf counters at DAT_10799554/DAT_10799734")
 int UStaticMesh::LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD,DWORD)
 {
 	guard(UStaticMesh::LineCheck);
-	// Retail: transforms ray to local space, traverses OPCODE BVH collision tree at +0x124,
-	// tests each leaf triangle with ray-plane intersection, fills FCheckResult on hit.
-	// DIVERGENCE: BVH helpers (FUN_104487d0, FUN_10448ba0) are unresolved.
-	return 1; // no hit
+	// Retail: transforms ray to local space, branches on UseSimpleLineCollision/UseSimpleBoxCollision
+	// flags and GUseStaticMeshSimpleCollision. For complex collision, calls FUN_1044c480 or
+	// FUN_1044bf80 to setup then FUN_1044e6e0/FUN_1044caf0 to traverse BVH. Fills FCheckResult
+	// on hit; adjusts Time by 4/Size epsilon. Returns 1 (no hit) or 0 (hit).
+	return 1;
 	unguard;
 }
-IMPL_DIVERGE("permanent: FUN_104487d0/FUN_10448ba0 (OPCODE BVH point-overlap helpers) absent from Ghidra decompilation; permanently unimplementable; returns 1 (no overlap); Ghidra 0x1044EF40")
+IMPL_TODO("Ghidra 0x1044EF40 (403b) fully decompiled; needs FUN_1044c220 (point-vs-BVH setup) and FUN_1044e390 (BVH traversal+gather); also uses rdtsc perf counters at DAT_10799554/DAT_10799734")
 int UStaticMesh::PointCheck(FCheckResult &,AActor *,FVector,FVector,DWORD)
 {
 	guard(UStaticMesh::PointCheck);
-	// Retail: transforms point+extent to local space, traverses OPCODE BVH tree at +0x124,
-	// tests each leaf triangle for overlap with the swept sphere.
-	// DIVERGENCE: BVH helpers (FUN_104487d0, FUN_10448ba0) are unresolved.
-	return 1; // no overlap
+	// Retail: branches on Actor flags and UseSimpleBoxCollision. For complex
+	// collision, calls FUN_1044c220 (setup) then FUN_1044e390 (BVH traverse).
+	// On overlap, fills FCheckResult Actor/Primitive and normalizes Normal.
+	// Falls back to this+0x120 model vtable[0x64/4] or UPrimitive::PointCheck.
+	return 1;
 	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x104469d0)
@@ -563,12 +587,13 @@ FSphere UStaticMesh::GetRenderBoundingSphere(const AActor*)
 	// Retail: 23b. Copy-constructs FSphere from this+0x48.
 	return *(FSphere*)((BYTE*)this + 0x48);
 }
-IMPL_EMPTY("editor tool: computes per-vertex lighting bake for static mesh")
+IMPL_TODO("Ghidra 0x104492F0 (1797b) fully decompiled; iterates lights from Actor+0x32c, allocates UStaticMeshInstance, bakes per-vertex colour into FRawColorStream at instance+0x3c; needs FUN_10322eb0 (TArray cleanup) and UStaticMeshInstance constructor")
 void UStaticMesh::Illuminate(AActor *,int)
 {
 	guard(UStaticMesh::Illuminate);
-	// Retail: computes per-vertex lighting for the static mesh.
-	// Divergence: not fully reconstructed from Ghidra.
+	// Retail: computes per-vertex lighting bake. Iterates light list at Actor+0x32c,
+	// allocates or reuses UStaticMeshInstance at Actor+0x174, transforms bounding
+	// sphere, gathers affecting lights, and writes vertex colours.
 	unguard;
 }
 
@@ -601,13 +626,14 @@ void UStaticMeshInstance::Serialize(FArchive& Ar)
 	unguard;
 }
 
-IMPL_DIVERGE("permanent: Ghidra 0x10446b40 is absent from retail export table; FUN_10449ee0 (triangle clip) and FUN_10448ca0 (OPCODE BVH gather) absent from Engine.dll exports — not callable")
+IMPL_TODO("Ghidra 0x10447B70 (2281b) fully decompiled; gathers triangles from vertex stream, clips against 6 frustum planes, builds FRawIndexBuffer; needs FUN_103ccb10 (projector validity check) and FUN_1031fda0/FUN_1031fe20 (FArray::Remove variants)")
 void UStaticMeshInstance::AttachProjectorClipped(AActor *,AProjector *)
 {
 	guard(UStaticMeshInstance::AttachProjectorClipped);
-	// Retail: gathers triangles from the OPCODE BVH that intersect the projector frustum,
-	// clips each against 6 frustum planes, builds an index buffer, and appends to per-instance
-	// projector list at this+0x54. FUN_10449ee0 (clip) and FUN_10448ca0 (BVH gather) unresolved.
+	// Retail: purges stale projector entries from this+0x54 and this+0x60,
+	// checks for duplicate, gathers triangles from vertex stream sections,
+	// clips each against projector frustum planes (Sutherland-Hodgman),
+	// builds FRawIndexBuffer with clipped indices, appends to projector list.
 	unguard;
 }
 
@@ -834,11 +860,9 @@ FRebuildOptions * FRebuildTools::GetFromName(FString p0)
 }
 
 // ?Save@FRebuildTools@@QAEPAVFRebuildOptions@@VFString@@@Z
-// Ghidra 0x103FD770 (260b): uses FArray::Add (Core.dll 0x10101790) to append a slot,
-// placement-constructs FRebuildOptions, copies current options via operator=, overrides name.
-// DIVERGENCE: retail builds a temporary FRebuildOptions on the stack and assigns via
-// FRebuildOptions::operator= with additional copy semantics; we copy fields directly.
-IMPL_DIVERGE("permanent: editor-only rebuild tool; our field copy produces same observable result as retail stack-temp+operator= pattern; Ghidra 0x103FD770")
+// Ghidra 0x103FD770 (260b): uses FArray::Add to append a slot,
+// placement-constructs FRebuildOptions, copies current via operator=, overrides name.
+IMPL_MATCH("Engine.dll", 0x103FD770)
 FRebuildOptions * FRebuildTools::Save(FString p0)
 {
 	guard(FRebuildTools::Save);
@@ -847,21 +871,16 @@ FRebuildOptions * FRebuildTools::Save(FString p0)
 	if (!result)
 	{
 		FArray* arr = (FArray*)((BYTE*)this + 4);
-		INT idx = arr->Add(1, 0x2C);  // FArray::Add — exported from Core.dll; resolved via import table
+		INT idx = arr->Add(1, 0x2C);
 		result = (FRebuildOptions*)((BYTE*)arr->GetData() + idx * 0x2C);
 		if (result)
 			new(result) FRebuildOptions();
-		// Re-read in case Add() reallocated the buffer
 		result = (FRebuildOptions*)((BYTE*)arr->GetData() + (arr->Num() - 1) * 0x2C);
 	}
 
-	// Copy current options then override name with p0
-	FRebuildOptions* cur = GetCurrent();
-	if (cur && result)
-	{
-		result->Name = cur->Name;
-		appMemcpy(result->Options, cur->Options, sizeof(result->Options));
-	}
+	// Ghidra: copies *GetCurrent() into result via FRebuildOptions::operator=,
+	// then overrides result->Name with p0.
+	*result = *GetCurrent();
 	result->Name = p0;
 	return result;
 	unguard;
@@ -886,20 +905,56 @@ int FRebuildTools::GetIdxFromName(FString p0)
 	return -1;
 }
 // ?Delete@FRebuildTools@@QAEXVFString@@@Z
-IMPL_EMPTY("editor tool: deletes named rebuild option")
-void FRebuildTools::Delete(FString p0) {}
+// Ghidra 0x103FD8B0 (120b): calls GetIdxFromName, then FUN_1031f0a0
+// (TArray<FRebuildOptions>::Remove with element destructors, stride 0x2C).
+IMPL_MATCH("Engine.dll", 0x103FD8B0)
+void FRebuildTools::Delete(FString p0) {
+	guard(FRebuildTools::Delete);
+	INT idx = GetIdxFromName(p0);
+	if (idx != -1)
+	{
+		// FUN_1031f0a0: thiscall on FArray, destructs elements then FArray::Remove(idx, 1, 0x2C)
+		typedef void (__thiscall* TArrayRemoveWithDtorFn)(FArray*, INT, INT);
+		((TArrayRemoveWithDtorFn)0x1031f0a0)((FArray*)((BYTE*)this + 4), idx, 1);
+	}
+	unguard;
+}
 
 // ?Init@FRebuildTools@@QAEXXZ
-IMPL_EMPTY("editor tool: initializes rebuild tools data")
-void FRebuildTools::Init() {}
+// Ghidra 0x103FD9C0 (665b): empties array, adds default FRebuildOptions, allocates
+// current-options pointer, then reads "Rebuild Configs" from GConfig (UnrealEd.ini)
+// to populate saved configs via FString::ParseIntoArray / appAtoi.
+IMPL_TODO("Ghidra 0x103FD9C0 (665b) fully decompiled; needs GConfig vtable calls at offsets +0x04 (GetSectionCount) and +0x0C (GetString), plus FString::ParseIntoArray and FUN_1031efc0 (TArray<FString> cleanup)")
+void FRebuildTools::Init() {
+	guard(FRebuildTools::Init);
+	// Retail: FUN_1031f140 empties TArray<FRebuildOptions>, adds default entry,
+	// allocates new FRebuildOptions as current ptr (*(this)), reads config sections.
+	unguard;
+}
 
 // ?SetCurrent@FRebuildTools@@QAEXVFString@@@Z
-IMPL_EMPTY("editor tool: sets current rebuild option by name")
-void FRebuildTools::SetCurrent(FString p0) {}
+// Ghidra 0x103FD660 (218b): looks up named option, asserts it exists,
+// copies it into *GetCurrent() via FRebuildOptions::operator=.
+IMPL_MATCH("Engine.dll", 0x103FD660)
+void FRebuildTools::SetCurrent(FString p0) {
+	guard(FRebuildTools::SetCurrent);
+	FRebuildOptions* found = GetFromName(p0);
+	if (!found)
+		appFailAssert("RO", ".\\UnRebuildTools.cpp", 0x7c);
+	*GetCurrent() = *found;
+	unguard;
+}
 
 // ?Shutdown@FRebuildTools@@QAEXXZ
-IMPL_EMPTY("editor tool: shuts down rebuild tools")
-void FRebuildTools::Shutdown() {}
+// Ghidra 0x103FD2E0 (376b): writes all rebuild configs to "Rebuild Configs"
+// section of UnrealEd.ini via GConfig vtable, then frees current-options pointer.
+IMPL_TODO("Ghidra 0x103FD2E0 (376b) fully decompiled; needs GConfig vtable calls at offsets +0x20 (EmptySection), +0x28 (SetInt), +0x30 (SetString)")
+void FRebuildTools::Shutdown() {
+	guard(FRebuildTools::Shutdown);
+	// Retail: writes NumItems + per-entry "Config%d" strings to GConfig,
+	// then destructs and frees *(FRebuildOptions**)this (current ptr).
+	unguard;
+}
 IMPL_MATCH("Engine.dll", 0x10316200)
 INT FStaticMeshColorStream::GetComponents(FVertexComponent* C) {
 	C[0].Type = 4; C[0].Function = 3;

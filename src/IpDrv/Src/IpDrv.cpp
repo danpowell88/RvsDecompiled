@@ -204,7 +204,7 @@ static bool IsValidSocket(SOCKET s)
 // Helper: get local IP for binding.
 // In the retail binary this is FUN_10701be0 (in _unnamed.cpp) which reads the configured bind
 // address from the output-device/log path.  We return INADDR_ANY for all-interfaces binding.
-IMPL_DIVERGE("permanent: retail FUN_10701be0 reads bind address from config via FUN_107018d0; we return INADDR_ANY — functionally equivalent for the common all-interfaces case")
+IMPL_DIVERGE("retail FUN_10701be0 reads bind address from config via FUN_107018d0 (735b); we return INADDR_ANY — functionally equivalent")
 static UINT GetLocalBindIP()
 {
 	return INADDR_ANY; // host order = 0
@@ -216,7 +216,7 @@ static UINT GetLocalBindIP()
 // Our wrapper has different parameter semantics (mask flags + bReuseAddr vs attempt count +
 // port increment) and calls setsockopt(SO_REUSEADDR) which retail does not.
 // All callers in this file use our interface — the retail ABI cannot be matched.
-IMPL_DIVERGE("permanent: our callers use mask/bReuseAddr params; retail FUN_10701810 takes attempt-count/port-increment — incompatible interface")
+IMPL_DIVERGE("retail FUN_10701810 (0x10701810) takes attempt-count/port-increment params; our interface uses mask/bReuseAddr — incompatible ABI")
 static WORD BindSocket(SOCKET s, sockaddr_in* Addr, INT mask, INT bReuseAddr)
 {
 	if (bReuseAddr)
@@ -263,7 +263,7 @@ static bool SetSocketOptions(SOCKET s)
 // Retail equivalent is FUN_1070df40 (0x1070df40): uses caller-allocated output FString* (return-by-pointer
 // ABI) vs our return-by-value. Port format uses data reference DAT_10717774 (unknown literal; functionally
 // equivalent to ":%i"). Both produce identical output strings.
-IMPL_DIVERGE("permanent: retail FUN_1070df40 uses explicit FString* out-param ABI; C++ return-by-value generates different calling convention — functionally equivalent")
+IMPL_DIVERGE("retail FUN_1070df40 (0x1070df40) uses FString* out-param ABI; return-by-value generates different calling convention")
 static FString IpAddrToStr(UINT Addr, UINT Port)
 {
 	BYTE b1 = (BYTE)( Addr        & 0xFF);
@@ -281,7 +281,7 @@ static FString IpAddrToStr(UINT Addr, UINT Port)
 // failure with no retry. On success checks h_addrtype == AF_INET before storing.
 // On failure, retail writes a wide-string error via appSprintf to offset 0x108; we store a
 // short WSA error code there instead. Both are zero on success / non-zero on failure.
-IMPL_DIVERGE("permanent: retail FUN_1070e0f0 writes wchar_t appSprintf error string to FResolveInfo+0x108; we store a short WSA error code — callers only check zero/non-zero so functionally equivalent")
+IMPL_DIVERGE("retail FUN_1070e0f0 (0x1070e0f0) writes wchar_t appSprintf error to +0x108; we store short WSA error code — callers check zero/non-zero only")
 static DWORD WINAPI ResolveThread(LPVOID Param)
 {
 	FResolveInfo* Info = (FResolveInfo*)Param;
@@ -316,7 +316,7 @@ static DWORD WINAPI ResolveThread(LPVOID Param)
 // lpThreadId (CreateThread writes the thread ID there; the thread clears it to 0 on finish).
 // Also calls appFailAssert if CreateThread fails. We use a separate ThreadId local and omit
 // the assert; both are functionally equivalent for callers that poll bWorking for completion.
-IMPL_DIVERGE("permanent: retail FUN_10701780 uses appToAnsi+memcpy for hostname copy and logs before CreateThread; we use WideCharToMultiByte and skip the log — functionally equivalent")
+IMPL_DIVERGE("retail FUN_10701780 (0x10701780) uses appToAnsi+memcpy for hostname copy; we use WideCharToMultiByte — functionally equivalent")
 static FResolveInfo* StartResolve(void* Buffer, const TCHAR* HostName)
 {
 	FResolveInfo* Info = (FResolveInfo*)Buffer;
@@ -543,7 +543,7 @@ void AInternetLink::execStringToIpAddr(FFrame& Stack, RESULT_DECL)
 	*(INT*)Result = 1;
 }
 
-IMPL_DIVERGE("Native: CD key validation stub; GameSpy SDK defunct since 2014")
+IMPL_DIVERGE("GameSpy CDKey SDK defunct since 2014; retail calls FUN_10703730/10703800/10703870/10703b90 (Ghidra 0x10704460)")
 void AInternetLink::execValidate(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STR(ProductID);
@@ -1260,7 +1260,7 @@ void AUdpLink::execSetPlayingTime(FFrame& Stack, RESULT_DECL)
 	UTcpNetDriver implementation.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Property registration stub; CPP_PROPERTY cannot address bitfield members in standard C++")
+IMPL_DIVERGE("CPP_PROPERTY cannot address bitfield members in standard C++; retail registers 4 properties (Ghidra 0x10706e20)")
 void UTcpNetDriver::StaticConstructor()
 {
 	// Property registration omitted: CPP_PROPERTY cannot take the address

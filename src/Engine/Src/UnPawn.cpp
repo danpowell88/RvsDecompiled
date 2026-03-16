@@ -898,7 +898,7 @@ void APlayerController::execPB_CanPlayerSpawn( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 1320, execPB_CanPlayerSpawn );
 
-IMPL_DIVERGE("Ghidra 0x1042c250; 562b — PunkBuster FUN_1047f210 status lookup not reproducible; permanent: PunkBuster binary-only integration")
+IMPL_DIVERGE("PunkBuster binary-only anti-cheat middleware; FUN_1047f210 status lookup stub (Ghidra 0x1042c250)")
 void APlayerController::execGetPBConnectStatus( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execGetPBConnectStatus);
@@ -908,7 +908,7 @@ void APlayerController::execGetPBConnectStatus( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execGetPBConnectStatus );
 
-IMPL_DIVERGE("Ghidra 0x10420290; 105b -- calls FUN_1047e850 (PunkBuster enabled check) and returns result; our stub returns 0")
+IMPL_DIVERGE("PunkBuster binary-only anti-cheat middleware; FUN_1047e850 enabled check stub returns 0 (Ghidra 0x10420290)")
 void APlayerController::execIsPBEnabled( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execIsPBEnabled);

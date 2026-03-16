@@ -638,14 +638,15 @@ int UMeshAnimation::SequenceMemFootprint(FName Name)
 	unguard;
 }
 
-IMPL_TODO("FUN_1043fd50 (MotionChunk stride-0x58 via FUN_1043fb70 calling FUN_103218c0/FUN_1043f8f0/FUN_10438100 deep chain) and FUN_1043f770 (FMeshAnimSeq stride-0x2C via FUN_103cab30 calling FUN_103ca780/FUN_103ca9f0/FUN_103ca720 chain) are unresolved; FUN_10437c90 (FMeshAnimNotify stride-0xC) is tractable but partial impl without Movements/Sequences would corrupt the stream; retail 0x1043fee0 (135b)")
+IMPL_TODO("blocked by FUN_1043fd50 (MotionChunk stride-0x58, deep chain via FUN_1043fb70→FUN_103218c0/FUN_1043f8f0/FUN_10438100) and FUN_1043f770 (FMeshAnimSeq stride-0x2C, deep chain via FUN_103cab30); FUN_10437c90 (FMeshAnimNotify stride-0xC) is tractable but partial impl without Movements/Sequences would corrupt the archive stream; retail 0x1043fee0 (135b)")
 void UMeshAnimation::Serialize(FArchive& Ar)
 {
-	// Ghidra 0x1043fee0 (135b): UObject::Serialize, BOS +0x2C (4b),
-	// FUN_10437c90(+0x30) / FUN_1043fd50(+0x3C) / FUN_1043f770(+0x48).
-	// Blockers: FUN_1043fd50 (MotionChunk) and FUN_1043f770 (FMeshAnimSeq) have deep
-	// nested serializer chains not yet fully traced; omitting them here avoids corrupting
-	// the archive stream.  FUN_10437c90 (FMeshAnimNotify, stride 0xC) is tractable.
+	// Ghidra 0x1043fee0 (135b): UObject::Serialize, BOS(+0x2C,4),
+	// FUN_10437c90(Ar,+0x30), FUN_1043fd50(Ar,+0x3C), FUN_1043f770(Ar,+0x48), IsPersistent().
+	// FUN_10437c90: TArray<FMeshAnimNotify> serializer (stride 0xC) — tractable (Ar<<FName + 2×BOS per entry).
+	// FUN_1043fd50: TArray<MotionChunk> serializer (stride 0x58) — deep chain via FUN_1043fb70.
+	// FUN_1043f770: TArray<FMeshAnimSeq> serializer (stride 0x2C) — deep chain via FUN_103cab30.
+	// Partial impl without all 3 would corrupt the archive stream position.
 	UObject::Serialize(Ar);
 	Ar.ByteOrderSerialize((BYTE*)this + 0x2C, 4);
 }
@@ -820,12 +821,16 @@ void UMeshAnimation::InitForDigestion()
 
 
 // --- UVertMesh ---
-IMPL_DIVERGE("partial blocker: binary global DAT_1060b564 resource-ID counter cannot be replicated — FUN_1043d7e0 entry constructor is confirmed in _unnamed.cpp (tractable) but DAT_1060b564 is a permanent binary-only constraint; entry initialised with appMemzero instead; retail 0x10474da0 (409b)")
+IMPL_TODO("FUN_1043d7e0 entry constructor sets FAnimMeshVertexStream vtable at +0x14, resource-ID from DAT_1060b564 at +0x28, and FRawIndexBuffer at +0x40 — all internal binary types not yet reconstructed; using appMemzero instead; also missing GLog->Logf between copy and material loops; retail 0x10474da0 (409b)")
 int UVertMesh::RenderPreProcess()
 {
 	guard(UVertMesh::RenderPreProcess);
 	INT iVar2 = ((FArray*)((BYTE*)this + 400))->Num();
 	if (iVar2 != 0) return 0;
+
+	// Ghidra: empty destructor loop over existing entries at +0x14C (count at +0x150).
+	// Retail iterates for side-effects (element destructors); our entries are POD-zeroed.
+	for (INT d = 0; d < *(INT*)((BYTE*)this + 0x150); d++) {}
 
 	((FArray*)((BYTE*)this + 0x14c))->Empty(0x20, 0);
 	FArray* this_00 = (FArray*)((BYTE*)this + 0xc4);
@@ -846,6 +851,12 @@ int UVertMesh::RenderPreProcess()
 		iVar2++;
 	}
 
+	// Ghidra: FArray::Num(+0xC4), FArray::Num(+0x14C), GLog->Logf(...)
+	// Format string is embedded in the binary and not extractable from Ghidra.
+	this_00->Num();
+	this_01->Num();
+	GLog->Logf(TEXT(""));
+
 	_WORD* puVar4 = NULL;
 	iVar2 = 0;
 	while (true)
@@ -861,7 +872,10 @@ int UVertMesh::RenderPreProcess()
 				puVar4 = NULL;
 			else
 			{
-				appMemzero(newEntry, 0x5C); // FUN_1043d7e0 zeroed entry + stamped DAT_1060b564 at +0x14; we zero-init only
+				// Retail: FUN_1043d7e0 constructs entry with FAnimMeshVertexStream vtable (+0x14),
+				// resource-ID stamp (+0x28 = DAT_1060b564++ * 0x100 + 0xE1), FArray (+0x1C),
+				// and FRawIndexBuffer (+0x40). We zero-init since those types are binary-internal.
+				appMemzero(newEntry, 0x5C);
 				puVar4 = (_WORD*)newEntry;
 				_WORD uStack_22 = (_WORD)(uVar1 >> 0x10);
 				puVar4[7] = (_WORD)iVar2;
@@ -879,17 +893,18 @@ int UVertMesh::RenderPreProcess()
 	unguard;
 }
 
-IMPL_TODO("FUN_1043f770 (FMeshAnimSeq stride-0x2C, same chain as UMeshAnimation blocker) is unresolved; all other helpers (FUN_103c7240/FUN_10438000/FUN_1032d5f0/FUN_103cd010/FUN_10474600/FUN_10323030) are now tractable via static helpers in this file, but partial impl without +0x118 would corrupt the stream; retail 0x104758b0 (424b)")
+IMPL_TODO("blocked by FUN_1043f770 (FMeshAnimSeq stride-0x2C, deep chain via FUN_103cab30); all other helpers are tractable: FUN_10323030 (stride-0x20), FUN_103c7240/FUN_10438000 (stride-4 BOS), FUN_1032d5f0 (stride-4 via FUN_10301310), FUN_103cd010 (FBox stride-0x1C), FUN_10474600 (FSphere stride-0x10), FUN_1043fc30 (stride-0x5C); partial impl without +0x118 would corrupt the archive stream; retail 0x104758b0 (424b)")
 void UVertMesh::Serialize(FArchive& Ar)
 {
 	guard(UVertMesh::Serialize);
-	// Ghidra 0x1758b0 (424b): ULodMesh::Serialize, FUN_10323030(+0x14C lazy-loader),
+	// Ghidra 0x104758b0 (424b): ULodMesh::Serialize, FUN_10323030(+0x14C, stride 0x20),
 	// BOS(+0x160,4), FUN_103c7240(+0xF4)/FUN_10438000(+0x10C)/FUN_1043f770(+0x118)/
 	// FUN_1032d5f0(+0x100), BOS(+0x13C,4)/BOS(+0x140,4),
 	// FUN_103cd010(+0x124)/FUN_10474600(+0x130).
 	// !IsPersistent path: BOS(+0x170,4), Ar<<FRawIndexBuffer(+0x174), FUN_1043fc30(+0x190),
 	// repeated for +0x19C/+0x1A0/+0x1BC, +0x1C8/+0x1CC/+0x1E8, +0x1F4/+0x1F8/+0x214.
-	// Blocker: FUN_1043f770 (FMeshAnimSeq serializer) — see UMeshAnimation notes.
+	// Blocker: FUN_1043f770 (FMeshAnimSeq serializer) is mid-stream; skipping it would
+	// desync everything after. All other serializers are tractable.
 	ULodMesh::Serialize(Ar);
 	Ar.ByteOrderSerialize((BYTE*)this + 0x13C, 4);
 	Ar.ByteOrderSerialize((BYTE*)this + 0x140, 4);
@@ -909,13 +924,14 @@ UClass * UVertMesh::MeshGetInstanceClass()
 	return UVertMeshInstance::StaticClass();
 }
 
-IMPL_DIVERGE("FUN_103ca8f0 AnimNotify instantiator is unexported; AnimSets element stride at this+0x118 is unknown — cannot safely iterate; retail 0x10472830 (124b)")
+IMPL_TODO("blocked by FUN_103ca8f0 (AnimNotify instantiator, creates UAnimNotify_Script objects via FUN_103ca880); loop iterates FArray::Num(+0x118) times calling FUN_103ca8f0(GetOuter()) with ECX=element — element stride is 0x2C (FMeshAnimSeq) but loop body does not access element data; retail 0x10472830 (124b)")
 void UVertMesh::PostLoad()
 {
-	// Ghidra 0x172830: UObject::PostLoad, then iterate AnimSets (this+0x118), calling
-	// FUN_103ca8f0 (unexported) per entry with ECX = current AnimSets element.
-	// Element stride unknown; FUN_103ca8f0 creates UAnimNotify_Script objects.
-	// DIVERGENCE: skipping AnimNotify instantiation — FUN_103ca8f0 unexported, stride unknown.
+	// Ghidra 0x10472830 (124b): UObject::PostLoad, then loop Num(+0x118) times,
+	// each iteration: outer=GetOuter(this), ECX=*(INT*)(+0x118)+i*0x2C,
+	// FUN_103ca8f0(outer) — instantiates UAnimNotify_Script per AnimSeq entry.
+	// FUN_103ca8f0 iterates sub-array at ECX+0x1C (AnimNotifys within the AnimSeq),
+	// creates UAnimNotify_Script objects and links them back.
 	UObject::PostLoad();
 }
 
@@ -991,14 +1007,17 @@ int USkeletalMesh::SetAttachAlias(FName param_2, FName param_3, FCoords& param_4
 	unguard;
 }
 
-IMPL_DIVERGE("FUN_10435460 bone-tag index helper is unexported; multiple additional vtable unknowns at param_2+0x328+0xf0 and instance+0x68; Ghidra 0x10436770 (865b)")
+IMPL_TODO("FUN_10435460 (bone-tag FName search, tractable: linear scan of TArray<FName> confirmed in _unnamed.cpp) is resolved in analysis but full function requires FCoords math chain, GMath_exref global, and vtable dispatch at param_2+0x328+0xf0 (possibly Karma/physics interface callback); Ghidra 0x10436770 (865b)")
 int USkeletalMesh::SetAttachmentLocation(AActor* param_2, AActor* param_3)
 {
 	guard(USkeletalMesh::SetAttachmentLocation);
-	// Retail: reads bone transforms from SkeletalMeshInstance (via GetMeshInstance on param_2)
-	// and applies the world-space bone transform to param_3's Location/Rotation.
-	// TODO: implement USkeletalMesh::SetAttachmentLocation — requires USkeletalMeshInstance::GetTagCoords
-	// and bone-transform-to-world conversion
+	// Ghidra 0x10436770 (865b): FUN_10435460(param_3+0x1B0) = search AttachTag FName in
+	// bone-alias array at this+0x2D0/+0x2DC. If found: use alias mapping via +0x2E8.
+	// If not: linear search this+0x19C (BoneNames, stride 0x40) for matching FName.
+	// Then: MeshGetInstance(param_2) → read bone transforms from instance+0xB8,
+	// apply FCoords::ApplyPivot + FVector::TransformVectorBy,
+	// optionally call param_3+0x328+0xF0 vtable method (physics interface),
+	// write final Location to param_3+0x234 and Rotation via FCoords multiply.
 	return 0;
 	unguard;
 }
@@ -1153,14 +1172,15 @@ void USkeletalMesh::FlipFaces()
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x10442d40: progressive-mesh LOD generation is editor-only preprocessing; FUN_10437c20/FUN_10440e20/FUN_10441200 are LOD reduction helpers used exclusively by the editor")
+IMPL_DIVERGE("7 render-stream vtable slot-0 calls at this+0xF4/+0x10C/+0x124/+0x13C/+0x154/+0x16C/+0x184 (stream Clear) use binary-internal vtable layout (FAnimMeshVertexStream, FSkinVertexStream, etc.); FUN_1043f4c0 (LOD constructor) and FUN_10440e20/FUN_10441200 (LOD reduction helpers) also unexported; Ghidra 0x10442d40 (1388b)")
 void USkeletalMesh::GenerateLodModel(int param1, float param2, float param3, int param4, int param5)
 {
 	guard(USkeletalMesh::GenerateLodModel);
-	// Ghidra 0x142d40: validates param1 in [0,8], then calls many FUN_ helpers
-	// to compute LOD vertex/face streams from the full-resolution mesh.
-	// DIVERGENCE: progressive mesh reduction helpers (FUN_10437c20 and related) are
-	// unresolved external calls in Engine.dll; LOD generation is not implementable here.
+	// Ghidra 0x10442d40 (1388b): validates param1 in [0,8], issues 7 render-stream
+	// vtable slot-0 Clear calls, then FUN_10441200 (vert-count normalization),
+	// FUN_1043f4c0 (LOD slot constructor), FUN_10440e20 (LOD reduction), and complex
+	// progressive mesh decimation loop with FUN_10440840 (face insertion).
+	// DIVERGENCE: render-stream vtable calls and LOD reduction helpers are binary-internal.
 	if (param1 >= 0 && param1 < 9)
 	{
 		(void)param2; (void)param3; (void)param4; (void)param5;
@@ -1168,14 +1188,16 @@ void USkeletalMesh::GenerateLodModel(int param1, float param2, float param3, int
 	unguard;
 }
 
-IMPL_DIVERGE("FUN_1043f4c0 (LOD slot constructor, unexported) + FUN_10440e20 (LOD reduction helper, unexported, editor-only) + 7 vtable slot-0 calls on render-stream objects in param2 (permanently unresolvable, same constraint as ResetGeometry); Ghidra 0x10442970 (925b)")
+IMPL_DIVERGE("7 render-stream vtable slot-0 calls on param_2+0xF4/+0x13C/+0x124/+0x10C/+0x154/+0x16C/+0x184 (stream Clear/copy) use binary-internal vtable layout; FUN_1043f4c0 (LOD entry constructor with FSkinVertexStream vtable + DAT_1060b564 resource-ID) and FUN_10440e20 (LOD reduction) also unexported; Ghidra 0x10442970 (925b)")
 void USkeletalMesh::InsertLodModel(int param1, USkeletalMesh* param2, float param3, int param4)
 {
 	guard(USkeletalMesh::InsertLodModel);
-	// Ghidra 0x142970: inserts LOD model from param2 at slot param1 in LOD array.
-	// FUN_1043f4c0 = LOD entry constructor (initialises the 0x11C-byte slot);
-	// following vtable stream-copy calls deep-copy param2's vertex/index streams.
-	// DIVERGENCE: FUN_1043f4c0 and stream-copy helpers are unresolved — no data copy.
+	// Ghidra 0x10442970 (925b): inserts LOD model from param2 at slot param1 in LOD array.
+	// FUN_1043f4c0 constructs 0x11C-byte LOD entry (multiple FArrays, FRawIndexBuffers,
+	// FSkinVertexStream vtable at +0x6C, resource-ID from DAT_1060b564 at +0x78).
+	// Then 7 vtable slot-0 calls on param2's render-streams (Clear), followed by
+	// deep-copy loops for vertices, faces, weights, and influence data.
+	// DIVERGENCE: FUN_1043f4c0, render-stream vtable calls, and copy logic all unresolved.
 	if (param1 >= 0 && param1 < 9)
 	{
 		FArray* lodArr = (FArray*)((BYTE*)this + 0x1AC);
@@ -1243,7 +1265,7 @@ int USkeletalMesh::R6LineCheck(FCheckResult& param_1, AActor* param_2, FVector p
 	unguard;
 }
 
-IMPL_TODO("FUN_1043fa50 (FSkelMeshLODModel stride-0x11C via FUN_1043f650 deep chain) and FUN_10438510 (GLazyLoad-gated lazy array) are unresolved; many helpers (FUN_10321a80/FUN_104378f0/FUN_1043ce30/FUN_10437a50/FUN_103ca780/FUN_104371c0) are tractable but partial impl without the LOD model array would corrupt the stream; NOTE: retail calls ULodMesh::Serialize (now implemented) but our source hierarchy has USkeletalMesh:UMesh so UMesh::Serialize is correct; retail 0x1043ffb0 (746b)")
+IMPL_TODO("blocked by FUN_1043fa50 (FSkelMeshLODModel stride-0x11C, deep chain via FUN_1043f650) and FUN_10438510 (GLazyLoad-gated lazy array); many helpers are tractable: FUN_10321a80 (+0x1B8), FUN_104378f0 (+0x19C), FUN_1043ce30 (+0x1C4), FUN_10437a50 (+0x1D0), FUN_103ca780 (+0x2D0/+0x2DC), FUN_104371c0 (+0x2E8); partial impl without LOD model array (+0x1AC) would corrupt the archive stream; retail hierarchy has ULodMesh::Serialize as base but our source uses UMesh::Serialize; retail 0x1043ffb0 (746b)")
 void USkeletalMesh::Serialize(FArchive& Ar)
 {
 	// Ghidra 0x1043ffb0 (746b): retail calls ULodMesh::Serialize first (USkeletalMesh→ULodMesh
@@ -1254,14 +1276,18 @@ void USkeletalMesh::Serialize(FArchive& Ar)
 	UMesh::Serialize(Ar);
 }
 
-IMPL_DIVERGE("Karma ragdoll line check pending MeSDK decompilation; retail 0x104354f0 (729b)")
+IMPL_DIVERGE("Karma/MeSDK proprietary: ragdoll line check uses KU2MEPosition, KME2UPosition, and per-body MeXContactPoints ray cast via FUN_104f36e0/FUN_104aa520/FUN_104aa400/FUN_104aa700 (all MathEngine SDK functions); retail 0x104354f0 (729b)")
 int USkeletalMesh::LineCheck(FCheckResult& param_1, AActor* param_2, FVector param_3, FVector param_4, FVector param_5, DWORD param_6, DWORD param_7)
 {
 	guard(USkeletalMesh::LineCheck);
 	if (*(BYTE*)((BYTE*)param_2 + 0x2c) != 0x0e) // PHYS_KarmaRagDoll = 14
 		return UPrimitive::LineCheck(param_1, param_2, param_3, param_4, param_5, param_6, param_7);
-	// DIVERGENCE: Karma ragdoll line check delegates to MeXContactPoints for per-body ray cast.
-	// Karma physics integration not implemented; returns 1 (no hit).
+	// Ghidra 0x104354f0 (729b): for ragdolls (Physics==0x0E), checks FVector!=zero extent,
+	// then MeshGetInstance→IsA(USkeletalMeshInstance), converts positions via KU2MEPosition,
+	// iterates instance+0x308 body array, calls FUN_104f36e0/FUN_104aa520/FUN_104aa400/
+	// FUN_104aa700 (MeSDK ray-vs-body contact test), finds closest hit body, converts back
+	// via KME2UPosition, fills FCheckResult. All FUN_104xxxxx are MathEngine SDK internals.
+	// DIVERGENCE: Karma/MeSDK proprietary — returns 1 (no hit) for ragdoll actors.
 	return 1;
 	unguard;
 }
@@ -1348,16 +1374,17 @@ FSphere USkeletalMesh::GetRenderBoundingSphere(const AActor* Owner)
 
 
 // --- USkeletalMesh ---
-IMPL_DIVERGE("7 vtable slot-0 calls on render-stream objects at this+0xF4/+0x13C/+0x124/+0x10C/+0x154/+0x16C/+0x184 use binary-specific vtable layout; stream-clear operations permanently unresolvable without render-stream vtable map; retail 0x10441820 (1752b)")
+IMPL_DIVERGE("7 render-stream vtable slot-0 calls at this+0xF4/+0x13C/+0x124/+0x10C/+0x154/+0x16C/+0x184 (FAnimMeshVertexStream/FSkinVertexStream Clear) use binary-internal vtable layout; subsequent FArray::Empty and per-LOD reconstruction depend on streams being in a clean state; retail 0x10441820 (1752b)")
 void USkeletalMesh::ReconstructRawMesh()
 {
 	guard(USkeletalMesh::ReconstructRawMesh);
-	// Ghidra 0x141820: first checks GIsEditor/GIsUCC, then issues 7 vtable slot-0 calls
-	// (stream Clear) on render-stream objects at this+0xF4/+0x13C/+0x124/+0x10C/+0x154/
-	// +0x16C/+0x184.  These vtable layouts are binary-specific — permanently unresolvable.
-	// The subsequent FArray::Empty calls and per-LOD reconstruction loops would also need
-	// the streams to be in a clean state, so they are omitted too.
-	// DIVERGENCE: stream-clear vtable calls and full LOD reconstruction permanently blocked.
+	// Ghidra 0x10441820 (1752b): checks GIsEditor/GIsUCC, then 7 render-stream vtable
+	// slot-0 Clear calls (FAnimMeshVertexStream/FSkinVertexStream at +0xF4/+0x13C/+0x124/
+	// +0x10C/+0x154/+0x16C/+0x184). Then empties arrays at +0x100/+0x130/+0x148/+0x160
+	// and TArray<unsigned short> at +0x178/+0x190. Reconstructs raw mesh from LOD data at
+	// +0x1C4 (up to 7 LODs), filling vertices, faces, weights, and influences.
+	// Finally builds FArray of face-material assignments and copies to +0xAC faces array.
+	// DIVERGENCE: render-stream vtable calls and downstream reconstruction permanently blocked.
 	unguard;
 }
 
@@ -1375,7 +1402,7 @@ UClass * USkeletalMesh::MeshGetInstanceClass()
 	return USkeletalMeshInstance::StaticClass();
 }
 
-IMPL_DIVERGE("vtable slot-0 call on render-stream object at this+0xF4 (stream Clear before ReconstructRawMesh) uses binary-specific render-stream vtable layout; permanently unresolvable; rest of function matches retail; retail 0x1042f4b0 (232b)")
+IMPL_DIVERGE("render-stream vtable slot-0 call at this+0xF4 (FAnimMeshVertexStream::Clear before ReconstructRawMesh) uses binary-internal vtable layout; rest of function matches retail; retail 0x1042f4b0 (232b)")
 void USkeletalMesh::PostLoad()
 {
 	// Ghidra 0x12f4b0: UObject::PostLoad, then if LodVersion (+0x5C) < 2: vtable slot-0 call

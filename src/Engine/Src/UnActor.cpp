@@ -1999,7 +1999,7 @@ void AActor::execGetGameVersion( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1419, execGetGameVersion );
 
-IMPL_DIVERGE("PunkBuster DLL integration unavailable; always returns 0 (Ghidra 0x104204b0)")
+IMPL_DIVERGE("PunkBuster binary-only anti-cheat middleware; stub returns 0 (Ghidra 0x104204b0)")
 void AActor::execIsPBClientEnabled( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execIsPBClientEnabled);
@@ -2009,7 +2009,7 @@ void AActor::execIsPBClientEnabled( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1400, execIsPBClientEnabled );
 
-IMPL_DIVERGE("PunkBuster DLL integration unavailable; always returns 0 (Ghidra 0x10420410)")
+IMPL_DIVERGE("PunkBuster binary-only anti-cheat middleware; stub returns 0 (Ghidra 0x10420410)")
 void AActor::execIsPBServerEnabled( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execIsPBServerEnabled);
@@ -2019,7 +2019,7 @@ void AActor::execIsPBServerEnabled( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1402, execIsPBServerEnabled );
 
-IMPL_DIVERGE("PunkBuster DLL integration unavailable; enable/disable call omitted (Ghidra 0x10420550)")
+IMPL_DIVERGE("PunkBuster binary-only anti-cheat middleware; enable/disable no-op (Ghidra 0x10420550)")
 void AActor::execSetPBStatus( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetPBStatus);
