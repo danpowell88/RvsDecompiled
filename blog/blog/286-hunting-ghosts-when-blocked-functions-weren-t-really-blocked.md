@@ -16,7 +16,7 @@ Spoiler: half of them turn out to be `memcpy`. The other half are completely imp
 
 At the start of this session, we had **187 IMPL_TODO entries** across our source code. Each one represents a function that's been identified in the retail binary via Ghidra but not yet reconstructed. Some were blocked by genuine external dependencies (the Karma physics SDK, defunct GameSpy servers). But a lot of them had `IMPL_TODO` for reasons that turned out to be... wrong.
 
-If you've read the [previous post](../284-impl-todo-sprint-from-265-to-138-and-the-chaos-of-concurrent-agents) about our attribution system, you know the difference between:
+If you've read the [previous post](/blog/284-impl-todo-sprint-from-265-to-138-and-the-chaos-of-concurrent-agents) about our attribution system, you know the difference between:
 - **IMPL_MATCH**: Our code matches the retail binary exactly
 - **IMPL_TODO**: Function identified but not yet written
 - **IMPL_DIVERGE**: Permanently blocked (Karma, GameSpy, etc.)
