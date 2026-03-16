@@ -1399,11 +1399,12 @@ int FStaticTexture::GetRevision()
 	}
 	return *(INT*)&Pad[12];
 }
-IMPL_TODO("Ghidra 0x10469da0 (1462b): FUN_1050557c confirmed in _unnamed.cpp; complex DXT/format decompression pipeline — pending full decompilation")
+IMPL_TODO("Ghidra 0x10469da0 (1462b): FUN_1050557c is __ftol2 CRT helper (117b, float-to-int via ST0) — not a true FUN_ blocker. Real blocker: lazy-load mip stream reader and per-format DXT1/DXT3/DXT5/RGBA8 decompression loops not yet translated.")
 void FStaticTexture::GetTextureData(int,void *,int,ETextureFormat,int)
 {
-	// TODO: implement FStaticTexture::GetTextureData (Ghidra 0x169da0: lazy-load path,
-	// format dispatch for TEXF_DXT1/DXT3/DXT5/RGBA8 etc.; uses FUN_1050557c confirmed in _unnamed.cpp)
+	// Ghidra 0x169da0: checks if mip array is non-empty, loads mip entry (stride 0x28),
+	// dispatches on ETextureFormat param for DXT1/DXT3/DXT5/P8/RGBA8 pixel unpacking.
+	// FUN_1050557c calls = (int)floatValue casts (__ftol2); no extern FUN_ dependency.
 }
 IMPL_MATCH("Engine.dll", 0x10468ce0)
 ETexClampMode FStaticTexture::GetUClamp()
@@ -1612,18 +1613,17 @@ FDynamicActor::FDynamicActor(const FDynamicActor& Other)
 	appMemcpy(this, &Other, 0x80);
 }
 
-IMPL_TODO("Ghidra 0x103ffb70 (1798b): no FUN_ blockers; complex vtable-dispatch for mesh/physics bounding box — actor vtable offsets 0xac/0xc0 and mesh vtable 0x6c/0x70 not yet mapped to named methods")
+IMPL_TODO("Ghidra 0x103ffb70 (1798b): no FUN_ blockers; vtable slots now identified: actor vtable+0xac=GetRenderBoundingBox(FMatrix*), +0xc0=GetMesh; mesh vtable+0x6c=GetBoundingBox, +0x70=GetSphere. Pending: map these to named virtual methods and reconcile Emitter/SkeletalMesh/Physics specialised bound paths.")
 FDynamicActor::FDynamicActor(AActor* Actor)
 {
 	// Ghidra 0xffb70: construct sub-objects, store actor pointer, compute transform/bounds.
-	// FMatrix at this+4, FBox at this+0x48, FSphere at this+0x64; actor pointer at this+0.
+	// FMatrix at this+4, FBox at this+0x48, FSphere at this+0x64 (offset 100); actor pointer at this+0.
+	// After construction: calls actor vtable+0xac (GetRenderBoundingBox -> FMatrix) to fill this+4..+44,
+	// computes Determinant into this+0x44, then dispatches on DrawType/Emitter/SkeletalMesh for bounds.
 	new ((BYTE*)this + 0x04) FMatrix();
 	new ((BYTE*)this + 0x48) FBox();
 	new ((BYTE*)this + 0x64) FSphere();
 	*(AActor**)this = Actor;
-	// Remaining: vtable dispatch for mesh/physics bounding box not yet mapped to named methods.
-	//   actor vtable+0xac = GetRenderBoundingBox, +0xc0 = GetMesh, mesh vtable+0x6c = GetBoundingBox.
-	//   Emitter/SkeletalMesh paths also have specialised bounds logic.
 }
 
 IMPL_MATCH("Engine.dll", 0x10309a70)
@@ -1767,19 +1767,19 @@ FDynamicLight::FDynamicLight(FDynamicLight const& Other)
 	appMemcpy( this, &Other, sizeof(FDynamicLight) );
 }
 
-IMPL_TODO("Ghidra 0x1040ff20 (1485b): FGetHSV (defined in UnCamera.cpp) and FUN_1050557c/FUN_1038a4f0 (confirmed in _unnamed.cpp) all accessible; LightEffect dispatch complex but tractable — pending full decompilation")
+IMPL_TODO("Ghidra 0x1040ff20 (1485b): FUN_1050557c=__ftol2 (CRT float-to-int, not a blocker); FUN_1038a4f0=IsA(UTexture) (inlineable). Real blockers: (1) private DLL globals _DAT_1078a540/_DAT_1078a53c (LightEffect=5 toggle state, no named symbol) and (2) FPU-stack-implicit float values in Pulse/Wave LightEffect cases require assembly-level analysis.")
 FDynamicLight::FDynamicLight(AActor* Actor)
 {
 	// Ghidra 0x10ff20: construct sub-objects, store actor, compute light color/direction.
-	// FPlane at this+4, FVector at this+0x14, FVector at this+0x20; actor at this+0.
+	// FPlane at this+4 (Color), FVector at this+0x14 (Origin), FVector at this+0x20 (Direction); actor at this+0.
+	// Flow: FGetHSV(actor->LightHue, actor->LightSaturation, ?) -> base HSV color stored in uStack_24..uStack_18,
+	// then switch on actor->LightEffect (byte at actor+0x36) modulates the base color,
+	// then multiply by actor->LightBrightness/255 and store to FPlane at this+4.
+	// Direction set from FRotator::Vector(actor+0x240) for LT_Directional/LT_Spotlight.
 	new ((BYTE*)this + 0x04) FPlane();
 	new ((BYTE*)this + 0x14) FVector();
 	new ((BYTE*)this + 0x20) FVector();
 	*(AActor**)this = Actor;
-	// Remaining: FGetHSV(actor->LightHue, actor->LightSaturation, ...) to build base color,
-	// then LightEffect switch (LT_Pulse/Subtractive/Flicker/Strobe etc.) to modulate it,
-	// then scale by actor->LightBrightness/255 and store to this->Color (FPlane at +4).
-	// Direction at this+0x20 set from actor rotation for LT_Directional/LT_Spot.
 }
 
 IMPL_MATCH("Engine.dll", 0x103135b0)

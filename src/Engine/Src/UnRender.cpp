@@ -371,16 +371,17 @@ void UCanvas::execTextSize( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execTextSize );
 
-IMPL_TODO("Ghidra 0x103897b0 (760b): projects WorldLoc via FCameraSceneNode + FCanvasUtil; scene-node setup required — pending full implementation")
+IMPL_TODO("Ghidra 0x103897b0 (760b): P_GET sequence wrong — Ghidra shows 7 params (2 FLOATs + 3 FVectors + 1 FRotator + misc) before FCameraSceneNode construction; current stub only reads 2. Full .uc signature and FCameraSceneNode/FCanvasUtil usage must be reconciled.")
 void UCanvas::execGetScreenCoordinate( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execGetScreenCoordinate);
 	P_GET_VECTOR(WorldLoc);
 	P_GET_VECTOR_REF(ScreenLoc);
 	P_FINISH;
-	// Project world location to screen coordinates.
-	// Basic projection using viewport dimensions. Full implementation
-	// requires the scene view matrix which lives in FSceneNode.
+	// Ghidra 0x897b0: reads 7 bytecode params (2 floats, 3 FVectors, 1 FRotator, misc),
+	// constructs FCameraSceneNode on stack, uses FCanvasUtil to project WorldLoc into
+	// screen-space coordinates stored via the out-ref ScreenLoc param.
+	// Current P_GET sequence is provisional; full .uc signature needed.
 	*ScreenLoc = FVector(SizeX * 0.5f, SizeY * 0.5f, 0.0f);
 	unguardexec;
 }
