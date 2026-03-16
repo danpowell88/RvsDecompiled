@@ -112,6 +112,7 @@ extern BYTE GShift[8];
 // Duplicate native/cast registration counters (defined in Core.cpp).
 extern CORE_API INT GNativeDuplicate;
 extern CORE_API INT GCastDuplicate;
+extern CORE_API UBOOL GIsUCC;
 
 // CPU feature flags (defined in Core.cpp, used in UnFile.cpp).
 extern CORE_API UBOOL GIsMMX;
@@ -130,6 +131,7 @@ extern INT GRunawayLimit;
 // appSRand — seeded random float, exported from Core.dll.
 CORE_API FLOAT appSRand();
 CORE_API void  appSRandInit( INT Seed );
+CORE_API void  VARARGS EdLoadErrorf( INT Type, const TCHAR* Fmt, ... );
 
 // appTrunc — float-to-int truncation (used in script math).
 inline INT appTrunc( FLOAT F ) { return (INT)F; }
