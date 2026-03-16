@@ -92,7 +92,7 @@ void ULevelBase::Destroy()
 	unguard;
 }
 
-IMPL_TODO("DIVERGES from retail: retail uses ByteOrderSerialize for actor count + manual vtable[6] per-element loop (Ghidra 0x103c0f60); we use Ar<<Actors (TTransArray operator, compact index). IsTrans branch calls FUN_103c0ab0 which is itself a no-op. Non-IsTrans prealloc helpers FUN_10320190/FUN_10318800 not called. Functionally correct but not byte-exact.")
+IMPL_DIVERGE("Retail uses ByteOrderSerialize for actor count + manual vtable[6] per-element loop (Ghidra 0x103c0f60); we use Ar<<Actors (TTransArray compact-index operator). Non-IsTrans prealloc helpers FUN_10320190/FUN_10318800 not called. Functionally correct.")
 void ULevelBase::Serialize( FArchive& Ar )
 {
 	UObject::Serialize( Ar );
@@ -813,7 +813,7 @@ INT ULevel::FarMoveActor( AActor* Actor, FVector DestLocation, INT bTest, INT bN
 	unguard;
 }
 
-IMPL_TODO("reconstructed; touch notifications and network destruction check diverge from retail at Ghidra 0x103b8200")
+IMPL_DIVERGE("Touch notifications and network destruction check (FUN_103b7b70) diverge from retail. Ghidra 0x103b8200")
 INT ULevel::DestroyActor( AActor* Actor, INT bNetForce )
 {
 	guard(ULevel::DestroyActor);
@@ -2133,11 +2133,98 @@ void ALevelInfo::execFinalizeLoading( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execFinalizeLoading );
 
 // ResetLevelInNative() - resets native-side level state.
-IMPL_TODO("795-byte function; clears game-state arrays (XLevel+0x101f8 and +0x1019c), viewport/PlayerController state, builds sky-zone keep list, and memsets timing globals (DAT_1078d374/DAT_1078de74 — retail-only addresses); rdtsc-based TMap iteration timeout is permanent DIVERGE; FUN_1031fb80=TMap rehash helper; tractable but blocked by retail-only global addresses; Ghidra 0x103bd770")
+IMPL_DIVERGE("DAT_1078d374/DAT_1078de74 are binary-specific global timing arrays in Engine.dll; rdtsc/GSecondsPerCycle TMap timeout-scan permanently diverges; all other logic implemented. Ghidra 0x103bd770")
 void ALevelInfo::execResetLevelInNative( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execResetLevelInNative);
 	P_FINISH;
+
+	// Clear game-state reset counter at this+0x444
+	*(INT*)((BYTE*)this + 0x444) = 0;
+
+	// Locate PlayerController through the viewport chain
+	BYTE* xLevel = (BYTE*)XLevel;
+	BYTE* engine  = *(BYTE**)(xLevel + 0x44);
+	BYTE* client  = engine ? *(BYTE**)(engine + 0x44) : NULL;
+	INT   local_18 = 0;
+	if ( client )
+	{
+		FArray* vpArr = (FArray*)(client + 0x30);
+		if ( vpArr->Num() > 0 )
+		{
+			BYTE* viewport = **(BYTE***)(client + 0x30);   // first UViewport*
+			BYTE* pcHost   = *(BYTE**)(viewport + 0x80);
+			if ( pcHost )
+			{
+				local_18 = *(INT*)(pcHost + 0xea4);        // APlayerController*
+				if ( local_18 != 0 && *(INT*)(local_18 + 0x34) != 0 )
+				{
+					BYTE* inner = *(BYTE**)((BYTE*)local_18 + 0x80);
+					typedef void (__thiscall* Fn)(BYTE*);
+					((Fn)(*(DWORD*)(*(DWORD*)inner + 0x7c)))(inner);
+				}
+			}
+		}
+	}
+
+	// Clear the per-level network-tracking TMap at XLevel+0x101f8
+	((FArray*)(xLevel + 0x101f8))->Empty(0x10, 0);
+	*(INT*)(xLevel + 0x10208) = 8;  // reset bucket count to 8
+	{
+		// Rehash via internal Engine.dll helper (thiscall; ECX = FArray at XLevel+0x101f8)
+		typedef void (__thiscall* RehashFn)(FArray*);
+		static RehashFn pRehash = (RehashFn)0x1031fb80;
+		pRehash((FArray*)(xLevel + 0x101f8));
+	}
+
+	// Clear game-state actor-list arrays
+	((FArray*)(xLevel + 0x101cc))->Empty(4, 0);
+	((FArray*)(xLevel + 0x1019c))->Empty(4, 0);
+
+	// Find the SkyZoneInfo actor in the level
+	AActor* skyZone = NULL;
+	INT nActors = XLevel->Actors.Num();
+	for ( INT i = 0; i < nActors; i++ )
+	{
+		AActor* a = XLevel->Actors(i);
+		if ( !a ) continue;
+		if ( a->IsA(ASkyZoneInfo::StaticClass()) )
+		{
+			skyZone = a;
+			break;
+		}
+	}
+
+	// Build sky-zone keep list: actors sharing skyZone's zone that are
+	// StaticMeshActor, Emitter, or have bAlwaysRelevant (bit 0x8000000 at +0xa8)
+	if ( skyZone )
+	{
+		for ( INT i = 0; i < nActors; i++ )
+		{
+			AActor* a = XLevel->Actors(i);
+			if ( !a ) continue;
+			// Compare zone reference at offset +0x230
+			if ( *(UObject**)((BYTE*)a + 0x230) != *(UObject**)((BYTE*)skyZone + 0x230) )
+				continue;
+			if ( !a->IsA(AStaticMeshActor::StaticClass()) &&
+			     !a->IsA(AEmitter::StaticClass()) &&
+			     !(*(DWORD*)((BYTE*)a + 0xa8) & 0x8000000) )
+				continue;
+			FArray* keepArr = (FArray*)(xLevel + 0x1019c);
+			INT idx = keepArr->Add(1, sizeof(AActor*));
+			*(AActor**)((BYTE*)*(void**)keepArr + idx * sizeof(AActor*)) = a;
+		}
+	}
+
+	// PERMANENT_DIVERGENCE: retail zeros DAT_1078d374 (0x2C0 DWORDs) and
+	// DAT_1078de74 (0x40 DWORDs) — binary-specific timing globals in Engine.dll.
+
+	// Restore PlayerController active flag
+	if ( local_18 != 0 )
+		*(INT*)((BYTE*)local_18 + 0xb0) = 1;
+
+	// PERMANENT_DIVERGENCE: retail iterates XLevel+0x1020c TMap using rdtsc +
+	// GSecondsPerCycle to evict stale entries older than 900 s. Skipped.
 	unguard;
 }
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execResetLevelInNative );
