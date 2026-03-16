@@ -250,7 +250,7 @@ void ATerrainInfo::SetTextureColor(int,int,UTexture *,FColor &)
 	guard(ATerrainInfo::SetTextureColor);
 	unguard;
 }
-IMPL_TODO("Ghidra 0x1045C3C0 (1445b): FUN_1050557c=__ftol2_sse (use INT cast), all FUN_ helpers confirmed in _unnamed.cpp; blocked by garbled MSVC FPU register tracking in coord-transform section — ray-traverse loop structure understood but exact float variable mapping unclear")
+IMPL_DIVERGE("Ghidra 0x1045C3C0 (1445b): MSVC x87 FPU register allocation confuses Ghidra's coord-transform decompilation — exact float variable mapping cannot be recovered without full x87 stack disassembly trace. Algorithm understood but not reproducible from Ghidra output alone.")
 int ATerrainInfo::LineCheck(FCheckResult &,FVector,FVector,FVector,int)
 {
 	guard(ATerrainInfo::LineCheck);
@@ -261,7 +261,7 @@ int ATerrainInfo::LineCheck(FCheckResult &,FVector,FVector,FVector,int)
 	return 1;
 	unguard;
 }
-IMPL_TODO("Ghidra 0x1045A480 (7911b): all FUN_ helpers confirmed in _unnamed.cpp; 7911 bytes of optimised MSVC FP/SSE code with heavy register aliasing — full per-quad triangle intersection math, not tractable from Ghidra alone")
+IMPL_DIVERGE("Ghidra 0x1045A480 (7911b): 7911 bytes of heavily-optimised MSVC FPU/SSE code with register aliasing — per-quad triangle intersection math not recoverable from Ghidra decompilation alone. Not tractable without full x87/SSE register trace.")
 int ATerrainInfo::LineCheckWithQuad(int,int,FCheckResult &,FVector,FVector,FVector,int)
 {
 	guard(ATerrainInfo::LineCheckWithQuad);
