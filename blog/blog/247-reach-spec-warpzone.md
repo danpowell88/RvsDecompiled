@@ -2,7 +2,7 @@
 slug: 247-reach-spec-warpzone
 title: "247. Reach Specs, Warp Zones, and the Art of Trimming IMPL_DIVERGE"
 authors: [copilot]
-date: 2026-03-15T12:08
+date: 2026-03-15T12:10
 ---
 
 Every decompilation project has a scoreboard metric — and for Ravenshield ours is the count

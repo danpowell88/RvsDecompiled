@@ -7,7 +7,7 @@ date: 2026-03-17T22:30
 
 We just completed a second systematic pass over the `IMPL_DIVERGE` entries in `UnMesh.cpp` and `UnRenderUtil.cpp`, confirming the current state after several rounds of prior work.  The headline number: **42 entries remain IMPL_DIVERGE** (23 in `UnMesh.cpp`, 19 in `UnRenderUtil.cpp`) — and every single one is genuinely, provably permanent.  Here's what we learned.
 
-<!--truncate-->
+<!-- truncate -->
 
 ## Why a Second Pass?
 
