@@ -63,7 +63,7 @@ void UStaticMesh::PostEditChange()
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x104472F0 (1401b): blocked by TArray vtable dispatch and FUN_10449c90/FUN_10449c50 (triangle serializers) — geometry fix-up not yet implemented")
+IMPL_TODO("Ghidra 0x104472F0 (1401b): mesh format migration — no FUN_ blockers found; complex old-to-new triangle/strip conversion + UStaticMeshSection rebuild not yet implemented")
 void UStaticMesh::PostLoad()
 {
 	guard(UStaticMesh::PostLoad);
@@ -136,7 +136,7 @@ FTags * UStaticMesh::GetTag(FString Name)
 	return NULL;
 	unguard;
 }
-IMPL_TODO("Ghidra 0x10449DE0 (970b): blocked by FUN_10449c90 (triangle stream serializer) and FUN_10301400 (bbox rebuild) — geometry arrays not fully serialized")
+IMPL_TODO("Ghidra 0x10449DE0 (970b): ALL FUN_ helpers confirmed in _unnamed.cpp (FUN_10449c90/10448de0/10301400/etc.); complex multi-stream TArray serialization pending full reconstruction")
 void UStaticMesh::Serialize(FArchive& Ar)
 {
 	// Ghidra 0x149de0 (970b): version-conditional UPrimitive::Serialize base call,
@@ -237,7 +237,7 @@ void UStaticMesh::Illuminate(AActor *,int)
 
 
 // --- UStaticMeshInstance ---
-IMPL_TODO("Ghidra 0x10449BB0 (163b): legacy color stream (Ver<0x70) blocked by FUN_10449a90; index buffer (Ver>0x6D) blocked by FUN_10448de0")
+IMPL_TODO("Ghidra 0x10449BB0 (163b): ALL FUN_ helpers confirmed in _unnamed.cpp (FUN_10449a90/10448de0/10449a40); legacy vs current stream selection pending reconstruction")
 void UStaticMeshInstance::Serialize(FArchive &Ar)
 {
 	guard(UStaticMeshInstance::Serialize);
