@@ -35,24 +35,58 @@ IMPLEMENT_PACKAGE(Window)
 
 IMPLEMENT_CLASS(UWindowManager)
 
-IMPL_DIVERGE("permanent: retail 0x110226d0 iterates WWindow::__Windows and WWindow::__DeleteWindows private statics; inaccessible from UWindowManager — serialization of window arrays is omitted")
+IMPL_MATCH("Window.dll", 0x110226d0)
 void UWindowManager::Serialize(FArchive& Ar)
 {
+	guard(UWindowManager::Serialize);
 	Super::Serialize(Ar);
+	for (INT i = 0; i < WWindow::_Windows.Num(); i++)
+		WWindow::_Windows(i)->Serialize(Ar);
+	for (INT i = 0; i < WWindow::_DeleteWindows.Num(); i++)
+		WWindow::_DeleteWindows(i)->Serialize(Ar);
+	unguard;
 }
 
 IMPL_MATCH("Window.dll", 0x11022780)
 void UWindowManager::Destroy()
 {
+	guard(UWindowManager::Destroy);
 	Super::Destroy();
+	DeleteObject(hBrushBlack);
+	DeleteObject(hBrushWhite);
+	DeleteObject(hBrushOffWhite);
+	DeleteObject(hBrushHeadline);
+	DeleteObject(hBrushCurrent);
+	DeleteObject(hBrushDark);
+	DeleteObject(hBrushGrey);
+	DeleteObject(hBrushGreyWindow);
+	DeleteObject(hBrushGrey160);
+	DeleteObject(hBrushGrey180);
+	DeleteObject(hBrushGrey197);
+	DeleteObject(hBrushCyanHighlight);
+	DeleteObject(hBrushCyanLow);
+	// Retail assert string: "GWindowManager==this" — cast needed for USubsystem*/UWindowManager* comparison
+	check((UObject*)GWindowManager==(UObject*)this);
+	GWindowManager = NULL;
+	if (!GIsCriticalError)
+		Tick(0.0f);
+	WWindow::_Windows.Empty();
+	WWindow::_DeleteWindows.Empty();
+	WProperties::PropertiesWindows.Empty();
+	unguard;
 }
 
-IMPL_DIVERGE("Ghidra Window.dll ~0x11022900: function body in gap between exports; catch block at 0x1102298c confirmed; body not decompiled by Ghidra")
+IMPL_MATCH("Window.dll", 0x110228f0)
 void UWindowManager::Tick(FLOAT DeltaTime)
 {
 	guard(UWindowManager::Tick);
-	// Retail: advances the window manager's state each frame.
-	// Divergence: not fully reconstructed from Ghidra.
+	while (WWindow::_DeleteWindows.Num())
+	{
+		WWindow* W = WWindow::_DeleteWindows(0);
+		if (W)
+			delete W;
+		check(WWindow::_DeleteWindows.FindItemIndex(W)==INDEX_NONE);
+	}
 	unguard;
 }
 
@@ -182,7 +216,7 @@ FDelegate::FDelegate(const FDelegate& Other)
 	Global functions.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("permanent: retail 0x110229c0 creates UWindowManager via StaticAllocateObject+FUN_11021c40 and moves brush/font creation to that constructor; our reconstruction initialises brushes inline here — functionally equivalent but structurally different")
+IMPL_TODO("retail 0x110229c0 creates UWindowManager via StaticAllocateObject+constructor; all brush/font/class-reg work is in FUN_11021c40 (UWindowManager ctor, 2456 bytes, ~30 RegisterWindowClass calls) — blocked on implementing that constructor")
 WINDOW_API void InitWindowing()
 {
 	guard(InitWindowing);
@@ -233,7 +267,7 @@ WINDOW_API void InitWindowing()
 
 	// Stipple brush.
 	{
-		WORD hatchBits[8] = { 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55 };
+		_WORD hatchBits[8] = { 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55 };
 		HBITMAP hBmp = CreateBitmap( 8, 8, 1, 1, hatchBits );
 		hBrushStipple = CreatePatternBrush( hBmp );
 		DeleteObject( hBmp );

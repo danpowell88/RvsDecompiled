@@ -221,15 +221,15 @@ void AR6RagDoll::FirstInit(AR6AbstractPawn * param_1)
 	unguard;
 }
 
-IMPL_DIVERGE("R6Engine.dll 0x10033760: FLineBatcher skeleton draw; editor-only debug visualization; raw FLineBatcher vtable call pattern not reconstructed")
+IMPL_TODO("FLineBatcher ctor/DrawBox/DrawLine API not reconstructed; ~1447 bytes of debug skeleton visualization")
 void AR6RagDoll::RenderBones(UCanvas * Canvas)
 {
 	guard(AR6RagDoll::RenderBones);
 
-	// DIVERGENCE: editor/debug visualization function (Ghidra 0x33760, ~1000 bytes).
-	// Draws ragdoll skeleton via FLineBatcher — iterates 16 particles, draws lines
-	// between connected bone pairs and spheres at particle positions.
-	// FLineBatcher raw call pattern not reconstructed; omitted (editor-only path).
+	// TODO(0x10033760): iterates 16 particles, draws boxes at bone positions via
+	// FLineBatcher::DrawBox, lines between connected pairs via FLineBatcher::DrawLine,
+	// and per-axis direction lines using FCoords axes. Requires FLineBatcher
+	// constructor and draw helpers to be reconstructed.
 
 	unguard;
 }
@@ -291,7 +291,7 @@ void AR6RagDoll::SatisfyConstraints()
 	unguard;
 }
 
-IMPL_DIVERGE("R6Engine.dll 0x10035000: SetBonePosition calls pass an extra buffer argument not present in our signature; calls dropped permanently")
+IMPL_MATCH("R6Engine.dll", 0x10035000)
 INT AR6RagDoll::Tick(FLOAT param_1, enum ELevelTick param_2)
 {
 	guard(AR6RagDoll::Tick);
@@ -336,17 +336,15 @@ INT AR6RagDoll::Tick(FLOAT param_1, enum ELevelTick param_2)
 				typedef USkeletalMeshInstance* (__thiscall *TGetMeshInst)(void*, void*);
 				USkeletalMeshInstance* local_18 = ((TGetMeshInst)*(DWORD*)(*(DWORD*)pMesh + 0x88))(pMesh, pawnOwner);
 
-				BYTE local_38[12];
-				(void)local_38;
 				for (INT iVar4 = 1; iVar4 < 0x10; iVar4++)
 				{
 					FCoords* this_00 = (FCoords*)((BYTE*)this + iVar4 * 0x58 + 0x3a8);
 					FRotator orthoRot = this_00->OrthoRotation();
 					DWORD* puVar5 = (DWORD*)&orthoRot;
 
-					FLOAT local_28 = (FLOAT)puVar5[1];
+					DWORD local_28 = puVar5[1];
 					DWORD uVar1    = puVar5[0];
-					FLOAT local_24 = (FLOAT)puVar5[2];
+					DWORD local_24 = puVar5[2];
 
 					*(FLOAT*)((BYTE*)this_00 + 0x44) = *(FLOAT*)((BYTE*)this_00 + 0x44) + 15.0f;
 
@@ -354,15 +352,14 @@ INT AR6RagDoll::Tick(FLOAT param_1, enum ELevelTick param_2)
 						FName boneName;
 						*(DWORD*)&boneName = *(DWORD*)((BYTE*)this_00 + 0x54);
 						FRotator boneRot;
-						*(DWORD*)&boneRot       = uVar1;
-						*(FLOAT*)((BYTE*)&boneRot + 4) = local_28;
-						*(FLOAT*)((BYTE*)&boneRot + 8) = local_24;
+						*(DWORD*)&boneRot                  = uVar1;
+						*(DWORD*)((BYTE*)&boneRot + 4)     = local_28;
+						*(DWORD*)((BYTE*)&boneRot + 8)     = local_24;
 						FVector bonePos;
-						*(DWORD*)&bonePos             = *(DWORD*)((BYTE*)this_00 + 0x3c);
-						*(DWORD*)((BYTE*)&bonePos + 4) = *(DWORD*)((BYTE*)this_00 + 0x40);
-						*(DWORD*)((BYTE*)&bonePos + 8) = *(DWORD*)((BYTE*)this_00 + 0x44);
+						*(DWORD*)&bonePos                  = *(DWORD*)((BYTE*)this_00 + 0x3c);
+						*(DWORD*)((BYTE*)&bonePos + 4)     = *(DWORD*)((BYTE*)this_00 + 0x40);
+						*(DWORD*)((BYTE*)&bonePos + 8)     = *(DWORD*)((BYTE*)this_00 + 0x44);
 						local_18->SetBonePosition(boneName, boneRot, bonePos, 1.0f);
-						// DIVERGENCE: original passes extra buffer arg; dropped
 					}
 				}
 

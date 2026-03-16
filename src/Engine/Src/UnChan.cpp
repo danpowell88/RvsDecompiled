@@ -16,7 +16,7 @@ inline void  operator delete(void*, void*) noexcept {}
 
 // --- UChannel ---
 
-IMPL_MATCH("Engine.dll", 0x104802c0)
+IMPL_TODO("Ghidra 0x104802c0 (965b): complex merge/split/reliable send logic; requires UNetConnection internal field offsets (0x120 WriterMark, 0x128 LastStart, 0x130-0x1B6 bunch merge state, 0x250 output writer)")
 INT UChannel::SendBunch(FOutBunch*, INT)
 {
 guard(UChannel::SendBunch);
@@ -34,23 +34,23 @@ guard(UFileChannel::StaticConstructor);
 unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x10481460)
+IMPL_TODO("Ghidra 0x10481460 (453b): file-sending tick with ParseParam/lanplay static, MaxSendBytes loop, FOutBunch serialize; blocked by undecoded UFileChannel field offsets (0x270 PackageIndex, 0x274 SentData)")
 void UFileChannel::Tick()
 {
 guard(UFileChannel::Tick);
-// TODO: implement UFileChannel::Tick (retail 453 bytes: file-sending tick)
+// Retail: UChannel::Tick(), then loop sending file data in FOutBunch chunks.
+UChannel::Tick();
 unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x10481890)
+IMPL_TODO("Ghidra 0x10481890 (1243b): receive handler with ArmPatch GUID logic, FOutBunch/FInBunch serialization, download creation via GFileManager; blocked by undecoded FGuid helpers (FUN_103bef40, FUN_103bef10), SpecialGUIDArmPatches global")
 void UFileChannel::ReceivedBunch(FInBunch&)
 {
 guard(UFileChannel::ReceivedBunch);
-// TODO: implement UFileChannel::ReceivedBunch (retail 1243 bytes: receive handler)
 unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x10481660)
+IMPL_TODO("Ghidra 0x10481660 (268b): FString::Printf File='%s', Sent/Received=%i/%i with UFileChannel field offsets 0x68 (Download), 0x6C (SendFile), 0x70 (Filename), 0x270 (PackageIndex), 0x274 (SentData); blocked by undecoded UFileChannel layout")
 FString UFileChannel::Describe()
 {
 return FString();
@@ -59,43 +59,52 @@ return FString();
 IMPL_MATCH("Engine.dll", 0x10484100)
 void UFileChannel::Destroy()
 {
-// Ghidra 0x184100: Close send file at +0x6C via vtable[0] (destructor, delete=1).
-// If InType (+0x3C) and download at +0x68 exist, flush/delete download.
-// Then assert Channels[ChIndex]==this, UChannel::Destroy.
-check(*(INT*)((BYTE*)this + 0x2C) != 0); // Connection must exist
-if (RouteDestroy() == 0)
-{
-void** sendFile = (void**)((BYTE*)this + 0x6C);
-if (*sendFile)
-{
-INT vt = *(INT*)*sendFile;
-typedef void (__thiscall *DtorFn)(void*, INT);
-((DtorFn)(*(INT*)(vt + 0)))(*sendFile, 1);
-*sendFile = NULL;
-}
-INT inType = *(INT*)((BYTE*)this + 0x3C);
-void** dld = (void**)((BYTE*)this + 0x68);
-if (inType && *dld)
-{
-INT vt = *(INT*)*dld;
-typedef void (__thiscall *TickFn)(void*);
-((TickFn)(*(INT*)(vt + 0x78)))(*dld);
-if (*dld)
-{
-vt = *(INT*)*dld;
-typedef void (__thiscall *DtorFn2)(void*, INT);
-((DtorFn2)(*(INT*)(vt + 0xC)))(*dld, 1);
-}
-}
-UChannel::Destroy();
-}
+	// Ghidra 0x184100: assert Connection, call RouteDestroy.
+	// If returns 0: assert Channels[ChIndex]==this, delete SendFile at +0x6C,
+	// if InType and Download at +0x68 exist: flush download then delete it,
+	// then UChannel::Destroy.
+	check(Connection != NULL);
+	if (RouteDestroy() == 0)
+	{
+		BYTE* conn = (BYTE*)Connection;
+		check(*(UFileChannel**)(conn + 0xEB0 + ChIndex * 4) == this);
+
+		// Delete send file at +0x6C (virtual destructor, delete=1)
+		void** sendFile = (void**)((BYTE*)this + 0x6C);
+		if (*sendFile)
+		{
+			typedef void (__thiscall *DtorFn)(void*, INT);
+			((DtorFn)(*(INT*)*(INT*)*sendFile))(*sendFile, 1);
+			*sendFile = NULL;
+		}
+
+		// If incoming type and download at +0x68 exist, flush then delete
+		if (OpenedLocally && *(void**)((BYTE*)this + 0x68))
+		{
+			void* dld = *(void**)((BYTE*)this + 0x68);
+			// Flush via vtable[0x78/4] = vtable[30]
+			typedef void (__thiscall *FlushFn)(void*);
+			((FlushFn)(*(INT*)(*(INT*)dld + 0x78)))(dld);
+
+			if (*(void**)((BYTE*)this + 0x68))
+			{
+				dld = *(void**)((BYTE*)this + 0x68);
+				// Delete via vtable[0xC/4] = vtable[3] (scalar deleting destructor)
+				typedef void (__thiscall *DtorFn2)(void*, INT);
+				((DtorFn2)(*(INT*)(*(INT*)dld + 0xC)))(dld, 1);
+			}
+		}
+
+		UChannel::Destroy();
+	}
 }
 
 IMPL_MATCH("Engine.dll", 0x10480f30)
 void UFileChannel::Init(UNetConnection* Conn, int ChIndex, int InType)
 {
-// Retail: 0x180f30. Just delegates to UChannel::Init.
-UChannel::Init(Conn, ChIndex, InType);
+	guard(UFileChannel::Init);
+	UChannel::Init(Conn, ChIndex, InType);
+	unguard;
 }
 
 
@@ -116,46 +125,42 @@ UChannel::Tick();
 unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x104827f0)
+IMPL_TODO("Ghidra 0x104827f0 (2931b): complex actor property replication receive with ClassNetCache iteration, UProperty serialization, bitmask diffing; blocked by FClassNetCache internals, UProperty replication helpers")
 void UActorChannel::ReceivedBunch(FInBunch&)
 {
 guard(UActorChannel::ReceivedBunch);
-// TODO: implement UActorChannel::ReceivedBunch (complex actor replication receive)
 unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x104824d0)
+IMPL_TODO("Ghidra 0x104824d0 (142b): calls UChannel::ReceivedNak, then if ActorClass (+0x70) loops RepConditions array (+0xB8) backwards calling FUN_10481dd0 for entries matching NakPacketId; blocked by FUN_10481dd0 (replication resend helper)")
 void UActorChannel::ReceivedNak(int NakPacketId)
 {
 guard(UActorChannel::ReceivedNak);
 UChannel::ReceivedNak(NakPacketId);
-// Divergence: actor replication NAK handling (FUN_10481dd0) not implemented.
+// Ghidra: if (*(int*)(this + 0x70) != 0) { loop RepConditions backwards, resend matching }
 unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x104834d0)
+IMPL_TODO("Ghidra 0x104834d0 (2840b): full actor property replication send with ClassNetCache, UProperty iteration, FOutBunch serialization, condition bitmask comparison; blocked by FClassNetCache, replication condition helpers")
 void UActorChannel::ReplicateActor()
 {
 guard(UActorChannel::ReplicateActor);
-// TODO: implement UActorChannel::ReplicateActor (complex actor replication)
 unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x10482590)
+IMPL_TODO("Ghidra 0x10482590 (558b): sets Actor/ActorClass, gets FClassNetCache, calls FUN_10481e10, allocates RepConditions array, copies/zeroes property data; blocked by FClassNetCache::GetRepConditionCount, FUN_10481e10 (channel registration)")
 void UActorChannel::SetChannelActor(AActor*)
 {
 guard(UActorChannel::SetChannelActor);
-// TODO: implement UActorChannel::SetChannelActor (actor channel setup)
 unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x104821d0)
+IMPL_TODO("Ghidra 0x104821d0 (91b): if Actor at +0x6C != NULL calls FUN_10481e90 (replication state flush) then UChannel::SetClosingFlag; blocked by FUN_10481e90")
 void UActorChannel::SetClosingFlag()
 {
-// Ghidra 0x1821d0: if actor ref at +0x6C is present, call FUN_10481e90 to flush
-// replication state, then call UChannel::SetClosingFlag.
-// Divergence: FUN_10481e90 (replication flush) not implemented; just delegate.
-UChannel::SetClosingFlag();
+	// Ghidra: if (*(int*)(this + 0x6c) != 0) { FUN_10481e90(this + 0x6c); }
+	// FUN_10481e90 not yet decompiled — skip for now.
+	UChannel::SetClosingFlag();
 }
 
 IMPL_MATCH("Engine.dll", 0x104813e0)
@@ -169,22 +174,32 @@ UChannel::Close();
 IMPL_MATCH("Engine.dll", 0x10480dc0)
 FString UActorChannel::Describe()
 {
-return FString();
+	// Ghidra 0x180dc0: if not closing and actor exists, return actor info + base.
+	// Otherwise return "Actor=None " + base.
+	if (!Closing && *(INT*)((BYTE*)this + 0x6C) != 0)
+	{
+		UObject* Actor = *(UObject**)((BYTE*)this + 0x6C);
+		return FString::Printf(TEXT("Actor=%s (Role=%i RemoteRole=%i) "),
+			Actor->GetFullName(),
+			(INT)*(BYTE*)((BYTE*)Actor + 0x2D),   // Role
+			(INT)*(BYTE*)((BYTE*)Actor + 0x2E))    // RemoteRole
+			+ UChannel::Describe();
+	}
+	return FString(TEXT("Actor=None ")) + UChannel::Describe();
 }
 
 IMPL_MATCH("Engine.dll", 0x10482260)
 void UActorChannel::Destroy()
 {
 	guard(UActorChannel::Destroy);
-	check(*(INT*)((BYTE*)this + 0x2C) != 0); // Connection must exist
+	check(Connection != NULL);
 	if (!UChannel::RouteDestroy())
 	{
 		// Assert Channels[ChIndex] == this
-		BYTE* conn    = *(BYTE**)((BYTE*)this + 0x2C); // Connection
-		INT   chIndex = *(INT*)((BYTE*)this + 0x38);   // ChIndex
-		check(*(UActorChannel**)(conn + 0xeb0 + chIndex * 4) == this);
+		BYTE* conn = (BYTE*)Connection;
+		check(*(UActorChannel**)(conn + 0xEB0 + ChIndex * 4) == this);
 
-		// Call virtual reset function at vtable slot 0x1a (offset 0x68) on this
+		// Call virtual reset function at vtable slot 0x1A (offset 0x68) on this
 		typedef void (__thiscall* VFunc26)(void*);
 		((VFunc26)(*(DWORD*)((BYTE*)*(DWORD**)this + 0x68)))(this);
 
@@ -193,33 +208,59 @@ void UActorChannel::Destroy()
 		INT num = repData->Num();
 		if (num != 0)
 		{
-			check(*(INT*)((BYTE*)this + 0x70) != 0); // ActorClass != NULL
+			check(*(INT*)((BYTE*)this + 0x70) != 0); // ActorClass
 			UObject::ExitProperties(*(BYTE**)((BYTE*)this + 0x94), *(UClass**)((BYTE*)this + 0x70));
 		}
 
-		// Determine client vs server via Connection->field_0x7c->field_0x3c
-		BYTE* drv = *(BYTE**)(conn + 0x7C); // Connection->field_0x7c (Driver)
+		// Determine client vs server via Connection->Driver->ServerConnection (0x3C)
+		BYTE* drv = *(BYTE**)(conn + 0x7C);
 		if (*(INT*)(drv + 0x3C) == 0)
 		{
-			// Client side: optionally clean up actor ref at +0x6c
-			if (*(INT*)((BYTE*)this + 0x6C) != 0 && *(INT*)((BYTE*)this + 0x30) == 0)
+			// Client side: clean up actor ref via FUN_103db080
+			if (*(INT*)((BYTE*)this + 0x6C) != 0 && !OpenAcked)
 			{
-				// FUN_103db080 = UActorChannel_CleanupActorRef() — zero actor ref and deregister from level.
-				// TODO: implement actor-channel teardown (FUN_103db080 = UActorChannel_CleanupActorRef); actor ref
-				// leaks on client-side channel destroy (safe since level is being torn down).
+				// FUN_103db080: actor-channel teardown — zeroes actor ref and deregisters from level.
+				// TODO: blocked by FUN_103db080 (UActorChannel_CleanupActorRef)
 			}
 		}
 		else
 		{
-			// Server side: validate actor/level/connection
+			// Server side: validate actor/level/connection/driver
 			UObject* actor = *(UObject**)((BYTE*)this + 0x6C);
 			if (actor != NULL)
 				check(actor->IsValid());
-			check(*(INT*)((BYTE*)this + 0x68) != 0);
-			check((*(UObject**)((BYTE*)this + 0x68))->IsValid());
-			check(*(INT*)((BYTE*)this + 0x2C) != 0);
-			check((*(UObject**)((BYTE*)this + 0x2C))->IsValid());
+			check(*(INT*)((BYTE*)this + 0x68) != 0);              // Level
+			check((*(UObject**)((BYTE*)this + 0x68))->IsValid());  // Level->IsValid()
+			check(Connection != NULL);
+			check(Connection->IsValid());
+			check(*(INT*)(conn + 0x7C) != 0);                     // Connection->Driver
+			check((*(UObject**)(conn + 0x7C))->IsValid());         // Connection->Driver->IsValid()
+
+			// Server-side actor role cleanup
+			INT actorAddr = *(INT*)((BYTE*)this + 0x6C);
+			if (actorAddr != 0)
+			{
+				if ((*(BYTE*)(actorAddr + 0xA4) & 0x10) == 0)
+				{
+					// Not bTearOff: if not bNetTemporary, call TearOff virtual
+					if ((*(DWORD*)(actorAddr + 0xA0) & 0x10000000) == 0)
+					{
+						// vtable call on actor's Level: Actor->Level->vtable[0xA0/4](actor, 1)
+						typedef void (__thiscall *TearOffFn)(void*, INT);
+						INT* level = *(INT**)(actorAddr + 0x328);
+						((TearOffFn)(*(INT*)(*(INT*)level + 0xA0)))(level, 1);
+					}
+				}
+				else
+				{
+					// bTearOff: set Role=ROLE_Authority(4), RemoteRole=ROLE_None(0)
+					*(BYTE*)(actorAddr + 0x2D) = 4;
+					*(BYTE*)(*(INT*)((BYTE*)this + 0x6C) + 0x2E) = 0;
+				}
+			}
 		}
+
+		UChannel::Destroy();
 	}
 	unguard;
 }
@@ -234,14 +275,31 @@ return *(AActor**)((BYTE*)this + 0x6C);
 IMPL_MATCH("Engine.dll", 0x10480c90)
 void UActorChannel::Init(UNetConnection* Conn, int ChIndex, int InType)
 {
-// Ghidra 0x180c90: UChannel::Init + initialise actor-specific replication fields.
-// Chain: this+0x2C=Conn, Conn+0x7C=Level, Level+0x40=LevelInfo, then vtable[3]()
-// returns game time stored at this+0x68; also copies Level+0x48 (seq nr 8b) to this+0x74.
-// Divergence: replication tracking fields zeroed instead of copying from level state.
-UChannel::Init(Conn, ChIndex, InType);
-*(INT*)((BYTE*)this + 0x68) = 0;
-*(INT*)((BYTE*)this + 0x6C) = 0;   // Actor ptr -- set later by SetChannelActor
-appMemzero((BYTE*)this + 0x74, 0x20); // zero 0x74..0x93 (replication state)
+	guard(UActorChannel::Init);
+	// Ghidra 0x180c90: UChannel::Init + initialise actor-specific replication fields.
+	UChannel::Init(Conn, ChIndex, InType);
+
+	BYTE* conn = (BYTE*)Conn;
+	BYTE* driver = *(BYTE**)(conn + 0x7C);       // Connection->Driver
+	BYTE* levelObj = *(BYTE**)(driver + 0x40);    // Driver->Level (or NetInfo object at +0x40)
+
+	// Get game time via levelObj vtable[3] (offset 0xC)
+	typedef INT (__thiscall *GetTimeFn)(void*);
+	INT gameTime = ((GetTimeFn)(*(INT*)(*(INT*)levelObj + 0xC)))(levelObj);
+	*(INT*)((BYTE*)this + 0x68) = gameTime;
+
+	// Copy TimeSeconds (double at Driver+0x48)
+	*(double*)((BYTE*)this + 0x74) = *(double*)(driver + 0x48);
+
+	// RelevantTime = TimeSeconds - TickRate (float at Driver+0x60)
+	FLOAT tickRate = *(FLOAT*)(driver + 0x60);
+	*(double*)((BYTE*)this + 0x7C) = *(double*)(driver + 0x48) - (double)tickRate;
+
+	// Zero replication tracking
+	*(INT*)((BYTE*)this + 0x88) = 0;
+	*(INT*)((BYTE*)this + 0x8C) = 0;
+	*(INT*)((BYTE*)this + 0x90) = 0;
+	unguard;
 }
 
 
@@ -255,41 +313,71 @@ unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x104809e0)
-void UControlChannel::ReceivedBunch(FInBunch&)
+void UControlChannel::ReceivedBunch(FInBunch& Bunch)
 {
 guard(UControlChannel::ReceivedBunch);
-// TODO: implement UControlChannel::ReceivedBunch (complex control message handling)
+	check(!Closing);
+
+	// Ghidra 0x1809e0: loop reading FStrings from bunch, dispatch each via
+	// Connection->Driver->Level->LevelInfo->vtable[4](Connection, Text).
+	for (;;)
+	{
+		FString Text;
+		*(FArchive*)&Bunch << Text;
+		if (((FArchive*)&Bunch)->IsError())
+			break;
+
+		// Dispatch to level: LevelInfo->vtable[4](Connection, *Text)
+		// Connection->Driver (+0x7C) -> Level (+0x40) -> vtable[0x10/4=4]
+		BYTE* conn = (BYTE*)Connection;
+		BYTE* driver = *(BYTE**)(conn + 0x7C);
+		BYTE* level = *(BYTE**)(driver + 0x40);
+		typedef void (__thiscall *NotifyFn)(void*, UNetConnection*, const TCHAR*);
+		((NotifyFn)(*(INT*)(*(INT*)level + 0x10)))(level, Connection, *Text);
+	}
 unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10480ad0)
-void UControlChannel::Serialize(const TCHAR*, EName)
+void UControlChannel::Serialize(const TCHAR* Data, EName Event)
 {
 guard(UControlChannel::Serialize);
-// TODO: implement UControlChannel::Serialize (complex control serialization)
+	// Ghidra 0x180ad0: Create FOutBunch, serialize Data as FString, send if no error.
+	// Note: Ghidra shows `this + -0x68` because this Serialize is dispatched through
+	// FOutputDevice vtable (second base class). The compiler generates a thunk that
+	// adjusts this to UControlChannel* automatically.
+	FOutBunch Bunch(this, 0);
+	*(BYTE*)((BYTE*)&Bunch + 0x7A) = 1;  // bReliable = 1
+	FString Str(Data);
+	*(FArchive*)&Bunch << Str;
+	if (!((FArchive*)&Bunch)->IsError())
+		SendBunch(&Bunch, 1);
 unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10480bc0)
 FString UControlChannel::Describe()
 {
-return FString();
+	// Ghidra 0x180bc0: return FString("Text ") + UChannel::Describe()
+	return FString(TEXT("Text ")) + UChannel::Describe();
 }
 
 IMPL_MATCH("Engine.dll", 0x10482070)
 void UControlChannel::Destroy()
 {
-// Ghidra 0x182070: assert Connection at +0x2C, call RouteDestroy.
-// If returns 0: assert Channels[ChIndex]==this, call UChannel::Destroy.
-check(*(INT*)((BYTE*)this + 0x2C) != 0); // Connection must exist
-if (RouteDestroy() == 0)
-UChannel::Destroy();
+	// Ghidra 0x182070: assert Connection, call RouteDestroy.
+	// If returns 0: call UChannel::Destroy.
+	check(Connection != NULL);
+	if (RouteDestroy() == 0)
+		UChannel::Destroy();
 }
 
 IMPL_MATCH("Engine.dll", 0x10480960)
 void UControlChannel::Init(UNetConnection* Conn, int ChIndex, int InType)
 {
-UChannel::Init(Conn, ChIndex, InType);
+	guard(UControlChannel::Init);
+	UChannel::Init(Conn, ChIndex, InType);
+	unguard;
 }
 
 
@@ -301,7 +389,56 @@ UChannel::Init(Conn, ChIndex, InType);
 // =============================================================================
 
 IMPL_MATCH("Engine.dll", 0x10481f20)
-void UChannel::Destroy() { Super::Destroy(); }
+void UChannel::Destroy()
+{
+	guard(UChannel::Destroy);
+	check(Connection != NULL);
+	check(*(UChannel**)((BYTE*)Connection + 0xEB0 + ChIndex * 4) == this);
+
+	// Free OutRec linked list (each FOutBunch: vtable[0](1) = scalar deleting destructor)
+	FOutBunch* Out = OutRec;
+	while (Out)
+	{
+		FOutBunch* Next = *(FOutBunch**)((BYTE*)Out + 0x54);
+		typedef void (__thiscall *DtorFn)(void*, INT);
+		((DtorFn)(*(INT*)*(INT*)Out))(Out, 1);
+		Out = Next;
+	}
+
+	// Free InRec linked list (each FInBunch: vtable[0](1))
+	FInBunch* In = InRec;
+	while (In)
+	{
+		FInBunch* Next = *(FInBunch**)((BYTE*)In + 0x58);
+		typedef void (__thiscall *DtorFn)(void*, INT);
+		((DtorFn)(*(INT*)*(INT*)In))(In, 1);
+		In = Next;
+	}
+
+	// Remove this from Connection->OpenChannels (TArray at Connection+0x4B7C)
+	BYTE* conn = (BYTE*)Connection;
+	INT* pCount = (INT*)(conn + 0x4B80);
+	INT origCount = *pCount;
+	for (INT i = 0; i < *pCount; i++)
+	{
+		UChannel** arr = *(UChannel***)(conn + 0x4B7C);
+		if (arr[i] == this)
+		{
+			// TArray::Remove(i, 1) — shift down
+			for (INT j = i; j < *pCount - 1; j++)
+				arr[j] = arr[j + 1];
+			(*pCount)--;
+			i--;
+		}
+	}
+	check(origCount - *pCount == 1);
+
+	// Clear channel slot and connection reference
+	*(INT*)((BYTE*)Connection + 0xEB0 + ChIndex * 4) = 0;
+	Connection = NULL;
+	Super::Destroy();
+	unguard;
+}
 
 IMPL_MATCH("Engine.dll", 0x1047fb60)
 void UChannel::Init( UNetConnection* InConnection, INT InChIndex, INT InOpenedLocally )
@@ -323,7 +460,21 @@ IMPL_MATCH("Engine.dll", 0x104811f0)
 void UChannel::Close()
 {
 guard(UChannel::Close);
-// TODO: implement UChannel::Close (retail 252 bytes: close bunch creation)
+	check(*(UChannel**)((BYTE*)Connection + 0xEB0 + ChIndex * 4) == this);
+
+	// Only send close bunch if not already closing and connection state is 2 or 3
+	if (!Closing)
+	{
+		INT connState = *(INT*)((BYTE*)Connection + 0x80);
+		if (connState == 3 || connState == 2)
+		{
+			FOutBunch CloseBunch(this, 1);
+			check(!((FArchive*)&CloseBunch)->IsError());
+			check(*(BYTE*)((BYTE*)&CloseBunch + 0x79) != 0);  // bClose must be set
+			*(BYTE*)((BYTE*)&CloseBunch + 0x7A) = 1;          // bReliable = 1
+			SendBunch(&CloseBunch, 0);
+		}
+	}
 unguard;
 }
 
@@ -331,7 +482,8 @@ IMPL_MATCH("Engine.dll", 0x104806c0)
 FString UChannel::Describe()
 {
 guard(UChannel::Describe);
-return FString();
+	// Ghidra 0x1806c0: returns FString("State=")
+	return FString(TEXT("State="));
 unguard;
 }
 
@@ -339,16 +491,15 @@ IMPL_MATCH("Engine.dll", 0x10480850)
 void UChannel::ReceivedNak(INT NakPacketId)
 {
 guard(UChannel::ReceivedNak);
-for (FOutBunch* Out = *(FOutBunch**)((BYTE*)this + 0x5C); Out; Out = *(FOutBunch**)((BYTE*)Out + 0x54))
-{
-if (*(INT*)((BYTE*)Out + 0x74) == NakPacketId && *(INT*)((BYTE*)Out + 0x64) == 0)
-{
-if (!*(BYTE*)((BYTE*)Out + 0x7A))
-appFailAssert("Out->bReliable", ".\\UnChan.cpp", 0x203);
-debugf(NAME_DevNet, TEXT("Resending bunch"));
-Connection->SendRawBunch(*Out, 0);
-}
-}
+	for (FOutBunch* Out = OutRec; Out; Out = *(FOutBunch**)((BYTE*)Out + 0x54))
+	{
+		if (*(INT*)((BYTE*)Out + 0x74) == NakPacketId && *(INT*)((BYTE*)Out + 0x64) == 0)
+		{
+			check(*(BYTE*)((BYTE*)Out + 0x7A) != 0);  // Out->bReliable
+			debugf(NAME_DevNet, TEXT("Resending bunch"));
+			Connection->SendRawBunch(*Out, 0);
+		}
+	}
 unguard;
 }
 
@@ -356,7 +507,29 @@ IMPL_MATCH("Engine.dll", 0x1047fd90)
 void UChannel::Tick()
 {
 guard(UChannel::Tick);
-// TODO: implement UChannel::Tick (retail 247 bytes: resend timer logic)
+	check(*(UChannel**)((BYTE*)Connection + 0xEB0 + ChIndex * 4) == this);
+
+	// Only resend on channel 0 when not opened locally
+	if (ChIndex == 0 && OpenedLocally == 0)
+	{
+		for (FOutBunch* Out = OutRec; Out; Out = *(FOutBunch**)((BYTE*)Out + 0x54))
+		{
+			// If not yet acked and time elapsed > 1.0 second
+			if (*(INT*)((BYTE*)Out + 0x64) == 0)
+			{
+				BYTE* conn = (BYTE*)Connection;
+				BYTE* driver = *(BYTE**)(conn + 0x7C);
+				double curTime = *(double*)(driver + 0x48);
+				double sentTime = *(double*)((BYTE*)Out + 0x5C);
+				if (curTime - sentTime > 1.0)
+				{
+					debugf(NAME_DevNet, TEXT("UChannel::Tick: Resending"));
+					check(*(BYTE*)((BYTE*)Out + 0x7A) != 0);  // Out->bReliable
+					Connection->SendRawBunch(*Out, 0);
+				}
+			}
+		}
+	}
 unguard;
 }
 
@@ -381,7 +554,14 @@ return 0;
 }
 
 IMPL_MATCH("Engine.dll", 0x10480780)
-INT UChannel::IsNetReady( INT Saturate ) { return 1; }
+INT UChannel::IsNetReady( INT Saturate )
+{
+	// Ghidra 0x180780: if NumOutRec > 126, return 0.
+	// Otherwise delegate to Connection->IsNetReady(Saturate) virtual.
+	if (NumOutRec > 0x7E)
+		return 0;
+	return Connection->IsNetReady(Saturate);
+}
 
 IMPL_MATCH("Engine.dll", 0x10481320)
 INT UChannel::MaxSendBytes()
@@ -402,7 +582,36 @@ IMPL_MATCH("Engine.dll", 0x1047fc60)
 void UChannel::ReceivedAcks()
 {
 guard(UChannel::ReceivedAcks);
-// TODO: implement UChannel::ReceivedAcks (retail 244 bytes: acked-bunch cleanup)
+	check(*(UChannel**)((BYTE*)Connection + 0xEB0 + ChIndex * 4) == this);
+
+	// Assert OutRec is in sequence order
+	for (FOutBunch* Out = OutRec; Out && *(FOutBunch**)((BYTE*)Out + 0x54);
+	     Out = *(FOutBunch**)((BYTE*)Out + 0x54))
+	{
+		FOutBunch* Next = *(FOutBunch**)((BYTE*)Out + 0x54);
+		check(*(INT*)((BYTE*)Next + 0x70) > *(INT*)((BYTE*)Out + 0x70));
+	}
+
+	// Free acked bunches from the head of OutRec
+	BYTE bHadClose = 0;
+	while (OutRec != NULL && *(INT*)((BYTE*)OutRec + 0x64) != 0)
+	{
+		bHadClose |= *(BYTE*)((BYTE*)OutRec + 0x79);  // accumulate bClose flag
+		FOutBunch* Next = *(FOutBunch**)((BYTE*)OutRec + 0x54);
+		typedef void (__thiscall *DtorFn)(void*, INT);
+		((DtorFn)(*(INT*)*(INT*)OutRec))(OutRec, 1);
+		OutRec = Next;
+		NumOutRec--;
+	}
+
+	// If we had a close ack, or if channel is open-temporary and was opened, destroy
+	if (bHadClose || (OpenTemporary && OpenedLocally))
+	{
+		check(!OutRec);
+		// vtable[3](1) = Destroy(1) — call virtual Destroy
+		typedef void (__thiscall *DestroyFn)(void*, INT);
+		((DestroyFn)(*(INT*)(*(INT*)this + 0xC)))(this, 1);
+	}
 unguard;
 }
 
@@ -410,7 +619,66 @@ IMPL_MATCH("Engine.dll", 0x10480070)
 void UChannel::ReceivedRawBunch(FInBunch& Bunch)
 {
 guard(UChannel::ReceivedRawBunch);
-// TODO: implement UChannel::ReceivedRawBunch (complex raw bunch routing)
+	check(*(UChannel**)((BYTE*)Connection + 0xEB0 + ChIndex * 4) == this);
+
+	BYTE* conn = (BYTE*)Connection;
+	INT* pInReliable = (INT*)(conn + 0x3728 + ChIndex * 4);
+
+	// If bunch is not reliable, or is the next expected reliable sequence
+	if (*(BYTE*)((BYTE*)&Bunch + 0x6E) == 0 ||
+	    *(INT*)((BYTE*)&Bunch + 0x68) == *pInReliable + 1)
+	{
+		// Process in sequence
+		if (ReceivedSequencedBunch(Bunch) != 0)
+			return;
+
+		// Drain any queued bunches that are now in sequence
+		while (InRec != NULL &&
+		       *(INT*)((BYTE*)InRec + 0x68) == *pInReliable + 1)
+		{
+			debugf(NAME_DevNet, TEXT("UChannel::ReceivedRawBunch draining queued"));
+			FInBunch* Queued = InRec;
+			InRec = *(FInBunch**)((BYTE*)Queued + 0x58);
+			NumInRec--;
+			if (ReceivedSequencedBunch(*Queued) != 0)
+			{
+				// Delete queued bunch
+				typedef void (__thiscall *DtorFn)(void*, INT);
+				if (Queued) ((DtorFn)(*(INT*)*(INT*)Queued))(Queued, 1);
+				return;
+			}
+			typedef void (__thiscall *DtorFn)(void*, INT);
+			if (Queued) ((DtorFn)(*(INT*)*(INT*)Queued))(Queued, 1);
+			AssertInSequenced();
+		}
+	}
+	else
+	{
+		// Out-of-order reliable bunch — queue it
+		INT bunchSeq = *(INT*)((BYTE*)&Bunch + 0x68);
+		check(bunchSeq > *pInReliable);
+		debugf(NAME_DevNet, TEXT("UChannel::ReceivedRawBunch queuing out-of-order"));
+
+		// Find insertion point (sorted by ChSequence)
+		FInBunch** pLink = &InRec;
+		while (*pLink != NULL)
+		{
+			INT linkSeq = *(INT*)((BYTE*)*pLink + 0x68);
+			if (bunchSeq == linkSeq)
+				return;  // duplicate
+			if (bunchSeq < linkSeq)
+				break;
+			pLink = (FInBunch**)((BYTE*)*pLink + 0x58);
+		}
+
+		// Allocate new FInBunch copy and insert
+		FInBunch* New = new(appMalloc(sizeof(FInBunch), TEXT("FInBunch"))) FInBunch(Bunch);
+		*(FInBunch**)((BYTE*)New + 0x58) = *pLink;
+		*pLink = New;
+		NumInRec++;
+		check(NumInRec <= 128);
+		AssertInSequenced();
+	}
 unguard;
 }
 
@@ -418,7 +686,33 @@ IMPL_MATCH("Engine.dll", 0x1047ff60)
 INT UChannel::ReceivedSequencedBunch(FInBunch& Bunch)
 {
 guard(UChannel::ReceivedSequencedBunch);
-return 0;
+	// Update InReliable sequence number if this is a reliable bunch
+	if (*(BYTE*)((BYTE*)&Bunch + 0x6E) != 0)
+	{
+		*(INT*)((BYTE*)Connection + 0x3728 + ChIndex * 4) =
+			*(INT*)((BYTE*)&Bunch + 0x68);
+	}
+
+	// If channel is not broken, dispatch to ReceivedBunch virtual
+	if (!Closing)
+	{
+		// vtable[0x74/4] = ReceivedBunch virtual
+		typedef void (__thiscall *RecvFn)(void*, FInBunch&);
+		((RecvFn)(*(INT*)(*(INT*)this + 0x74)))(this, Bunch);
+	}
+
+	// If bunch has bClose flag, handle channel close
+	if (*(BYTE*)((BYTE*)&Bunch + 0x6D) != 0)
+	{
+		if (InRec != NULL)
+			GNull->Logf(TEXT(""));
+		debugf(NAME_DevNet, TEXT("UChannel::ReceivedSequencedBunch: close"));
+		// vtable[0xC/4] = Destroy virtual
+		typedef void (__thiscall *DestroyFn)(void*);
+		((DestroyFn)(*(INT*)(*(INT*)this + 0xC)))(this);
+		return 1;
+	}
+	return 0;
 unguard;
 }
 
@@ -426,7 +720,20 @@ IMPL_MATCH("Engine.dll", 0x1047fb90)
 INT UChannel::RouteDestroy()
 {
 guard(UChannel::RouteDestroy);
-return 0;
+	if (Connection != NULL)
+	{
+		DWORD connFlags = Connection->GetFlags();
+		if (connFlags & RF_Unreachable)
+		{
+			// Temporarily clear RF_Destroyed on this channel so
+			// Connection->ConditionalDestroy can reference us.
+			ClearFlags(RF_Destroyed);
+			if (Connection->ConditionalDestroy())
+				return 1;
+			SetFlags(RF_Destroyed);
+		}
+	}
+	return 0;
 unguard;
 }
 
@@ -438,21 +745,21 @@ unguard;
 
 // UChannel
 // ---------------------------------------------------------------------------
-IMPL_DIVERGE("UChannel::StaticConstructor not found in Engine.dll Ghidra export — base UChannel registers no properties; subclasses (UActorChannel, UVoiceChannel) handle their own")
+IMPL_DIVERGE("Base UChannel::StaticConstructor has no retail export; empty stub needed for vtable slot — subclasses override with ChType assignment")
 void UChannel::StaticConstructor()
 {
 guard(UChannel::StaticConstructor);
 unguard;
 }
 
-IMPL_DIVERGE("UChannel::ReceivedBunch not found in Engine.dll Ghidra export — base implementation unreachable; always dispatched to concrete subclass (UActorChannel, UControlChannel, etc.)")
+IMPL_DIVERGE("Base UChannel::ReceivedBunch has no retail export; pure-virtual-like — always dispatched to subclass override (UActorChannel, UControlChannel, UFileChannel)")
 void UChannel::ReceivedBunch(FInBunch& Bunch)
 {
 guard(UChannel::ReceivedBunch);
 unguard;
 }
 
-IMPL_DIVERGE("UChannel::Serialize(TCHAR*,EName) not found in Engine.dll Ghidra export — base channel has no describe-serialization; subclasses provide channel-type-specific strings")
+IMPL_DIVERGE("Base UChannel::Serialize has no retail export; FOutputDevice::Serialize override only meaningful on UControlChannel — base stub is unreachable")
 void UChannel::Serialize(const TCHAR* Name, EName Type)
 {
 guard(UChannel::Serialize);

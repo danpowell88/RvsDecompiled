@@ -94,9 +94,8 @@ int AEmitter::Tick(float DeltaTime, ELevelTick TickType)
 				{
 					FLOAT bCount = ((FRange*)(em + 0x248))->GetCenter();
 					bCount = bCount * *(FLOAT*)(em + 0x8c);
-					// FUN_1050557c = FString::Printf used internally to format burst count.
-				// Retail converts bCount (float) to an integer burst amount.
-				// DIVERGENCE: burst count computation omitted; no burst spawn occurs.
+					// Retail uses FUN_1050557c (likely appTrunc via FPU) for loop bound;
+				// (INT)bCount is equivalent for positive burst counts.
 				INT iVar6 = (INT)bCount;
 					for (INT bi = 0; bi < iVar6; bi++)
 					{
@@ -208,8 +207,10 @@ int AEmitter::Tick(float DeltaTime, ELevelTick TickType)
 	{
 		if (noActive == 0 && ((FArray*)((BYTE*)this + 0x398))->Num() != 0 && (*(BYTE*)((BYTE*)this + 0x394) & 1) != 0)
 		{
-			// Retail: calls Level->DestroyActor(this) via vtable when all emitters done.
-			// DIVERGENCE: Level pointer not available at this call site without ULevel integration.
+			// XLevel->DestroyActor(this, 0) via vtable offset 0xa0
+			typedef int(__thiscall* DestroyActorFn)(void*, void*, int);
+			INT xlevel = *(INT*)((BYTE*)this + 0x328);
+			(*(DestroyActorFn*)((*(INT*)xlevel) + 0xa0))((void*)xlevel, (void*)this, 0);
 			return 1;
 		}
 		if ((*(DWORD*)((BYTE*)this + 0x394) & 2) != 0 && (*(DWORD*)((BYTE*)this + 0x394) & 1) == 0)
@@ -294,14 +295,15 @@ void AEmitter::PostScriptDestroyed()
 	}
 }
 
-IMPL_MATCH("Engine.dll", 0x103dfe90)
+// Ghidra: 0x103dfe90, 387 bytes
+IMPL_TODO("blocked by FCollisionHash query infrastructure and AProjector class integration")
 int AEmitter::CheckForProjectors()
 {
 	guard(AEmitter::CheckForProjectors);
+	// Retail: queries FCollisionHash via Level->CollisionHash for AProjector actors
+	// overlapping this emitter's bbox, registers each via projector vtable[0x194],
+	// clamps count to [0,4], stores in render data at this+0x3d8.
 	INT result = 0;
-	// FUN_0xdfe90 = collision hash projector check: queries FCollisionHash for projector
-	// actors whose bounds overlap this emitter's bbox, returns the count clamped to [0,4].
-	// DIVERGENCE: FCollisionHash integration not yet implemented; returns 0 (no projectors).
 	if (result < 0) result = 0;
 	else if (result > 3) result = 4;
 	if (*(INT*)((BYTE*)this + 0x3d8) != 0)
@@ -333,7 +335,8 @@ void UBeamEmitter::UpdateActorHitList()
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x10381920)
+// Ghidra: 0x10381920, 1208 bytes
+IMPL_TODO("blocked by FUN_10301560 world-space transform helper and FUN_10370d70 matrix multiply")
 int UBeamEmitter::UpdateParticles(float DeltaTime)
 {
 	guard(UBeamEmitter::UpdateParticles);
@@ -379,20 +382,19 @@ int UBeamEmitter::UpdateParticles(float DeltaTime)
 	(void)sizeW;
 	FBox expanded = ((FBox*)((BYTE*)this + 0x304))->ExpandBy(0.0f);
 	*(FBox*)((BYTE*)this + 0x304) = expanded;
-	// FUN_10301560 = world-space transform helper for beam emitter; FUN_10370d70 = matrix
-	// multiply to apply owner transform. DIVERGENCE: world-space transform not applied.
+	// FUN_10301560 = emitter-to-world FMatrix builder; FUN_10370d70 = FMatrix multiply.
+	// World-space bbox transform not yet applied.
 	return local_2c;
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x10301560)
+// Ghidra: 0x10381eb0, 2210 bytes
+IMPL_TODO("blocked by beam vertex buffer construction, FRawIndexBuffer, and FRenderInterface state management")
 int UBeamEmitter::RenderParticles(FDynamicActor* param_1, FLevelSceneNode* param_2, TList<FDynamicLight*>* param_3, FRenderInterface* param_4)
 {
 	guard(UBeamEmitter::RenderParticles);
-	// FUN_0xcb0b0 = complex beam particle renderer: builds vertex buffers, applies matrix
-	// transforms, sets up beam segments between source/target actors, and submits to RI.
-	// DIVERGENCE: beam rendering omitted; too complex to implement without full vertex-buffer
-	// infrastructure and actor-to-beam linking logic.
+	// Retail: builds beam segment geometry between source/target actors,
+	// constructs index buffers, and submits via FRenderInterface.
 	UParticleEmitter::RenderParticles(param_1, param_2, param_3, param_4);
 	return 0;
 	unguard;
@@ -455,12 +457,13 @@ int UMeshEmitter::UpdateParticles(float DeltaTime)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x103caec0)
+// Ghidra: 0x103caec0, 2697 bytes
+IMPL_TODO("blocked by per-particle mesh-instance FMatrix pipeline and FRenderInterface draw calls")
 int UMeshEmitter::RenderParticles(FDynamicActor* param_1, FLevelSceneNode* param_2, TList<FDynamicLight*>* param_3, FRenderInterface* param_4)
 {
 	guard(UMeshEmitter::RenderParticles);
-	// DIVERGENCE: complex mesh particle rendering not implemented (requires full vertex
-	// buffer + per-particle mesh-instance transform pipeline).
+	// Retail: iterates active particles, builds per-particle FMatrix transforms,
+	// applies mesh LOD via UViewport::IsWire/IsLit, and renders via FRenderInterface.
 	UParticleEmitter::RenderParticles(param_1, param_2, param_3, param_4);
 	return 0;
 	unguard;
@@ -507,7 +510,8 @@ float UParticleEmitter::SpawnParticles(float,float,float)
 	return 0.0f;
 }
 
-IMPL_MATCH("Engine.dll", 0x103ddca0)
+// Ghidra: 0x103ddca0, 5049 bytes
+IMPL_TODO("blocked by ~5KB particle physics loop: per-particle collision (FUN_1035dc30), velocity integration, and lifetime management")
 int UParticleEmitter::UpdateParticles(float DeltaTime)
 {
 	guard(UParticleEmitter::UpdateParticles);
@@ -522,8 +526,10 @@ int UParticleEmitter::UpdateParticles(float DeltaTime)
 		else if (idx >= n) idx = n - 1;
 		*(INT*)((BYTE*)this + 0x40) = idx;
 	}
-	// DIVERGENCE: SpawnParticles and main particle tick loop (~300 lines Ghidra) unresolved.
-	// Particle spawning and per-particle physics/lifetime updates not implemented.
+	// Retail continues with index clamping for offsets 0x58 and 0x34,
+	// SpawnParticles rate computation, and per-particle tick loop
+	// (velocity integration, collision via FUN_1035dc30, lifetime decay,
+	// force/acceleration application, colour/size interpolation).
 	return iVar20;
 	unguard;
 }
@@ -651,7 +657,8 @@ int USparkEmitter::UpdateParticles(float DeltaTime)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x10443a60)
+// Ghidra: 0x10443a60, 887 bytes
+IMPL_TODO("blocked by FUN_10443720 (spark RI setup) and FUN_10443610 (spark line submit)")
 int USparkEmitter::RenderParticles(FDynamicActor* param_1, FLevelSceneNode* param_2, TList<FDynamicLight*>* param_3, FRenderInterface* param_4)
 {
 	guard(USparkEmitter::RenderParticles);
@@ -675,12 +682,11 @@ int USparkEmitter::RenderParticles(FDynamicActor* param_1, FLevelSceneNode* para
 					if (rdPtr != 0)
 						*(DWORD*)((BYTE*)rdPtr + 0x58) = (BYTE)((BYTE*)this)[0x31];
 				}
-				// FUN_10443720 = spark render setup: configures RenderInterface state
-			// (blend mode, texture, vertex format) for spark line primitives.
-			// FUN_10443610 = spark render submit/cleanup: draws buffered spark segments
-			// and restores RI state.
-			// DIVERGENCE: spark rendering omitted — RI setup/submit infrastructure needed.
-			return pTVar2;
+				// FUN_10443720 = spark render setup: configures FRenderInterface state
+				// (blend mode, texture, vertex format) for spark line primitives.
+				// FUN_10443610 = spark render submit: draws buffered spark segments
+				// and restores RI state. Both blocked on FRenderInterface integration.
+				return pTVar2;
 			}
 		}
 	}
@@ -742,12 +748,14 @@ int USpriteEmitter::UpdateParticles(float DeltaTime)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x10445110)
+// Ghidra: 0x10445110, 981 bytes
+IMPL_TODO("blocked by FUN_10445060 (sprite RI setup), FUN_10301560 (emitter-to-world matrix), and FillVertexBuffer integration")
 int USpriteEmitter::RenderParticles(FDynamicActor* param_1, FLevelSceneNode* param_2, TList<FDynamicLight*>* param_3, FRenderInterface* param_4)
 {
 	guard(USpriteEmitter::RenderParticles);
-	// DIVERGENCE: sprite particle render loop (~700 lines Ghidra) unresolved.
-	// Per-particle billboarding, UV selection, and vertex upload not implemented.
+	// Retail: calls parent, counts active particles, sets up sprite cache via
+	// FUN_10445060, builds world-space matrix if needed, then submits vertex
+	// data through FRenderInterface.
 	UParticleEmitter::RenderParticles(param_1, param_2, param_3, param_4);
 	return 0;
 	unguard;
@@ -773,13 +781,14 @@ void USpriteEmitter::CleanUp()
 	UParticleEmitter::CleanUp();
 }
 
-IMPL_DIVERGE("FUN_ particle transform and vertex-upload helpers are unexported Engine.dll internals; camera-facing quad generation cannot be reconstructed")
+// Ghidra: 0x104440b0, 3625 bytes
+IMPL_TODO("blocked by FSceneNode::Deproject and per-particle billboard quad generation with FCoords transforms")
 int USpriteEmitter::FillVertexBuffer(FSpriteParticleVertex* param_1, FLevelSceneNode* param_2)
 {
 	guard(USpriteEmitter::FillVertexBuffer);
-	// Retail: iterates live particles, transforms each to a camera-facing quad,
-	// uploads UV and colour data to the vertex buffer, returns vertex count.
-	// DIVERGENCE: FUN_ particle transform/upload helpers are unresolved.
+	// Retail: builds camera-facing quads per live particle using FSceneNode::Deproject
+	// to compute screen-space axes, then iterates particles applying rotation, scale,
+	// colour, and UV data to FSpriteParticleVertex output buffer.
 	return 0;
 	unguard;
 }

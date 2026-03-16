@@ -8,14 +8,15 @@ IMPLEMENT_CLASS(AR6StairVolume)
 
 // --- AR6StairVolume ---
 
-IMPL_MATCH("R6Engine.dll", 0x1003b210)
+IMPL_TODO("~800 byte function; trace-based stair direction detection, StaticFindObjectChecked class lookup, SpawnActor marker placement with NAN guard patterns")
 void AR6StairVolume::AddMyMarker(AActor * param_1)
 {
 	guard(AR6StairVolume::AddMyMarker);
 
-	// TODO: implement AR6StairVolume::AddMyMarker (Ghidra 0x3c500, ~800 bytes: spawns R6Stairs
-	// navigation markers along stair volume; rotation cross product for stair normal;
-	// raw SpawnActor vtable dispatch not reconstructed; AI stair pathfinding absent)
+	// TODO(0x1003b210): uses StaticFindObjectChecked for R6Stairs class; adjusts Location by
+	// PrePivot offset; fires 4+ line traces (vtable 0xcc) to determine stair direction;
+	// walks forward/backward via Encompasses loop spawning navigation markers via SpawnActor;
+	// sets DrawScale, bDirectional flags on spawned actors.
 
 	unguard;
 }

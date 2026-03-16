@@ -6,18 +6,19 @@
 
 IMPLEMENT_CLASS(UR6SubActionAnimSequence)
 
-// Stubs for unresolved R6Engine internal functions
-// FUN_10024530 (0x10024530): class hierarchy traversal - IsA pattern against PrivateStaticClass
-IMPL_DIVERGE("FUN_10024530 (0x10024530): class hierarchy traversal via UMeshInstance linked list at +0x24/+0x2c; PrivateStaticClass_exref unresolved — returns NULL permanently")
-static INT*  FUN_10024530(INT) { return NULL; }
-// FUN_10042934 (0x10042934): x87 FPU QWORD conversion; reads ST0 FPU register state
-IMPL_DIVERGE("FUN_10042934 (0x10042934): x87 ftol2 reads FPU ST0 register; not recoverable from Ghidra decompilation")
-static QWORD FUN_10042934()    { return 0; }
-static const FLOAT s_flt_1_0f = 1.0f;
+// FUN_10024530 (0x10024530): IsA check — walks class chain at +0x24/+0x2c against PrivateStaticClass_exref.
+// Pass-through: in the animation context, the mesh instance always passes the type check.
+IMPL_TODO("blocked: PrivateStaticClass_exref unresolved — IsA target class unknown; pass-through assumes check always succeeds")
+static INT FUN_10024530(INT param_1) { return param_1; }
+// FUN_10042934 (0x10042934): MSVC __ftol2 intrinsic — reads x87 ST0 and converts float to int64.
+// Inlined as (INT)fVar at call sites where the source float is known (e.g. GetAnimDuration).
+// Kept as stub for PctToFrameNumber where the ST0 source is ambiguous.
+IMPL_TODO("blocked: __ftol2 reads x87 ST0; only needed where source float is ambiguous (PctToFrameNumber)")
+static QWORD FUN_10042934() { return 0; }
 
 // --- UR6SubActionAnimSequence ---
 
-IMPL_DIVERGE("calls FUN_10024530 (class hierarchy stub, permanently NULL) and FUN_10042934 (x87 ftol2 stub, permanently 0); both helpers unresolved — GetAnimDuration returns 0.0f for all inputs")
+IMPL_TODO("blocked: FUN_10024530 IsA uses unresolved PrivateStaticClass_exref; pass-through assumes mesh instance always passes type check")
 FLOAT UR6SubActionAnimSequence::GetAnimDuration(UR6PlayAnim* param_1)
 {
 	guard(UR6SubActionAnimSequence::GetAnimDuration);
@@ -35,37 +36,35 @@ FLOAT UR6SubActionAnimSequence::GetAnimDuration(UR6PlayAnim* param_1)
 			iVar4 = ((TGetMeshInst)*(DWORD*)(*(DWORD*)mesh + 0x88))(mesh, actor);
 		}
 
-		// DIVERGENCE: FUN_10024530 = get anim controller from UMeshInstance vtable; unresolved
 		INT* piVar5 = (INT*)FUN_10024530(iVar4);
 		if (piVar5 != (INT*)0)
 		{
-			// GetAnimByName via vtable 0xb0/4, using anim sequence name at param_1+0x50
+			// GetAnimByName via vtable 0xb0/4
 			typedef DWORD (__thiscall *TGetAnimByName)(void*, DWORD);
 			DWORD uVar6 = ((TGetAnimByName)*(DWORD*)(*(DWORD*)piVar5 + 0xb0))(piVar5, *(DWORD*)((BYTE*)param_1 + 0x50));
 
 			// GetNumFrames (as float) via vtable 0xc4/4
 			typedef FLOAT (__thiscall *TGetNumFrames)(void*, DWORD);
 			FLOAT fVar7 = ((TGetNumFrames)*(DWORD*)(*(DWORD*)piVar5 + 0xc4))(piVar5, uVar6);
-			UR6PlayAnim* pUVar1 = (UR6PlayAnim*)(INT)fVar7;
 
-			// Release/deref via vtable 0xc0/4
+			// Release anim handle via vtable 0xc0/4
 			typedef void (__thiscall *TReleaseAnim)(void*, DWORD);
 			((TReleaseAnim)*(DWORD*)(*(DWORD*)piVar5 + 0xc0))(piVar5, uVar6);
 
-			// DIVERGENCE: FUN_10042934 = high-resolution frame counter (QWORD); unresolved
-			QWORD uVar8 = FUN_10042934();
+			// Ghidra: uVar8 = FUN_10042934() — __ftol2 reads GetNumFrames result still in x87 ST0.
+			// Inlined here as (INT)fVar7 since the source float is known.
+			INT iFrameCount = (INT)fVar7;
 
-			FLOAT fVar2 = *(FLOAT*)((BYTE*)param_1 + 0x3c); // rate
-			param_1 = pUVar1;
+			FLOAT fVar2 = *(FLOAT*)((BYTE*)param_1 + 0x3c); // m_Rate
 
 			// Fallback to 1.0f if denominator is zero
 			FLOAT fDenominator = fVar7;
 			if (fDenominator == 0.0f)
 				fDenominator = 1.0f;
 
-			*(INT*)((BYTE*)pUVar3 + 0x34) = (INT)uVar8;
+			*(INT*)((BYTE*)pUVar3 + 0x34) = iFrameCount; // m_iFrameNumber
 
-			return ((FLOAT)(INT)uVar8 / fDenominator) * (FLOAT)*(INT*)((BYTE*)pUVar3 + 0x2c) * fVar2;
+			return ((FLOAT)iFrameCount / fDenominator) * (FLOAT)*(INT*)((BYTE*)pUVar3 + 0x2c) * fVar2;
 		}
 	}
 
@@ -129,7 +128,7 @@ INT UR6SubActionAnimSequence::IncrementSequence()
 	return 0;
 }
 
-IMPL_DIVERGE("FUN_10024530 stub returns NULL; PrivateStaticClass_exref unresolved — class hierarchy verification permanently omitted")
+IMPL_TODO("blocked: FUN_10024530 IsA check skipped; PrivateStaticClass_exref target class unresolved")
 INT UR6SubActionAnimSequence::IsAnimAtFrame(INT param_1, INT param_2)
 {
 	guard(UR6SubActionAnimSequence::IsAnimAtFrame);
@@ -143,12 +142,9 @@ INT UR6SubActionAnimSequence::IsAnimAtFrame(INT param_1, INT param_2)
 		iVar2 = ((TGetMeshInst)*(DWORD*)(*(DWORD*)mesh2 + 0x88))(mesh2, actor2);
 	}
 
-	// DIVERGENCE: skip class hierarchy verification (PrivateStaticClass_exref unresolved)
-	if (iVar2 != 0)
-		goto LAB_IsAnimAtFrameDone;
-	iVar2 = 0;
+	// Ghidra: FUN_10024530 IsA check on iVar2; if it fails, iVar2 = 0 (crash on deref below).
+	// Retail also crashes if iVar2 is 0. Pass-through: IsA always succeeds in practice.
 
-LAB_IsAnimAtFrameDone:
 	// Array of anim track entries at iVar2+0x10c; each entry 0x74 bytes; frame start time at +0x10
 	FLOAT fVar1 = *(FLOAT*)(*(INT*)(iVar2 + 0x10c) + 0x10 + param_1 * 0x74);
 
@@ -168,7 +164,7 @@ INT UR6SubActionAnimSequence::LaunchSequence()
 
 	m_AffectedActor->AnimBlendParams(0x11, 1.0f, 0.0f, 0.0f, NAME_None);
 
-	// DIVERGENCE: PlayAnim called via raw vtable slot 88 (offset 0x160) on m_AffectedActor.
+	// PlayAnim via vtable slot 88 (offset 0x160) on m_AffectedActor.
 	typedef void (__thiscall *TPlayAnim)(AActor*, INT, INT, FLOAT, FLOAT, INT, INT, INT);
 	TPlayAnim pfPlayAnim = (TPlayAnim)(*(INT**)m_AffectedActor)[0x160 / 4];
 	pfPlayAnim(m_AffectedActor, 0x11, *(INT*)&m_CurSequence->m_Sequence,
@@ -176,18 +172,18 @@ INT UR6SubActionAnimSequence::LaunchSequence()
 
 	if (m_bUseRootMotion)
 	{
-		// DIVERGENCE: StopAnim called via raw vtable slot 71 (offset 0x11C) on m_AffectedActor.
+		// StopAnim via vtable slot 71 (offset 0x11C) on m_AffectedActor.
 		typedef void (__thiscall *TStopAnim)(AActor*, INT, INT, INT, INT, FLOAT);
 		TStopAnim pfStopAnim = (TStopAnim)(*(INT**)m_AffectedActor)[0x11C / 4];
 		pfStopAnim(m_AffectedActor, 0xC, 0, 0, 0, 1.0f);
-		// DIVERGENCE: clear UseRootMotion flag (bit 12) at Actor+0xA8.
+		// Clear UseRootMotion flag (bit 12) at Actor+0xA8.
 		*(DWORD*)((BYTE*)m_AffectedActor + 0xA8) &= ~0x1000;
 	}
 
 	return 1;
 }
 
-IMPL_DIVERGE("FUN_10024530 stub returns NULL; FUN_10042934 stub returns 0; PrivateStaticClass_exref unresolved — class hierarchy verification and frame counter permanently omitted")
+IMPL_TODO("blocked: FUN_10024530 IsA + FUN_10042934 ST0 source float ambiguous after vtable 0xc0 call — returns 0.0f")
 FLOAT UR6SubActionAnimSequence::PctToFrameNumber(UR6PlayAnim* param_1, FLOAT param_2)
 {
 	guard(UR6SubActionAnimSequence::PctToFrameNumber);
@@ -201,17 +197,18 @@ FLOAT UR6SubActionAnimSequence::PctToFrameNumber(UR6PlayAnim* param_1, FLOAT par
 		piVar3 = ((TGetMeshInst)*(DWORD*)(*(DWORD*)mesh3 + 0x88))(mesh3, actor3);
 	}
 
-	// DIVERGENCE: skip class hierarchy verification (PrivateStaticClass_exref unresolved)
+	// Ghidra: FUN_10024530 IsA check — pass-through (always succeeds in practice)
 	if (piVar3 == (INT*)0)
 		piVar3 = (INT*)0; // stay NULL
 
-	// Lookup anim by name, then release
+	// Lookup anim by name via vtable 0xb0, then call vtable 0xc0
 	typedef DWORD (__thiscall *TGetAnimByName2)(void*, DWORD);
 	DWORD uVar4 = ((TGetAnimByName2)*(DWORD*)(*(DWORD*)piVar3 + 0xb0))(piVar3, *(DWORD*)((BYTE*)param_1 + 0x50));
 	typedef void (__thiscall *TReleaseAnim2)(void*, DWORD);
 	((TReleaseAnim2)*(DWORD*)(*(DWORD*)piVar3 + 0xc0))(piVar3, uVar4);
 
-	// DIVERGENCE: FUN_10042934 = get high-resolution frame counter (returns QWORD); unresolved.
+	// Ghidra: FUN_10042934 reads x87 ST0 left by vtable 0xc0 call above.
+	// The source float is ambiguous — vtable 0xc0 may or may not return a float via ST0.
 	QWORD uVar7 = FUN_10042934();
 
 	FLOAT local_1c = 0.0f;
@@ -257,7 +254,7 @@ void UR6SubActionAnimSequence::PreBeginPreview()
 	}
 }
 
-IMPL_MATCH("R6Engine.dll", 0x10040f40)
+IMPL_TODO("blocked: GIsEditor path not implemented — needs PctToFrameNumber, FString::Printf, ASceneManager+0x494, mesh vtable 0x104")
 INT UR6SubActionAnimSequence::Update(FLOAT Time, ASceneManager* Mgr)
 {
 	if (!UMatSubAction::Update(Time, Mgr))
@@ -272,11 +269,10 @@ INT UR6SubActionAnimSequence::Update(FLOAT Time, ASceneManager* Mgr)
 	return UpdateGame(Time, Mgr);
 }
 
-// Ghidra 0x10041420 (343b). Raw vtable and state-field accesses are implemented.
-// Remaining divergence: in the first-time path Ghidra reads Data[0] unconditionally
-// before checking Num==0||Data[0]==NULL, while our code uses a ternary (Num>0?Data[0]:NULL)
-// followed by a single null check — functionally identical but generates different assembly.
-IMPL_DIVERGE("Ghidra 0x10041420: retail reads Data[0] unconditionally before dual-null-check (Num==0||ptr==NULL); our ternary guard generates different assembly — permanent assembly-level divergence, functionally identical")
+// Ghidra 0x10041420: retail reads m_Sequences.Data[0] unconditionally before
+// null-checking (Num==0 || ptr==NULL); our ternary guard generates different
+// assembly — functionally identical, permanent assembly-level divergence.
+IMPL_DIVERGE("retail reads Data[0] unconditionally before null-check; ternary guard generates different assembly — functionally identical")
 INT UR6SubActionAnimSequence::UpdateGame(FLOAT Time, ASceneManager* Mgr)
 {
 	if (!IsRunning())
@@ -297,7 +293,7 @@ INT UR6SubActionAnimSequence::UpdateGame(FLOAT Time, ASceneManager* Mgr)
 	}
 	else
 	{
-		// DIVERGENCE: anim-playing check via raw vtable slot 57 (offset 0xE4) on m_AffectedActor.
+		// Anim-playing check via vtable slot 57 (offset 0xE4) on m_AffectedActor.
 		typedef INT (__thiscall *TCheckAnim)(AActor*);
 		if (((TCheckAnim)(*(INT**)m_AffectedActor)[0xE4 / 4])(m_AffectedActor) == 0)
 			return 1;
@@ -311,7 +307,7 @@ INT UR6SubActionAnimSequence::UpdateGame(FLOAT Time, ASceneManager* Mgr)
 				if (m_bResetAnimation)
 					m_AffectedActor->AnimBlendParams(0x11, 0.0f, 0.0f, 0.0f, NAME_None);
 				eventSequenceFinished();
-				// DIVERGENCE: set UMatSubAction state field at raw offset 0x2C to 3 (done).
+				// Set UMatSubAction state field at offset 0x2C to 3 (done).
 				*(INT*)((BYTE*)this + 0x2C) = 3;
 				m_bFirstTime = 1;
 				return 1;
