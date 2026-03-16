@@ -23,6 +23,44 @@ IMPLEMENT_CLASS(AGameReplicationInfo);
 IMPLEMENT_CLASS(AR6PawnReplicationInfo);
 
 /*=============================================================================
+	Private static helpers (reconstructed from Ghidra analysis).
+=============================================================================*/
+
+// FUN_1036d760 (53 bytes): swap two FVector values in-place.
+static void SwapFVectors( FVector* A, FVector* B )
+{
+	FVector Tmp = *A;
+	*A = *B;
+	*B = Tmp;
+}
+
+// FUN_10370830 (59 bytes): check whether an object reference changed for replication.
+// Returns TRUE when the property should be added to the rep list:
+//   - If newObj is already mapped on this connection → FALSE (client already knows).
+//   - If not mapped → mark channel dirty and return (newObj != NULL).
+// vtable[25] of Map (byte offset 100/0x64) = MapObject check.
+static UBOOL RepObjectChanged( INT newObj, INT /*oldObj*/, UPackageMap* Map, UActorChannel* Chan )
+{
+	DWORD* vtbl = *(DWORD**)Map;
+	typedef INT (__thiscall* MapObjectFn)(UPackageMap*, INT);
+	if ( ((MapObjectFn)vtbl[25])( Map, newObj ) != 0 )
+		return 0;  // already mapped — no change from client's perspective
+	*(INT*)((BYTE*)Chan + 0x8c) = 1;  // Chan->bActorMustStayDirty
+	return (newObj != 0);
+}
+
+// FUN_10371990 (32 bytes): lazy UProperty lookup by name within a class.
+static UObject* FindRepProperty( UObject* Outer, const TCHAR* PropName )
+{
+	return UObject::StaticFindObjectChecked( UProperty::StaticClass(), Outer, PropName, 0 );
+}
+
+// FUN_10357860 (1108 bytes): per-tick native-physics integration (velocity, constraints).
+// Called once per frame from ULevel::Tick. Stub pending full decompilation — Ghidra 0x10357860.
+IMPL_TODO("1108-byte per-tick physics integration helper called from ULevel::Tick; Ghidra 0x10357860; full decompilation pending")
+static void LevelPhysicsTick( ULevel* /*Level*/, FLOAT /*DeltaSeconds*/ ) {}
+
+/*=============================================================================
 	ULevelBase implementation.
 =============================================================================*/
 
@@ -54,7 +92,7 @@ void ULevelBase::Destroy()
 	unguard;
 }
 
-IMPL_TODO("IsTrans path calls FUN_103c0ab0 (unresolved); non-IsTrans uses ByteOrderSerialize; Ghidra 0x103c0f60")
+IMPL_TODO("DIVERGES from retail: retail uses ByteOrderSerialize for actor count + manual vtable[6] per-element loop (Ghidra 0x103c0f60); we use Ar<<Actors (TTransArray operator, compact index). IsTrans branch calls FUN_103c0ab0 which is itself a no-op. Non-IsTrans prealloc helpers FUN_10320190/FUN_10318800 not called. Functionally correct but not byte-exact.")
 void ULevelBase::Serialize( FArchive& Ar )
 {
 	UObject::Serialize( Ar );
@@ -309,11 +347,188 @@ void ULevel::SetActorCollision( INT bCollision, INT bUnused )
 	unguard;
 }
 
-IMPL_TODO("stub; retail Tick is full physics/script event loop at Ghidra 0x103c6700")
+IMPL_TODO("structural loop implemented; LevelPhysicsTick (FUN_10357860) stubbed; Karma actor tick (vtable[92]) skipped (MeSDK); bTicked bookkeeping elided; rdtsc profiling diverges; Ghidra 0x103c6700")
 void ULevel::Tick( ELevelTick TickType, FLOAT DeltaSeconds )
 {
 	guard(ULevel::Tick);
-	// TODO: implement ULevel::Tick (actor iteration, physics, script events, timer firing)
+	FMemMark Mark(GMem);
+	FMemMark EngMark(GEngineMem);
+	GInitRunaway();
+
+	// Mark level as currently ticking (prevents re-entrant actor destruction).
+	*(INT*)((BYTE*)this + 0xfc) = 1;  // bInTick
+
+	// Connection timeout: if we have a pending server connection that has not been
+	// acknowledged within 10 seconds, abort and browse to ?failed.
+	if ( NetDriver && NetDriver->ServerConnection
+		 && *(INT*)((BYTE*)this + 0x10194) == 0 )
+	{
+		DOUBLE elapsed = appSeconds() - *(DOUBLE*)((BYTE*)this + 0x1018c);
+		if ( elapsed > 10.0 )
+		{
+			BYTE* engB   = *(BYTE**)((BYTE*)this + 0x44);
+			BYTE* client = *(BYTE**)(engB + 0x44);
+			BYTE* vp0    = *(BYTE**)(*(BYTE**)(client + 0x30));
+			typedef void (__thiscall* BrowseFn)(void*, void*, const TCHAR*, INT, INT);
+			((BrowseFn)(*(DWORD*)(*(DWORD*)engB + 0xa4)))(engB, vp0, TEXT("?failed"), 0, 0);
+		}
+	}
+
+	// Dispatch incoming network data (client receives packets here).
+	if ( NetDriver )
+	{
+		DWORD* vtbl = *(DWORD**)NetDriver;
+		typedef void (__thiscall* TickDispatchFn)(UNetDriver*, FLOAT);
+		((TickDispatchFn)vtbl[32])( NetDriver, DeltaSeconds );  // vtable byte 0x80
+		if ( NetDriver->ServerConnection )
+			TickNetClient( DeltaSeconds );
+	}
+
+	// Dispatch incoming demo-record/playback data.
+	if ( DemoRecDriver )
+	{
+		DWORD* vtbl = *(DWORD**)DemoRecDriver;
+		typedef void (__thiscall* TickDispatchFn)(UNetDriver*, FLOAT);
+		((TickDispatchFn)vtbl[32])( DemoRecDriver, DeltaSeconds );  // vtable byte 0x80
+		if ( DemoRecDriver->ServerConnection )
+			TickDemoPlayback( DeltaSeconds );
+	}
+
+	// Tick the spatial collision hash (updates broadphase structures).
+	FCollisionHashBase* hashPtr = *(FCollisionHashBase**)((BYTE*)this + 0xf0);
+	if ( hashPtr )
+		hashPtr->Tick();
+
+	// Apply time dilation and advance the level clock (stored as double for precision).
+	ALevelInfo* LI = GetLevelInfo();
+	FLOAT TimeDilation = *(FLOAT*)((BYTE*)LI + 0x458);
+	DeltaSeconds *= TimeDilation;
+	if ( !IsPaused() )
+		*(DOUBLE*)((BYTE*)this + 0xd4) += (DOUBLE)DeltaSeconds;
+
+	// Sync LevelInfo's float copy of TimeSeconds.
+	*(FLOAT*)((BYTE*)LI + 0x45c) = (FLOAT)*(DOUBLE*)((BYTE*)this + 0xd4);
+	UpdateTime( LI );
+
+	// Force LEVELTICK_All when an async load was requested to block until complete.
+	if ( *(DWORD*)((BYTE*)LI + 0x450) & 0x40 )  // bRequestedBlockOnAsyncLoading
+		TickType = LEVELTICK_All;
+
+	// Clamp DeltaSeconds to a sane range to prevent physics blow-ups.
+	if ( DeltaSeconds < 0.0005f ) DeltaSeconds = 0.0005f;
+	if ( DeltaSeconds > 0.4f )    DeltaSeconds = 0.4f;
+
+	// Engine slow-motion override (e.g. editor pause / fixed demo-playback rate).
+	BYTE* engPtr = *(BYTE**)((BYTE*)this + 0x44);
+	if ( engPtr && ( *(DWORD*)(engPtr + 0x120) & 0x4000u ) )
+		DeltaSeconds = 0.3333f;
+
+	// DIVERGE: rdtsc profiling start skipped (rdtsc chains are permanent DIVERGE).
+
+	if ( TickType != LEVELTICK_TimeOnly )
+	{
+		// Full tick when: not paused AND (no server connection OR connection fully open).
+		INT srvState = 0;
+		if ( NetDriver && NetDriver->ServerConnection )
+			srvState = *(INT*)((BYTE*)NetDriver->ServerConnection + 0x80);
+
+		if ( !IsPaused() && ( !NetDriver || !NetDriver->ServerConnection || srvState == 3 ) )
+		{
+			// Clear the newly-spawned actor list that SpawnActor populates during ticking.
+			*(INT*)((BYTE*)this + 0xf8) = 0;
+
+			// Native physics integration (velocity, joints, rigid bodies).
+			// FUN_10357860 is a complex 1108-byte helper — stubbed pending decompilation.
+			LevelPhysicsTick( this, DeltaSeconds );
+
+			// Tick all dynamic actors from iFirstDynamicActor onwards.
+			INT iFirst = *(INT*)((BYTE*)this + 0x104);
+			for ( INT i = iFirst; i < Actors.Num(); i++ )
+			{
+				AActor* Actor = Actors(i);
+				if ( !Actor || Actor->bDeleteMe )
+					continue;
+
+				// DIVERGE: Karma rigid-body pre-tick (vtable[92] on actor) skipped.
+				//          Requires MeSDK binary-only library (permanent blocker).
+
+				// Tick actor, adding any delta accumulated during frames it was skipped.
+				FLOAT AccumDelta = *(FLOAT*)((BYTE*)Actor + 0x13c);
+				Actor->Tick( DeltaSeconds + AccumDelta, TickType );
+				*(FLOAT*)((BYTE*)Actor + 0x13c) = 0.0f;
+			}
+
+			// Tick actors spawned during this frame's tick pass (NewlySpawned list).
+			{
+				BYTE* node = *(BYTE**)((BYTE*)this + 0xf8);
+				while ( node )
+				{
+					AActor* spawned  = *(AActor**)node;
+					BYTE*   nextNode = *(BYTE**)(node + 4);
+					if ( spawned && !spawned->bDeleteMe )
+						spawned->Tick( DeltaSeconds, TickType );
+					node = nextNode;
+				}
+				*(INT*)((BYTE*)this + 0xf8) = 0;
+			}
+
+			// KGData: clear pending-constraints flag after physics step.
+			BYTE* kgData = *(BYTE**)((BYTE*)this + 0x101a8);
+			if ( kgData )
+				*(INT*)(kgData + 0x14224) = 0;
+		}
+		else
+		{
+			// Paused: only tick viewport and PlayerInput for active PlayerControllers.
+			for ( INT i = 0; i < Actors.Num(); i++ )
+			{
+				AActor* Actor = Actors(i);
+				if ( !Actor || Actor->bDeleteMe )
+					continue;
+				if ( !Actor->IsA( APlayerController::StaticClass() ) )
+					continue;
+				BYTE* vp = *(BYTE**)((BYTE*)Actor + 0x5b4);
+				if ( !vp )
+					continue;
+				// Viewport tick (vtable byte 0x64 = slot 25).
+				typedef void (__thiscall* VpTickFn)(void*, FLOAT);
+				((VpTickFn)(*(DWORD*)((BYTE*)*(DWORD*)vp + 0x64)))( vp, DeltaSeconds );
+				// PlayerInput tick at actor+0x7d8 (vtable byte 0x7c = slot 31).
+				BYTE* pi = *(BYTE**)((BYTE*)Actor + 0x7d8);
+				if ( pi )
+				{
+					typedef void (__thiscall* PITickFn)(void*, FLOAT);
+					((PITickFn)(*(DWORD*)((BYTE*)*(DWORD*)pi + 0x7c)))( pi, DeltaSeconds );
+				}
+			}
+		}
+	}
+
+	// DIVERGE: rdtsc profiling end skipped.
+
+	// Flush outgoing network data.
+	if ( NetDriver )
+	{
+		if ( !NetDriver->ServerConnection )
+			TickNetServer( DeltaSeconds );
+		DWORD* vtbl = *(DWORD**)NetDriver;
+		typedef void (__thiscall* TickFlushFn)(UNetDriver*);
+		((TickFlushFn)vtbl[31])( NetDriver );  // vtable byte 0x7c
+	}
+	if ( DemoRecDriver )
+	{
+		if ( !DemoRecDriver->ServerConnection )
+			TickDemoRecord( DeltaSeconds );
+		DWORD* vtbl = *(DWORD**)DemoRecDriver;
+		typedef void (__thiscall* TickFlushFn)(UNetDriver*);
+		((TickFlushFn)vtbl[31])( DemoRecDriver );  // vtable byte 0x7c
+	}
+
+	*(INT*)((BYTE*)this + 0xfc) = 0;    // bInTick = false
+	*(INT*)((BYTE*)this + 0x100) ^= 1;  // FrameTag: toggle 0 to 1 and back
+	EngMark.Pop();
+	Mark.Pop();
+	CleanupDestroyed( 0 );
 	unguard;
 }
 
@@ -1224,7 +1439,7 @@ INT ULevel::CheckSlice( FVector& Adjusted, FVector TraceDest, INT& TraceLen, AAc
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103bad70 (1594 bytes): builds FMatrix from actor transforms, iterates hash query results, calls moveSmooth + IsJoinedTo + IsVolumeBrush; FUN_1036d760/FUN_1035a3d0 unresolved")
+IMPL_TODO("Ghidra 0x103bad70 (1594 bytes): builds FMatrix from actor transforms, iterates hash query results, calls moveSmooth + IsJoinedTo + IsVolumeBrush; static helpers now resolved (FUN_1036d760=SwapFVectors, FUN_1035a3d0=collision-query init struct); full FMatrix/moveSmooth/IsVolumeBrush translation pending")
 INT ULevel::CheckEncroachment( AActor* Actor, FVector TestLocation, FRotator TestRotation, INT bTouchNotify )
 {
 	guard(ULevel::CheckEncroachment);
@@ -1918,7 +2133,7 @@ void ALevelInfo::execFinalizeLoading( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execFinalizeLoading );
 
 // ResetLevelInNative() - resets native-side level state.
-IMPL_TODO("795-byte function; clears game state arrays, viewport state, calls FUN_1031fb80; Ghidra 0x103bd770")
+IMPL_TODO("795-byte function; clears game-state arrays (XLevel+0x101f8 and +0x1019c), viewport/PlayerController state, builds sky-zone keep list, and memsets timing globals (DAT_1078d374/DAT_1078de74 — retail-only addresses); rdtsc-based TMap iteration timeout is permanent DIVERGE; FUN_1031fb80=TMap rehash helper; tractable but blocked by retail-only global addresses; Ghidra 0x103bd770")
 void ALevelInfo::execResetLevelInNative( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execResetLevelInNative);
@@ -1947,7 +2162,7 @@ void ALevelInfo::execSetBankSound( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execSetBankSound );
 
 // NotifyMatchStart() - notifies native code that a match has begun.
-IMPL_TODO("611-byte function; FGuid generation via engine vtable, sets session state; Ghidra 0x103bc230")
+IMPL_TODO("611-byte function; generates FGuid via engine vtable, initialises R6-specific match session state, caches arm-patches data; R6Engine helpers not yet analysed; tractable once R6Engine.dll exports are mapped; Ghidra 0x103bc230")
 void ALevelInfo::execNotifyMatchStart( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execNotifyMatchStart);
@@ -2160,10 +2375,114 @@ IMPL_EMPTY("base no-op — subclass implements")
 void ALevelInfo::PreNetReceive() {}
 IMPL_EMPTY("base no-op — subclass implements")
 void ALevelInfo::CheckForErrors() {}
-IMPL_TODO("FUN_10370830 (rep-object compare) and FUN_10371990 (lazy property lookup) unresolved; Ghidra 0x103756b0")
-INT* ALevelInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
+IMPL_TODO("Ghidra 0x103756b0; helpers RepObjectChanged/FindRepProperty resolved; diverges: DAT_10656444 gate assumed set, property caches use function-local statics instead of fixed globals")
+INT* ALevelInfo::GetOptimizedRepList( BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan )
 {
-	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
+	guard(ALevelInfo::GetOptimizedRepList);
+	Ptr = AActor::GetOptimizedRepList( Mem, Retire, Ptr, Map, Chan );
+
+	// DAT_10656444 & 0x800: R6 extended-replication gate.
+	// DIVERGE: retail reads a global at 0x10656444; assumed always set during gameplay.
+	{
+		// Static property pointer cache (retail: five fixed globals at 0x106669e8-0x106669fc).
+		static INT      s_RepFlags     = 0;
+		static UObject* s_pPauserProp  = NULL;
+		static UObject* s_pTimeDilProp = NULL;
+		static UObject* s_pWeatherProp = NULL;
+		static UObject* s_pShowFloppy  = NULL;
+		static UObject* s_pCompteur    = NULL;
+
+		if ( Role == ROLE_Authority && ( *(DWORD*)((BYTE*)this + 0xa0) & 0x40000000u ) )
+		{
+			// Pauser (this+0x4b0): replicate when object ref changed or not yet mapped.
+			if ( RepObjectChanged( *(INT*)((BYTE*)this + 0x4b0),
+			                       *(INT*)((BYTE*)Mem  + 0x4b0), Map, Chan ) )
+			{
+				if ( !(s_RepFlags & 1) )
+				{
+					s_RepFlags   |= 1;
+					s_pPauserProp = FindRepProperty( ALevelInfo::StaticClass(), TEXT("Pauser") );
+				}
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pPauserProp + 0x4a));
+			}
+
+			// TimeDilation (this+0x458): bitwise FLOAT compare.
+			if ( *(INT*)((BYTE*)this + 0x458) != *(INT*)((BYTE*)Mem + 0x458) )
+			{
+				if ( !(s_RepFlags & 2) )
+				{
+					s_RepFlags    |= 2;
+					s_pTimeDilProp = FindRepProperty( ALevelInfo::StaticClass(), TEXT("TimeDilation") );
+				}
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pTimeDilProp + 0x4a));
+			}
+		}
+
+		if ( Role == ROLE_Authority )
+		{
+			// m_RepWeatherEmitterClass (this+0x58c): object-ref with explicit mapping check.
+			{
+				INT    newW   = *(INT*)((BYTE*)this + 0x58c);
+				INT    oldW   = *(INT*)((BYTE*)Mem  + 0x58c);
+				DWORD* vtbl   = *(DWORD**)Map;
+				typedef INT (__thiscall* MapObjFn)(UPackageMap*, INT);
+				INT    mapped = ((MapObjFn)vtbl[25])( Map, newW );
+				UBOOL  bSame;
+				if ( mapped == 0 )
+				{
+					*(INT*)((BYTE*)Chan + 0x8c) = 1;  // bActorMustStayDirty
+					bSame = (oldW == 0);
+				}
+				else
+				{
+					bSame = (newW == oldW);
+				}
+				if ( !bSame )
+				{
+					if ( !(s_RepFlags & 4) )
+					{
+						s_RepFlags    |= 4;
+						s_pWeatherProp = FindRepProperty( ALevelInfo::StaticClass(), TEXT("m_RepWeatherEmitterClass") );
+					}
+					*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pWeatherProp + 0x4a));
+				}
+			}
+
+			// VirusUpload-mode properties: only replicated in RGM_VirusUploadAdvMode.
+			UObject* gri = *(UObject**)((BYTE*)this + 0x4cc);
+			if ( gri )
+			{
+				const FString& gameMode = *(FString*)((BYTE*)gri + 0x4b0);
+				if ( gameMode == TEXT("RGM_VirusUploadAdvMode") )
+				{
+					// m_bShowFloppy: bit 0 of this+0x450.
+					if ( ( *(DWORD*)((BYTE*)this + 0x450) ^ *(DWORD*)((BYTE*)Mem + 0x450) ) & 1u )
+					{
+						if ( !(s_RepFlags & 8) )
+						{
+							s_RepFlags   |= 8;
+							s_pShowFloppy = FindRepProperty( ALevelInfo::StaticClass(), TEXT("m_bShowFloppy") );
+						}
+						*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pShowFloppy + 0x4a));
+					}
+
+					// m_fCompteurFrameDetection (this+0x464).
+					if ( *(INT*)((BYTE*)this + 0x464) != *(INT*)((BYTE*)Mem + 0x464) )
+					{
+						if ( !(s_RepFlags & 0x10) )
+						{
+							s_RepFlags  |= 0x10;
+							s_pCompteur  = FindRepProperty( ALevelInfo::StaticClass(), TEXT("m_fCompteurFrameDetection") );
+						}
+						*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pCompteur + 0x4a));
+					}
+				}
+			}
+		}
+	}
+
+	return Ptr;
+	unguard;
 }
 IMPL_EMPTY("base no-op — subclass implements")
 void ALevelInfo::CallLogThisActor(AActor*) {}
@@ -2278,14 +2597,14 @@ INT ALevelInfo::IsSoundAudibleFromZone(INT Zone1, INT Zone2)
 }
 IMPL_EMPTY("base no-op — subclass implements")
 void AGameReplicationInfo::PostNetReceive() {}
-IMPL_TODO("FUN_10370870 (string diff for rep arrays) and FUN_10371990 unresolved; 4039-byte function (Ghidra 0x10376620)")
+IMPL_TODO("4039-byte function; helpers now resolved (RepObjectChanged=FUN_10370830, FindRepProperty=FUN_10371990, string-array diff=FUN_10370870); tractable but large translation pending; Ghidra 0x10376620")
 INT* AGameReplicationInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
 }
 IMPL_EMPTY("base no-op — subclass implements")
 void APlayerReplicationInfo::PostNetReceive() {}
-IMPL_TODO("FUN_10370830 (rep-object compare), FUN_10371990 unresolved; 3146-byte function (Ghidra 0x103759a0)")
+IMPL_TODO("3146-byte function; helpers now resolved (RepObjectChanged=FUN_10370830, FindRepProperty=FUN_10371990); tractable but large translation pending; Ghidra 0x103759a0")
 INT* APlayerReplicationInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
