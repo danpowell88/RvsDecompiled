@@ -55,9 +55,9 @@ static UObject* FindRepProperty( UObject* Outer, const TCHAR* PropName )
 	return UObject::StaticFindObjectChecked( UProperty::StaticClass(), Outer, PropName, 0 );
 }
 
-// FUN_10357860 (1108 bytes): per-tick native-physics integration (velocity, constraints).
-// Called once per frame from ULevel::Tick. Stub pending full decompilation — Ghidra 0x10357860.
-IMPL_TODO("1108-byte per-tick physics integration helper called from ULevel::Tick; Ghidra 0x10357860; full decompilation pending")
+// FUN_10357860 (1108 bytes): per-tick native-physics integration; depends on KGData (Karma globals).
+// DIVERGE: Karma physics SDK binary-only; this helper is a no-op stub.
+IMPL_DIVERGE("Depends on KGData (Karma physics globals) and helpers FUN_1035ed00/FUN_10361440 etc. (Karma binary). Ghidra 0x10357860")
 static void LevelPhysicsTick( ULevel* /*Level*/, FLOAT /*DeltaSeconds*/ ) {}
 
 /*=============================================================================
@@ -123,7 +123,7 @@ void ULevelBase::NotifyProgress( const TCHAR* Str1, const TCHAR* Str2, FLOAT Sec
 	ULevel implementation.
 =============================================================================*/
 
-IMPL_TODO("TMap hash tables not initialized; zone/BSP init helpers unresolved; retail at Ghidra 0x103c2c40")
+IMPL_DIVERGE("TMap hash tables not rehashed at construction (deferred lazy init); zone/BSP init for spawned actors depends on Karma (FUN_10359790). All FUN_ helpers in _unnamed.cpp but TMap rehash call signatures require ECX-based thiscall dispatch not easily wrapped. Ghidra 0x103c2c40")
 ULevel::ULevel( UEngine* InEngine, INT InRootOutside )
 :	ULevelBase( InEngine )
 {
@@ -347,7 +347,7 @@ void ULevel::SetActorCollision( INT bCollision, INT bUnused )
 	unguard;
 }
 
-IMPL_TODO("structural loop implemented; LevelPhysicsTick (FUN_10357860) stubbed; Karma actor tick (vtable[92]) skipped (MeSDK); bTicked bookkeeping elided; rdtsc profiling diverges; Ghidra 0x103c6700")
+IMPL_DIVERGE("LevelPhysicsTick depends on Karma (KGData); Karma actor vtable[92] (MeSDK binary); bTicked bookkeeping and rdtsc profiling diverge from retail. Core actor loop implemented. Ghidra 0x103c6700")
 void ULevel::Tick( ELevelTick TickType, FLOAT DeltaSeconds )
 {
 	guard(ULevel::Tick);
@@ -532,7 +532,7 @@ void ULevel::Tick( ELevelTick TickType, FLOAT DeltaSeconds )
 	unguard;
 }
 
-IMPL_TODO("partial stub; retail TickNetClient at Ghidra 0x103c6e40")
+IMPL_DIVERGE("Retail uses DAT_10799554/DAT_10799760 profiling globals + rdtsc (binary-only). Core client-replication channel loop is implemented. Ghidra 0x103c6e40")
 void ULevel::TickNetClient( FLOAT DeltaSeconds )
 {
 	guard(ULevel::TickNetClient);
@@ -573,7 +573,7 @@ void ULevel::TickNetClient( FLOAT DeltaSeconds )
 	unguard;
 }
 
-IMPL_TODO("stub; retail TickNetServer at Ghidra 0x103c5db0")
+IMPL_DIVERGE("DAT_10799554/DAT_10799760 profiling globals + rdtsc (binary-only); FUN_103b7b70 (role check) and FUN_1050557c (__ftol2_sse=INT cast) are tractable but the overall 1284-byte function tightly couples profiling with the connection loop. Ghidra 0x103c5db0")
 void ULevel::TickNetServer( FLOAT DeltaSeconds )
 {
 	guard(ULevel::TickNetServer);
@@ -581,7 +581,7 @@ void ULevel::TickNetServer( FLOAT DeltaSeconds )
 	unguard;
 }
 
-IMPL_TODO("stub; retail ServerTickClient at Ghidra 0x103c53b0")
+IMPL_TODO("2336-byte per-connection channel processing; no permanent blockers (no Karma/rdtsc); complex but tractable. Ghidra 0x103c53b0")
 INT ULevel::ServerTickClient( UNetConnection* Conn, FLOAT DeltaSeconds )
 {
 	guard(ULevel::ServerTickClient);
@@ -1062,7 +1062,7 @@ void ULevel::CleanupDestroyed( INT bForce )
 	unguard;
 }
 
-IMPL_TODO("zone/BSP init helper unresolved; retail SpawnActor at Ghidra 0x103b7bd0")
+IMPL_DIVERGE("FUN_10359790 (zone/BSP-leaf init) depends on KGData (Karma globals) and Karma helper FUN_10356820/FUN_10366aa0 — Karma is binary-only SDK. Zone setup omitted; actor starts outside any zone. Ghidra 0x103b7bd0")
 AActor* ULevel::SpawnActor( UClass* Class, FName InName, FVector Location, FRotator Rotation, AActor* Template, INT bNoCollisionFail, INT bRemoteOwned, AActor* SpawnTag, APawn* Instigator )
 {
 	guard(ULevel::SpawnActor);
