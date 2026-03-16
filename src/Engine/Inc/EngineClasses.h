@@ -2617,7 +2617,7 @@ public:
 class ENGINE_API APhysicsVolume : public AVolume
 {
 public:
-	DECLARE_CLASS(APhysicsVolume,AVolume,0,Engine)
+	DECLARE_CLASS(APhysicsVolume,AVolume,0|CLASS_NativeReplication,Engine)
 	INT Priority;                   // 0x40c — first APhysicsVolume field (Ghidra copy-ctor confirms)
 	// Event thunks
 	void eventActorEnteredVolume(class AActor*);

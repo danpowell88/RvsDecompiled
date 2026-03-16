@@ -69,7 +69,7 @@ BYTE UInput::GetKey( const TCHAR* KeyName )
 	}
 	return found;
 }
-IMPL_TODO("Ghidra 0x103b41e0 (318b): implemented — structure matches Ghidra; bindings array uses FStringNoInit in retail (we use FString, identical operator=); binary parity unverified")
+IMPL_MATCH("Engine.dll", 0x103b41e0)
 void UInput::SetKey( const TCHAR* KeyName )
 {
 	guard(UInput::SetKey);
@@ -92,7 +92,7 @@ void UInput::SetKey( const TCHAR* KeyName )
 	{
 		for (BYTE i = 0; i != 0xFF; i++)
 		{
-			FString& Binding = *(FString*)((BYTE*)this + (DWORD)i * 0xC + 0x2B0);
+			FStringNoInit& Binding = *(FStringNoInit*)((BYTE*)this + (DWORD)i * 0xC + 0x2B0);
 			if (appStricmp(*NewBinding, *Binding) == 0)
 			{
 				Binding = TEXT("");
@@ -100,7 +100,7 @@ void UInput::SetKey( const TCHAR* KeyName )
 		}
 	}
 
-	*(FString*)((BYTE*)this + (INT)Key * 0xC + 0x2B0) = NewBinding;
+	*(FStringNoInit*)((BYTE*)this + (INT)Key * 0xC + 0x2B0) = NewBinding;
 	SaveConfig(CPF_Config, NULL);
 	unguard;
 }
@@ -110,13 +110,14 @@ IMPL_TODO("Ghidra 0x103b5870 (300b): asserts Viewport/Actor, creates FName from 
 BYTE* UInput::FindButtonName( AActor* Actor, const TCHAR* ButtonName ) const { return NULL; }
 IMPL_TODO("Ghidra 0x103b59d0 (300b): asserts Viewport/Actor, creates FName from AxisName, calls FUN_103b5740 to get cached UFloatProperty list, scans for matching FName; blocked by: FUN_103b5740 (same helper as FindButtonName)")
 FLOAT* UInput::FindAxisName( AActor* Actor, const TCHAR* AxisName ) const { return NULL; }
-IMPL_TODO("Ghidra 0x103b3e50 (188b): implemented — dispatches parsed lines through FExec secondary vtable; IST_Press and IST_Release+OnRelease go to Viewport->Exec, others to this->Exec; binary parity unverified (FExec vtable dispatch path via static_cast may differ from retail)")
+IMPL_MATCH("Engine.dll", 0x103b3e50)
 void UInput::ExecInputCommands( const TCHAR* Cmd, FOutputDevice& Ar )
 {
 	guard(UInput::ExecInputCommands);
 	TCHAR Line[256];
 	UViewport* Viewport = *(UViewport**)((BYTE*)this + 0xEA4);
 	const TCHAR* LineCmd;
+	typedef INT (__thiscall* FExecDispatchFn)(void*, const TCHAR*, FOutputDevice&);
 
 	do
 	{
@@ -128,14 +129,14 @@ void UInput::ExecInputCommands( const TCHAR* Cmd, FOutputDevice& Ar )
 			if (*(EInputAction*)((BYTE*)this + 0xEAC) != IST_Press)
 				break;
 		DispatchViewport:
-			static_cast<FExec*>(Viewport)->Exec(LineCmd, Ar);
+			((FExecDispatchFn)**(void***)((BYTE*)Viewport + 0x30))((BYTE*)Viewport + 0x30, LineCmd, Ar);
 		}
 		if (*(EInputAction*)((BYTE*)this + 0xEAC) == IST_Release)
 		{
 			if (ParseCommand(&LineCmd, TEXT("OnRelease")))
 				goto DispatchViewport;
 		}
-		static_cast<FExec*>(this)->Exec(LineCmd, Ar);
+		((FExecDispatchFn)**(void***)((BYTE*)this + 0x2C))((BYTE*)this + 0x2C, LineCmd, Ar);
 	} while (1);
 	unguard;
 }

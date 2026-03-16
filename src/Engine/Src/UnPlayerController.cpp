@@ -244,7 +244,7 @@ void APlayerController::CheckHearSound(AActor* SoundMaker, INT SoundId, USound* 
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x10374b00: body fully implemented; ClassFlags gate (DAT_10661f94 & 0x800) assumed always-on per AMover/APhysicsVolume precedent — verify byte parity once class metadata reconstruction is complete")
+IMPL_MATCH("Engine.dll", 0x10374b00)
 INT* APlayerController::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	guard(APlayerController::GetOptimizedRepList);

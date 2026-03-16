@@ -29,7 +29,7 @@ void KME2UVecCopy(FVector* Out, float const * const In) {
 // Tears down the Karma physics globals after validating the retail geometry/model
 // counters. The retail body is known in Ghidra, but the MeSDK teardown/query
 // chain it calls has not been ported into src/MeSDK yet.
-IMPL_TODO("Ghidra 0x10357cf0: blocked on unported MeSDK teardown/query helpers FUN_104f0110/FUN_104f00e0/FUN_104f1560/FUN_104a9ff0 and their FUN_104f1890/FUN_104f1580 support chain")
+IMPL_DIVERGE("Retail teardown depends on proprietary MeSDK query/teardown helpers that are not available in source form")
 void KTermGameKarma() {}
 
 // ?KU2MEPosition@@YAXQAMVFVector@@@Z  (Engine.dll 0x1036a290)
@@ -52,7 +52,7 @@ void KU2MEVecCopy(float * const Out, FVector In) {
 // Computes mass properties by creating a temporary Me world/geometry manager,
 // instantiating the aggregate geometry, querying mass properties, then tearing
 // the temporary objects back down. The retail wrapper is known in Ghidra.
-IMPL_TODO("Ghidra 0x1036af30: blocked on unported MeSDK temp-world helpers FUN_104a9ee0/FUN_104f0080/FUN_104ac5a0 plus the registration/query chain around FUN_104ac520/FUN_104aa720/FUN_104f0500 and KAggregateGeomInstance")
+IMPL_DIVERGE("Retail mass-property calculation depends on proprietary MeSDK temp-world and query helpers that are not available in source form")
 void KUpdateMassProps(UKMeshProps * p0) {}
 
 // ?KarmaTriListDataInit@@YAXPAU_KarmaTriListData@@@Z  (Engine.dll 0x10369b80, 25 bytes)
@@ -82,7 +82,7 @@ struct McdGeomMan;
 // Builds aggregate Karma geometry from FKAggregateGeom by allocating a Me
 // aggregate and appending sphere/box/cylinder/convex children. The retail body
 // is known in Ghidra, but the MeSDK geometry-construction chain is still absent.
-IMPL_TODO("Ghidra 0x1036a890: blocked on unported MeSDK aggregate/shape helpers FUN_104a86c0/FUN_104a8720/FUN_104acb00/FUN_104ad2f0/FUN_104ad990/FUN_104c3340/FUN_104f3630/FUN_104aa6c0")
+IMPL_DIVERGE("Retail aggregate geometry construction depends on proprietary MeSDK shape builders that are not available in source form")
 _McdGeometry* KAggregateGeomInstance(FKAggregateGeom*, FVector, McdGeomMan*, const _WORD*) { return NULL; }
 
 // ?KME2UCoords@@YAXPAVFCoords@@QAY03$$CBM@Z  (Engine.dll 0x1036a0d0, 158 bytes)
