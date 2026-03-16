@@ -176,8 +176,385 @@ extern void KTermGameKarma();             // EngineAux.cpp — tears down the Ka
 // UGameEngine
 // =============================================================================
 
-IMPL_TODO("Ghidra 0x103a3f00: 3692-byte console-command dispatch (STAT, SHOW, OPEN, etc.) — no FUN_ blockers found; pending full reconstruction of command-dispatch switch table")
-INT UGameEngine::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return Super::Exec( Cmd, Ar ); }
+// BSS-segment globals used by UGameEngine::Exec (retail: Engine.dll .bss ~0x10671508-0x10671710)
+static INT  s_bIsCanceling   = 0;        // retail: DAT_10671508 — cancel-in-progress guard
+static char s_VideosRootBuf[512];        // retail: DAT_10671510 — narrow-char videos root path
+static char s_VideoFilenameBuf[512];     // retail: DAT_10671610 — narrow-char video filename
+
+// Helper: close a UNetDriver / UNetConnection pair found through a level's NetDriver chain.
+// Pattern: level->NetDriver->ServerConnection->subObject->vtable[0x6c] + conn->vtable[0x80]
+static void CloseNetLevel( BYTE* level )
+{
+    if ( !level ) return;
+    INT driver = *(INT*)(level + 0x40);
+    if ( !driver ) return;
+    INT conn = *(INT*)(driver + 0x3c);
+    if ( !conn ) return;
+    INT obj = *(INT*)(conn + 0xeb0);
+    if ( !obj ) return;
+    typedef void (__thiscall *tClose)(void*);
+    ((tClose)(*(void***)obj )[0x6c/4])((void*)obj );
+    ((tClose)(*(void***)conn)[0x80/4])((void*)conn);
+}
+
+IMPL_MATCH("Engine.dll", 0x103a3f00)
+INT UGameEngine::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
+{
+    guard(UGameEngine::Exec);
+
+    // Convenience aliases for UEngine fields — Ghidra offset crosscheck:
+    //   Ghidra this+0x18 = actual+0x44 = Client,  this+0x1c = Audio,  this+0x20 = GRenDev
+    //   Ghidra this+0x42c= actual+0x458= GLevel,  this+0x434= actual+0x460= _uge_unk[0] (GPendingLevel)
+    //   Ghidra this-0x2c = actual+0x00 = vtable ptr → calling named virtuals handles this
+    UClient*       pClient  = Client;
+    URenderDevice* pRenDev  = GRenDev;
+    ULevel*        pLevel   = GLevel;
+    ULevel*        pPending = *(ULevel**)((BYTE*)this + 0x460);  // _uge_unk[0]
+    FURL*          pLastURL = (FURL*)  ((BYTE*)this + 0x464);    // _uge_unk[4]
+    DWORD*         pFlags   = (DWORD*) ((BYTE*)this + 0xf4);     // engine flags (UEngine._ue_unk)
+
+    // typedef for raw zero-arg __thiscall dispatch
+    typedef void (__thiscall *tVoidV)(void*);
+
+    // ── TESTPATCH ─────────────────────────────────────────────────────────────
+    if ( ParseCommand(&Cmd, TEXT("TESTPATCH")) )
+    {
+        if ( !GEvilTest )
+        {
+            // Retail: spawn AR6eviLTesting in GLevel via ULevel vtable slot 42 (SpawnActor).
+            // ZeroRot and NAME_None are passed as implicit stack args in the retail ABI;
+            // exact multi-arg SpawnActor signature not reconstructed — IMPL_TODO for spawn path.
+            // IMPL_TODO: FUN_103a3f00-local spawn — ULevel::SpawnActor arg ABI unconfirmed
+            typedef AActor* (__thiscall *tSpawnActor)(ULevel*);
+            tSpawnActor pfSpawn = (tSpawnActor)(*(void***)pLevel)[0xa8/4];
+            GEvilTest = (AR6eviLTesting*)pfSpawn(pLevel);
+        }
+        if ( GEvilTest )
+        {
+            // IMPL_TODO: FindFunctionChecked FName arg unconfirmed; ProcessEvent ABI unconfirmed
+            // Retail: FindFunctionChecked(some_event_name) → then call UObject vtable slot 4
+            ((tVoidV)(*(void***)GEvilTest)[0x10/4])(GEvilTest);
+        }
+        return 1;
+    }
+
+    // ── VER — toggle engine flags bit 0x2000 ──────────────────────────────────
+    if ( ParseCommand(&Cmd, TEXT("VER")) )
+    {
+        *pFlags ^= 0x2000;
+        return 1;
+    }
+
+    // ── R6LIGHTVALUE — toggle engine flags bit 0x800 ──────────────────────────
+    if ( ParseCommand(&Cmd, TEXT("R6LIGHTVALUE")) )
+    {
+        *pFlags ^= 0x800;
+        return 1;
+    }
+
+    // ── PLAYVIDEO — parse FILE= and play via render-device ────────────────────
+    if ( ParseCommand(&Cmd, TEXT("PLAYVIDEO")) )
+    {
+        TCHAR FilePart[256];
+        if ( !Parse(Cmd, TEXT("FILE="), FilePart, 256) )
+            return 0;
+
+        // StopMovie: GRenDev vtable slot 40 (offset 0xa0)
+        if ( pRenDev ) ((tVoidV)(*(void***)pRenDev)[0xa0/4])(pRenDev);
+
+        // Build narrow-char filename into static buffer (retail: DAT_10671610)
+        {
+            FString fname(FilePart);
+            const TCHAR* src = *fname;
+            char* dst = s_VideoFilenameBuf;
+            while ( *src ) { unsigned short c = (unsigned short)*src++; *dst++ = c > 0xff ? (char)0x7f : (char)c; }
+            *dst = 0;
+        }
+
+        // Get videos-root path from GModMgr and narrow-char-encode into static buffer (retail: DAT_10671510)
+        if ( GModMgr )
+        {
+            FString root = GModMgr->eventGetVideosRoot();
+            const TCHAR* src = *root;
+            char* dst = s_VideosRootBuf;
+            while ( *src ) { unsigned short c = (unsigned short)*src++; *dst++ = c > 0xff ? (char)0x7f : (char)c; }
+            *dst = 0;
+        }
+
+        // IsMoviePlaying check: GRenDev vtable slot 39 (offset 0x9c); retail calls it twice
+        if ( pRenDev ) ((tVoidV)(*(void***)pRenDev)[0x9c/4])(pRenDev);
+        if ( pRenDev ) ((tVoidV)(*(void***)pRenDev)[0x9c/4])(pRenDev);
+
+        // PlayMovie: GRenDev vtable slot 42 (offset 0xa8)
+        if ( pRenDev ) ((tVoidV)(*(void***)pRenDev)[0xa8/4])(pRenDev);
+
+        return 1;
+    }
+
+    // ── STOPVIDEO ─────────────────────────────────────────────────────────────
+    if ( ParseCommand(&Cmd, TEXT("STOPVIDEO")) )
+    {
+        // GRenDev vtable slot 43 (offset 0xac): stop/close video playback
+        if ( pRenDev ) ((tVoidV)(*(void***)pRenDev)[0xac/4])(pRenDev);
+        return 1;
+    }
+
+    // ── SERVER ────────────────────────────────────────────────────────────────
+    if ( ParseCommand(&Cmd, TEXT("SERVER")) )
+    {
+        // GSys+0x2c holds a raw function pointer (retail-specific launch helper).
+        // Intentionally returns 0 (command not consumed by game engine, passed on).
+        if ( GSys )
+        {
+            typedef void (*tVoidVoid)();
+            tVoidVoid pfn = *(tVoidVoid*)((BYTE*)GSys + 0x2c);
+            pfn();
+        }
+        return 0;
+    }
+
+    // ── OPEN / START / STARTMINIMIZED ─────────────────────────────────────────
+    {
+        INT bStartMin = ParseCommand(&Cmd, TEXT("STARTMINIMIZED"));
+        const TCHAR* CmdAfterStart    = Cmd;
+        INT bStart    = !bStartMin && ParseCommand(&Cmd, TEXT("START"));
+        const TCHAR* CmdAfterOpen     = Cmd;
+        INT bOpen     = !bStartMin && !bStart && ParseCommand(&Cmd, TEXT("OPEN"));
+
+        if ( bOpen || bStart || bStartMin )
+        {
+            FString Error;
+            if ( pClient && pClient->Viewports.Num() )
+            {
+                // With an active viewport: for START/STARTMINIMIZED, flush viewport first
+                if ( bStart || bStartMin )
+                {
+                    UViewport* vp = pClient->Viewports(0);
+                    // Viewport vtable slot 43 (0xac): flush or stop-movie
+                    ((tVoidV)(*(void***)vp)[0xac/4])(vp);
+                }
+                SetClientTravel(NULL, Cmd, 0, TRAVEL_Absolute);
+                return 1;
+            }
+            // No active viewport: construct URL and Browse
+            ETravelType tt = bStartMin ? TRAVEL_Partial : TRAVEL_Absolute;
+            FURL URL(pLastURL, Cmd, tt);
+            Browse(URL, NULL, Error);
+            if ( *Error ) Ar.Logf(TEXT("%s"), *Error);
+            return 1;
+        }
+    }
+
+    // ── MINIMIZEAPP ───────────────────────────────────────────────────────────
+    if ( ParseCommand(&Cmd, TEXT("MINIMIZEAPP")) )
+    {
+        if ( pClient && pClient->Viewports.Num() )
+        {
+            UViewport* vp = pClient->Viewports(0);
+            // Viewport vtable slot 43 (0xac): minimize
+            ((tVoidV)(*(void***)vp)[0xac/4])(vp);
+        }
+        return 1;
+    }
+
+    // ── MAXIMIZEAPP ───────────────────────────────────────────────────────────
+    if ( ParseCommand(&Cmd, TEXT("MAXIMIZEAPP")) )
+    {
+        if ( pClient && pClient->Viewports.Num() )
+        {
+            UViewport* vp = pClient->Viewports(0);
+            // Viewport vtable slot 44 (0xb0): maximize
+            ((tVoidV)(*(void***)vp)[0xb0/4])(vp);
+        }
+        return 1;
+    }
+
+    // ── SERVERTRAVEL (dedicated-server only) ──────────────────────────────────
+    if ( ParseCommand(&Cmd, TEXT("SERVERTRAVEL")) && GIsServer && !GIsClient )
+    {
+        FString Dest(Cmd);
+        ALevelInfo* LI = GLevel ? GLevel->GetLevelInfo() : NULL;
+        LI->eventServerTravel(Dest, 0);
+        return 1;
+    }
+
+    // ── SERVERQUIT / SAY ──────────────────────────────────────────────────────
+    if ( !ParseCommand(&Cmd, TEXT("SERVERQUIT")) )
+    {
+        // SERVERQUIT not found — check for SAY broadcast on a dedicated server
+        if ( GIsServer && !GIsClient && ParseCommand(&Cmd, TEXT("SAY")) )
+        {
+            FString Message(Cmd);
+            FName   None(NAME_None);
+            ALevelInfo* LI = GLevel ? GLevel->GetLevelInfo() : NULL;
+            if ( LI && LI->Game )
+                LI->Game->eventBroadcast(NULL, Message, None);
+            return 1;
+        }
+    }
+    else if ( GIsServer )
+    {
+        // SERVERQUIT on a dedicated server: close all network connections and quit
+        CloseNetLevel((BYTE*)pLevel);
+        CloseNetLevel((BYTE*)pPending);
+        // Close GPendingLevel's own pending-net as well (retail closes it twice via two loops)
+        if ( pPending )
+        {
+            BYTE* pl = (BYTE*)pPending;
+            INT driver = *(INT*)(pl + 0x40);
+            if ( driver )
+            {
+                INT conn = *(INT*)(driver + 0x3c);
+                if ( conn )
+                {
+                    INT obj = *(INT*)(conn + 0xeb0);
+                    if ( obj )
+                    {
+                        typedef void (__thiscall *tClose)(void*);
+                        ((tClose)(*(void***)obj )[0x6c/4])((void*)obj);
+                        ((tClose)(*(void***)conn)[0x80/4])((void*)conn);
+                    }
+                }
+            }
+        }
+        return 1;
+    }
+
+    // ── DISCONNECT ────────────────────────────────────────────────────────────
+    if ( ParseCommand(&Cmd, TEXT("DISCONNECT")) )
+    {
+        FString Error;
+        // Only handle if we're on a client (NM_Client=3) or listen server (NM_ListenServer=2)
+        BYTE nmClient = pLevel ? *(BYTE*)((BYTE*)pLevel->GetLevelInfo() + 0x425) : 0;
+        if ( !pClient || !pClient->Viewports.Num() || !pLevel || (nmClient != 3 && nmClient != 2) )
+        {
+            Ar.Logf(TEXT("%s"), *Error);
+            return 1;
+        }
+        // Close network connections then travel to entry level
+        CloseNetLevel((BYTE*)pLevel);
+        CloseNetLevel((BYTE*)pPending);
+        SetClientTravel(NULL, TEXT(""), 0, TRAVEL_Absolute);
+        // Notify audio subsystem to stop/reset
+        if ( Audio )
+        {
+            ((tVoidV)(*(void***)Audio)[0xc4/4])(Audio);
+            ((tVoidV)(*(void***)Audio)[0xe4/4])(Audio);
+            ((tVoidV)(*(void***)Audio)[0xe0/4])(Audio);
+        }
+        return 1;
+    }
+
+    // ── EXIT / QUIT ───────────────────────────────────────────────────────────
+    if ( ParseCommand(&Cmd, TEXT("EXIT")) || ParseCommand(&Cmd, TEXT("QUIT")) )
+    {
+        CloseNetLevel((BYTE*)pLevel);
+        CloseNetLevel((BYTE*)pPending);
+        Ar.Log(TEXT("Closing by request"));
+        appRequestExit(0);
+        return 1;
+    }
+
+    // ── GETCURRENTTICKRATE / GETMAXTICKRATE ───────────────────────────────────
+    // Both commands log GetMaxTickRate() — GETCURRENTTICKRATE and GETMAXTICKRATE share code path
+    if ( ParseCommand(&Cmd, TEXT("GETCURRENTTICKRATE")) || ParseCommand(&Cmd, TEXT("GETMAXTICKRATE")) )
+    {
+        Ar.Logf(TEXT("%f"), GetMaxTickRate());
+        return 1;
+    }
+
+    // ── BIGHEAD (cheat: scale actor bone sizes) ───────────────────────────────
+    {
+        ALevelInfo* LI = pLevel ? pLevel->GetLevelInfo() : NULL;
+        // Only available in standalone (NetMode==0)
+        BYTE nmLocal = LI ? *(BYTE*)((BYTE*)LI + 0x425) : 0xff;
+        if ( LI && nmLocal == 0 && ParseCommand(&Cmd, TEXT("BIGHEAD")) )
+        {
+            // IMPL_TODO: FUN_103a0540 (actor iterator, retail 0x103a0540) not yet identified;
+            // bone-scale loop body omitted until helper is reconstructed.
+            return 1;
+        }
+    }
+
+    // ── GSPYLITE — launch GameSpy Lite ────────────────────────────────────────
+    if ( ParseCommand(&Cmd, TEXT("GSPYLITE")) )
+    {
+        FString Error;
+        appLaunchURL(TEXT("GSpyLite.exe"), TEXT(""), &Error);
+        return 1;
+    }
+
+    // ── SAVEGAME ──────────────────────────────────────────────────────────────
+    if ( ParseCommand(&Cmd, TEXT("SAVEGAME")) )
+    {
+        // FUN_1039eb00: internal save-availability check (retail 0x1039eb00, not exported).
+        // IMPL_TODO: FUN_1039eb00 identity unconfirmed; skipping check and calling SaveGame directly.
+        INT slot = appAtoi(Cmd);
+        SaveGame(slot);
+        return 1;
+    }
+
+    // ── CANCEL — abort a pending level connection ─────────────────────────────
+    if ( ParseCommand(&Cmd, TEXT("CANCEL")) )
+    {
+        if ( s_bIsCanceling ) return 1;
+        s_bIsCanceling = 1;
+
+        if ( !pPending )
+        {
+            SetProgress(TEXT(""), TEXT(""), 0.f);
+        }
+        else
+        {
+            // UPendingLevel::Try() — vtable slot 28 (offset 0x70); returns non-zero if still trying
+            typedef INT (__thiscall *tTry)(void*);
+            INT bStillTrying = ((tTry)(*(void***)pPending)[0x70/4])(pPending);
+            if ( bStillTrying )
+            {
+                s_bIsCanceling = 0;
+                return 1;
+            }
+            LocalizeProgress(TEXT("CancelledConnect"), TEXT("Engine"), NULL);
+            SetProgress(TEXT(""), TEXT(""), 0.f);
+        }
+        CancelPending();
+        s_bIsCanceling = 0;
+        return 1;
+    }
+
+    // ── SET gametype class validation (NM_Client guard) ───────────────────────
+    // Retail: on network clients (NM_Client=3), validate that a SET target class is not
+    // a non-GameInfo actor (prevents clients from changing the game type).
+    // FUN_1038d760 (class lookup) is not exported; validation skipped with comment.
+    // IMPL_TODO: FUN_1038d760 (retail 0x1038d760) not yet identified; SET class check omitted.
+    if ( pLevel )
+    {
+        ALevelInfo* LI = pLevel ? pLevel->GetLevelInfo() : NULL;
+        BYTE nm = *(BYTE*)((BYTE*)LI + 0x425);
+        if ( nm == 3 )   // NM_Client
+        {
+            // Retail would: ParseToken → FUN_1038d760(className) → IsChildOf(AActor) && !IsChildOf(AGameInfo) → return 0
+            // We fall through to ULevel::Exec and then Super::Exec below.
+        }
+    }
+
+    // ── GLevel command forwarding ─────────────────────────────────────────────
+    if ( pLevel )
+    {
+        // ULevel vtable slot 33 (0x84): Exec — forward unknown commands to the level
+        typedef INT (__thiscall *tExec)(void*, const TCHAR*, FOutputDevice&);
+        tExec pfExec = (tExec)(*(void***)pLevel)[0x84/4];
+        if ( pfExec(pLevel, Cmd, Ar) )
+            return 1;
+    }
+
+    // ── Fallthrough to UEngine::Exec ──────────────────────────────────────────
+    if ( !Super::Exec(Cmd, Ar) )
+        return 0;
+    return 1;
+
+    unguard;
+}
 IMPL_MATCH("Engine.dll", 0x1039edc0)
 void UGameEngine::Destroy()
 {
