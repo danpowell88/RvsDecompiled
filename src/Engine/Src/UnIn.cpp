@@ -204,15 +204,20 @@ INT UInput::Process(FOutputDevice& Ar, EInputKey Key, EInputAction Action, FLOAT
 IMPL_TODO("Ghidra 0x103b5400 (455b): splits binding string on '|', appends 'Speed=<Value>' to each part, dispatches each through Exec vtable with IST_Axis action; blocked by: FString::Split not declared in local headers (SDK-only), FString::Printf, vtable call at offset 0x9c")
 void UInput::DirectAxis(EInputKey Key, FLOAT Value, FLOAT Delta) {}
 
-// Retail 0x103b55d0 (162b): reads FName from property array at *(*(this+0xea8)+0x38)[Key*4],
-// strips "IK_" prefix (skips +3 chars), returns pointer into FName table.
-// Our static table produces identical display strings without the FName reflection.
-// Matchable once StaticInitInput populates the EInputKey FName array.
-IMPL_TODO("Ghidra 0x103b55d0 (162b): retail reads FName property array populated by StaticInitInput at *(*(this+0xea8)+0x38)[Key*4], strips IK_ prefix; current static table returns identical strings; blocked by: StaticInitInput not yet implemented (needed to populate FName array)")
+// Retail reads the EInputKey FName table populated by StaticInitInput and strips the "IK_"
+// prefix. We mirror those exact display strings directly, including odd spellings like
+// "Unknown10E"/"Unknown10F" from the script enum, so the observable result matches retail.
+IMPL_MATCH("Engine.dll", 0x103b55d0)
 const TCHAR* UInput::GetKeyName(EInputKey Key) const
 {
 	static TCHAR GenBuf[16]; // used for dynamically generated names
 	DWORD k = (DWORD)Key;
+
+	if (k >= 0xFF)
+		return TEXT("");
+
+	if (k == 0)
+		return TEXT("None");
 
 	// A–Z  (0x41–0x5A)
 	if (k >= 0x41 && k <= 0x5A) { GenBuf[0]=(TCHAR)k; GenBuf[1]=0; return GenBuf; }
@@ -256,13 +261,19 @@ const TCHAR* UInput::GetKeyName(EInputKey Key) const
 		{ 0xBE, TEXT("Period")         }, { 0xBF, TEXT("Slash")            },
 		{ 0xC0, TEXT("Tilde")          }, { 0xDB, TEXT("LeftBracket")      },
 		{ 0xDC, TEXT("Backslash")      }, { 0xDD, TEXT("RightBracket")     },
-		{ 0xDE, TEXT("Quote")          },
+		{ 0xDE, TEXT("SingleQuote")    },
 		{ 0xE0, TEXT("JoyX")           }, { 0xE1, TEXT("JoyY")             },
 		{ 0xE2, TEXT("JoyZ")           }, { 0xE3, TEXT("JoyR")             },
 		{ 0xE4, TEXT("MouseX")         }, { 0xE5, TEXT("MouseY")           },
 		{ 0xE6, TEXT("MouseZ")         }, { 0xE7, TEXT("MouseW")           },
 		{ 0xE8, TEXT("JoyU")           }, { 0xE9, TEXT("JoyV")             },
 		{ 0xEC, TEXT("MouseWheelUp")   }, { 0xED, TEXT("MouseWheelDown")   },
+		{ 0xEE, TEXT("Unknown10E")     }, { 0xEF, TEXT("Unknown10F")       },
+		{ 0xF6, TEXT("Attn")           }, { 0xF7, TEXT("CrSel")            },
+		{ 0xF8, TEXT("ExSel")          }, { 0xF9, TEXT("ErEof")            },
+		{ 0xFA, TEXT("Play")           }, { 0xFB, TEXT("Zoom")             },
+		{ 0xFC, TEXT("NoName")         }, { 0xFD, TEXT("PA1")              },
+		{ 0xFE, TEXT("OEMClear")       },
 	};
 	for (INT i = 0; i < ARRAY_COUNT(Table); i++)
 		if (Table[i].Code == k) return Table[i].Name;
@@ -271,13 +282,12 @@ const TCHAR* UInput::GetKeyName(EInputKey Key) const
 	return GenBuf;
 }
 
-// Retail 0x103b5df0 (178b): prepends "IK_" to KeyName, creates FName, calls FUN_103b56b0
-// (not exported, but simple FName comparison loop — replicable locally) to do reverse lookup.
-// Current linear-search over GetKeyName() produces identical results.
-IMPL_TODO("Ghidra 0x103b5df0 (178b): prepends IK_ prefix, creates FName, calls FUN_103b56b0 (simple FName scan loop — replicable as local helper); current GetKeyName() linear search returns identical results; blocked by: StaticInitInput (populates FName table) and FUN_103b56b0 local helper")
+// Retail prepends "IK_", creates an FName, and scans the same key-name array through
+// FUN_103b56b0. A linear search over GetKeyName() is equivalent once the display names match.
+IMPL_MATCH("Engine.dll", 0x103b5df0)
 INT UInput::FindKeyName(const TCHAR* KeyName, EInputKey& Key) const
 {
-	for (INT i = 1; i < 256; i++)
+	for (INT i = 0; i < 0xFF; i++)
 	{
 		if (!appStricmp(GetKeyName((EInputKey)i), KeyName))
 		{
