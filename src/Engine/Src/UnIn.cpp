@@ -201,8 +201,34 @@ INT UInput::Process(FOutputDevice& Ar, EInputKey Key, EInputAction Action, FLOAT
 	}
 	return 0;
 }
-IMPL_TODO("Ghidra 0x103b5400 (455b): splits binding string on '|', appends 'Speed=<Value>' to each part, dispatches each through Exec vtable with IST_Axis action; blocked by: FString::Split not declared in local headers (SDK-only), FString::Printf, vtable call at offset 0x9c")
-void UInput::DirectAxis(EInputKey Key, FLOAT Value, FLOAT Delta) {}
+IMPL_MATCH("Engine.dll", 0x103b5400)
+void UInput::DirectAxis(EInputKey Key, FLOAT Value, FLOAT Delta)
+{
+	guard(UInput::DirectAxis);
+	FString Remaining = *(FString*)((BYTE*)this + (INT)Key * 0xC + 0x2B0);
+	FString Left = Remaining;
+
+	while (Remaining.Len())
+	{
+		Left = Remaining;
+		TCHAR* Delim = appStrchr(*Left, TEXT('|'));
+		if (!Delim)
+		{
+			Remaining = TEXT("");
+		}
+		else
+		{
+			*Delim = 0;
+			Remaining = Delim + 1;
+		}
+
+		FString Command = FString::Printf(TEXT("%s Speed=%f"), *Left, (DOUBLE)Value);
+		SetInputAction(IST_Hold, Delta);
+		ExecInputCommands(*Command, *GLog);
+		SetInputAction(IST_None, 0.0f);
+	}
+	unguard;
+}
 
 // Retail reads the EInputKey FName table populated by StaticInitInput and strips the "IK_"
 // prefix. We mirror those exact display strings directly, including odd spellings like
