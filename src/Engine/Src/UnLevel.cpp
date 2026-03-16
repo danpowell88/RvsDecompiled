@@ -2259,7 +2259,7 @@ void ALevelInfo::execNotifyMatchStart( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execNotifyMatchStart );
 
 // PBNotifyServerTravel() - PunkBuster server travel notification.
-IMPL_DIVERGE("stub; retail calls PunkBuster INIT; Ghidra 0x120330")
+IMPL_DIVERGE("PunkBuster binary-only anti-cheat middleware; INIT call omitted (Ghidra 0x10420330)")
 void ALevelInfo::execPBNotifyServerTravel( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execPBNotifyServerTravel);

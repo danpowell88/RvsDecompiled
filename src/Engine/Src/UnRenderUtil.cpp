@@ -201,7 +201,7 @@ int FBspVertexStream::GetStride()
 // Ghidra 0x10406670 (1270b): scene render loop. Permanent divergence: constructs
 // FCanvasUtil with the incoming FRenderInterface* (D3D device), then dispatches
 // Begin/End scene and debug STDbgLine draws through vtable methods on that interface.
-IMPL_DIVERGE("FRenderInterface vtable dispatch — FCanvasUtil construction + D3D Begin/EndScene calls")
+IMPL_TODO("Ghidra 0x10406670 (1270b): FRenderInterface vtable has only 3 declared virtual methods; retail calls ~20+ undeclared vtable slots (SetMaterial, DrawPrimitive, etc.). Blocked on FRenderInterface vtable mapping and FCanvasUtil stack construction path.")
 void FLevelSceneNode::Render(FRenderInterface *)
 {
 	guard(FLevelSceneNode::Render);
@@ -391,13 +391,9 @@ int FLightMap::GetRevision()
 {
 	return *(INT*)(Pad + 32);
 }
-IMPL_DIVERGE("retail 0x10410560 (1589b): per-lightmap sample cache fill; uses rdtsc performance counters and complex FDynamicLight iteration")
+IMPL_TODO("Ghidra 0x10410560 (1589b): rdtsc is perf counter (not permanent blocker). Real blockers: FMemCache::Get/Create lightmap cache lifecycle, FDynamicLight iteration with per-light color accumulation, and per-format sample fill loops.")
 void FLightMap::GetTextureData(int,void *,int,ETextureFormat,int)
 {
-	// Ghidra 0x110560 ~900 bytes. Caches per-lightmap sample data into GCache,
-	// computes lighting contributions from each dynamic light, and copies
-	// the result into param_2. Too complex to translate in full here.
-	// TODO: implement FLightMap::GetTextureData (retail 0x110560, ~900 bytes: caches per-lightmap samples, computes lighting contributions)
 	guard(FLightMap::GetTextureData);
 	unguard;
 }
@@ -587,7 +583,7 @@ FLineBatcher& FLineBatcher::operator=(const FLineBatcher& Other)
 	return *this;
 }
 
-IMPL_TODO("Ghidra 0x10415560 (985b): FPoly class is forward-declared only in EngineClasses.h; needs full FPoly definition (vertex array + methods) before this can be implemented")
+IMPL_TODO("Ghidra 0x10415560 (985b): FPoly is forward-declared only; needs full FPoly definition (vertex array, NumVertices, Normal) and FVector::FindBestAxisVectors before this can be implemented")
 void FLineBatcher::DrawConvexVolume(FConvexVolume Volume, FColor Color)
 {
 	// Ghidra 0x115560: iterates FConvexVolume planes, builds FPoly per plane,
@@ -692,7 +688,7 @@ void FLineBatcher::DrawPoint(FSceneNode* Scene, FVector Point, FColor Color)
 	DrawLine(Point - CamX + CamY, Point - CamX - CamY, Color);
 }
 
-IMPL_DIVERGE("FUN_10370d70 (FMatrix ctor from FRotator) is an unexported Engine.dll internal; FCoords/FRotator equivalent used — produces identical axis vectors")
+IMPL_DIVERGE("FUN_10370d70 (852b, FMatrix ctor from FRotator via CosTab/SinTab) is an unexported Engine.dll internal; current implementation uses FCoords/FRotator — produces identical axis vectors but different codegen")
 void FLineBatcher::DrawSphere(FVector Center, FColor Color, FLOAT Radius, INT NumSides)
 {
 	// Retail loops NumSides times using FRotator→FMatrix via FUN_10370d70 to derive circle axes.
@@ -708,10 +704,10 @@ void FLineBatcher::DrawSphere(FVector Center, FColor Color, FLOAT Radius, INT Nu
 	}
 }
 
-// Ghidra 0x104172a0 (813b): flush line batch to GPU. Permanent divergence: calls
-// (**(this+0x20))[0x54/4]() — vtable dispatch on the stored FRenderInterface* to
-// submit the vertex stream; not reproducible without binary-specific D3D vtable layout.
-IMPL_DIVERGE("direct FRenderInterface vtable dispatch at offset +0x54 through stored RI pointer (this+0x20)")
+// Ghidra 0x104172a0 (813b): flush line batch to GPU. Blocked: retail calls FRenderInterface
+// vtable slot +0x54 and constructs UProxyBitmapMaterial/UFinalBlend as material state.
+// FRenderInterface only has 3 declared virtual methods; needs full vtable mapping.
+IMPL_TODO("Ghidra 0x104172a0 (813b): FRenderInterface vtable has only 3 declared virtual methods; retail calls undeclared slot +0x54, constructs UProxyBitmapMaterial/UFinalBlend. Blocked on FRenderInterface vtable mapping.")
 void FLineBatcher::Flush(DWORD Flags)
 {
 }
@@ -889,13 +885,13 @@ return 4;
 
 
 // --- FRawIndexBuffer ---
-IMPL_DIVERGE("NvTriStrip is a third-party GPU vertex cache optimiser not included in this project; strip generation skipped, revision bumped")
+IMPL_DIVERGE("NvTriStrip (FUN_1048d8b0/FUN_1048d8c0) is a third-party NVIDIA GPU vertex cache optimiser; library not included. Strip generation skipped, revision bumped.")
 int FRawIndexBuffer::Stripify()
 {
 	guard(FRawIndexBuffer::Stripify);
-	// Ghidra 0x116e70: calls FUN_1048d8b0 (NvTriStrip init) and FUN_1048d8c0 (generate strips),
-	// copies result back into TArray<_WORD> at this+4, bumps revision.
-	// FUN_1048d8b0/FUN_1048d8c0 = NvTriStrip library calls (external GPU vertex cache optimizer).
+	// Ghidra 0x10416e70 (237b): calls FUN_1048d8b0(0) to init NvTriStrip,
+	// FUN_1048d8c0 to generate strips, copies result back into TArray<_WORD>,
+	// bumps revision, returns Num()-2.
 	// DIVERGENCE: NvTriStrip not available; strip generation skipped; revision bumped; returns Num()-2.
 	*(INT*)(Pad + 20) += 1;
 	return *(INT*)(Pad + 4) - 2;
@@ -934,12 +930,12 @@ FRawIndexBuffer& FRawIndexBuffer::operator=(const FRawIndexBuffer& Other)
 }
 
 // (merged from earlier occurrence)
-IMPL_DIVERGE("NvTriStrip is a third-party GPU vertex cache optimiser not included in this project; optimisation skipped, revision bumped")
+IMPL_DIVERGE("NvTriStrip (FUN_1048d8b0/FUN_1048d8c0) is a third-party NVIDIA GPU vertex cache optimiser; library not included. Cache optimisation skipped, revision bumped.")
 void FRawIndexBuffer::CacheOptimize()
 {
-	// Ghidra 0x116860: uses FUN_1048d8b0/FUN_1048d8c0 (external cache-optimiser).
-	// Those functions are not reconstructed; increment revision counter only.
-	// DIVERGENCE: optimisation pass skipped; revision still bumped for cache invalidation.
+	// Ghidra 0x10416860 (230b): calls FUN_1048d8b0(1) to init NvTriStrip in optimise mode,
+	// FUN_1048d8c0 to generate optimised strips, copies result back.
+	// DIVERGENCE: NvTriStrip not available; optimisation pass skipped; revision still bumped for cache invalidation.
 	*(INT*)(Pad + 20) += 1;
 }
 IMPL_MATCH("Engine.dll", 0x10444fa0)
@@ -1399,12 +1395,11 @@ int FStaticTexture::GetRevision()
 	}
 	return *(INT*)&Pad[12];
 }
-IMPL_TODO("Ghidra 0x10469da0 (1462b): FUN_1050557c is __ftol2 CRT helper (117b, float-to-int via ST0) — not a true FUN_ blocker. Real blocker: lazy-load mip stream reader and per-format DXT1/DXT3/DXT5/RGBA8 decompression loops not yet translated.")
+IMPL_TODO("Ghidra 0x10469da0 (1462b): no extern FUN_ blockers (FUN_1050557c=__ftol2, FUN_10468ec0=format stride calc). Needs: (1) mip lazy-loader vtable call at mip_entry+0x10, (2) per-format DXT1/DXT3/DXT5/P8/RGBA8 block copy/decompression, (3) FArray stride 0x28 mip entry layout.")
 void FStaticTexture::GetTextureData(int,void *,int,ETextureFormat,int)
 {
-	// Ghidra 0x169da0: checks if mip array is non-empty, loads mip entry (stride 0x28),
-	// dispatches on ETextureFormat param for DXT1/DXT3/DXT5/P8/RGBA8 pixel unpacking.
-	// FUN_1050557c calls = (int)floatValue casts (__ftol2); no extern FUN_ dependency.
+	// Ghidra 0x169da0: checks mip array, loads mip entry (stride 0x28),
+	// dispatches on ETextureFormat for DXT1/DXT3/DXT5/P8/RGBA8 pixel unpacking.
 }
 IMPL_MATCH("Engine.dll", 0x10468ce0)
 ETexClampMode FStaticTexture::GetUClamp()
@@ -1441,7 +1436,7 @@ FBspSection::FBspSection(FBspSection const &Other)
 	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x1C); // 7 DWORDs
 }
 
-IMPL_DIVERGE("vtable pointer value differs from retail; constructor logic is otherwise correct — retail sets FBspVertexStream::_vftable_ at offset 0, but FBspSection has no virtual base in source so the compiler never emits that store")
+IMPL_DIVERGE("Retail derives FBspSection from FBspVertexStream (stores _vftable_ at offset 0); our header defines FBspSection as standalone (BYTE Pad[64]). Field initialisation is byte-identical; only the vtable store at offset 0 diverges.")
 FBspSection::FBspSection()
 {
 	// Ghidra 0x27a70: sets vtable (FBspVertexStream::_vftable_), inits TArray at +4,
@@ -1598,11 +1593,10 @@ FPoly FConvexVolume::ClipPolygonPrecise(FPoly Poly)
 }
 
 // --- FDynamicActor ---
-// Ghidra 0x104038b0 (11290b): per-actor render dispatch. Permanent divergence: the
-// entire function body drives FRenderInterface* param_3 vtable methods (SetMaterial,
-// DrawMesh, SetTransform etc.) — a 11 kb D3D render pipeline that cannot be reproduced
-// without matching the binary-specific vtable layout.
-IMPL_DIVERGE("FRenderInterface vtable dispatch — full per-mesh D3D render pipeline (~11 kb)")
+// Ghidra 0x104038b0 (11290b): per-actor render dispatch. The entire function body drives
+// FRenderInterface* param_3 vtable methods (SetMaterial, DrawMesh, SetTransform etc.).
+// FRenderInterface only has 3 declared virtual methods; retail uses ~20+ undeclared slots.
+IMPL_TODO("Ghidra 0x104038b0 (11290b): FRenderInterface vtable has only 3 declared virtual methods; retail drives ~20+ undeclared slots for full per-actor D3D render pipeline. Blocked on FRenderInterface vtable mapping.")
 void FDynamicActor::Render(FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
 {
 }
@@ -1613,7 +1607,7 @@ FDynamicActor::FDynamicActor(const FDynamicActor& Other)
 	appMemcpy(this, &Other, 0x80);
 }
 
-IMPL_TODO("Ghidra 0x103ffb70 (1798b): no FUN_ blockers; vtable slots now identified: actor vtable+0xac=GetRenderBoundingBox(FMatrix*), +0xc0=GetMesh; mesh vtable+0x6c=GetBoundingBox, +0x70=GetSphere. Pending: map these to named virtual methods and reconcile Emitter/SkeletalMesh/Physics specialised bound paths.")
+IMPL_TODO("Ghidra 0x103ffb70 (1798b): no FUN_ blockers. Needs: (1) AActor vtable +0xac (GetRenderBoundingBox) and +0xc0 (GetMesh) mapped to named virtual methods, (2) UMesh vtable +0x6c (GetBoundingBox) and +0x70 (GetSphere) identified, (3) AEmitter/SkeletalMesh/Karma specialised bound paths translated.")
 FDynamicActor::FDynamicActor(AActor* Actor)
 {
 	// Ghidra 0xffb70: construct sub-objects, store actor pointer, compute transform/bounds.
@@ -1767,7 +1761,7 @@ FDynamicLight::FDynamicLight(FDynamicLight const& Other)
 	appMemcpy( this, &Other, sizeof(FDynamicLight) );
 }
 
-IMPL_TODO("Ghidra 0x1040ff20 (1485b): FUN_1050557c=__ftol2 (CRT float-to-int, not a blocker); FUN_1038a4f0=IsA(UTexture) (inlineable). Real blockers: (1) private DLL globals _DAT_1078a540/_DAT_1078a53c (LightEffect=5 toggle state, no named symbol) and (2) FPU-stack-implicit float values in Pulse/Wave LightEffect cases require assembly-level analysis.")
+IMPL_TODO("Ghidra 0x1040ff20 (1485b): FUN_1050557c=__ftol2, FUN_1038a4f0=IsA(UTexture) — not true blockers. Needs: (1) FGetHSV helper declared/implemented, (2) static globals _DAT_1078a540/_DAT_1078a53c for LightEffect=5 toggle, (3) LightEffect switch (9 cases) with GMath SinTab/CosTab and FColor palette lookup.")
 FDynamicLight::FDynamicLight(AActor* Actor)
 {
 	// Ghidra 0x10ff20: construct sub-objects, store actor, compute light color/direction.
@@ -1965,7 +1959,7 @@ int FStaticCubemap::GetWidth()
 
 
 // --- FTempLineBatcher ---
-IMPL_DIVERGE("retail builds a lightweight stack struct { vtable+FArray } without the full ctor; we use FLineBatcher ctor/dtor — functionally equivalent but binary-level struct diverges")
+IMPL_DIVERGE("Retail stack-allocates bare {vtable+FArray} struct without full FLineBatcher ctor; we use full FLineBatcher ctor/dtor. Draw logic (iterating Start/End/Box TArrays) is functionally identical but binary struct layout diverges.")
 void FTempLineBatcher::Render(FRenderInterface* RI, INT Flags)
 {
 	// Ghidra 0x1180b0: sets local_30 = &FLineBatcher::_vftable_, initialises a bare FArray
