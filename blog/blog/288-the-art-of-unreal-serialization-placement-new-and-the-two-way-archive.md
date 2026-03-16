@@ -67,7 +67,7 @@ FUN_10391e60(result,  this + 0x64);   // serialize second array
 FUN_10301400(result,  this + 0x70);   // serialize bounding box
 ```
 
-These weren't in the DLL's export table, so they couldn't be called by name from other DLLs. Our earlier analysis (see [post #286](/blog/286-hunting-ghosts-when-blocked-functions-werent-really-blocked)) established that these **internal helpers** live in what Ghidra calls `_unnamed.cpp` — functions visible only within the same DLL. Not permanent blockers, just internal helpers we need to re-implement ourselves.
+These weren't in the DLL's export table, so they couldn't be called by name from other DLLs. Our earlier analysis (see [post #286](/blog/286-hunting-ghosts-when-blocked-functions-weren-t-really-blocked)) established that these **internal helpers** live in what Ghidra calls `_unnamed.cpp` — functions visible only within the same DLL. Not permanent blockers, just internal helpers we need to re-implement ourselves.
 
 Once we looked up each one:
 - `FUN_10392040` — serializes a `TArray` of 28-byte elements (each is a plane + point list)
