@@ -248,7 +248,7 @@ CCompressedLipDescData& CCompressedLipDescData::operator=(const CCompressedLipDe
 
 
 // --- ULodMesh ---
-IMPL_DIVERGE("FUN_103c7240/FUN_103c7140/FUN_1031e600/FUN_1032d290/FUN_1032d090/FUN_103c7340 are internal unexported Engine.dll TArray serializers; LOD geometry data cannot be serialized; retail 0x103c7610 (558b)")
+IMPL_TODO("all FUN_ helpers (FUN_103c7240/FUN_103c7140/FUN_1031e600/FUN_1032d290/FUN_1032d090/FUN_103c7340) confirmed in _unnamed.cpp — implement as static TArray serializer helpers to unblock LOD geometry serialization; retail 0x103c7610 (558b)")
 void ULodMesh::Serialize(FArchive& Ar)
 {
 	// Ghidra 0xc7610: UMesh::Serialize, then IsSaving stamp (+0x5C = 2), ByteOrderSerialize
@@ -391,7 +391,7 @@ int UMeshAnimation::SequenceMemFootprint(FName Name)
 	unguard;
 }
 
-IMPL_DIVERGE("FUN_10437c90/FUN_1043fd50/FUN_1043f770 are internal unexported Engine.dll TArray serializers; animation data (FMeshAnimNotify, MotionChunk, FMeshAnimSeq arrays) cannot be serialized; retail 0x103fee0 (135b)")
+IMPL_TODO("all FUN_ helpers (FUN_10437c90/FUN_1043fd50/FUN_1043f770) confirmed in _unnamed.cpp — implement as static TArray serializer helpers to unblock animation data (FMeshAnimNotify, MotionChunk, FMeshAnimSeq arrays); retail 0x103fee0 (135b)")
 void UMeshAnimation::Serialize(FArchive& Ar)
 {
 	// Ghidra 0x13fee0 (not found in exports — address inferred from IMPL_TODO record):
@@ -573,7 +573,7 @@ void UMeshAnimation::InitForDigestion()
 
 
 // --- UVertMesh ---
-IMPL_DIVERGE("FUN_1043d7e0 (0x5C-byte entry constructor) is unexported; DAT_1060b564 resource-ID counter is a binary-only global — cannot replicate; entry initialised with appMemzero instead; retail 0x10474da0 (409b)")
+IMPL_DIVERGE("partial blocker: binary global DAT_1060b564 resource-ID counter cannot be replicated — FUN_1043d7e0 entry constructor is confirmed in _unnamed.cpp (tractable) but DAT_1060b564 is a permanent binary-only constraint; entry initialised with appMemzero instead; retail 0x10474da0 (409b)")
 int UVertMesh::RenderPreProcess()
 {
 	guard(UVertMesh::RenderPreProcess);
@@ -632,7 +632,7 @@ int UVertMesh::RenderPreProcess()
 	unguard;
 }
 
-IMPL_DIVERGE("FUN_103c7240/FUN_10438000/FUN_1043f770/FUN_1032d5f0 are internal unexported Engine.dll TArray serializers; vert-mesh geometry data cannot be serialized; retail 0x104758b0 (424b)")
+IMPL_TODO("all FUN_ helpers (FUN_103c7240/FUN_10438000/FUN_1043f770/FUN_1032d5f0) confirmed in _unnamed.cpp — implement as static TArray serializer helpers to unblock vert-mesh geometry serialization; retail 0x104758b0 (424b)")
 void UVertMesh::Serialize(FArchive& Ar)
 {
 	guard(UVertMesh::Serialize);
@@ -999,7 +999,7 @@ int USkeletalMesh::R6LineCheck(FCheckResult& param_1, AActor* param_2, FVector p
 	unguard;
 }
 
-IMPL_DIVERGE("FUN_10321a80/FUN_104378f0/FUN_1043ce30/FUN_10437a50/FUN_103ca780/FUN_104371c0/FUN_1043fa50/FUN_10438510 etc. are internal unexported Engine.dll TArray serializers; bone/LOD/stream data cannot be serialized. NOTE: retail calls ULodMesh::Serialize first (retail USkeletalMesh→ULodMesh chain); our source uses UMesh base — calling UMesh::Serialize here is correct for our hierarchy; retail 0x1043ffb0 (746b)")
+IMPL_TODO("all FUN_ helpers (FUN_10321a80/FUN_104378f0/FUN_1043ce30/FUN_10437a50/FUN_103ca780/FUN_104371c0/FUN_1043fa50/FUN_10438510) confirmed in _unnamed.cpp — implement as static TArray serializer helpers to unblock bone/LOD/stream data serialization; NOTE: retail calls ULodMesh::Serialize first (retail USkeletalMesh→ULodMesh chain); our source uses UMesh base — calling UMesh::Serialize here is correct for our hierarchy; retail 0x1043ffb0 (746b)")
 void USkeletalMesh::Serialize(FArchive& Ar)
 {
 	// Ghidra 0x13ffb0: first calls ULodMesh::Serialize (retail has USkeletalMesh→ULodMesh).
