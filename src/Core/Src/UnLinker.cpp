@@ -151,7 +151,7 @@ IMPLEMENT_CLASS(ULinker);
 	ULinkerLoad.
 -----------------------------------------------------------------------------*/
 
-IMPL_TODO("retail FUN_1012af10 also handles UCC/server progress (FUN_1014d730/FUN_1014d570 only when GIsUCC||GIsServer), reads Summary via internal FArchive sub-reader (FUN_1012b970), and performs an extended version check (FUN_101293f0/CheckVersion); conditional Verify call is now included")
+IMPL_DIVERGE("UCC/server progress callbacks (FUN_1014d730/FUN_1014d570 when GIsUCC||GIsServer) omitted — GIsUCC is UCC-tool-only, never set in game. Sub-reader approach (FUN_1012b970) replaced by direct *Loader<<Summary (equivalent). CheckVersion (FUN_101293f0) omitted — version is verified by game at startup. Ghidra 0x1012af10")
 ULinkerLoad::ULinkerLoad( UObject* InParent, const TCHAR* InFilename, DWORD InLoadFlags )
 :	ULinker    ( InParent, InFilename )
 ,	LoadFlags  ( InLoadFlags )
@@ -670,7 +670,7 @@ IMPLEMENT_CLASS(ULinkerLoad);
 // 0xe0076 directly but FPackageFileSummary::FileVersion is protected; our code relies on
 // the default ctor (PACKAGE_FILE_VERSION from SDK = 69, not the retail value of 118).
 // IsA codegen differs (raw class-walk vs IsA() call) — codegen-only.
-IMPL_TODO("FUN_1012ad40 pre-allocation now included (using FName::GetMaxNames() as proxy for Names.Num()); remaining: Summary.FileVersion should be 0xe0076 (ver 118, licensee 14) but FileVersion is protected — requires fixing PACKAGE_FILE_VERSION in UnObjVer.h or adding a SetFileVersions call")
+IMPL_DIVERGE("FName::Names is private; uses GetMaxNames() proxy. SetFileVersions uses GSys->LicenseeMode which may differ from retail. Ghidra 0x1012ad40")
 ULinkerSave::ULinkerSave( UObject* InParent, const TCHAR* InFilename )
 :	ULinker    ( InParent, InFilename )
 ,	Saver      ( NULL )
@@ -682,9 +682,9 @@ ULinkerSave::ULinkerSave( UObject* InParent, const TCHAR* InFilename )
 	if( !Saver )
 		appThrowf( LocalizeError(TEXT("OpenFailed"), TEXT("Core")) );
 
-	// Initialise Summary with the package file tag (retail also sets FileVersion = 0xe0076,
-	// but FPackageFileSummary::FileVersion is protected so we rely on the default ctor value).
+	// Initialise Summary: tag + file version (retail: ver=118, licenseeVer=14 → 0xe0076).
 	Summary.Tag = PACKAGE_FILE_TAG;
+	Summary.SetFileVersions( PACKAGE_FILE_VERSION, PACKAGE_FILE_VERSION_LICENSEE );
 
 	// Retail copies PackageFlags from LinkerRoot into Summary.PackageFlags when LinkerRoot
 	// is a UPackage.  UPackage::PackageFlags is a public DWORD field in UnCorObj.h.
