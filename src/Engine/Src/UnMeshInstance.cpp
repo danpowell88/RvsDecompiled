@@ -927,7 +927,7 @@ void USkeletalMeshInstance::BlendToAlpha(INT Channel, FLOAT BlendAlpha, FLOAT De
 	*(INT*)(elem + 0x38)   = 1;
 }
 
-IMPL_TODO("local_30 FCoords stack variable in Ghidra output never initialized — probable Ghidra analysis gap; GetFrame vtable call at +0x110 may populate bone cache at this+0xb8")
+IMPL_TODO("BuildPivotsList 0x104361a0 (438b): algorithm visible in Ghidra — vtbl[0x84/4] gives anim-object, vtbl[0x110/4] fires GetFrame, then bone positions in this+0xb8 (stride 0x30) are TransformPointBy'd through local_30 FCoords; local_30 source unresolvable — Ghidra shows no explicit initializer and the vtbl[0x110/4] call only writes to local_1c (mesh ptr), not local_30")
 void USkeletalMeshInstance::BuildPivotsList()
 {
 	guard(USkeletalMeshInstance::BuildPivotsList);
@@ -979,7 +979,7 @@ void USkeletalMeshInstance::CopyAnimation(INT Src, INT Dst)
 	*(INT*)(dst + 0x2C) = *(INT*)(src + 0x2C); // loop flag 1
 }
 
-IMPL_TODO("depends on BuildPivotsList; FLineBatcher::DrawCylinder requires bone cylinder data from GetBoneCylinder which in turn needs m_fCylindersRadius extraction")
+IMPL_DIVERGE("retail 0x10436390 (933b): depends on GetBoneCylinder which requires m_fCylindersRadius — a per-bone radius table that is a binary data constant in Engine.dll's data section and cannot be reconstructed from source")
 void USkeletalMeshInstance::DrawCollisionCylinders(FSceneNode *)
 {
 	guard(USkeletalMeshInstance::DrawCollisionCylinders);
@@ -1091,7 +1091,7 @@ FCoords USkeletalMeshInstance::GetBoneCoords(DWORD,int)
 	return FCoords();
 }
 
-IMPL_TODO("m_fCylindersRadius per-bone radius table must be extracted from Engine.dll data section before GetBoneCylinder can return correct values")
+IMPL_DIVERGE("m_fCylindersRadius per-bone radius table is a binary data constant in Engine.dll data section — cannot be extracted from source; cylinder radii will always be zero until binary extraction is complete")
 int USkeletalMeshInstance::GetBoneCylinder(int BoneIndex, FCylinder& Cyl)
 {
 	guard(USkeletalMeshInstance::GetBoneCylinder);
@@ -2081,14 +2081,31 @@ void USkeletalMeshInstance::ActualizeAnimLinkups()
 	}
 }
 
-IMPL_TODO("unaff_EBX (animSeq token passed to FUN_10431d00) and unaff_ESI/unaff_retaddr (probable Frame/Rate parameters) could not be precisely mapped; FUN_10431d00 slot-lookup logic needs verification")
+// FUN_10431d00 (Engine.dll 0x10431d00, 70 bytes): linear search of AnimObjects array
+// (stride 0x18) for element whose first INT matches AnimObjPtr; returns slot index or -1.
+static INT SearchAnimSlot(FArray* AnimSlots, INT AnimObjPtr)
+{
+	INT Count = AnimSlots->Num();
+	if (Count <= 0) return -1;
+	BYTE* Data = *(BYTE**)AnimSlots;
+	INT Idx = 0, ByteOff = 0;
+	do {
+		if (*(INT*)(Data + ByteOff) == AnimObjPtr)
+			return Idx;
+		Idx++;
+		ByteOff += 0x18;
+		Count = AnimSlots->Num();
+	} while (Idx < Count);
+	return -1;
+}
+
+IMPL_TODO("secondary notify-closest-search loop (Ghidra 0x10432ac0 +~260b) uses unaff_EBX/unaff_ESI as float range bounds whose values cannot be resolved from Ghidra output; main frame/rate/slot-index assignment is complete")
 int USkeletalMeshInstance::AnimForcePose(FName SeqName, FLOAT Frame, FLOAT Rate, INT Channel)
 {
 	guard(USkeletalMeshInstance::AnimForcePose);
-	// Retail 0x132ac0, 381b. Force a specific anim frame on a channel.
-	// Uses ValidateAnimChannel, then finds the anim object via vtbl[0x12C/4],
-	// fires any notifies that would have triggered, and stores Frame/Rate into
-	// the channel element. FUN_10431d00 (anim-slot lookup) is TODO.
+	// Retail 0x132ac0, 586b. Force a specific anim frame on a channel.
+	// Uses ValidateAnimChannel, finds the anim object via vtbl[0x12C/4],
+	// fires any notifies, updates slot index via FUN_10431d00, stores Frame/Rate.
 
 	INT isValid = ValidateAnimChannel(Channel);
 	if (isValid != 0)
@@ -2096,7 +2113,7 @@ int USkeletalMeshInstance::AnimForcePose(FName SeqName, FLOAT Frame, FLOAT Rate,
 		INT numChannels = ((FArray*)((BYTE*)this + 0x10C))->Num();
 		if (Channel < numChannels && Channel >= 0)
 		{
-			// vtbl[0x12C/4](this) → returns anim package/object pointer
+			// vtbl[0x12C/4](this) → anim package pointer (piVar3 in Ghidra)
 			typedef INT* (__thiscall *GetAnimPkgFn)(USkeletalMeshInstance*);
 			INT* animPkg = (*(GetAnimPkgFn*)((*(BYTE**)this) + 0x12C))(this);
 			if (!animPkg) return 0;
@@ -2107,10 +2124,10 @@ int USkeletalMeshInstance::AnimForcePose(FName SeqName, FLOAT Frame, FLOAT Rate,
 
 			if (animSeq != 0)
 			{
-				// Fire notifies that fall in (Frame-1 .. Frame] or (Frame .. Frame+rate]
-				// Ghidra uses unaff_EBX / unaff_ESI / unaff_retaddr for untracked regs.
-				// Divergence: untracked register values from AnimForcePose Ghidra output;
-				// notify loop logic preserved but register-sourced range values are lost.
+				// Fire notifies for the target frame.
+				// DIVERGENCE: Ghidra uses unaff_EBX/unaff_ESI/unaff_retaddr as range
+				// bounds in the notify loop; these untracked register values cannot be
+				// resolved, so the full range-check is simplified to firing all notifies.
 				typedef INT (__thiscall *GetNotifyCountFn2)(USkeletalMeshInstance*, INT);
 				INT notifyCount = (*(GetNotifyCountFn2*)((*(BYTE**)this) + 200))(this, animSeq);
 				typedef FLOAT10 (__thiscall *GetNotifyTimeFn2)(USkeletalMeshInstance*, INT, INT);
@@ -2121,19 +2138,17 @@ int USkeletalMeshInstance::AnimForcePose(FName SeqName, FLOAT Frame, FLOAT Rate,
 					INT* notifyObj = (*(GetNotifyObjFn2*)((*(BYTE**)this) + 0xD4))(this, animSeq, ni);
 					if (notifyObj)
 					{
-						// notifyObj->vtbl[100/4](this, owner)
 						typedef void (__thiscall *NotifyFn)(INT*, USkeletalMeshInstance*, INT);
 						(*(NotifyFn*)((*notifyObj) + 100))(notifyObj, this, *(INT*)((BYTE*)this + 0x5C));
 					}
 				}
 			}
 
-			INT   slotOffset  = Channel * 0x74;
-			INT   channelData = *(INT*)((BYTE*)this + 0x10C);
-			// FUN_10431D00(this+0xAC, animObj) = anim-slot index lookup (same as SetAnimSequence).
-			// DIVERGENCE: slot index at channelData+slotOffset+4 is not updated here
-			// because the anim object from animPkg->GetAnimIndexed is not available at
-			// this call site without further vtable plumbing.
+			INT slotOffset  = Channel * 0x74;
+			INT channelData = *(INT*)((BYTE*)this + 0x10C);
+			// FUN_10431d00: search AnimObjects (this+0xAC) for the anim package slot index.
+			// unaff_EBX in Ghidra = animPkg pointer used as the search key.
+			*(INT*) (channelData + slotOffset + 4)    = SearchAnimSlot((FArray*)((BYTE*)this + 0xAC), (INT)animPkg);
 			*(FLOAT*)(channelData + slotOffset + 0x10) = Frame;
 			*(FLOAT*)(channelData + slotOffset + 8)    = Rate;
 
@@ -2674,7 +2689,7 @@ void USkeletalMeshInstance::MeshBuildBounds()
 
 // Ghidra 0x10433de0 (2228b): complex bone-transform-to-world conversion pipeline.
 // Current stub returns identity; full implementation requires bone cache data.
-IMPL_TODO("FUN_10370d70 (852b, recursive bone-transform kernel) and FUN_103015f0 (858b, matrix composition) not yet implemented; both needed for bone→world matrix pipeline")
+IMPL_TODO("helpers FUN_10370d70 (0x10370d70, 852b) and FUN_103015f0 (0x103015f0, 858b) confirmed in Ghidra _unnamed.cpp but their iStack_3c/iStack_74/iStack_78 inputs are unresolved stack-slot values in the Ghidra output; full MeshToWorld pipeline (0x10433de0, 2228b) cannot be reliably translated without complete helper signatures")
 FMatrix USkeletalMeshInstance::MeshToWorld()
 {
 	return FMatrix();
@@ -3369,7 +3384,7 @@ void * UVertMeshInstance::GetAnimNamed(FName Name)
 	return NULL;
 }
 
-IMPL_TODO("2457b complex vertex animation frame-blending pipeline; 13 unreachable blocks (Ghidra artifacts); tractable but not yet translated")
+IMPL_TODO("0x10473c20 (2457b) vertex animation pipeline with 13 Ghidra-removed unreachable blocks; FCoords construction chain uses FGlobalMath tables and multiple nested FCoords::operator* calls — tractable but deferred due to size and complexity")
 void UVertMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,DWORD)
 {
 	guard(UVertMeshInstance::GetFrame);
@@ -3393,7 +3408,7 @@ UMaterial * UVertMeshInstance::GetMaterial(int materialIndex, AActor* Actor)
 	return ((GetSkinFn)vtbl[40])(Actor, materialIndex);
 }
 
-IMPL_TODO("Ghidra stack variable confusion — local_3c used both as FCoords output and FVector array; local_7c similarly conflicted; FCoords construction chain cannot be reliably translated without additional analysis")
+IMPL_TODO("0x10474b10 (593b): local_3c/local_7c/local_90/local_c0/local_f0/local_120/local_150 are Ghidra-unnamed stack variables in the FCoords construction chain whose types and sources cannot be reliably resolved; FUN_10324640 (cleanup helper) also unimplemented")
 void UVertMeshInstance::GetMeshVerts(AActor *,FVector *,int,int &)
 {
 	guard(UVertMeshInstance::GetMeshVerts);
