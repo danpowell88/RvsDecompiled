@@ -49,15 +49,17 @@ void AR6Terrorist::PreNetReceive()
 	unguard;
 }
 
-IMPL_MATCH("R6Engine.dll", 0x10029590)
+IMPL_TODO("FUN_10042934 ftol2-style rounding helper unidentified; complex bone rotation distribution across 7 bones with stance-dependent splits")
 void AR6Terrorist::UpdateAiming(FLOAT DeltaTime)
 {
 	guard(AR6Terrorist::UpdateAiming);
 
-	// TODO: implement AR6Terrorist::UpdateAiming (Ghidra 0x29590, ~2500 bytes: interpolates
-	// m_iCurrentHeadYaw/m_iCurrentAimingPitch and distributes across bones "R6 Neck", "R6 Spine",
-	// "R6 Spine1", "R6 Spine2", "R6 L Forearm", "R6 L Hand", "R6 R Hand" via SetBoneRotation;
-	// exact rate constants unknown pending full disassembly analysis)
+	// TODO(0x10029590, ~1272 bytes): reads target yaw from BYTE at this+0xa30 (*256, sign-extended)
+	// and target pitch from this+0xa2f; smoothly interpolates current values (this+0xa3c, this+0xa38)
+	// via FUN_10042934 rate helper; clamps pitch to [-10000, 10000]; distributes rotation across
+	// "R6 Neck", "R6 Spine", "R6 Spine1", "R6 Spine2", "R6 L Forearm", "R6 L Hand", "R6 R Hand"
+	// via SetBoneRotation; stance byte (this+0xa28) selects distribution table; weapon attachment
+	// at this+0x4fc modifies split ratios.
 
 	unguard;
 }

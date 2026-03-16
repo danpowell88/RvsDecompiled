@@ -84,7 +84,7 @@ void AR6HUD::UpdateHUDColors(FColor)
 	unguard;
 }
 
-IMPL_DIVERGE("R6Game.dll 0x1000ceb0: 10251-byte HUD rendering function; Ghidra decompilation failed due to codec error — function body unrecoverable from export")
+IMPL_TODO("R6Game.dll 0x1000ceb0: 10251-byte function; blocked — Ghidra export_cpp.py ascii codec error, re-export with UTF-8 to obtain decompilation")
 void AR6HUD::execDrawNativeHUD(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;

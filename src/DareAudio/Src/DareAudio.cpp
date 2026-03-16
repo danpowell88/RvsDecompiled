@@ -103,9 +103,11 @@ static FLOAT s_VolumeResetData[12] =
 
 /*-----------------------------------------------------------------------------
 	Helper: linear amplitude [0,1] to dB.
+	NOTE: unused -- no call site in DareAudio.cpp.  Retail uses appLoge-based
+	dB conversion inline (see SND_ChangeVolumeLinear_TypeSound).
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("static helper; not identified in DareAudio.dll Ghidra export; may be inlined in retail")
+IMPL_DIVERGE("unused static helper; no counterpart in Ghidra DareAudio.dll exports; dead code")
 static FLOAT LinearToDb(FLOAT v)
 {
 	return 20.0f * log10f(v > 0.0001f ? v : 0.0001f);
@@ -126,7 +128,7 @@ UDareAudioSubsystem::UDareAudioSubsystem(const UDareAudioSubsystem& Other)
 {
 }
 
-IMPL_DIVERGE("compiler-generated assignment op; not identified in DareAudio.dll Ghidra export; body delegates to UAudioSubsystem::operator=")
+IMPL_TODO("Ghidra 0x100017f0 (650 bytes): calls UObject::operator=, copies 0x30-0x234 via FUN_10001550/FUN_10001660 + loop memcpy; blocked by internal helpers")
 UDareAudioSubsystem& UDareAudioSubsystem::operator=(const UDareAudioSubsystem& Other)
 {
 UAudioSubsystem::operator=(Other);
@@ -137,7 +139,7 @@ return *this;
 UObject interface.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("empty body; address in Ghidra gap 0x10001780-0x10001e80 -- not exported; registerable properties unknown")
+IMPL_EMPTY("Ghidra confirms empty at 0x10001d40; shares address with PostEditChange, ordinals 41+66")
 void UDareAudioSubsystem::StaticConstructor()
 {
 }
@@ -286,20 +288,15 @@ m_pViewport = InViewport;
 return 1;
 }
 
-IMPL_DIVERGE("uses FCoordsFromFMatrix instead of FMatrix::Coords() to avoid Core.dll link dependency")
+IMPL_MATCH("DareAudio.dll", 0x10006000)
 void UDareAudioSubsystem::Update(FSceneNode* SceneNode)
 {
 	guard(UDareAudioSubsystem::Update);
-	// Ghidra 0x6000 (77): guard frame, m_bInitialized check, then:
-	//   if (!GIsEditor && SceneNode) { FCoords from view matrix; UpdateAmbientSounds }
-	//   SND_fn_vSynchroSound(); UpdateSoundList();
-	// FMatrix::Coords() is a non-inline Ravenshield Core addition; use the equivalent
-	// inline FCoordsFromFMatrix to avoid a Core.dll link dependency.
 	if (m_bInitialized)
 	{
 		if (!GIsEditor && SceneNode != NULL)
 		{
-			FCoords Coords = FCoordsFromFMatrix(*(FMatrix*)((BYTE*)SceneNode + 0x10));
+			FCoords Coords = ((FMatrix*)((BYTE*)SceneNode + 0x10))->Coords();
 			UpdateAmbientSounds(Coords);
 		}
 		SND_fn_vSynchroSound();
@@ -710,34 +707,18 @@ return s_VolumeInitData[idx];
 return 0.0f;
 }
 
-// Returns the volume line handle for a given volume type
-IMPL_DIVERGE("static helper; not identified in DareAudio.dll Ghidra export; inferred from SND_GetVolumeLine usage pattern")
-static long GetVolumeLineHandle(void* self, ESoundVolume VolType)
-{
-switch (VolType)
-{
-case VOLUME_Music:   return F_LONG(self, 0x228);
-case VOLUME_Voices:  return F_LONG(self, 0x22c);
-case VOLUME_FX:      return F_LONG(self, 0x230);
-case VOLUME_Grenade: return F_LONG(self, 0x234);
-default:             return 0;
-}
-}
-
 IMPL_MATCH("DareAudio.dll", 0x10002490)
 FLOAT UDareAudioSubsystem::SND_GetVolumeLine(ESoundVolume VolType)
 {
-long h = GetVolumeLineHandle(this, VolType);
-if (!h) return 0.0f;
-return SND_fn_fGetSoundVolumeLine(h);
+// Ghidra 0x10002490 (15 bytes): passes ESoundVolume directly to DARE API
+return SND_fn_fGetSoundVolumeLine((long)VolType);
 }
 
 IMPL_MATCH("DareAudio.dll", 0x100024a0)
 void UDareAudioSubsystem::SND_SetVolumeLine(ESoundVolume VolType, FLOAT Volume)
 {
-long h = GetVolumeLineHandle(this, VolType);
-if (!h) return;
-SND_fn_vSetSoundVolumeLine(h, Volume);
+// Ghidra 0x100024a0 (22 bytes): passes ESoundVolume directly to DARE API
+SND_fn_vSetSoundVolumeLine((long)VolType, Volume);
 }
 
 IMPL_MATCH("DareAudio.dll", 0x10002770)
@@ -749,25 +730,42 @@ SND_fn_vChangeVolumeSoundObjectType((INT)Slot, Volume);
 IMPL_MATCH("DareAudio.dll", 0x10002620)
 void UDareAudioSubsystem::SND_ChangeVolumeLinear_TypeSound(ESoundSlot Slot, INT Volume)
 {
-// Volume is linear 0-100; convert to linear 0-1 then set on the volume line
-FLOAT linear = (FLOAT)Volume / 100.0f;
-if (linear < 0.0f) linear = 0.0f;
-if (linear > 1.0f) linear = 1.0f;
+	guard(UDareAudioSubsystem::SND_ChangeVolumeLinear_TypeSound);
 
-// Map slot to volume type
-ESoundVolume vt;
-switch (Slot)
-{
-case SLOT_Music:         vt = VOLUME_Music;   break;
-case SLOT_Talk:
-case SLOT_Speak:
-case SLOT_HeadSet:       vt = VOLUME_Voices;  break;
-case SLOT_GrenadeEffect: vt = VOLUME_Grenade; break;
-default:                 vt = VOLUME_FX;      break;
-}
+	// Ghidra 0x10002620 (250 bytes): converts linear 0-100 to dB, then
+	// dispatches to volume line handles stored at member offsets 0x228-0x234.
+	FLOAT dBVol;
+	if (Volume < 1)
+	{
+		dBVol = -96.0f;
+	}
+	else
+	{
+		dBVol = (FLOAT)(20.0 * appLoge((DOUBLE)((FLOAT)Volume * 0.01f)) / appLoge(10.0));
+	}
 
-long h = GetVolumeLineHandle(this, vt);
-if (h) SND_fn_vSetSoundVolumeLine(h, linear);
+	switch (Slot)
+	{
+	case SLOT_Ambient:
+	case SLOT_Guns:
+	case SLOT_SFX:
+	case SLOT_GrenadeEffect:
+	case SLOT_Menu:
+		SND_fn_vSetSoundVolumeLine(F_LONG(this, 0x230), dBVol);
+		SND_fn_vSetSoundVolumeLine(F_LONG(this, 0x234), dBVol);
+		return;
+	case SLOT_Music:
+		SND_fn_vSetSoundVolumeLine(F_LONG(this, 0x228), dBVol);
+		break;
+	case SLOT_Talk:
+	case SLOT_Speak:
+	case SLOT_HeadSet:
+	case SLOT_Instruction:
+		SND_fn_vSetSoundVolumeLine(F_LONG(this, 0x22c), dBVol);
+		break;
+	}
+
+	unguard;
 }
 
 IMPL_MATCH("DareAudio.dll", 0x100027c0)

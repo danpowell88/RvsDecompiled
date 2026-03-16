@@ -8,7 +8,7 @@ IMPLEMENT_CLASS(AR6ClimbableObject)
 
 // --- AR6ClimbableObject ---
 
-IMPL_DIVERGE("R6Engine.dll 0x10016310: retail uses StaticFindObjectChecked for class lookup (vs direct StaticClass()); error log uses raw data-section format strings; SpawnActor dispatched via C++ vtable correctly")
+IMPL_TODO("retail uses StaticFindObjectChecked for R6ClimbablePoint class lookup; GLog format string from data section unknown")
 void AR6ClimbableObject::AddMyMarker(AActor * param_1)
 {
 	guard(AR6ClimbableObject::AddMyMarker);
@@ -47,7 +47,7 @@ void AR6ClimbableObject::AddMyMarker(AActor * param_1)
 			}
 		}
 
-		// DIVERGENCE: retail error log args are in data sections; log a generic message
+		// TODO: retail format string from data section; approximated
 		GLog->Logf(TEXT("%s: failed to spawn climbable point markers"), GetName());
 	}
 
