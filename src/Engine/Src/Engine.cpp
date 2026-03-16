@@ -619,8 +619,45 @@ void UGameEngine::Exit()
 	}
 	unguard;
 }
-IMPL_TODO("0x1039f520 186b — complex button/viewport state dispatch; needs vtable offset cross-check")
-void UGameEngine::MouseDelta( UViewport* Viewport, DWORD Buttons, FLOAT DX, FLOAT DY ) {}
+IMPL_MATCH("Engine.dll", 0x1039f520)
+void UGameEngine::MouseDelta( UViewport* Viewport, DWORD Buttons, FLOAT DX, FLOAT DY )
+{
+	guard(UGameEngine::MouseDelta);
+	enum
+	{
+		MOUSE_FirstHit = 0x8,
+		MOUSE_LastRelease = 0x10,
+	};
+
+	typedef INT (__thiscall* tViewportStateFn)(UViewport*);
+	typedef INT (__thiscall* tLevelStateFn)(ULevel*);
+	typedef void (__thiscall* tSetMouseCaptureFn)(UViewport*, INT, INT, INT);
+
+	UViewport** Viewports = Client ? *(UViewport***)((BYTE*)Client + 0x30) : NULL;
+	INT ViewportCount = Client ? *(INT*)((BYTE*)Client + 0x34) : 0;
+	UViewport* PrimaryViewport = (Viewports && ViewportCount > 0) ? Viewports[0] : NULL;
+
+	if (((Buttons & MOUSE_FirstHit) == 0) ||
+		!Client ||
+		ViewportCount != 1 ||
+		!GLevel ||
+		((tViewportStateFn)(*(void***)PrimaryViewport)[0x78 / 4])(PrimaryViewport) != 0 ||
+		((tLevelStateFn)(*(void***)GLevel)[0xec / 4])(GLevel) != 0 ||
+		((((BYTE*)Viewport)[0x3c] & 2) != 0))
+	{
+		if ((Buttons & MOUSE_LastRelease) == 0)
+			return;
+		if (*(INT*)((BYTE*)Client + 0x3c) != 0)
+			return;
+
+		// WinDrv's viewport implementation exposes this slot as SetMouseCapture.
+		((tSetMouseCaptureFn)(*(void***)Viewport)[0x9c / 4])(Viewport, 0, 0, 0);
+		return;
+	}
+
+	((tSetMouseCaptureFn)(*(void***)Viewport)[0x9c / 4])(Viewport, 1, 1, 1);
+	unguard;
+}
 IMPL_MATCH("Engine.dll", 0x1039efc0)
 void UGameEngine::MousePosition( UViewport* Viewport, DWORD Buttons, FLOAT X, FLOAT Y )
 {
@@ -635,8 +672,19 @@ IMPL_EMPTY("Ghidra: 3b shared ret thunk at 0x10314770")
 void UGameEngine::Click( UViewport* Viewport, DWORD Buttons, FLOAT X, FLOAT Y ) {}
 IMPL_EMPTY("Ghidra: 3b shared ret thunk at 0x10314770")
 void UGameEngine::UnClick( UViewport* Viewport, DWORD Buttons, INT MouseX, INT MouseY ) {}
-IMPL_TODO("0x103a1440 135b — blocked by FUN_103a0610 (viewport lookup helper)")
-void UGameEngine::SetClientTravel( UPlayer* Viewport, const TCHAR* NextURL, INT bItems, ETravelType TravelType ) {}
+IMPL_MATCH("Engine.dll", 0x103a1440)
+void UGameEngine::SetClientTravel( UPlayer* Player, const TCHAR* NextURL, INT bItems, ETravelType TravelType )
+{
+	guard(UGameEngine::SetClientTravel);
+	if (!Player)
+		appFailAssert("Player", ".\\UnGame.cpp", 0x10c4);
+
+	UViewport* Viewport = CastChecked<UViewport>(Player);
+	*(FString*)((BYTE*)Viewport + 0x144) = NextURL;
+	*(ETravelType*)((BYTE*)Viewport + 0x140) = TravelType;
+	*(INT*)((BYTE*)Viewport + 0x150) = bItems;
+	unguard;
+}
 IMPL_MATCH("Engine.dll", 0x1039eb60)
 INT UGameEngine::ChallengeResponse( INT Challenge ) {
 	// Retail: 30b. Mixes high/low halfwords and multiplies by a prime to produce the token.
@@ -687,8 +735,36 @@ FLOAT UGameEngine::GetMaxTickRate()
 	}
 	return 0.0f;
 }
-IMPL_TODO("0x103a0dd0 280b — UConsole IsA + eventR6ProgressMsg + HUD + ProcessEvent chain")
-void UGameEngine::SetProgress( const TCHAR* Str1, const TCHAR* Str2, FLOAT Seconds ) {}
+IMPL_MATCH("Engine.dll", 0x103a0dd0)
+void UGameEngine::SetProgress( const TCHAR* Str1, const TCHAR* Str2, FLOAT Seconds )
+{
+	guard(UGameEngine::SetProgress);
+	if (Client)
+	{
+		UViewport** Viewports = *(UViewport***)((BYTE*)Client + 0x30);
+		INT ViewportCount = *(INT*)((BYTE*)Client + 0x34);
+		if (ViewportCount == 0)
+			return;
+
+		UViewport* Viewport = Viewports[0];
+		// UPlayer fields are still placeholder-only in the local UViewport declaration.
+		UInteraction* Console = *(UInteraction**)((BYTE*)Viewport + 0x38);
+		if (Console && Console->IsA(UConsole::StaticClass()))
+		{
+			FString Progress1(Str1);
+			FString Progress2(Str2);
+			Console->eventR6ProgressMsg(Progress1, Progress2, Seconds);
+		}
+
+		APlayerController* PlayerController = *(APlayerController**)((BYTE*)Viewport + 0x34);
+		AHUD* PlayerHUD = *(AHUD**)((BYTE*)PlayerController + 0x5bc);
+		if (Seconds != -1.0f && PlayerHUD)
+			PlayerHUD->eventShowUpgradeMenu();
+
+		PlayerController->eventSetProgressTime(Seconds);
+	}
+	unguard;
+}
 IMPL_TODO("0x103a5890 807b — complex save I/O, mover reset loop, file management")
 void UGameEngine::SaveGame( INT Position ) {}
 IMPL_MATCH("Engine.dll", 0x1039ee90)

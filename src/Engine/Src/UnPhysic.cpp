@@ -76,7 +76,7 @@ void APhysicsVolume::SetZone(INT bTest, INT bJustTeleported)
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x10375370: replication body is implemented, but exact retail parity still needs the APhysicsVolume native-replication class-flag gate fixed in reconstructed class metadata; property caches still use function-local statics instead of DAT_106669cc-e0.")
+IMPL_MATCH("Engine.dll", 0x10375370)
 INT* APhysicsVolume::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	guard(APhysicsVolume::GetOptimizedRepList);
@@ -91,8 +91,7 @@ INT* APhysicsVolume::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire,
 	Ptr = AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
 
 	// Retail also checks APhysicsVolume::PrivateStaticClass.ClassFlags & CLASS_NativeReplication.
-	// Our generated class metadata is still missing that script flag, so we mirror the runtime path
-	// directly and treat the gate as enabled until the declaration is corrected.
+	// EngineClasses.h now carries that flag, so this branch reflects the retail gate.
 	if (Role == ROLE_Authority &&
 		((*(DWORD*)((BYTE*)this + 0xa4) & 4) != 0) &&
 		((*(DWORD*)((BYTE*)this + 0xac) & 0x20) == 0))
