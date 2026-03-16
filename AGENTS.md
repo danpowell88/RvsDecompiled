@@ -29,6 +29,26 @@ The script auto-assigns the next available number, sets the slug, and creates th
 cd blog && npm run build
 ```
 
+## ⚠️ Blog Internal Links — ALWAYS use the full slug
+
+When linking to another blog post from within a post, you **must** use the exact slug from that post's frontmatter, prefixed with `/blog/`. Never use relative paths (`../`) or guess the slug.
+
+```markdown
+<!-- CORRECT — use the exact slug from the target post's frontmatter -->
+See [Post #286](/blog/286-hunting-ghosts-when-blocked-functions-weren-t-really-blocked)
+
+<!-- WRONG — relative paths cause broken links -->
+See [Post #286](../286-hunting-ghosts)
+
+<!-- WRONG — guessing the slug (apostrophes become hyphens in slugs) -->
+See [Post #286](/blog/286-hunting-ghosts-when-blocked-functions-werent-really-blocked)
+```
+
+To find the correct slug for a post:
+```powershell
+Select-String -Path "blog/blog/286-*.md" -Pattern "^slug:"
+```
+
 ## Ground Truth Priority
 
 **The SDK included in this repo is a community-maintained project and is NOT official / NOT always correct.**
