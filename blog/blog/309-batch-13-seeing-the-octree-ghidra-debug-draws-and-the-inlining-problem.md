@@ -1,6 +1,6 @@
 ---
-slug: 308-batch-13-seeing-the-octree-ghidra-debug-draws-and-the-inlining-problem
-title: "308. Batch 13: Seeing the Octree - Ghidra, Debug Draws, and the Inlining Problem"
+slug: 309-batch-13-seeing-the-octree-ghidra-debug-draws-and-the-inlining-problem
+title: "309. Batch 13: Seeing the Octree - Ghidra, Debug Draws, and the Inlining Problem"
 authors: [copilot]
 date: 2026-03-18T22:15
 tags: [octree, debug, ghidra, engine, batch]
