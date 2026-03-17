@@ -88,12 +88,12 @@ void AR6SoundReplicationInfo::PlayWeaponSound(enum EWeaponSound WeaponSound, BYT
 		switch ((INT)WeaponSound) {
 		case 2: // Fire sound
 			(*(void (__thiscall**)(INT*, AActor*, INT, INT, INT))(*(INT*)AudioSub + 0x84))
-				(AudioSub, this, *(INT*)(weaponInfo + 0x3a0 + (UINT)CurrentWeapon * 4), 2, 0);
+				(AudioSub, this, *(INT*)(weaponInfo + 0x3a0 + (DWORD)CurrentWeapon * 4), 2, 0);
 			break;
 
 		case 3: // Fire + echo (+ silencer echo if equipped)
 		{
-			UINT uWeapon = (UINT)CurrentWeapon;
+			DWORD uWeapon = (DWORD)CurrentWeapon;
 			(*(void (__thiscall**)(INT*, AActor*, INT, INT, INT))(*(INT*)AudioSub + 0x84))
 				(AudioSub, this, *(INT*)(weaponInfo + 0x3a0 + uWeapon * 4), 2, 0);
 			(*(void (__thiscall**)(INT*, AActor*, INT, INT, INT))(*(INT*)AudioSub + 0x84))
@@ -109,12 +109,12 @@ void AR6SoundReplicationInfo::PlayWeaponSound(enum EWeaponSound WeaponSound, BYT
 
 		case 4: // Reload sound
 			(*(void (__thiscall**)(INT*, AActor*, INT, INT, INT))(*(INT*)AudioSub + 0x84))
-				(AudioSub, this, *(INT*)(weaponInfo + 0x3c0 + (UINT)CurrentWeapon * 4), 2, 0);
+				(AudioSub, this, *(INT*)(weaponInfo + 0x3c0 + (DWORD)CurrentWeapon * 4), 2, 0);
 			break;
 
 		case 5: // Fire + suppressed (+ silencer suppressed if equipped)
 		{
-			UINT uWeapon = (UINT)CurrentWeapon;
+			DWORD uWeapon = (DWORD)CurrentWeapon;
 			(*(void (__thiscall**)(INT*, AActor*, INT, INT, INT))(*(INT*)AudioSub + 0x84))
 				(AudioSub, this, *(INT*)(weaponInfo + 0x3a0 + uWeapon * 4), 2, 0);
 			(*(void (__thiscall**)(INT*, AActor*, INT, INT, INT))(*(INT*)AudioSub + 0x84))
@@ -131,7 +131,7 @@ void AR6SoundReplicationInfo::PlayWeaponSound(enum EWeaponSound WeaponSound, BYT
 		case 6: // Looping fire sound (start)
 			if (((BYTE*)this)[0x39c] != 6 && (*(BYTE*)(weaponInfo + 0x398) & 2) == 0)
 			{
-				UINT uWeapon = (UINT)CurrentWeapon;
+				DWORD uWeapon = (DWORD)CurrentWeapon;
 				(*(void (__thiscall**)(INT*, AActor*, INT, INT, INT))(*(INT*)AudioSub + 0x84))
 					(AudioSub, this, *(INT*)(weaponInfo + 0x3a0 + uWeapon * 4), 2, 0);
 				(*(void (__thiscall**)(INT*, AActor*, INT, INT, INT))(*(INT*)AudioSub + 0x84))
@@ -147,7 +147,7 @@ void AR6SoundReplicationInfo::PlayWeaponSound(enum EWeaponSound WeaponSound, BYT
 
 		case 7: // Fire + echo + alt-fire
 		{
-			UINT uWeapon = (UINT)CurrentWeapon;
+			DWORD uWeapon = (DWORD)CurrentWeapon;
 			(*(void (__thiscall**)(INT*, AActor*, INT, INT, INT))(*(INT*)AudioSub + 0x84))
 				(AudioSub, this, *(INT*)(weaponInfo + 0x3a0 + uWeapon * 4), 2, 0);
 			(*(void (__thiscall**)(INT*, AActor*, INT, INT, INT))(*(INT*)AudioSub + 0x84))
@@ -159,24 +159,24 @@ void AR6SoundReplicationInfo::PlayWeaponSound(enum EWeaponSound WeaponSound, BYT
 
 		case 8: // Special fire sound
 			(*(void (__thiscall**)(INT*, AActor*, INT, INT, INT))(*(INT*)AudioSub + 0x84))
-				(AudioSub, this, *(INT*)(weaponInfo + 0x410 + (UINT)CurrentWeapon * 4), 2, 0);
+				(AudioSub, this, *(INT*)(weaponInfo + 0x410 + (DWORD)CurrentWeapon * 4), 2, 0);
 			break;
 
 		case 9: // Alt-fire sound
 			(*(void (__thiscall**)(INT*, AActor*, INT, INT, INT))(*(INT*)AudioSub + 0x84))
-				(AudioSub, this, *(INT*)(weaponInfo + 0x420 + (UINT)CurrentWeapon * 4), 2, 0);
+				(AudioSub, this, *(INT*)(weaponInfo + 0x420 + (DWORD)CurrentWeapon * 4), 2, 0);
 			break;
 
 		case 10: // Stop looping fire / play stop sound
 			if (((BYTE*)this)[0x39c] == 6)
 			{
 				(*(void (__thiscall**)(INT*, AActor*, INT, INT, INT))(*(INT*)AudioSub + 0x84))
-					(AudioSub, this, *(INT*)(weaponInfo + 0x3f0 + (UINT)CurrentWeapon * 4), 2, 0);
+					(AudioSub, this, *(INT*)(weaponInfo + 0x3f0 + (DWORD)CurrentWeapon * 4), 2, 0);
 				if (piSilencer != NULL &&
 					(*(INT (__thiscall**)(INT*))(*(INT*)piSilencer + 0x19c))(piSilencer) != 0)
 				{
 					(*(void (__thiscall**)(INT*, AActor*, INT, INT, INT))(*(INT*)AudioSub + 0x84))
-						(AudioSub, this, *(INT*)(*(INT*)((BYTE*)this + 0x3b0) + 0x460 + (UINT)CurrentWeapon * 4), 2, 0);
+						(AudioSub, this, *(INT*)(*(INT*)((BYTE*)this + 0x3b0) + 0x460 + (DWORD)CurrentWeapon * 4), 2, 0);
 				}
 			}
 			else if ((~(*(DWORD*)(weaponInfo + 0x398) >> 1) & *(DWORD*)((BYTE*)this + 0x3a0) >> 1 & 1) != 0)
