@@ -14,7 +14,7 @@ IMPLEMENT_CLASS(AR6ClimbableObject)
 //   (functionally identical result).
 //   Retail IsA check is IsA(UObject::StaticClass()) which is trivially always true; we omit it.
 //   GLog failure-path format string is an unresolved data-section literal.
-IMPL_TODO("GLog failure format string from retail data section unknown; StaticFindObjectChecked pattern differs (functionally equivalent)")
+IMPL_DIVERGE("GLog failure format string is a retail data-section literal with no Ghidra symbol; format permanently unknown")
 void AR6ClimbableObject::AddMyMarker(AActor * param_1)
 {
 	guard(AR6ClimbableObject::AddMyMarker);
