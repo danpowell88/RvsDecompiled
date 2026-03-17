@@ -924,7 +924,15 @@ void FRebuildTools::Delete(FString p0) {
 // Ghidra 0x103FD9C0 (665b): empties array, adds default FRebuildOptions, allocates
 // current-options pointer, then reads "Rebuild Configs" from GConfig (UnrealEd.ini)
 // to populate saved configs via FString::ParseIntoArray / appAtoi.
-IMPL_TODO("Ghidra 0x103FD9C0 (665b) fully decompiled; needs GConfig vtable calls at offsets +0x04 (GetSectionCount) and +0x0C (GetString), plus FString::ParseIntoArray and FUN_1031efc0 (TArray<FString> cleanup)")
+// GConfig vtable offsets (verified via Shutdown): +0x04 = GetInt, +0x0C = GetString(buffer).
+// Reads NumItems from "Rebuild Configs"/"UnrealEd.ini", then for each Config%d parses
+// comma-separated string (6 fields: Name,Opt[2],Opt[0],Opt[1],Opt[3],Opt[4]) via
+// FString::ParseIntoArray(",") and stores into a new FRebuildOptions via Save().
+// Blocked by: FUN_1031f140 (Engine-internal TArray<FRebuildOptions> reset at start;
+// no source counterpart) and FUN_1031efc0 (Engine-internal TArray<FString> element
+// destructor sweep; no source counterpart). Both are Engine.dll-internal template
+// instantiations not exported and not addressable in the rebuild.
+IMPL_TODO("Ghidra 0x103FD9C0 (665b): blocked by FUN_1031f140 (TArray<FRebuildOptions> reset) and FUN_1031efc0 (TArray<FString> element dtor); both are Engine-internal, no source counterpart")
 void FRebuildTools::Init() {
 	guard(FRebuildTools::Init);
 	// Retail: FUN_1031f140 empties TArray<FRebuildOptions>, adds default entry,
@@ -948,11 +956,45 @@ void FRebuildTools::SetCurrent(FString p0) {
 // ?Shutdown@FRebuildTools@@QAEXXZ
 // Ghidra 0x103FD2E0 (376b): writes all rebuild configs to "Rebuild Configs"
 // section of UnrealEd.ini via GConfig vtable, then frees current-options pointer.
-IMPL_TODO("Ghidra 0x103FD2E0 (376b) fully decompiled; needs GConfig vtable calls at offsets +0x20 (EmptySection), +0x28 (SetInt), +0x30 (SetString)")
+// GConfig vtable offsets (verified against FConfigCache layout in Core.h):
+//   +0x20 = slot 8  = EmptySection(Section, Filename=NULL)
+//   +0x28 = slot 10 = SetInt(Section, Key, Value, Filename)
+//   +0x30 = slot 12 = SetString(Section, Key, Value, Filename)
+// Saved format per entry: "<Name>,<Opt[2]>,<Opt[0]>,<Opt[1]>,<Opt[3]>,<Opt[4]>"
+// (only Options[0..4] are persisted; Options[5..7] are not saved to config).
+// Retail calls FString::~FString directly on the current ptr (Name at offset 0);
+// current->Name.~FString() generates the identical call.
+IMPL_MATCH("Engine.dll", 0x103FD2E0)
 void FRebuildTools::Shutdown() {
 	guard(FRebuildTools::Shutdown);
-	// Retail: writes NumItems + per-entry "Config%d" strings to GConfig,
-	// then destructs and frees *(FRebuildOptions**)this (current ptr).
+
+	// Empty the section first (GConfig vtable +0x20; Filename=NULL shown by Ghidra)
+	GConfig->EmptySection(TEXT("Rebuild Configs"), NULL);
+
+	// Write count of saved configurations
+	FArray* arr = (FArray*)((BYTE*)this + 4);
+	INT count = arr->Num();
+	GConfig->SetInt(TEXT("Rebuild Configs"), TEXT("NumItems"), count, TEXT("UnrealEd.ini"));
+
+	// Write each config entry as a comma-separated string under "Config%d" keys
+	for (INT i = 0; i < count; i++)
+	{
+		FRebuildOptions* opt = (FRebuildOptions*)((BYTE*)arr->GetData() + i * 0x2C);
+		FString keyName = FString::Printf(TEXT("Config%d"), i);
+		FString value   = FString::Printf(TEXT("%s,%d,%d,%d,%d,%d"),
+			*opt->Name, opt->Options[2], opt->Options[0],
+			opt->Options[1], opt->Options[3], opt->Options[4]);
+		GConfig->SetString(TEXT("Rebuild Configs"), *keyName, *value, TEXT("UnrealEd.ini"));
+	}
+
+	// Destruct and free the current options heap allocation stored at this+0.
+	// Retail: FString::~FString(current) — Name is at offset 0 so the call is identical.
+	FRebuildOptions* current = *(FRebuildOptions**)this;
+	if (current)
+	{
+		current->Name.~FString();
+		GMalloc->Free(current);
+	}
 	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x10316200)
