@@ -3008,11 +3008,142 @@ return reached ? flags : 0;
 unguard;
 }
 
-IMPL_TODO("Ghidra 0x103e88b0; 1264b: iterative gravity integration with floor detection, AScout-specific handling; no rdtsc/Karma/unaff blockers; tractable but not yet reconstructed")
+// Ghidra 0x103e88b0; 1264 bytes.
+// Simulates jump-landing physics: advances the pawn under gravity (plus zone effects)
+// in 0.1-second sub-steps until it lands on a floor (Normal.Z >= 0.7), hits terminal
+// velocity, enters water, or runs out of steps.
+// Used by jumpReachable to test whether a parabolic jump trajectory reaches solid floor.
+// DIVERGENCE: fieldAt0x44c (terminal-velocity Z limit) is unnamed in the SDK; raw offset.
+// DIVERGENCE: AScout MaxStepHeight at this+0x660 is unnamed; raw offset.
+// DIVERGENCE: ZoneGravity at Zone+0x450, ZoneVelocity at Zone+0x444 — both confirmed
+//   from other Ghidra callers but unnamed in the SDK.
+// DIVERGENCE: MoveActor stray args (fVar5, fVar6, fVar7 after bFlags) are Ghidra
+//   stack-tracking artifacts. The retail MoveActor only pops 9 declared params.
+IMPL_MATCH("Engine.dll", 0x103e88b0)
 ETestMoveResult APawn::jumpLanding(FVector TestFall, INT bAdjust)
 {
 	guard(APawn::jumpLanding);
-	return TESTMOVE_Stopped;
+
+	// Save starting location
+	FVector SavedLoc = Location;
+
+	FLOAT  stepTime  = 0.1f;
+	INT    done      = 0;
+	INT    stepCount = 0;
+
+	do
+	{
+		if ( done )
+		{
+			// AScout: update its step-height field with the peak negative Z
+			if ( IsA(AScout::StaticClass()) )
+			{
+				FLOAT scoutField = *(FLOAT*)(this + 0x660);
+				FLOAT negZ       = -TestFall.Z;
+				if ( negZ > scoutField ) scoutField = negZ;
+				*(FLOAT*)(this + 0x660) = scoutField;
+			}
+
+			FVector newLoc = Location;
+			// If not asked to adjust, restore start position
+			if ( bAdjust == 0 )
+				XLevel->FarMoveActor(this, SavedLoc, 1, 1);
+
+			// Return TESTMOVE_Moved if position changed, TESTMOVE_Stopped if not
+			FLOAT dx = newLoc.X - SavedLoc.X;
+			FLOAT dy = newLoc.Y - SavedLoc.Y;
+			FLOAT dz = newLoc.Z - SavedLoc.Z;
+			return (dx != 0.f || dy != 0.f || dz != 0.f) ? TESTMOVE_Moved : TESTMOVE_Stopped;
+		}
+
+		// Zone buoyancy
+		AZoneInfo* Zone = *(AZoneInfo**)(this + 0x164);
+		FLOAT buoyancy  = 0.f;
+		if ( (*(BYTE*)((BYTE*)Zone + 0x410) & 0x40) != 0 )  // bWaterVolume
+			buoyancy = *(FLOAT*)((BYTE*)Zone + 0x420);
+
+		// Gravity integration: ZoneGravity contribution + buoyancy damping
+		FVector ZoneGrav = *(FVector*)((BYTE*)Zone + 0x450);  // Zone->ZoneGravity
+		FVector ZGDelta  = ZoneGrav * stepTime;
+		FLOAT   damping  = 1.0f - buoyancy * stepTime;
+		FLOAT   newTFz   = ZGDelta.Z + TestFall.Z * damping;  // updated Z (terminal vel check)
+		TestFall         = TestFall * damping + ZGDelta;
+
+		// Add zone wind velocity
+		TestFall.X += *(FLOAT*)((BYTE*)Zone + 0x444);
+		TestFall.Y += *(FLOAT*)((BYTE*)Zone + 0x448);
+		TestFall.Z += *(FLOAT*)((BYTE*)Zone + 0x44c);
+
+		// Position delta for this step
+		FVector Delta = TestFall * stepTime;
+
+		// Test-move the pawn (bTest=1, bIgnorePawns=1)
+		FCheckResult hit(1.f);
+		XLevel->MoveActor(this, Delta, Rotation, hit, 1, 1, 0, 0, 0);
+
+		if ( (*(BYTE*)((BYTE*)Zone + 0x410) & 0x40) != 0 )  // water zone → landed
+		{
+			done = 1;  // LAB_103e8c8d
+		}
+		else if ( -(*(FLOAT*)(this + 0x44c)) <= newTFz )  // terminal velocity not exceeded
+		{
+			if ( hit.Time < 1.f )
+			{
+				if ( hit.Normal.Z >= 0.7f )
+				{
+					done = 1;  // landed on walkable floor
+				}
+				else
+				{
+					// Wall hit — try to slide
+					FVector WallNormal = hit.Normal;
+					FLOAT   fDot       = (Delta | WallNormal);
+					FVector SlideDir   = Delta - WallNormal * fDot;
+					FLOAT   remaining  = 1.f - hit.Time;
+					FVector SlideScaled = SlideDir * remaining;
+
+					if ( (SlideScaled | Delta) >= 0.f )
+					{
+						FCheckResult hit2(1.f);
+						XLevel->MoveActor(this, SlideScaled, Rotation, hit2, 1, 1, 0, 0, 0);
+
+						if ( hit2.Time < 1.f )
+						{
+							if ( hit2.Normal.Z >= 0.7f )
+							{
+								done = 1;
+							}
+							else
+							{
+								FVector DeltaNorm  = Delta.SafeNormal();
+								FVector OldWall    = WallNormal;
+								TwoWallAdjust(DeltaNorm, SlideScaled, WallNormal, OldWall, hit.Time);
+								FCheckResult hit3(1.f);
+								XLevel->MoveActor(this, SlideScaled, Rotation, hit3, 1, 1, 0, 0, 0);
+								if ( hit3.Normal.Z >= 0.7f )
+									done = 1;
+							}
+						}
+					}
+				}
+			}
+		}
+		else
+		{
+			// Terminal velocity exceeded — stop and restore
+			done = 1;
+			XLevel->FarMoveActor(this, SavedLoc, 1, 1);
+		}
+
+		stepCount++;
+		if ( !Owner || stepCount > 0x23 )
+		{
+			XLevel->FarMoveActor(this, SavedLoc, 1, 1);
+			done = 1;
+		}
+
+	} while ( true );
+
 	unguard;
 }
 

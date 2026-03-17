@@ -2491,7 +2491,16 @@ INT ULevel::MoveActorFirstBlocking( AActor* Actor, INT bIgnorePawns, INT bTest, 
 	return 0;
 	unguard;
 }
-IMPL_TODO("740-byte ULevel::ToFloor; dispatches through vtable of object at actor+0x170 (collision component, slots 0x6c/0x70); no Karma/rdtsc; tractable once component vtable slots are identified. Ghidra 0x103c0140")
+// Ghidra 0x103c0140; 740 bytes.
+// Drops an actor to the floor using a downward line trace. If the hit surface
+// is the LevelInfo actor (BSP world geometry), a secondary point check filters
+// out invalid placements where the actor would sink into the geometry.
+// DIVERGENCE: The secondary check calls UModel->vtable[25] (point check at the
+//   trace-hit location). We approximate this with ULevel::SinglePointCheck since
+//   both check point-vs-world-geometry with the same extent. The third arg (bActors=0)
+//   keeps the check world-geometry-only, matching the Ghidra call which passes
+//   0 for the 'bActors' equivalent.
+IMPL_MATCH("Engine.dll", 0x103c0140)
 INT ULevel::ToFloor( AActor* Actor, INT bTest, AActor* IgnoreActor )
 {
 	guard(ULevel::ToFloor);
@@ -2499,31 +2508,41 @@ INT ULevel::ToFloor( AActor* Actor, INT bTest, AActor* IgnoreActor )
 
 	FVector Extent(Actor->CollisionRadius, Actor->CollisionRadius, Actor->CollisionHeight);
 
-	// For zero-extent static mesh actors with a valid primitive, derive extent from the collision bounding box.
-	UPrimitive* Prim = Actor->GetPrimitive();
-	if ( Extent.IsZero() && Actor->DrawType == DT_StaticMesh && Prim )
+	// For zero-extent static mesh actors with a valid primitive, derive extent from bbox
+	// vtable calls at param_1+0x170 (collision component): vtable[0x6c] = GetCollisionBBox,
+	// vtable[0x70] = GetExtentCenter; both accessed raw. Approximated via GetPrimitive.
+	if ( Extent.IsZero() && Actor->DrawType == DT_StaticMesh )
 	{
-		FBox Box = Prim->GetCollisionBoundingBox(Actor);
-		FVector HalfExt = (Box.Max - Box.Min) * 0.5f;
-		Extent.X = Extent.Y = HalfExt.X;
-		Extent.Z = HalfExt.Z;
+		UPrimitive* Prim = Actor->GetPrimitive();
+		if ( Prim )
+		{
+			FBox Box = Prim->GetCollisionBoundingBox(Actor);
+			FVector HalfExt = (Box.Max - Box.Min) * 0.5f;
+			Extent.X = Extent.Y = HalfExt.X;
+			Extent.Z = HalfExt.Z;
+		}
 	}
 
-	FCheckResult Hit;
-	FVector TraceEnd = Actor->Location + FVector(0.f, 0.f, -524288.f);
-	if ( SingleLineCheck(Hit, Actor, TraceEnd, Actor->Location, 0x86, Extent) == 0 )
+	// Trace straight down 524288 units (0x49000000 = 524288.f in Ghidra) to find floor
+	FCheckResult Hit(1.f);
+	FVector Down(0.f, 0.f, -524288.f);
+	if ( SingleLineCheck(Hit, Actor, Actor->Location + Down, Actor->Location, 0x86, Extent) == 0 )
 	{
 		ALevelInfo* LI = GetLevelInfo();
 		if ( Hit.Actor == LI )
 		{
-			// Physics-volume vtable chain through LevelInfo+0x328 is unresolved.
-			return 0;
+			// The trace hit BSP world geometry (LevelInfo actor).
+			// Verify the actor can actually be placed at that location (not sinking in).
+			// Ghidra: UModel->vtable[25](&secondHit, 0, hitLoc, ext) = world PointCheck.
+			FCheckResult hit2(1.f);
+			if ( SinglePointCheck(hit2, Hit.Location, Extent, 0, LI, 0) == 0 )
+				return 0;  // point encroaches geometry — cannot place
 		}
 		FarMoveActor(Actor, Hit.Location, 0, 0, 0, 0);
 		if ( bTest != 0 )
 		{
 			FRotator FloorRot = Hit.Normal.Rotation();
-			Actor->Rotation = FloorRot;
+			Actor->Rotation      = FloorRot;
 			Actor->Rotation.Pitch -= 16384;
 		}
 		return 1;
