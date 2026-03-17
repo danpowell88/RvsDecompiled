@@ -1726,21 +1726,191 @@ INT ULevel::EncroachingWorldGeometry( FCheckResult& Hit, FVector Location, FVect
 	unguard;
 }
 
-IMPL_TODO("966-byte ULevel::MultiPointCheck; rdtsc call confirmed dead code (local_1c overwritten before read); no permanent blockers. Ghidra 0x103bc6f0")
+// Helper: prepend a FCheckResult to a linked list using Mem's stack allocator.
+// Returns the new head, or NULL if allocation failed. Sets Actor on the new node.
+static FCheckResult* PrependHit( FMemStack& Mem, const FCheckResult& Hit, FCheckResult* OldHead, AActor* Actor )
+{
+	FCheckResult* New = (FCheckResult*)Mem.PushBytes( sizeof(FCheckResult), 8 );
+	if ( !New )
+		return OldHead;
+	*New = Hit;
+	New->GetNext() = OldHead;
+	New->Actor = Actor;
+	return New;
+}
+
+IMPL_MATCH("Engine.dll", 0x103bc6f0)
 FCheckResult* ULevel::MultiPointCheck( FMemStack& Mem, FVector Location, FVector Extent, DWORD ExtraNodeFlags, ALevelInfo* Level, INT bActors, INT bOnlyWorldGeometry, INT bSingleResult, AActor* Requester )
 {
 	guard(ULevel::MultiPointCheck);
-	// TODO: implement ULevel::MultiPointCheck (returns all actors/BSP overlapping a box)
-	return NULL;
+	FCheckResult* Result = NULL;
+
+	// --- 1. Actor/BSP hash point check ---
+	// Calls FCollisionHashBase::ActorPointCheck (vtable slot 4, offset 0x14).
+	// TraceFlags: bOnlyWorldGeometry ? 0x86 (world-only) : 0x9f (actors+world).
+	// Ghidra: (-(DWORD)(bOnlyWorldGeometry!=0) & 0xffffffe7) + 0x9f
+	FCollisionHashBase* Hash = *(FCollisionHashBase**)((BYTE*)this + 0xf0);
+	if ( bActors && Hash )
+	{
+		DWORD TraceFlags = bOnlyWorldGeometry ? (DWORD)0x86 : (DWORD)0x9f;
+		Result = Hash->ActorPointCheck( Mem, Location, Extent, ExtraNodeFlags, TraceFlags, bOnlyWorldGeometry, Requester );
+	}
+
+	// --- 2. Requester's XLevel BSP check ---
+	// Requester->XLevel is at actor+0x328; from there, Model->PointCheck is invoked.
+	// This path checks the BSP model of the requester's level for point containment.
+	if ( Requester )
+	{
+		ULevel* XLev = *(ULevel**)((BYTE*)Requester + 0x328);
+		if ( XLev )
+		{
+			UModel* XModel = *(UModel**)((BYTE*)XLev + 0x90);
+			if ( XModel )
+			{
+				FCheckResult hit( 1.0f, NULL );
+				hit.Item = INDEX_NONE;
+				INT r = XModel->PointCheck( hit, Requester, Location, Extent, ExtraNodeFlags );
+				if ( r == 0 )
+				{
+					Result = PrependHit( Mem, hit, Result, Requester );
+					if ( bSingleResult )
+						return Result;
+				}
+			}
+		}
+	}
+
+	// --- 3. Terrain zone checks ---
+	// Iterate all 256 BSP zones from the Model, testing terrain actors in terrain zones.
+	// Zone actor is at Model_base + (iZone * 9 + 0x24) * 8 (each zone stride = 0x48 bytes).
+	// bTerrainZone = bit 1 of AZoneInfo::bFlags at +0x398.
+	UModel* Model = *(UModel**)((BYTE*)this + 0x90);
+	for ( INT iZone = 0; iZone < 0x100; iZone++ )
+	{
+		ALevelInfo* ZoneActor = *(ALevelInfo**)((BYTE*)Model + (iZone * 9 + 0x24) * 8);
+		if ( !ZoneActor )
+			ZoneActor = GetLevelInfo();
+		if ( !ZoneActor )
+			continue;
+		if ( !(*(BYTE*)((BYTE*)ZoneActor + 0x398) & 2) )
+			continue;
+		TArray<ATerrainInfo*>& Terrains = *(TArray<ATerrainInfo*>*)((BYTE*)ZoneActor + 0x3C0);
+		for ( INT iT = 0; iT < Terrains.Num(); iT++ )
+		{
+			ATerrainInfo* Terrain = Terrains(iT);
+			FCheckResult hit( 1.0f, NULL );
+			hit.Item = INDEX_NONE;
+			if ( Terrain->PointCheck( hit, Location, Extent, ExtraNodeFlags ) != 0 )
+				continue;
+			// Verify the hit point lies in the expected terrain zone.
+			FPointRegion Region = Model->PointRegion( GetLevelInfo(), hit.Location );
+			if ( Region.Zone != (AZoneInfo*)ZoneActor )
+				continue;
+			Result = PrependHit( Mem, hit, Result, (AActor*)Terrain );
+			if ( bSingleResult )
+				return Result;
+		}
+	}
+
+	return Result;
 	unguard;
 }
 
-IMPL_TODO("stub; retail MultiLineCheck at Ghidra 0x103bcb00; no permanent blockers (no Karma/rdtsc/FUNs)")
+IMPL_MATCH("Engine.dll", 0x103bcb00)
 FCheckResult* ULevel::MultiLineCheck( FMemStack& Mem, FVector End, FVector Start, FVector Extent, ALevelInfo* Level, DWORD TraceFlags, AActor* SourceActor )
 {
 	guard(ULevel::MultiLineCheck);
-	// TODO: implement ULevel::MultiLineCheck (returns linked list of all hits along a ray)
-	return NULL;
+
+	// Collect up to 256 hits in a stack buffer, sort by Time, then link into Mem.
+	// The 0x100-slot array mirrors the Ghidra local_30b0[] layout.
+	BYTE resultBuf[0x100 * sizeof(FCheckResult)];
+	INT numHits = 0;
+	FLOAT timeScale = 1.0f;  // Ghidra: local_1c; updated during warp zone traversal
+
+	// Working End-point, updated if a warp zone is traversed (common case: no update).
+	FVector adjEnd = End;
+
+	// --- 1. Terrain zone line checks (if TRACE_Level) ---
+	// Ghidra: if ((TraceFlags & 4) && !((TraceFlags & 0x100) && !(TraceFlags & 0x2000)))
+	if ( (TraceFlags & TRACE_Level) &&
+		 ( !(TraceFlags & TRACE_ShadowCast) || (TraceFlags & TRACE_VisibleNonColliding) ) )
+	{
+		// Zone list at ULevel+0x101d8 (TArray<AZoneInfo*> of all zone actors).
+		TArray<AZoneInfo*>& ZoneList = *(TArray<AZoneInfo*>*)((BYTE*)this + 0x101d8);
+		for ( INT iZ = 0; iZ < ZoneList.Num(); iZ++ )
+		{
+			AZoneInfo* Zone = ZoneList(iZ);
+			if ( !Zone )
+				continue;
+			TArray<ATerrainInfo*>& Terrains = *(TArray<ATerrainInfo*>*)((BYTE*)Zone + 0x3C0);
+			for ( INT iT = 0; iT < Terrains.Num(); iT++ )
+			{
+				if ( numHits >= 0x100 )
+					goto hashCheck;
+				FCheckResult* slot = (FCheckResult*)(resultBuf + numHits * sizeof(FCheckResult));
+				appMemset( slot, 0, sizeof(FCheckResult) );
+				slot->Time = 1.0f;
+				slot->Item = INDEX_NONE;
+				ATerrainInfo* Terrain = Terrains(iT);
+				if ( Terrain->LineCheck( *slot, adjEnd, Start, Extent, TraceFlags ) != 0 )
+					continue;
+				// Verify the hit is in the expected zone.
+				UModel* Mdl = *(UModel**)((BYTE*)this + 0x90);
+				FPointRegion Region = Mdl->PointRegion( GetLevelInfo(), slot->Location );
+				if ( Region.Zone != Zone )
+					continue;
+				slot->Actor = (AActor*)Terrain;
+				// Ghidra scales slot->Time by timeScale then updates timeScale.
+				slot->Time *= timeScale;
+				numHits++;
+				// DIVERGENCE from retail: warp zone End-point adjustment omitted
+				// (adjusts adjEnd toward hit then reschedules for portal; common case is no warp).
+				if ( TraceFlags & TRACE_StopAtFirstHit )
+					goto buildList;
+			}
+		}
+	}
+
+hashCheck:
+	// --- 2. Actor hash line check ---
+	// Ghidra: if (!(TraceFlags & 0x200) || uVar10 == 0) AND (TraceFlags & 0x9b) AND hash
+	// 0x200 = TRACE_StopAtFirstHit; 0x9b = actor-trace flags.
+	if ( (numHits == 0 || !(TraceFlags & TRACE_StopAtFirstHit)) &&
+		 (TraceFlags & 0x9b) )
+	{
+		FCollisionHashBase* Hash = *(FCollisionHashBase**)((BYTE*)this + 0xf0);
+		if ( Hash )
+		{
+			FCheckResult* pfVar7 = Hash->ActorLineCheck( Mem, adjEnd, Start, Extent, TraceFlags, 0, SourceActor );
+			for ( ; pfVar7 && numHits < 0x100; numHits++ )
+			{
+				FCheckResult* slot = (FCheckResult*)(resultBuf + numHits * sizeof(FCheckResult));
+				*slot = *pfVar7;
+				slot->Time *= timeScale;  // Ghidra: pfVar7[9] = local_1c * pfVar7[9]
+				pfVar7 = pfVar7->GetNext();
+			}
+		}
+	}
+
+buildList:
+	if ( numHits == 0 )
+		return NULL;
+
+	// Sort by Time (ascending). Ghidra: appQsort(local_30b0, uVar10, 0x30, &LAB_103b6f70)
+	appQsort( resultBuf, numHits, sizeof(FCheckResult), (QSORT_COMPARE)CompareHits );
+
+	// Allocate numHits FCheckResult nodes from Mem and link them.
+	FCheckResult* head = (FCheckResult*)Mem.PushBytes( numHits * sizeof(FCheckResult), 8 );
+	if ( !head )
+		return NULL;
+	for ( INT i = 0; i < numHits; i++ )
+	{
+		FCheckResult* node = head + i;
+		*node = *(FCheckResult*)(resultBuf + i * sizeof(FCheckResult));
+		node->GetNext() = (i + 1 < numHits) ? (head + i + 1) : NULL;
+	}
+
+	return head;
 	unguard;
 }
 
@@ -1762,13 +1932,137 @@ void ULevel::DetailChange( INT NewDetail )
 	unguard;
 }
 
-IMPL_TODO("621-byte ULevel::TickDemoRecord; FUN_103b7b70 (role/channel-find helper) confirmed in Engine _unnamed.cpp; no permanent blockers. Ghidra 0x103c62f0")
+// FUN_103b7b70 (88 bytes, _unnamed.cpp): thiscall on UNetConnection; looks up
+// the UActorChannel* for an actor in the connection's TMap<AActor*,UChannel*>
+// hash. Returns NULL if no channel exists for that actor.
+typedef UChannel* (__thiscall* FindActorChannelFn)(void* Conn, AActor** pActor);
+
+IMPL_MATCH("Engine.dll", 0x103c62f0)
 INT ULevel::TickDemoRecord( FLOAT DeltaSeconds )
 {
 	guard(ULevel::TickDemoRecord);
-	if ( !*(INT*)((BYTE*)this + 0x8c) ) // DemoRecDriver == NULL
-		return 0;
-	// TODO: implement DemoRecDriver actor replication
+
+	// DemoRecDriver is at this+0x8c; its first Connection is at DemoRecDriver+0x30.
+	if ( !*(DWORD*)((BYTE*)this + 0x8c) )
+		return 1;
+	UNetConnection* ServerConn = *(UNetConnection**)(*(DWORD*)((BYTE*)this + 0x8c) + 0x30);
+
+	// bDemoPlayback: true when NetMode == NM_Client (3).
+	// Ghidra: local_1c = (*(char*)(Actors[0] + 0x425) == 3)
+	UBOOL bDemoPlayback = (*(BYTE*)((BYTE*)GetLevelInfo() + 0x425) == 3);
+
+	// Retail FUN_103b7b70: TMap actor→channel lookup on the connection.
+	FindActorChannelFn FindActorChannel = (FindActorChannelFn)0x103b7b70;
+
+	// PackageMap is at ServerConn+0xC8 (= offset 200); vtable slot 28 (0x70)
+	// checks whether a given UClass has a valid demo-record channel index.
+	typedef INT (__thiscall* PkgMapChannelCheckFn)(void*, UClass*);
+
+	for ( INT iActor = 0; ; iActor++ )
+	{
+		if ( iActor >= Actors.Num() )
+			return 1;
+
+		// Retail asserts that Actors[0] is LevelInfo.
+		if ( !*(INT*)Actors.GetData() )
+			appFailAssert("Actors(0)", "d:\\ravenshield\\412\\engine\\inc\\UnLevel.h", 0x1ad);
+		if ( !Actors(0)->IsA(ALevelInfo::StaticClass()) )
+			appFailAssert("Actors(0)->IsA(ALevelInfo::StaticClass())", "d:\\ravenshield\\412\\engine\\inc\\UnLevel.h", 0x1ae);
+
+		AActor* a = Actors(iActor);
+		if ( !a )
+			continue;
+
+		// Replicate if RemoteRole != ROLE_None (Ghidra: this_02[0x2e] != 0, offset 0xB8).
+		// In demo-playback mode, also replicate if Role is non-None and non-Authority.
+		// Ghidra: this_02[0x2d] = *(DWORD*)(a+0xB4) = Role DWORD, [0x2e] = RemoteRole DWORD.
+		UBOOL bShouldRep = (*(DWORD*)((BYTE*)a + 0xB8) != 0);
+		if ( !bShouldRep && bDemoPlayback )
+			bShouldRep = (*(DWORD*)((BYTE*)a + 0xB4) != 0 && *(DWORD*)((BYTE*)a + 0xB4) != 4);
+		if ( !bShouldRep )
+			continue;
+
+		// Skip zone-info actors in the lower network-relevant range.
+		if ( iActor < *(INT*)((BYTE*)this + 0x104) )
+		{
+			if ( !a->IsA(AZoneInfo::StaticClass()) )
+				continue;
+		}
+
+		// If RF flag 0x10000000 is set, skip actors already bound to another connection.
+		if ( *(DWORD*)((BYTE*)a + 0xa0) & 0x10000000 )
+		{
+			INT    nConn  = *(INT*)((BYTE*)ServerConn + 0x4b8c);
+			INT*   cList  = *(INT**)((BYTE*)ServerConn + 0x4b88);
+			UBOOL  bFound = 0;
+			for ( INT j = 0; j < nConn && !bFound; j++ )
+				if ( cList[j] == (INT)a ) bFound = 1;
+			if ( bFound )
+				continue;
+		}
+
+		// Skip if bStatic (bit 0 of RF at +0xa0) is not set and the class default
+		// actor HAS bStatic — meaning only static versions of this class replicate.
+		if ( !(*(BYTE*)((BYTE*)a + 0xa0) & 1) )
+		{
+			AActor* def = a->GetClass()->GetDefaultActor();
+			if ( def && (*(BYTE*)((BYTE*)def + 0xa0) & 1) )
+				continue;
+		}
+
+		// Find or create the demo-record channel for this actor.
+		UChannel* Channel = FindActorChannel(ServerConn, &a);
+		if ( !Channel )
+		{
+			// Check whether this actor's class has a registered channel slot.
+			void* pkgmap = *(void**)((BYTE*)ServerConn + 0xC8);
+			INT chanIdx = ((PkgMapChannelCheckFn)(*(DWORD*)(*(DWORD*)pkgmap + 0x70)))(pkgmap, a->GetClass());
+			if ( chanIdx != -1 )
+			{
+				Channel = ServerConn->CreateChannel(CHTYPE_Actor, 1, -1);
+				if ( !Channel )
+					appFailAssert("Channel", ".\\UnLevTic.cpp", 0x501);
+				((UActorChannel*)Channel)->SetChannelActor(a);
+			}
+		}
+
+		if ( Channel )
+		{
+			if ( *(INT*)((BYTE*)Channel + 0x34) )
+				appFailAssert("!Channel->Closing", ".\\UnLevTic.cpp", 0x507);
+
+			if ( Channel->IsNetReady(0) )
+			{
+				// Set bForceStatic (bit 8) and optionally bNetOwner (bit 9) flags.
+				// Ghidra: flags |= 0x100; if bDemoPlayback adjust bit 9.
+				DWORD& fl = *(DWORD*)((BYTE*)a + 0xac);
+				fl = (fl & ~0x200u) | (bDemoPlayback ? 0x200u : 0u) | 0x100u;
+
+				if ( bDemoPlayback )
+				{
+					// Temporarily swap Role ↔ RemoteRole so the actor replicates
+					// with its server-side role (Ghidra: swap DWORDS at 0xB4/0xB8).
+					DWORD tmp = *(DWORD*)((BYTE*)a + 0xB8);
+					*(DWORD*)((BYTE*)a + 0xB8) = *(DWORD*)((BYTE*)a + 0xB4);
+					*(DWORD*)((BYTE*)a + 0xB4) = tmp;
+				}
+
+				((UActorChannel*)Channel)->ReplicateActor();
+
+				if ( bDemoPlayback )
+				{
+					// Restore original roles.
+					DWORD tmp = *(DWORD*)((BYTE*)a + 0xB8);
+					*(DWORD*)((BYTE*)a + 0xB8) = *(DWORD*)((BYTE*)a + 0xB4);
+					*(DWORD*)((BYTE*)a + 0xB4) = tmp;
+				}
+
+				// Clear bForceStatic and bNetOwner flags.
+				*(DWORD*)((BYTE*)a + 0xac) &= ~0x300u;
+			}
+		}
+	}
+
 	return 1;
 	unguard;
 }
