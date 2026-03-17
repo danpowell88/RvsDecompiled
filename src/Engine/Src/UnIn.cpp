@@ -38,11 +38,18 @@ namespace
 {
 	enum { INPUT_PROPERTY_CACHE_TAG = 0x1F };
 	enum { CPF_InputFlag = 0x00000004 };
+	enum { INPUT_ALIAS_COUNT = 40 };
 
 	struct FInputPropertyCache
 	{
 		INT Count;
 		UProperty* Properties[1];
+	};
+
+	struct FInputAlias
+	{
+		FName Alias;
+		FString Command;
 	};
 
 	static FInputPropertyCache* GetInputPropertyCache(UClass* Class, FMemCache::FCacheItem*& Item)
@@ -109,8 +116,27 @@ void UInput::Serialize( FArchive& Ar )
 	// Serialize the UViewport* stored at offset 0xEA8
 	Ar << *(UViewport**)((BYTE*)this + 0xEA8);
 }
-IMPL_TODO("Ghidra 0x103b3f50 (344b): sets Viewport at this+0xEA4, iterates 40 alias slots checking AXIS+FIRE keywords via FString::Caps/InStr, clears fire-axis bindings; blocked by: alias slot layout at this+0x34 (FName+FString per 0x10-byte slot) and vtable call at offset 0x7c (ResetInput?)")
-void UInput::Init( UViewport* InViewport ) {}
+IMPL_MATCH("Engine.dll", 0x103b3f50)
+void UInput::Init( UViewport* InViewport )
+{
+	guard(UInput::Init);
+	*(UViewport**)((BYTE*)this + 0xEA4) = InViewport;
+	ResetInput();
+	GLog->Logf(NAME_Init, TEXT("Input system initialized for %s"), InViewport->GetName());
+
+	// Retail stores 40 alias entries here as FName + FString pairs on a 0x10-byte stride.
+	FInputAlias* Aliases = (FInputAlias*)((BYTE*)this + 0x30);
+	for (INT Index = 0; Index < INPUT_ALIAS_COUNT; ++Index)
+	{
+		FString UpperCommand = Aliases[Index].Command.Caps();
+		if (UpperCommand.InStr(TEXT("AXIS"), 0) != -1 && UpperCommand.InStr(TEXT("FIRE"), 0) != -1)
+		{
+			Aliases[Index].Command = TEXT("");
+			Aliases[Index].Alias = FName(TEXT(")"), FNAME_Add);
+		}
+	}
+	unguard;
+}
 IMPL_MATCH("Engine.dll", 0x103b5b30)
 void UInput::ReadInput( FLOAT DeltaSeconds, FOutputDevice& Ar )
 {
