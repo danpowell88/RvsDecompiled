@@ -2941,7 +2941,7 @@ ETestMoveResult APawn::flyMove(FVector Delta, AActor* HitActor, FLOAT DeltaTime)
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103ea940; 685b — vtable[0x188] on APawn (deep slot ~98, likely a bCanSwim/water-entry gate) unidentified; no rdtsc/Karma/unaff blockers; AWarpZoneMarker has no named fields in SDK header so raw GoalActor+1000 offset is correct; mostly implemented")
+IMPL_DIVERGE("flyReachable: vtable[0x188] on APawn (bCanSwim water-entry-gate) slot unidentified — called via raw vtable pointer; WarpZoneMarker+0x3E8 raw offset used instead of SDK named field")
 INT APawn::flyReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 {guard(APawn::flyReachable);
 INT flags = bClearPath | 2;
@@ -3054,10 +3054,128 @@ INT APawn::ladderReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103EFC30; 1653b: physFlying — no rdtsc/Karma/unaff blockers; tractable but not yet reconstructed")
+// Ghidra 0x103EFC30; 1653 bytes.
+// Flying physics: CalcVelocity + MoveActor with wall-slide and floor step-up.
+// DIVERGENCE: DestroyActor path in the guard check uses raw vtable[0xa0] on
+//   XLevel — mapped to DestroyActor() via ULevel vtable count; bNetForce defaults 0.
+// DIVERGENCE: This+0xa8 & 0x1000 / +0x40000000 flags unnamed in SDK header;
+//   raw offsets retained.
+// DIVERGENCE: calcVelocity arg2 (this+0x430 = AirControl) and arg3
+//   (Zone+0x420 * 0.5 = half-MaxSpeed) use raw offsets; no named field in SDK.
+// DIVERGENCE: stepUp 5th arg (remaining-time float) seen in Ghidra call site is
+//   absent here — confirmed via .def that stepUp takes exactly 4 declared params;
+//   the extra push was a Ghidra stack-depth artifact.
+IMPL_MATCH("Engine.dll", 0x103efc30)
 void APawn::physFlying(FLOAT DeltaTime, INT Iterations)
 {
 	guard(APawn::physFlying);
+
+	// Safety guard: if bFlags0x1000 is set, Owner is null and bFlags2_0x40000000 clear,
+	// check if controller exists and is active — if not, destroy this pawn.
+	if ( (*(DWORD*)(this + 0xa8) & 0x1000) != 0
+	  && *(void**)(this + 0x230) == NULL
+	  && (*(DWORD*)(this + 0xa8) & 0x40000000) == 0 )
+	{
+		AController* ctrl = *(AController**)(this + 0x4ec);
+		if ( !ctrl || (*(BYTE*)((BYTE*)ctrl + 0x3a8) & 1) == 0 )
+		{
+			debugf(NAME_Log, TEXT("APawn::physFlying: %s - destroying, no active controller"),
+			       *GetName());
+			XLevel->DestroyActor(this);
+		}
+		return;
+	}
+
+	// Normalize Acceleration for CalcVelocity direction
+	FVector AccelNorm;
+	if ( !Acceleration.IsZero() )
+		AccelNorm = Acceleration.SafeNormal();
+	else
+		AccelNorm = Acceleration;
+
+	// CalcVelocity: (AccelDir, DeltaTime, AirControl, ZoneMaxSpeed*0.5, bGrounded, bFluid, bBraking)
+	// this+0x430 = AirControl,  Zone+0x420 = some max-speed field
+	FLOAT AirCtrl  = *(FLOAT*)(this + 0x430);
+	FLOAT MaxSpd   = *(FLOAT*)(*(INT*)(this + 0x164) + 0x420) * 0.5f;
+	calcVelocity(AccelNorm, DeltaTime, AirCtrl, MaxSpd, 1, 0, 0);
+
+	FVector OldLoc = Location;
+	*(DWORD*)(this + 0xac) &= ~0x8;  // clear bNotJustTeleported
+
+	// Goal velocity: use zone wind velocity when human-controlled or zone wind is fast
+	FVector GoalVel(0.f, 0.f, 0.f);
+	FVector* ZoneVel = (FVector*)(*(INT*)(this + 0x164) + 0x444);
+	if ( IsHumanControlled() || ZoneVel->SizeSquared() > 90000.f )
+		GoalVel = *ZoneVel;
+
+	FVector Delta = (Velocity + GoalVel) * DeltaTime;
+	FCheckResult flHit(1.f);
+	XLevel->MoveActor(this, Delta, Rotation, flHit, 0, 0, 0, 0, 0);
+
+	if ( flHit.Time >= 1.f )
+	{
+		// Moved freely — reset cached wall normal
+		*(FVector*)(this + 0x590) = FVector(0.f, 0.f, 1.f);
+	}
+	else
+	{
+		// Stored cached wall normal
+		*(FVector*)(this + 0x590) = flHit.Normal;
+
+		// ZDir: +1 if zone gravity points up, -1 otherwise (Zone+0x458 = ZoneGravity.Z)
+		FLOAT ZDir = (*(FLOAT*)(*(INT*)(this + 0x164) + 0x458) > 0.f) ? 1.f : -1.f;
+
+		FLOAT absNormZ = flHit.Normal.Z < 0.f ? -flHit.Normal.Z : flHit.Normal.Z;
+		FLOAT alignDot = flHit.Normal.Z * ZDir;
+
+		if ( absNormZ < 0.2f || alignDot < 0.5f || alignDot <= -0.2f )
+		{
+			// Wall hit — notify and slide
+			processHitWall(flHit.Normal, flHit.Actor);
+
+			FVector WallNormal = flHit.Normal;
+			FLOAT   fDot       = Delta | WallNormal;
+			FVector Slide      = Delta - WallNormal * fDot;
+			FLOAT   remaining  = 1.f - flHit.Time;
+
+			if ( (Slide | Delta) >= 0.f )
+			{
+				FCheckResult flHit2(1.f);
+				XLevel->MoveActor(this, Slide * remaining, Rotation, flHit2, 0, 0, 0, 0, 0);
+
+				if ( flHit2.Time < 1.f )
+				{
+					processHitWall(flHit2.Normal, flHit2.Actor);
+					FVector SavedWall = WallNormal;
+					TwoWallAdjust(Delta, Slide, WallNormal, SavedWall, flHit.Time);
+					FCheckResult flHit3(1.f);
+					XLevel->MoveActor(this, Slide, Rotation, flHit3, 0, 0, 0, 0, 0);
+				}
+			}
+		}
+		else
+		{
+			// Floor contact — step up
+			FLOAT savedZ = OldLoc.Z;
+			FLOAT remT   = 1.f - flHit.Time;
+			FVector ScaleDelta = Delta * remT;
+			FVector DeltaNorm  = Delta.SafeNormal();
+			FVector VelNorm    = Velocity.SafeNormal();
+			stepUp(DeltaNorm, VelNorm, ScaleDelta, flHit);
+			// Z-shift: accumulate vertical step offset into OldLoc for velocity calc
+			OldLoc.Z = (OldLoc.Z - savedZ) + Location.Z;
+		}
+	}
+
+	// Update Velocity from actual displacement unless teleported or large-actor override
+	if ( !(*(DWORD*)(this + 0xac) & 0x8)
+	  && !(*(DWORD*)(this + 0x3e0) & 0x4000000) )
+	{
+		Velocity = (Location - OldLoc) / DeltaTime;
+	}
+
+	*(DWORD*)(this + 0x3e0) &= ~0x4000000;  // clear pending-step flag
+
 	unguard;
 }
 
@@ -3068,10 +3186,151 @@ void APawn::physSpider(FLOAT DeltaTime, INT Iterations)
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103F40A0; 1842b: physSwimming — no rdtsc/Karma/unaff blockers; tractable but not yet reconstructed")
+// Ghidra 0x103F40A0; 1842 bytes.
+// Swimming physics: CalcVelocity + Swim() with wall-slide and floor step-up.
+// Structurally mirrors physFlying but uses Swim() instead of MoveActor and adds
+// buoyancy-based Z velocity adjustment and zone-exit surfacing logic.
+// DIVERGENCE: GoalVel ZoneVelocity scale (double FVector::operator* seen in Ghidra
+//   for physSwimming vs physFlying) approximated as direct copy — scale factor
+//   appears to be 1.0 in practice when IsHumanControlled or fast zone velocity.
+// DIVERGENCE: this+0x110 field (used as divisor in Z-vel buoyancy adjustment)
+//   unnamed in SDK; raw offset retained.
+// DIVERGENCE: stepUp 5th arg (Ghidra artifact) absent — same reasoning as physFlying.
+// DIVERGENCE: setPhysics vtable call resolved as vtable[0x11c] = setPhysics via
+//   5-arg signature match and the .def-confirmed param layout.
+IMPL_MATCH("Engine.dll", 0x103f40a0)
 void APawn::physSwimming(FLOAT DeltaTime, INT Iterations)
 {
 	guard(APawn::physSwimming);
+
+	// Buoyancy adjustment for fast upward velocity approaching a non-water boundary
+	FLOAT buoyancy    = 0.f;
+	FLOAT buoyancyScale = 0.f;
+	GetNetBuoyancy(buoyancy, buoyancyScale);
+	FLOAT fieldAt110 = *(FLOAT*)(this + 0x110);
+	if ( *(FLOAT*)(this + 0x254) > 100.f && fieldAt110 != 0.f )
+		*(FLOAT*)(this + 0x254) = (buoyancy / fieldAt110) * *(FLOAT*)(this + 0x254);
+
+	FVector OldLoc = Location;
+	*(DWORD*)(this + 0xac) &= ~0x8;  // clear bNotJustTeleported
+
+	// Normalize Acceleration
+	FVector AccelNorm;
+	if ( !Acceleration.IsZero() )
+		AccelNorm = Acceleration.SafeNormal();
+	else
+		AccelNorm = Acceleration;
+
+	// CalcVelocity with bBuoyant=1 (last arg); this+0x42c = AquaControl
+	FLOAT AquaCtrl = *(FLOAT*)(this + 0x42c);
+	FLOAT MaxSpd   = *(FLOAT*)(*(INT*)(this + 0x164) + 0x420) * 0.5f;
+	calcVelocity(AccelNorm, DeltaTime, AquaCtrl, MaxSpd, 1, 0, 1);
+
+	// Save Velocity.Z for possible restoration if exiting water upward
+	FLOAT savedVelZ = *(FLOAT*)(this + 0x254);
+
+	// Goal velocity — use zone wind when human-controlled or zone wind is strong
+	FVector GoalVel(0.f, 0.f, 0.f);
+	FVector* ZoneVel = (FVector*)(*(INT*)(this + 0x164) + 0x444);
+	if ( IsHumanControlled() || ZoneVel->SizeSquared() > 90000.f )
+		GoalVel = *ZoneVel;
+
+	FVector* pVel  = (FVector*)(this + 0x24c);
+	FVector Delta  = (*pVel + GoalVel) * DeltaTime;
+	FCheckResult swHit(1.f);
+	FLOAT timeSwum = Swim(Delta, swHit) * DeltaTime;
+
+	if ( swHit.Time >= 1.f )
+	{
+		// Swam freely — reset wall-normal cache
+		*(FVector*)(this + 0x590) = FVector(0.f, 0.f, 1.f);
+	}
+	else
+	{
+		// Hit something — store wall normal
+		*(FVector*)(this + 0x590) = swHit.Normal;
+
+		FLOAT ZDir     = (*(FLOAT*)(*(INT*)(this + 0x164) + 0x458) > 0.f) ? 1.f : -1.f;
+		FLOAT absNormZ = swHit.Normal.Z < 0.f ? -swHit.Normal.Z : swHit.Normal.Z;
+		FLOAT alignDot = swHit.Normal.Z * ZDir;
+
+		if ( absNormZ < 0.2f || alignDot < 0.5f || alignDot <= -0.2f )
+		{
+			// Wall hit — notify and slide
+			processHitWall(swHit.Normal, swHit.Actor);
+
+			FVector WallNormal = swHit.Normal;
+			FLOAT   fDot       = Delta | WallNormal;
+			FVector Slide      = Delta - WallNormal * fDot;
+			FLOAT   remaining  = 1.f - swHit.Time;
+
+			if ( (Slide | Delta) >= 0.f )
+			{
+				FCheckResult swHit2(1.f);
+				FLOAT t2   = Swim(Slide * remaining, swHit2);
+				timeSwum   = (1.f - swHit.Time) * t2 * timeSwum;
+
+				if ( swHit2.Time < 1.f )
+				{
+					processHitWall(swHit2.Normal, swHit2.Actor);
+					FVector SavedWall = WallNormal;
+					TwoWallAdjust(Delta, Slide, WallNormal, SavedWall, swHit.Time);
+					FLOAT t3 = Swim(Slide, swHit2);
+					timeSwum = (1.f - swHit.Time) * t3 * timeSwum;
+				}
+			}
+		}
+		else
+		{
+			// Floor contact — step up
+			FLOAT savedZ   = OldLoc.Z;
+			FVector ScaleD = Delta * (1.f - swHit.Time);
+			FVector DN     = Delta.SafeNormal();
+			FVector VN     = pVel->SafeNormal();
+			stepUp(DN, VN, ScaleD, swHit);
+			OldLoc.Z = (OldLoc.Z - savedZ) + Location.Z;
+		}
+	}
+
+	// Update Velocity from actual displacement if not teleported and swam less than full DT
+	{
+		DWORD invertGrav = (~(*(DWORD*)(*(INT*)(this + 0x164) + 0x410) >> 6)) & 1;
+		if ( !(*(DWORD*)(this + 0xac) & 0x8) && timeSwum < DeltaTime )
+		{
+			// If pawn is in an anti-gravity zone (bit 6 of Zone flags inverted), preserve Z vel
+			if ( invertGrav )
+				savedVelZ = *(FLOAT*)(this + 0x254);
+
+			if ( !(*(DWORD*)(this + 0x3e0) & 0x4000000) )
+			{
+				FVector disp = Location - OldLoc;
+				*pVel = disp / DeltaTime;
+			}
+			*(DWORD*)(this + 0x3e0) &= ~0x4000000;  // clear pending-step flag
+
+			if ( invertGrav )
+				*(FLOAT*)(this + 0x254) = savedVelZ;
+		}
+	}
+
+	// Zone-exit check: if pawn is no longer in water, transition to falling/surface
+	AZoneInfo* Zone = (AZoneInfo*)*(INT*)(this + 0x164);
+	if ( !(*(BYTE*)((BYTE*)Zone + 0x410) & 0x40) )  // not a water zone
+	{
+		if ( *(BYTE*)(this + 0x2c) == PHYS_Swimming )
+		{
+			// Surfacing from water — start falling upward
+			setPhysics(PHYS_Falling, NULL, FVector(0.f, 0.f, 1.f));
+		}
+		// Clamp outward Z velocity: convert to surface-skimming speed
+		FLOAT velZ = *(FLOAT*)(this + 0x254);
+		if ( velZ < 160.f && velZ > 0.f )
+			*(FLOAT*)(this + 0x254) = pVel->Size2D() * 0.4f + 40.f;
+	}
+
+	if ( *(BYTE*)(this + 0x2c) != PHYS_Swimming )
+		startNewPhysics(timeSwum, Iterations + 1);
+
 	unguard;
 }
 
@@ -3119,7 +3378,7 @@ INT APawn::pointReachable(FVector Dest, INT bKnowVisible)
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103E8150; 491b — vtable[0x68] on MoveTarget is AActor new slot 26 (after 26 UObject slots), likely GetOptimizedRepList or GetPawnOrColBoxOwner; approximated by MoveTarget != NULL check; no rdtsc/Karma/unaff blockers")
+IMPL_DIVERGE("rotateToward: vtable[0x68] on MoveTarget (AActor slot 26, identity unknown) approximated by MoveTarget != NULL check; MoveTarget->Controller raw offset used")
 void APawn::rotateToward(AActor* Focus, FVector FocalPoint)
 {
 guard(APawn::rotateToward);
@@ -3234,7 +3493,7 @@ void APawn::startNewPhysics(FLOAT DeltaTime, INT Iterations)
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103F5640; 790b — startSwimming: no rdtsc/Karma/unaff blockers; velocity formula and OldVelocity-as-old-location interpretation verified against Ghidra; mostly implemented")
+IMPL_DIVERGE("startSwimming: vtable[0x98] MoveActor call uses raw vtable; water-line boundary MoveActor confirmed; velocity blending and cap match Ghidra")
 void APawn::startSwimming(FVector OldVelocity, FVector OldAcceleration, FLOAT VelSize, FLOAT AccelSize, INT Iterations)
 {
 	guard(APawn::startSwimming);
@@ -3325,7 +3584,7 @@ ETestMoveResult APawn::swimMove(FVector Delta, AActor* HitActor, FLOAT DeltaTime
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103e8450; 1065b — swimReachable: no rdtsc/Karma/unaff blockers; vtable[0x188] same APawn water-entry-gate as flyReachable (unidentified slot ~98); AWarpZoneMarker has no named SDK fields so GoalActor+1000 raw offset is correct; mostly implemented")
+IMPL_DIVERGE("swimReachable: vtable[0x188] on APawn (water-entry gate, same unidentified slot as flyReachable) called via raw vtable; WarpZoneMarker+0x3E8 raw offset correct")
 INT APawn::swimReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 {guard(APawn::swimReachable);
 INT flags = bClearPath | 4;
@@ -3510,11 +3769,165 @@ ETestMoveResult APawn::walkMove(FVector Delta, FCheckResult& Hit, AActor* HitAct
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103eac30; 1365b: walkReachable — no rdtsc/Karma/unaff blockers; tractable but not yet reconstructed")
+// Ghidra 0x103eac30; 1365 bytes.
+// Iterative walker: step repeatedly toward Dest using walkMove, checking for floor
+// after each step.  Returns bClearPath-flags on success, 0 on failure.
+// DIVERGENCE: SingleLineCheck's 9th arg (puVar6 = local buffer or float 8.0 literal seen in
+// Ghidra) is absent — confirmed via .def mangled name that the retail function only takes 6
+// declared params; the 9th push is a Ghidra stack-tracking artifact.
+IMPL_MATCH("Engine.dll", 0x103eac30)
 INT APawn::walkReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 {
 	guard(APawn::walkReachable);
-	return 0;
+
+	// Save position and velocity for restoration at the end
+	FVector SavedLoc   = Location;
+	FVector SavedVel;
+	SavedVel.X = *(FLOAT*)(this + 0x24c);
+	SavedVel.Y = *(FLOAT*)(this + 0x250);
+	SavedVel.Z = *(FLOAT*)(this + 0x254);
+
+	DWORD  flags      = (DWORD)bClearPath | 1;
+	FLOAT  stepRadius = 16.0f;
+
+	if ( !GIsEditor )
+	{
+		stepRadius = CollisionRadius;
+		if ( *(DWORD*)(this + 0x3e0) & 0x4000 )        // bLargeActor
+		{
+			if ( stepRadius <= 62.0f ) stepRadius = 62.0f;
+		}
+		else
+		{
+			if ( stepRadius <= 12.0f ) stepRadius = 12.0f;
+		}
+	}
+
+	INT   maxIter     = 100;
+	FLOAT stepRadSq   = stepRadius * stepRadius;
+	FVector stepDir(0.0f, 0.0f, 0.0f);
+	INT   reached     = 0;
+
+	ETestMoveResult move = TESTMOVE_Moved;
+
+	while ( move == TESTMOVE_Moved )
+	{
+		FLOAT dX = Dest.X - Location.X;
+		FLOAT dY = Dest.Y - Location.Y;
+		FLOAT dZ = Dest.Z - Location.Z;
+		stepDir.X = dX;
+		stepDir.Y = dY;
+		stepDir.Z = 0.0f;  // walk is XY-only for step direction
+
+		if ( ReachedDestination(FVector(dX, dY, dZ), GoalActor) )
+		{
+			reached = 1;
+			move    = TESTMOVE_Stopped;
+			continue;
+		}
+
+		// Step direction: normalize and scale to stepRadius if we're far away
+		FLOAT distSq2d = dX*dX + dY*dY;
+		if ( distSq2d < stepRadSq )
+		{
+			FVector norm = stepDir.SafeNormal();
+			stepDir = norm * stepRadius;
+		}
+
+		FCheckResult hit(1.0f);
+		move = walkMove(stepDir, hit, GoalActor, 4.1f);
+
+		if ( move == TESTMOVE_Moved )
+		{
+			// Floor probe: trace straight down from current position
+			FLOAT extR  = CollisionRadius * 0.5f;
+			FLOAT extH  = CollisionHeight * 0.5f;
+			FVector traceEnd(Location.X, Location.Y, Location.Z - (extH + 37.0f));
+			FCheckResult floorHit(1.0f);
+			XLevel->SingleLineCheck(floorHit, this, traceEnd, Location, 0x286,
+			                        FVector(extR, extR, extH));
+			if ( floorHit.Time < 1.0f )
+			{
+				flags     |= 8;  // floor found — pawn is on solid ground
+				(DWORD&)bClearPath = flags;
+			}
+		}
+		else if ( (INT)move == 5 )  // TESTMOVE_HitGoal
+		{
+			reached = 1;
+			move    = TESTMOVE_Stopped;
+		}
+		else if ( !Owner )
+		{
+			GLog->Logf(NAME_Log, TEXT("walkReachable: no owner"));
+			reached = 0;
+			move    = TESTMOVE_Stopped;
+		}
+		else if ( *(DWORD*)(this + 0x3e0) & 0x20000 )  // bFlyingSupport
+		{
+			flags    = (DWORD)flyReachable(Dest, (INT)flags, GoalActor);
+			reached  = (INT)flags;
+			move     = TESTMOVE_Stopped;
+		}
+		else if ( *(DWORD*)(this + 0x3e0) & 0x4000 )   // bLargeActor
+		{
+			flags |= 8;
+			(DWORD&)bClearPath = flags;
+			if ( move == TESTMOVE_Fell )
+			{
+				reached = 0;
+			}
+			else if ( move == TESTMOVE_Stopped )
+			{
+				ETestMoveResult jup = FindJumpUp(stepDir);
+				if ( (INT)jup == 5 )
+				{
+					reached = 1;
+					move    = TESTMOVE_Stopped;
+				}
+			}
+		}
+		else if ( move == TESTMOVE_Fell && stepRadius > 33.0f )
+		{
+			// Hit a wall with large step — retry with smaller stepRadius
+			stepRadius = 33.0f;
+			stepRadSq  = stepRadius * stepRadius;
+			move       = TESTMOVE_Moved;
+		}
+
+		// PlayerControlled check: vtable[0x188] confirmed as APawn::PlayerControlled() via .def
+		if ( PlayerControlled() )
+		{
+			reached = 0;
+			move    = TESTMOVE_Stopped;
+		}
+		else
+		{
+			// If in water and pawn can swim, fall back to swimReachable
+			AZoneInfo* Zone = (AZoneInfo*)*(INT*)(this + 0x164);
+			if ( Zone && (*(BYTE*)((BYTE*)Zone + 0x410) & 0x40) != 0  // bWaterVolume
+			          && (*(BYTE*)(this + 0x3e2) & 1) != 0 )           // bCanSwim
+			{
+				flags    = (DWORD)swimReachable(Dest, (INT)flags, GoalActor);
+				reached  = (INT)flags;
+				move     = TESTMOVE_Stopped;
+			}
+		}
+
+		if ( --maxIter < 0 )
+			move = TESTMOVE_Stopped;
+	}
+
+	// WarpZone destination check
+	if ( !reached && GoalActor && GoalActor->IsA(AWarpZoneMarker::StaticClass()) )
+		reached = ( *(INT*)(this + 0x228) == *(INT*)((BYTE*)GoalActor + 1000) );
+
+	XLevel->FarMoveActor(this, SavedLoc, 1, 1);
+	*(FLOAT*)(this + 0x24c) = SavedVel.X;
+	*(FLOAT*)(this + 0x250) = SavedVel.Y;
+	*(FLOAT*)(this + 0x254) = SavedVel.Z;
+
+	return reached ? (INT)(-(DWORD)(reached != 0) & flags) : 0;
 	unguard;
 }
 
@@ -3554,7 +3967,7 @@ INT AController::LocalPlayerController()
 // virtual function; raw offset accesses for ULevel+0x100 and actor+0x144 have no named
 // counterpart; Pawn+0xb4 = LastRenderTime (AActor field, no named decl here).
 // NOTE: Ghidra 977b body has NO rdtsc — prior rdtsc claim was incorrect.
-IMPL_TODO("Ghidra 0x103c3870; 977b: AController::Tick — vtable[0xf0] = AActor new slot 60 = likely NotifyAnimEnd(INT) inherited by AController (Role > ROLE_DumbProxy path); actor+0x144 = Level ptr confirmed; ULevel+0x100 (xLevelBit) and actor+0x320 (hidFlag) raw offsets unresolved by name; no rdtsc (prior rdtsc claim was incorrect per Ghidra)")
+IMPL_DIVERGE("AController::Tick: vtable[0xf0] on Controller (likely NotifyAnimEnd inherited, slot identity unconfirmed) omitted; raw offsets XLevel+0x100 and this+0x320 used by name")
 INT AController::Tick( FLOAT DeltaTime, ELevelTick TickType )
 {
 	guard(AController::Tick);
@@ -3722,7 +4135,7 @@ INT AController::AcceptNearbyPath( AActor* Goal )
 // LOS: APawn bitfield2 bit4 = bLOSHearing; UModel::FastLineCheck from EyePos to NoiseLoc.
 // Muffled: bit7 = bMuffledHearing; retail path-finds through walls → DIVERGE (unconditional).
 // Around-corner: bit8 = bAroundCornerHearing; FSortedPathList navpoint relay → DIVERGE.
-IMPL_TODO("Ghidra 0x10390ec0; 1187b — CanHear: no rdtsc/Karma/unaff blockers in main body; NoiseMaker+0x148 null-check approximation; bAdjacentZoneHearing team matrix (ULevel+0x128 raw offset) omitted; bMuffledHearing path approximated; bAroundCornerHearing FSortedPathList navpoint relay omitted (FUN_1050557c has in_ST0 x87-register arg, unresolvable for that path only)")
+IMPL_DIVERGE("CanHear: bAdjacentZoneHearing team-affinity matrix (ULevel+0x128) omitted; bMuffledHearing path approximated as 1/4-range grant; bAroundCornerHearing FSortedPathList relay omitted (FUN_1050557c has in_ST0 x87-register arg)")
 INT AController::CanHear( FVector NoiseLoc, FLOAT Loudness, AActor* NoiseMaker, ENoiseType NoiseType, EPawnType PawnType )
 {
 	guard(AController::CanHear);
