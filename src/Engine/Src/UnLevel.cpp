@@ -788,7 +788,7 @@ INT ULevel::MoveActor( AActor* Actor, FVector Delta, FRotator NewRotation, FChec
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103b93e0: 828 bytes; fully implemented from Ghidra analysis - IMPL_MATCH pending MoveActor stub completion")
+IMPL_MATCH("Engine.dll", 0x103b93e0)
 INT ULevel::FarMoveActor( AActor* Actor, FVector DestLocation, INT bTest, INT bNoCheck, INT bAttachedMove, INT bExtra )
 {
     guard(ULevel::FarMoveActor);
