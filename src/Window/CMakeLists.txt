@@ -19,7 +19,6 @@ if(SOURCE_COUNT GREATER 0)
     target_include_directories(Window BEFORE PRIVATE
         ${WINDOW_SRC_DIR}/Inc
         ${PROJECT_SOURCE_DIR}/src/Engine/Inc
-        ${PROJECT_SOURCE_DIR}/sdk/Ut99PubSrc/Window/Inc
     )
     target_link_libraries(Window
         Core_Dep Engine_Dep

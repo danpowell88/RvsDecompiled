@@ -186,7 +186,7 @@ void UFactory::Serialize( FArchive& Ar )
 }
 
 IMPL_MATCH("Core.dll", 0x10112520)
-UObject* UFactory::StaticImportObject( UClass* Class, UObject* InOuter, FName Name, DWORD Flags, const TCHAR* Filename, UObject* Context, UFactory* InFactory, const TCHAR* Parms, FFeedbackContext* Warn )
+UObject* UFactory::StaticImportObject( ULevel* Level, UClass* Class, UObject* InOuter, FName Name, DWORD Flags, const TCHAR* Filename, UObject* Context, UFactory* InFactory, const TCHAR* Parms, FFeedbackContext* Warn )
 {
 	guard(UFactory::StaticImportObject);
 	check(Class);
@@ -231,7 +231,7 @@ UObject* UFactory::StaticImportObject( UClass* Class, UObject* InOuter, FName Na
 		if( appLoadFileToString(Data, Filename) )
 		{
 			const TCHAR* Buffer = *Data;
-			return BestFactory->FactoryCreateText( Class, InOuter, Name, Flags, Context, Ext, Buffer, Buffer + Data.Len(), Warn );
+			return BestFactory->FactoryCreateText( Level, Class, InOuter, Name, Flags, Context, Ext, Buffer, Buffer + Data.Len(), Warn );
 		}
 	}
 	else
@@ -249,6 +249,13 @@ UObject* UFactory::StaticImportObject( UClass* Class, UObject* InOuter, FName Na
 }
 
 IMPLEMENT_CLASS(UFactory);
+
+// Ghidra 0x10102cb0 (5 bytes): base UFactory::FactoryCreateText(ULevel*, ...) returns NULL
+IMPL_MATCH("Core.dll", 0x10102cb0)
+UObject* UFactory::FactoryCreateText( ULevel* /*Level*/, UClass* /*Class*/, UObject* /*InParent*/, FName /*Name*/, DWORD /*Flags*/, UObject* /*Context*/, const TCHAR* /*Type*/, const TCHAR*& /*Buffer*/, const TCHAR* /*BufferEnd*/, FFeedbackContext* /*Warn*/ )
+{
+	return NULL;
+}
 
 /*-----------------------------------------------------------------------------
 	UObjectExporterT3D.

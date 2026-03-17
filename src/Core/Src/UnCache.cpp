@@ -299,5 +299,16 @@ FMemCache::FCacheItem* FMemCache::FlushItem( FCacheItem* Item, UBOOL IgnoreLocke
 }
 
 /*-----------------------------------------------------------------------------
+	FMemCache hash Ravenshield-specific formula.
+-----------------------------------------------------------------------------*/
+
+// GHash: Ghidra 0x10102df0 — Ravenshield uses a different hash formula than UT99
+IMPL_MATCH("Core.dll", 0x10102df0)
+DWORD FMemCache::GHash( DWORD Val )
+{
+	return ((Val >> 0xc ^ Val) >> 0xc ^ Val) & (HASH_COUNT-1);
+}
+
+/*-----------------------------------------------------------------------------
 	The End.
 -----------------------------------------------------------------------------*/

@@ -151,6 +151,8 @@ static FFileManagerWindows& GetLaunchFileManager()
 class FConfigCacheIniR6 : public FConfigCacheIni
 {
 public:
+	FString ServerIni;
+
 	// R6-specific virtual methods (slots 16-19 in FConfigCache vtable)
 	IMPL_DIVERGE("Reconstructed; no Ghidra match found")
 	void InitUser( const TCHAR* InProfilesPath, const TCHAR* InUserIni )
@@ -163,7 +165,10 @@ public:
 	void InitServer( const TCHAR* InServerIni )
 	{
 		if( InServerIni && *InServerIni )
+		{
+			ServerIni = InServerIni;
 			Find( InServerIni, 1 );
+		}
 	}
 	IMPL_DIVERGE("Reconstructed; no Ghidra match found")
 	FString& GetUserIni( FString& OutIni )

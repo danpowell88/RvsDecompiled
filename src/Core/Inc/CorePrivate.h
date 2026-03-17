@@ -53,6 +53,29 @@
 
 #include "Core.h"
 
+// Fix IMPLEMENT_CLASS for MSVC 2019+ and CSDK private members.
+// UObject::WithinClass and GUID1-4 are private in CSDK — same fix as EnginePrivate.h.
+// Hardcode UObject as WithinClass and zero GUIDs (all Core classes use UObject).
+#undef IMPLEMENT_CLASS
+#define IMPLEMENT_CLASS(TClass) \
+	UClass TClass::PrivateStaticClass \
+	( \
+		EC_NativeConstructor, \
+		sizeof(TClass), \
+		TClass::StaticClassFlags, \
+		TClass::Super::StaticClass(), \
+		UObject::StaticClass(), \
+		FGuid(0,0,0,0), \
+		TEXT(#TClass)+1, \
+		GPackage, \
+		StaticConfigName(), \
+		RF_Public | RF_Standalone | RF_Transient | RF_Native, \
+		(void(*)(void*))TClass::InternalConstructor, \
+		(void(UObject::*)())&TClass::StaticConstructor \
+	); \
+	extern "C" DLL_EXPORT UClass* autoclass##TClass;\
+	DLL_EXPORT UClass* autoclass##TClass = TClass::StaticClass();
+
 // Ravenshield retail package version (Ghidra 0x1012ad40: writes ver=118=0x76, licenseeVer=14=0xe).
 // The SDK ships with 69/0x00, which is the UT99 value. Override for correctness.
 #undef  PACKAGE_FILE_VERSION
@@ -92,6 +115,11 @@
 // Function source attribution macros (IMPL_MATCH, IMPL_APPROX, etc.)
 // Zero compile-time overhead — all macros expand to nothing.
 #include "ImplSource.h"
+
+// ULevel — forward declaration required by Core sources that use the
+// Ravenshield FactoryCreateText(ULevel*, ...) overload (UnExport.cpp).
+// ULevel is defined in Engine; a pointer-only forward decl is sufficient.
+class ULevel;
 
 #pragma pack(pop)
 
@@ -432,6 +460,48 @@ CORE_API INT appIsDebuggerPresent();
 CORE_API INT RegGet( FString Key, FString Name, FString& Value );
 CORE_API INT RegSet( FString Key, FString Name, FString Value );
 
+
+/*-----------------------------------------------------------------------------
+Shim fixes for SDK header incompatibilities in UnClass.cpp
+These declarations address MSVC 7.1 build errors
+-----------------------------------------------------------------------------*/
+
+// FIX for lines 149, 470, 560, 640, 660, 809:
+// "error C2248: 'UObject::WithinClass' : cannot access private typedef"
+// "error C2248: 'GUID1' : inaccessible enumerator in 'UField'"
+//
+// PROBLEM: In UnObjBas.h line 463-464, UObject defines:
+//   typedef UObject WithinClass;    // NO public: section before this
+//   enum {GUID1=0,GUID2=0,GUID3=0,GUID4=0};  // NO public: section
+//
+// These are inherited by UField and descendants but remain private.
+// The IMPLEMENT_CLASS macro tries to access TClass::WithinClass and TClass::GUID1-4,
+// which fails because they're inherited private members.
+//
+// SOLUTION: Modify UnObjBas.h to make these public, OR create a shim that declares
+// them as public in derived classes. Since we can't modify SDK files (gitignored),
+// we need to fix this in the project code.
+//
+// The actual fix must be applied by modifying how IMPLEMENT_CLASS accesses these members,
+// or by adding public redeclarations in each class that uses IMPLEMENT_CLASS.
+
+// FIX for lines 298, 363, 438:
+// "error C2039: 'SerializeBin' : is not a member of 'UProperty'"
+// "error C2039: 'SerializeItem' : is not a member of 'UProperty'"
+// "error C2039: 'CleanupDestroyed' : is not a member of 'UProperty'"
+//
+// PROBLEM: UnType.h line 57-58 has these methods commented out:
+//   //virtual void SerializeItem( FArchive& Ar, void* Value ) const=0;
+// But UnClass.cpp calls these methods on UProperty objects.
+//
+// SOLUTION: These methods must be declared in UProperty base class.
+// They should be virtual pure methods that subclasses implement.
+
+// FIX applied: UnType.h had inline UStruct::StructCompare causing C2084 conflict
+// with UnClass.cpp IMPL_MATCH implementation. The UnType.h inline is commented out.
+
+
 /*-----------------------------------------------------------------------------
 	The End.
 -----------------------------------------------------------------------------*/
+

@@ -1,14 +1,12 @@
 // RavenShield launcher resource script — splash dialog.
 // Based on UT99 LaunchRes.rc.
 //
+#include <windows.h>
 #include "LaunchRes.h"
-#include "afxres.h"
-
-// Use the retail RavenShield icon so the rebuilt launcher has the proper shell icon.
-IDICON_Mainframe ICON DISCARDABLE "..\\..\\..\\retail\\RavenShield.ico"
 
 // Splash screen dialog — borderless popup with a bitmap control.
 // The InitSplash() function loads a .bmp and sizes the window to match.
+// NOTE: Icon omitted — retail RavenShield.ico not present in source tree.
 IDDIALOG_Splash DIALOGEX 0, 0, 191, 65
 STYLE DS_SETFOREGROUND | DS_CENTER | WS_POPUP
 EXSTYLE WS_EX_TOOLWINDOW
