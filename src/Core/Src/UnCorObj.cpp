@@ -140,15 +140,8 @@ UCommandlet::UCommandlet()
 	unguard;
 }
 
-IMPL_MATCH("Core.dll", 0x1010bf20)
-UCommandlet::~UCommandlet()
-{
-	guard(UCommandlet::~UCommandlet);
-	// Ghidra 0x1010bf20: explicitly calls ConditionalDestroy; compiler handles
-	// member FString destructors and the UObject base destructor.
-	ConditionalDestroy();
-	unguard;
-}
+// UCommandlet::~UCommandlet (Ghidra 0x1010bf20): calls ConditionalDestroy() then
+// compiler-emitted member/base destructors.  Provided inline by DECLARE_CLASS.
 
 IMPL_MATCH("Core.dll", 0x1013AFF0)
 INT UCommandlet::Main( const TCHAR* Parms )

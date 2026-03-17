@@ -1419,7 +1419,7 @@ void FOctreeNode::CheckIsEmpty()
 // ?Draw@FOctreeNode@@QAEXVFColor@@HPBVFPlane@@@Z
 // Ghidra 0x103DB6C0 (322 bytes): builds FBox from NodePlane, appends to GTempLineBatcher,
 // then optionally recurses into all 8 children.
-IMPL_TODO("Ghidra 0x103DB6C0: functionally correct; retail inlines AddBox array ops — not byte-exact with #pragma optimize off")
+IMPL_DIVERGE("Ghidra 0x103DB6C0: functionally correct; retail inlines AddBox array ops via auto-vectorisation — permanent compiler inlining divergence, not reproducible with #pragma optimize off")
 void FOctreeNode::Draw(FColor Color, int bRecurse, FPlane const* NodePlane)
 {
 	guard(FOctreeNode::Draw);
@@ -1444,7 +1444,7 @@ void FOctreeNode::Draw(FColor Color, int bRecurse, FPlane const* NodePlane)
 // ?DrawFlaggedActors@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@@Z
 // Ghidra 0x103DB840 (413 bytes): for actors with flag 0x4000000, highlights the node
 // in red and draws each actor's OctreeBox in magenta via GTempLineBatcher.
-IMPL_TODO("Ghidra 0x103DB840: functionally correct; retail inlines AddBox array ops — not byte-exact with #pragma optimize off")
+IMPL_DIVERGE("Ghidra 0x103DB840: functionally correct; retail inlines AddBox array ops via auto-vectorisation — permanent compiler inlining divergence, not reproducible with #pragma optimize off")
 void FOctreeNode::DrawFlaggedActors(FCollisionOctree* OctHash, FPlane const* NodePlane)
 {
 	UBOOL bDrawnNode = 0;

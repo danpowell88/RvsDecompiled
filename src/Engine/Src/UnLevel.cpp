@@ -788,31 +788,152 @@ INT ULevel::MoveActor( AActor* Actor, FVector Delta, FRotator NewRotation, FChec
 	unguard;
 }
 
-IMPL_TODO("828-byte ULevel::FarMoveActor; no permanent blockers (no DATs/FUNs in function body); tractable. Ghidra 0x103b93e0")
+IMPL_TODO("Ghidra 0x103b93e0: 828 bytes; fully implemented from Ghidra analysis - IMPL_MATCH pending MoveActor stub completion")
 INT ULevel::FarMoveActor( AActor* Actor, FVector DestLocation, INT bTest, INT bNoCheck, INT bAttachedMove, INT bExtra )
 {
-	guard(ULevel::FarMoveActor);
-	if ( !Actor )
-		appFailAssert("Actor!=NULL", ".\\UnLevAct.cpp", 0x49f);
-	// bStatic or not bMovable — cannot move in non-editor mode
-	if ( ((*(BYTE*)((BYTE*)Actor + 0xa0) & 1) != 0
-		  || (*(DWORD*)((BYTE*)Actor + 0xa8) & 0x20) == 0)
-		 && !GIsEditor )
-	{
-		return 0;
-	}
-	FCollisionHashBase* hash = *(FCollisionHashBase**)((BYTE*)this + 0xf0);
-	// Remove from hash before move
-	if ( (*(DWORD*)((BYTE*)Actor + 0xa8) & 0x800) && hash )
-		hash->RemoveActor(Actor);
-	// TODO: implement full FarMoveActor sweep and blocked-movement logic
-	// Re-add to hash after move
-	if ( (*(DWORD*)((BYTE*)Actor + 0xa8) & 0x800) && hash )
-		hash->AddActor(Actor);
-	return 1;
-	unguard;
-}
+    guard(ULevel::FarMoveActor);
 
+    if ( !Actor )
+        appFailAssert("Actor!=NULL", ".\\UnLevAct.cpp", 0x49f);
+
+    // bStatic (offset 0xa0 bit 0) or not bMovable (offset 0xa8 bit 5 = 0x20) - can't move outside editor
+    if ( ((*(BYTE*)((BYTE*)Actor + 0xa0) & 1) != 0 || (*(DWORD*)((BYTE*)Actor + 0xa8) & 0x20) == 0) && !GIsEditor )
+        return 0;
+
+    FCollisionHashBase* hash = *(FCollisionHashBase**)((BYTE*)this + 0xf0);
+
+    // Remove actor from collision hash before repositioning (bCollideWorld = 0xa8 & 0x800)
+    if ( (*(DWORD*)((BYTE*)Actor + 0xa8) & 0x800) != 0 && hash != NULL )
+        hash->RemoveActor(Actor);
+
+    FLOAT localX = DestLocation.X;
+    FLOAT localY = DestLocation.Y;
+    FLOAT localZ = DestLocation.Z;
+    INT result = 1;
+
+    // do-while(0) used as a structured-goto: break exits to the hash re-add block
+    do
+    {
+        if ( bNoCheck == 0 )
+        {
+            DWORD flags2 = *(DWORD*)((BYTE*)Actor + 0xa8);
+            // FindSpot if bInterpolating (0x1000), OR if bOwned (0x8) AND NOT on NM_Client
+            UBOOL doFindSpot = (flags2 & 0x1000) != 0;
+            if ( !doFindSpot && (flags2 & 8) != 0 )
+            {
+                ALevelInfo* li = GetLevelInfo();
+                // offset 0x425 = NetMode byte; 3 == NM_Client; skip FindSpot on client
+                if ( *(BYTE*)((BYTE*)li + 0x425) != 3 )
+                    doFindSpot = 1;
+            }
+            if ( doFindSpot )
+            {
+                // Extent = (CollisionRadius, CollisionRadius, CollisionHeight)
+                FVector extent(
+                    *(FLOAT*)((BYTE*)Actor + 0xf8),
+                    *(FLOAT*)((BYTE*)Actor + 0xf8),
+                    *(FLOAT*)((BYTE*)Actor + 0xfc)
+                );
+                FVector dest(localX, localY, localZ);
+                result = FindSpot(extent, dest, 0, Actor);
+                localX = dest.X; localY = dest.Y; localZ = dest.Z;
+
+                if ( bExtra )
+                {
+                    if ( !result ) break;
+                    // If FindSpot moved the destination, reject the teleport
+                    if ( dest != DestLocation ) { result = 0; break; }
+                }
+                if ( !result ) break;
+            }
+        }
+
+        // Perform the actual sweep move when not testing and not skipping collision
+        if ( bTest == 0 && bNoCheck == 0 )
+        {
+            FCheckResult hit;
+            FVector delta(
+                localX - *(FLOAT*)((BYTE*)Actor + 0x234),
+                localY - *(FLOAT*)((BYTE*)Actor + 0x238),
+                localZ - *(FLOAT*)((BYTE*)Actor + 0x23c)
+            );
+            FRotator rot(
+                *(INT*)((BYTE*)Actor + 0x240),
+                *(INT*)((BYTE*)Actor + 0x244),
+                *(INT*)((BYTE*)Actor + 0x248)
+            );
+            // MoveActor returns 0 when unblocked, non-zero when blocked
+            INT moved = MoveActor(Actor, delta, rot, hit, 0, 0, 0, 1, 0);
+            result = (moved == 0) ? 1 : 0;
+        }
+
+        if ( result != 0 )
+        {
+            if ( bTest == 0 )
+            {
+                // Set bTeleportedFwd flag (offset 0xac bit 3)
+                *(DWORD*)((BYTE*)Actor + 0xac) |= 8;
+
+                // If not an attached-move, detach actor from its base first
+                if ( bAttachedMove == 0 )
+                    Actor->SetBase(NULL, FVector(0.0f, 0.0f, 1.0f), 1);
+
+                // Recursively FarMoveActor all actors attached to this one
+                // Attached TArray<AActor*> at offset 0x1d4: Data @ +0, Num @ +4
+                INT numAttached = *(INT*)((BYTE*)Actor + 0x1d8);
+                for ( INT i = 0; i < numAttached; i++ )
+                {
+                    AActor* att = *(AActor**)(*(INT*)((BYTE*)Actor + 0x1d4) + i * 4);
+                    if ( att )
+                    {
+                        FarMoveActor(att,
+                            FVector(
+                                localX + *(FLOAT*)((BYTE*)att + 0x234) - *(FLOAT*)((BYTE*)Actor + 0x234),
+                                localY + *(FLOAT*)((BYTE*)att + 0x238) - *(FLOAT*)((BYTE*)Actor + 0x238),
+                                localZ + *(FLOAT*)((BYTE*)att + 0x23c) - *(FLOAT*)((BYTE*)Actor + 0x23c)
+                            ),
+                            0, bNoCheck, 1, 0);
+                    }
+                }
+            }
+
+            // If Touching array (0x338) is non-empty, remove from hash before updating location
+            // Touching TArray<AActor*> at 0x338: Data @ +0, Num @ +4
+            if ( *(INT*)((BYTE*)Actor + 0x33c) > 0 )
+            {
+                FCollisionHashBase* hash2 = *(FCollisionHashBase**)((BYTE*)this + 0xf0);
+                if ( hash2 )
+                    hash2->RemoveActor(Actor);
+            }
+
+            // Commit the new location
+            *(FLOAT*)((BYTE*)Actor + 0x234) = localX;
+            *(FLOAT*)((BYTE*)Actor + 0x238) = localY;
+            *(FLOAT*)((BYTE*)Actor + 0x23c) = localZ;
+        }
+    }
+    while (0);
+
+    // Always re-add to collision hash (whether success or blocked)
+    hash = *(FCollisionHashBase**)((BYTE*)this + 0xf0);
+    if ( (*(DWORD*)((BYTE*)Actor + 0xa8) & 0x800) != 0 && hash != NULL )
+        hash->AddActor(Actor);
+
+    // PostTeleport callback - AActor vtable slot 0x10c, args: (bTest, 0)
+    if ( result != 0 )
+    {
+        typedef void (__thiscall *tPostTeleport)(AActor*, INT, INT);
+        tPostTeleport pfPT = (tPostTeleport)(*(INT*)(*(INT*)Actor + 0x10c));
+        pfPT(Actor, bTest, 0);
+    }
+
+    // Update render state (skip when just probing with bTest)
+    if ( bTest == 0 )
+        Actor->UpdateRenderData();
+
+    return result;
+    unguard;
+}
 IMPL_DIVERGE("Touch notifications and network destruction check (FUN_103b7b70) diverge from retail. Ghidra 0x103b8200")
 INT ULevel::DestroyActor( AActor* Actor, INT bNetForce )
 {
@@ -1999,7 +2120,7 @@ INT ULevel::ToFloor( AActor* Actor, INT bTest, AActor* IgnoreActor )
 	if ( Extent.IsZero() && Actor->DrawType == DT_StaticMesh && Prim )
 	{
 		FBox Box = Prim->GetCollisionBoundingBox(Actor);
-		FVector HalfExt = Box.GetExtent();
+		FVector HalfExt = (Box.Max - Box.Min) * 0.5f;
 		Extent.X = Extent.Y = HalfExt.X;
 		Extent.Z = HalfExt.Z;
 	}

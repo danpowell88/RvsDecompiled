@@ -5,6 +5,9 @@
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
 
+// Define this before CorePrivate.h so FCodec.h emits the FCodecBWT static
+// member definitions in exactly one translation unit (this one).
+#define FCODEC_IMPLEMENT_STATICS
 #include "CorePrivate.h"
 
 /*-----------------------------------------------------------------------------

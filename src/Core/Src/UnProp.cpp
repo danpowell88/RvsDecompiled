@@ -198,7 +198,7 @@ void UProperty::ExportCpp( FOutputDevice& Out, UBOOL IsLocal, UBOOL IsParm ) con
 			}
 		}
 	}
-	ExportCppItem( Out );
+	ExportCppItem( Out, 0 );
 	if( ArrayDim != 1 )
 	{
 		TCHAR Buf[32];

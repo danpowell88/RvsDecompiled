@@ -136,5 +136,59 @@ void FFrame::Serialize( const TCHAR* V, EName Event )
 }
 
 /*-----------------------------------------------------------------------------
+	FArchive Ravenshield additions.
+-----------------------------------------------------------------------------*/
+
+// IsCriticalError: Ghidra 0x10101580 (4 bytes): returns ArIsCriticalError at this+0x34
+IMPL_MATCH("Core.dll", 0x10101580)
+INT FArchive::IsCriticalError()
+{
+	return ArIsCriticalError;
+}
+
+/*-----------------------------------------------------------------------------
+	FFeedbackContext Ravenshield MapCheck methods.
+-----------------------------------------------------------------------------*/
+
+// All MapCheck base-class methods are trivial no-ops in Core.dll.
+// MapCheck_Add: Ghidra 0x10101330 (3 bytes — ret only)
+IMPL_EMPTY("Ghidra 0x10101330: 3-byte trivial no-op")
+void FFeedbackContext::MapCheck_Add( INT Type, void* Obj, const TCHAR* Msg )
+{
+}
+
+// MapCheck_Clear/Hide/Show/ShowConditionally: Ghidra 0x10101320 (1 byte — ret only)
+IMPL_EMPTY("Ghidra 0x10101320: 1-byte trivial no-op")
+void FFeedbackContext::MapCheck_Clear()
+{
+}
+
+IMPL_EMPTY("Ghidra 0x10101320: 1-byte trivial no-op (shared stub)")
+void FFeedbackContext::MapCheck_Hide()
+{
+}
+
+IMPL_EMPTY("Ghidra 0x10101320: 1-byte trivial no-op (shared stub)")
+void FFeedbackContext::MapCheck_Show()
+{
+}
+
+IMPL_EMPTY("Ghidra 0x10101320: 1-byte trivial no-op (shared stub)")
+void FFeedbackContext::MapCheck_ShowConditionally()
+{
+}
+
+/*-----------------------------------------------------------------------------
+	FMalloc Ravenshield additions.
+-----------------------------------------------------------------------------*/
+
+// GetMemoryBlockSize: Ghidra 0x10101c70 (shared thunk with FUnknown::Release — returns 0)
+IMPL_EMPTY("Ghidra 0x10101c70: shared trivial stub that returns 0")
+INT FMalloc::GetMemoryBlockSize( void* Original )
+{
+	return 0;
+}
+
+/*-----------------------------------------------------------------------------
 	The End.
 -----------------------------------------------------------------------------*/

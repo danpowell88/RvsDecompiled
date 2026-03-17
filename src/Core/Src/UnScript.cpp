@@ -3476,7 +3476,7 @@ IMPL_MATCH("Core.dll", 0x101261D0)
 void UObject::execResetConfig( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execResetConfig);
-	ResetConfig( GetClass() );
+	ResetConfig( GetClass(), NULL, 0 );
 	unguardexecSlow;
 }
 IMPLEMENT_FUNCTION( UObject, 0, execResetConfig );

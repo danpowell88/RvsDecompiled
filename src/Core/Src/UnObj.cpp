@@ -857,79 +857,8 @@ void UObject::StaticShutdownAfterError()
 	unguard;
 }
 
-IMPL_MATCH("Core.dll", 0x1013DCC0)
-INT UObject::StaticExec( const TCHAR* Cmd, FOutputDevice& Ar )
-{
-	guard(UObject::StaticExec);
-
-	const TCHAR* Str = Cmd;
-	if( ParseCommand(&Str, TEXT("OBJ")) )
-	{
-		if( ParseCommand(&Str, TEXT("GC")) || ParseCommand(&Str, TEXT("GARBAGE")) )
-		{
-			// Force a full garbage collect.
-			CollectGarbage( RF_Native );
-			Ar.Log( TEXT("Garbage collected.") );
-			return 1;
-		}
-		if( ParseCommand(&Str, TEXT("LIST")) )
-		{
-			// List all objects of an optional class.
-			TCHAR ClassName[64]; ClassName[0] = 0;
-			Parse( Str, TEXT("CLASS="), ClassName, ARRAY_COUNT(ClassName) );
-			UClass* FilterClass = ClassName[0] ? (UClass*)StaticFindObject(UClass::StaticClass(), ANY_PACKAGE, ClassName, 0) : NULL;
-			INT Count = 0;
-			for( FObjectIterator It; It; ++It )
-			{
-				if( !FilterClass || It->IsA(FilterClass) )
-				{
-					Ar.Logf( TEXT("%s"), It->GetFullName() );
-					Count++;
-				}
-			}
-			Ar.Logf( TEXT("%i object(s)"), Count );
-			return 1;
-		}
-		if( ParseCommand(&Str, TEXT("DUMP")) )
-		{
-			TCHAR ObjName[256]; ObjName[0] = 0;
-			Parse( Str, TEXT("NAME="), ObjName, ARRAY_COUNT(ObjName) );
-			if( ObjName[0] )
-			{
-				UObject* Obj = StaticFindObject( NULL, ANY_PACKAGE, ObjName, 0 );
-				if( Obj )
-					ExportProperties( Ar, Obj->GetClass(), (BYTE*)Obj, 0, NULL, NULL );
-			}
-			return 1;
-		}
-		if( ParseCommand(&Str, TEXT("HASH")) )
-		{
-			// Dump hash bucket statistics.
-			INT MaxChain = 0, Total = 0;
-			for( INT i=0; i<ARRAY_COUNT(GObjHash); i++ )
-			{
-				INT Chain = 0;
-				for( UObject* H=GObjHash[i]; H; H=H->HashNext )
-					Chain++;
-				if( Chain > MaxChain ) MaxChain = Chain;
-				Total += Chain;
-			}
-			Ar.Logf( TEXT("Hash: %i objects, max chain %i"), Total, MaxChain );
-			return 1;
-		}
-		if( ParseCommand(&Str, TEXT("LINKERS")) )
-		{
-			Ar.Logf( TEXT("Linkers: %i"), GObjLoaders.Num() );
-			for( INT i=0; i<GObjLoaders.Num(); i++ )
-				Ar.Logf( TEXT("  %s"), GObjLoaders(i)->GetFullName() );
-			return 1;
-		}
-	}
-	return 0;
-	unguard;
-}
-
 // StaticConfigName() defined inline in UObject class header.
+// StaticExec full implementation is at the bottom of this file (3-param exported version).
 
 IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10136EF0 size 6 bytes")
 INT UObject::GetInitialized()
@@ -2339,25 +2268,73 @@ UObject* UObject::StaticConstructObject( UClass* Class, UObject* InOuter, FName 
 IMPL_MATCH("Core.dll", 0x1013DCC0)
 INT UObject::StaticExec( const TCHAR* Cmd, FOutputDevice& Ar, INT bShowHelp )
 {
-	return StaticExec( Cmd, Ar );
+	guard(UObject::StaticExec);
+
+	const TCHAR* Str = Cmd;
+	if( ParseCommand(&Str, TEXT("OBJ")) )
+	{
+		if( ParseCommand(&Str, TEXT("GC")) || ParseCommand(&Str, TEXT("GARBAGE")) )
+		{
+			CollectGarbage( RF_Native );
+			Ar.Log( TEXT("Garbage collected.") );
+			return 1;
+		}
+		if( ParseCommand(&Str, TEXT("LIST")) )
+		{
+			TCHAR ClassName[64]; ClassName[0] = 0;
+			Parse( Str, TEXT("CLASS="), ClassName, ARRAY_COUNT(ClassName) );
+			UClass* FilterClass = ClassName[0] ? (UClass*)StaticFindObject(UClass::StaticClass(), ANY_PACKAGE, ClassName, 0) : NULL;
+			INT Count = 0;
+			for( FObjectIterator It; It; ++It )
+			{
+				if( !FilterClass || It->IsA(FilterClass) )
+				{
+					Ar.Logf( TEXT("%s"), It->GetFullName() );
+					Count++;
+				}
+			}
+			Ar.Logf( TEXT("%i object(s)"), Count );
+			return 1;
+		}
+		if( ParseCommand(&Str, TEXT("DUMP")) )
+		{
+			TCHAR ObjName[256]; ObjName[0] = 0;
+			Parse( Str, TEXT("NAME="), ObjName, ARRAY_COUNT(ObjName) );
+			if( ObjName[0] )
+			{
+				UObject* Obj = StaticFindObject( NULL, ANY_PACKAGE, ObjName, 0 );
+				if( Obj )
+					ExportProperties( Ar, Obj->GetClass(), (BYTE*)Obj, 0, NULL, NULL );
+			}
+			return 1;
+		}
+		if( ParseCommand(&Str, TEXT("HASH")) )
+		{
+			INT MaxChain = 0, Total = 0;
+			for( INT i=0; i<ARRAY_COUNT(GObjHash); i++ )
+			{
+				INT Chain = 0;
+				for( UObject* H=GObjHash[i]; H; H=H->HashNext )
+					Chain++;
+				if( Chain > MaxChain ) MaxChain = Chain;
+				Total += Chain;
+			}
+			Ar.Logf( TEXT("Hash: %i objects, max chain %i"), Total, MaxChain );
+			return 1;
+		}
+		if( ParseCommand(&Str, TEXT("LINKERS")) )
+		{
+			Ar.Logf( TEXT("Linkers: %i"), GObjLoaders.Num() );
+			for( INT i=0; i<GObjLoaders.Num(); i++ )
+				Ar.Logf( TEXT("  %s"), GObjLoaders(i)->GetFullName() );
+			return 1;
+		}
+	}
+	return 0;
+	unguard;
 }
 
-/*-----------------------------------------------------------------------------
-	UFactory Ravenshield overloads with ULevel* parameter.
-	Delegates to base version ignoring ULevel*.
------------------------------------------------------------------------------*/
-
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10102CB0 size 5 bytes")
-UObject* UFactory::FactoryCreateText( ULevel* Level, UClass* Class, UObject* InParent, FName Name, DWORD Flags, UObject* Context, const TCHAR* Type, const TCHAR*& Buffer, const TCHAR* BufferEnd, FFeedbackContext* Warn )
-{
-	return FactoryCreateText( Class, InParent, Name, Flags, Context, Type, Buffer, BufferEnd, Warn );
-}
-
-IMPL_MATCH("Core.dll", 0x10112520)
-UObject* UFactory::StaticImportObject( ULevel* Level, UClass* Class, UObject* InOuter, FName Name, DWORD Flags, const TCHAR* Filename, UObject* Context, UFactory* Factory, const TCHAR* Parms, FFeedbackContext* Warn )
-{
-	return StaticImportObject( Class, InOuter, Name, Flags, Filename, Context, Factory, Parms, Warn );
-}
+// StaticImportObject(ULevel*, ...) implementation lives in UnExport.cpp
 
 IMPL_MATCH("Core.dll", 0x1013D4B0)
 INT UObject::ResolveName( UObject*& InPackage, const TCHAR*& InName, INT Create, INT Throw )

@@ -37,7 +37,7 @@ if(SOURCE_COUNT GREATER 0)
         ${LAUNCH_SRC_DIR}/Inc
         ${LAUNCH_SRC_DIR}/Src
         ${PROJECT_SOURCE_DIR}/src/Engine/Inc
-        ${PROJECT_SOURCE_DIR}/sdk/Ut99PubSrc/Window/Inc
+        ${PROJECT_SOURCE_DIR}/src/Window/Inc
     )
 
     target_link_libraries(RavenShield

@@ -1956,6 +1956,13 @@ CORE_API void* appCreateProc( const TCHAR* URL, const TCHAR* Parms )
 	return appCreateProc( URL, Parms, 0 );
 }
 
+// 5-param Localize: internal wrapper; not in Core.def.
+// UnFile.h declares it with Optional=0 default so callers with 4 args resolve here.
+const TCHAR* Localize( const TCHAR* Section, const TCHAR* Key, const TCHAR* Package, const TCHAR* LangExt, UBOOL Optional )
+{
+	return Localize( Section, Key, Package, LangExt, Optional, 0 );
+}
+
 /*-----------------------------------------------------------------------------
 	The End.
 -----------------------------------------------------------------------------*/
