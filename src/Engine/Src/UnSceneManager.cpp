@@ -1085,15 +1085,14 @@ void ASceneManager::SetSceneStartTime()
 
 // =============================================================================
 // --- AInterpolationPoint ---
-IMPL_TODO("Ghidra 0x1040ba00: algorithm reconstructed — wireframe box with 8 vertices and 12 edges. XAxis forward-offset scalar in FVector::operator* calls is obscured by Ghidra hidden-return-pointer confusion; currently using 0.0f (vertices at Location). Needs disassembly verification of the FPU scalar parameter.")
+IMPL_MATCH("Engine.dll", 0x1040ba00)
 void AInterpolationPoint::RenderEditorSelected(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
 	guard(AInterpolationPoint::RenderEditorSelected);
-	// Retail 0x1040ba00 (2837 bytes, ordinal 4303): draws a wireframe double-box
-	// around this interpolation point.  Decomposes Rotation into coordinate axes,
-	// computes 4 inner vertices (32-unit scale) and 4 outer vertices (64-unit scale)
-	// from SafeNormal'd combinations of +/-YAxis +/-ZAxis, draws 12 edges
-	// (inner face, outer face, 4 connecting) via FLineBatcher::DrawLine with white.
+	// Retail 0x1040ba00 (2837 bytes, ordinal 4303): draws an editor-only wireframe
+	// frustum in front of the interpolation point.  The near face sits 24 units
+	// down the local X axis with 32-unit half-extent; the far face sits 128 units
+	// down local X with 64-unit half-extent.
 
 	FLineBatcher Lines(RI, 1, 0);
 
@@ -1102,25 +1101,23 @@ void AInterpolationPoint::RenderEditorSelected(FLevelSceneNode* SceneNode, FRend
 	FVector YAxis = Coords.YAxis;
 	FVector ZAxis = Coords.ZAxis;
 	FVector NegY  = FVector(-YAxis.X, -YAxis.Y, -YAxis.Z);
+	FVector NegZ  = FVector(-ZAxis.X, -ZAxis.Y, -ZAxis.Z);
+	FVector NearCenter = Location + XAxis * 24.0f;
+	FVector FarCenter  = Location + XAxis * 128.0f;
 
-	// Corner directions: ±ZAxis ± YAxis
-	FVector Dir0 = FVector(ZAxis.X + NegY.X, ZAxis.Y + NegY.Y, ZAxis.Z + NegY.Z);  // Z - Y
-	FVector Dir1 = FVector(ZAxis.X - NegY.X, ZAxis.Y - NegY.Y, ZAxis.Z - NegY.Z);  // Z + Y
-	FVector NegZ = FVector(-ZAxis.X, -ZAxis.Y, -ZAxis.Z);
-	FVector Dir2 = FVector(NegZ.X - NegY.X, NegZ.Y - NegY.Y, NegZ.Z - NegY.Z);    // -Z + Y
-	FVector Dir3 = FVector(NegZ.X + NegY.X, NegZ.Y + NegY.Y, NegZ.Z + NegY.Z);    // -Z - Y
+	FVector Dir0 = (ZAxis + NegY).SafeNormal(); // Z - Y
+	FVector Dir1 = (ZAxis - NegY).SafeNormal(); // Z + Y
+	FVector Dir2 = (NegZ - NegY).SafeNormal();  // -Z + Y
+	FVector Dir3 = (NegZ + NegY).SafeNormal();  // -Z - Y
 
-	// 4 inner vertices at 32-unit perpendicular offset from Location
-	FVector V0 = Location + Dir0.SafeNormal() * 32.0f;
-	FVector V1 = Location + Dir1.SafeNormal() * 32.0f;
-	FVector V2 = Location + Dir2.SafeNormal() * 32.0f;
-	FVector V3 = Location + Dir3.SafeNormal() * 32.0f;
-
-	// 4 outer vertices at 64-unit perpendicular offset from Location
-	FVector V4 = Location + Dir0.SafeNormal() * 64.0f;
-	FVector V5 = Location + Dir1.SafeNormal() * 64.0f;
-	FVector V6 = Location + Dir2.SafeNormal() * 64.0f;
-	FVector V7 = Location + Dir3.SafeNormal() * 64.0f;
+	FVector V0 = NearCenter + Dir0 * 32.0f;
+	FVector V1 = NearCenter + Dir1 * 32.0f;
+	FVector V2 = NearCenter + Dir2 * 32.0f;
+	FVector V3 = NearCenter + Dir3 * 32.0f;
+	FVector V4 = FarCenter + Dir0 * 64.0f;
+	FVector V5 = FarCenter + Dir1 * 64.0f;
+	FVector V6 = FarCenter + Dir2 * 64.0f;
+	FVector V7 = FarCenter + Dir3 * 64.0f;
 
 	FColor White(0xFFFFFFFF);
 
