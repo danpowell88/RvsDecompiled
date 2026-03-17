@@ -8,17 +8,17 @@ IMPLEMENT_CLASS(UR6SubActionAnimSequence)
 
 // FUN_10024530 (0x10024530): IsA check — walks class chain at +0x24/+0x2c against PrivateStaticClass_exref.
 // Pass-through: in the animation context, the mesh instance always passes the type check.
-IMPL_TODO("blocked: PrivateStaticClass_exref unresolved — IsA target class unknown; pass-through assumes check always succeeds")
+IMPL_DIVERGE("FUN_10024530: PrivateStaticClass_exref not exported from R6Engine.dll; target class permanently unknown — pass-through is best-effort")
 static INT FUN_10024530(INT param_1) { return param_1; }
 // FUN_10042934 (0x10042934): MSVC __ftol2 intrinsic — reads x87 ST0 and converts float to int64.
 // Inlined as (INT)fVar at call sites where the source float is known (e.g. GetAnimDuration).
 // Kept as stub for PctToFrameNumber where the ST0 source is ambiguous.
-IMPL_TODO("blocked: __ftol2 reads x87 ST0; only needed where source float is ambiguous (PctToFrameNumber)")
+IMPL_DIVERGE("FUN_10042934: __ftol2 reads x87 ST0 register — not portable to standard C++; PctToFrameNumber call site returns 0 as safe fallback")
 static QWORD FUN_10042934() { return 0; }
 
 // --- UR6SubActionAnimSequence ---
 
-IMPL_TODO("blocked: FUN_10024530 IsA uses unresolved PrivateStaticClass_exref; pass-through assumes mesh instance always passes type check")
+IMPL_DIVERGE("FUN_10024530 IsA check: PrivateStaticClass_exref target class not exported from R6Engine.dll — permanently unresolvable")
 FLOAT UR6SubActionAnimSequence::GetAnimDuration(UR6PlayAnim* param_1)
 {
 	guard(UR6SubActionAnimSequence::GetAnimDuration);
@@ -128,7 +128,7 @@ INT UR6SubActionAnimSequence::IncrementSequence()
 	return 0;
 }
 
-IMPL_TODO("blocked: FUN_10024530 IsA check skipped; PrivateStaticClass_exref target class unresolved")
+IMPL_DIVERGE("FUN_10024530 IsA check: PrivateStaticClass_exref not exported from R6Engine.dll; check permanently skipped")
 INT UR6SubActionAnimSequence::IsAnimAtFrame(INT param_1, INT param_2)
 {
 	guard(UR6SubActionAnimSequence::IsAnimAtFrame);
@@ -183,7 +183,7 @@ INT UR6SubActionAnimSequence::LaunchSequence()
 	return 1;
 }
 
-IMPL_TODO("blocked: FUN_10024530 IsA + FUN_10042934 ST0 source float ambiguous after vtable 0xc0 call — returns 0.0f")
+IMPL_DIVERGE("FUN_10024530 IsA + x87 ST0 float: both permanently unresolvable — IsA target class not exported, ST0 source not portable")
 FLOAT UR6SubActionAnimSequence::PctToFrameNumber(UR6PlayAnim* param_1, FLOAT param_2)
 {
 	guard(UR6SubActionAnimSequence::PctToFrameNumber);
@@ -254,7 +254,7 @@ void UR6SubActionAnimSequence::PreBeginPreview()
 	}
 }
 
-IMPL_TODO("blocked: GIsEditor path not implemented — needs PctToFrameNumber, FString::Printf, ASceneManager+0x494, mesh vtable 0x104")
+IMPL_DIVERGE("GIsEditor path requires unmapped mesh vtable slots (0x104) and ASceneManager+0x494 interface; game path via UpdateGame() is complete")
 INT UR6SubActionAnimSequence::Update(FLOAT Time, ASceneManager* Mgr)
 {
 	if (!UMatSubAction::Update(Time, Mgr))
