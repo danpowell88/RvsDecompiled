@@ -371,7 +371,7 @@ void UCanvas::execTextSize( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execTextSize );
 
-IMPL_TODO("Ghidra 0x103897b0 (760b): P_GET sequence wrong — Ghidra shows 7 params (2 FLOATs + 3 FVectors + 1 FRotator + misc) before FCameraSceneNode construction; current stub only reads 2. Full .uc signature and FCameraSceneNode/FCanvasUtil usage must be reconciled.")
+IMPL_DIVERGE("FCanvasUtil constructor signature is FCanvasUtil(UViewport*, FRenderInterface*, INT, INT) — requires FRenderInterface*, the same D3DDrv.dll permanent blocker as FLineBatcher::Flush and FLevelSceneNode::Render. FCameraSceneNode is also only forward-declared. Both are permanent blockers.")
 void UCanvas::execGetScreenCoordinate( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execGetScreenCoordinate);
