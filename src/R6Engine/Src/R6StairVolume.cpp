@@ -8,16 +8,10 @@ IMPLEMENT_CLASS(AR6StairVolume)
 
 // --- AR6StairVolume ---
 
-IMPL_TODO("~800 byte function; trace-based stair direction detection, StaticFindObjectChecked class lookup, SpawnActor marker placement with NAN guard patterns")
+IMPL_DIVERGE("Ghidra 0x1003b210 (2458b): calls UObject::IsA(param_1, (UClass*)PrivateStaticClass_exref) and StaticFindObjectChecked((UClass*)PrivateStaticClass_exref, ANY, L\"R6Stairs\") — PrivateStaticClass_exref is the R6Stairs actor class defined in R6GameCode.dll, which is not part of this rebuild. Note: function is 2458 bytes, not ~800b as the original TODO stated.")
 void AR6StairVolume::AddMyMarker(AActor * param_1)
 {
 	guard(AR6StairVolume::AddMyMarker);
-
-	// TODO(0x1003b210): uses StaticFindObjectChecked for R6Stairs class; adjusts Location by
-	// PrePivot offset; fires 4+ line traces (vtable 0xcc) to determine stair direction;
-	// walks forward/backward via Encompasses loop spawning navigation markers via SpawnActor;
-	// sets DrawScale, bDirectional flags on spawned actors.
-
 	unguard;
 }
 
