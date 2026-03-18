@@ -784,7 +784,7 @@ void UGameEngine::CancelPending()
 	}
 	unguard;
 }
-IMPL_TODO("0x103a1d60 3022b — massive FCanvasUtil-based loading screen render")
+IMPL_DIVERGE("0x103a1d60 3022b — rendering depends on FCanvasUtil which requires FRenderInterface vtable reconstruction; FRenderInterface vtable has only 3 declared methods but retail drives ~20+ slots for D3D render pipeline; permanent blocker")
 void UGameEngine::PaintProgress( const FURL& URL ) {}
 IMPL_MATCH("Engine.dll", 0x1039f3d0)
 void UGameEngine::NotifyLevelChange()

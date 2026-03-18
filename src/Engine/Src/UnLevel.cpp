@@ -2730,13 +2730,131 @@ void ALevelInfo::execGetLocalURL( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execGetLocalURL );
 
-// GetMapNameLocalisation() - returns the localised map name.
-IMPL_TODO("1212-byte ALevelInfo::execGetMapNameLocalisation; creates UR6MissionDescription via StaticAllocateObject; no permanent blockers (no Karma/rdtsc/FUNs); tractable. Ghidra 0x103bdb70")
+// GetMapNameLocalisation() - returns the localised display name of a map from
+// its R6MissionDescription INI file.
+// Ghidra 0x103bdb70, 1212 bytes.
+//
+// Logic:
+//   1. Read FString map-name param from bytecode.
+//   2. Allocate a temporary UR6MissionDescription object.
+//   3. If GModMgr->eventIsRavenShield() is FALSE (non-vanilla mod):
+//        try ..\\MODS\\<currentMod>\\MAPS\\<mapname>.INI
+//      else loop through all mods (GModMgr+0x34 inner state -> +0x7c FArray).
+//   4. Fallback: ..\\MAPS\\<mapname>.INI
+//   5. If mission desc has a section name (at +0xd0) and a localised-name result
+//      (at +0xac is non-empty), call Localize() to retrieve the display name.
+//
+// DIVERGENCE: GModMgr internal state struct at GModMgr+0x34 (inner C++ object with
+//   +0x94=FString(modFolderName), +0x7c=FArray(mod list)) has no named wrapper type;
+//   accessed via raw byte offsets from Ghidra analysis.
+// DIVERGENCE: UR6MissionDescription fields +0xac (INI-result FString) and +0xd0
+//   (section-name FString) accessed via raw offsets; no named member in header.
+IMPL_MATCH("Engine.dll", 0x103bdb70)
 void ALevelInfo::execGetMapNameLocalisation( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execGetMapNameLocalisation);
+	P_GET_STR(MapName);
 	P_FINISH;
-	*(FString*)Result = XLevel->URL.Map;
+
+	FString localName = MapName;   // fallback: raw map name
+
+	if ( !GModMgr )
+	{
+		*(FString*)Result = localName;
+		return;
+	}
+
+	// Allocate a UR6MissionDescription via StaticAllocateObject + placement new.
+	// This matches retail: StaticAllocateObject(class, transientPkg, NAME_None,
+	//   flags=0, NULL, GError, NULL) then explicit constructor call.
+	UR6MissionDescription* desc = (UR6MissionDescription*)UObject::StaticAllocateObject(
+		UR6MissionDescription::StaticClass(),
+		UObject::GetTransientPackage(),
+		FName(NAME_None),
+		0, NULL, GError, NULL );
+	if ( !desc )
+	{
+		*(FString*)Result = localName;
+		return;
+	}
+	new (desc) UR6MissionDescription();
+
+	// --- Build the INI path and call eventInit ---
+	FString iniPath;
+	UBOOL initOk = 0;
+
+	// GModMgr+0x34 = pointer to internal mod-state object (unnamed C++ struct).
+	// That object at +0x94 = FString(currentModFolderName)
+	//                  +0x7c = FArray of pointers, each -> object with +0x94=FString(modFolderName)
+	BYTE* modState = *(BYTE**)( (BYTE*)GModMgr + 0x34 );
+
+	// Check if running in non-vanilla mode
+	if ( GModMgr->eventIsRavenShield() == 0 )
+	{
+		// Non-vanilla: try current mod's INI.
+		const TCHAR* curMod = *(const TCHAR**)( modState + 0x94 );
+		iniPath = FString::Printf( TEXT("..\\MODS\\%s\\MAPS\\%s.INI"), curMod, *MapName );
+		desc->eventReset();
+		if ( desc->eventInit( this, iniPath ) )
+			initOk = 1;
+	}
+
+	// If not yet initialised: loop through all mod entries.
+	if ( !initOk )
+	{
+		FArray* modArr = (FArray*)( modState + 0x7c );
+		INT nMods = modArr->Num();
+		for ( INT i = 0; i < nMods && !initOk; i++ )
+		{
+			BYTE* modEntry = *(BYTE**)( (BYTE*)modArr->GetData() + i * 4 );
+			const TCHAR* modFolder = *(const TCHAR**)( modEntry + 0x94 );
+			iniPath = FString::Printf( TEXT("..\\MODS\\%s\\MAPS\\%s.INI"), modFolder, *MapName );
+			desc->eventReset();
+			if ( desc->eventInit( this, iniPath ) )
+				initOk = 1;
+		}
+	}
+
+	// Final fallback: bare ..\\MAPS\\<mapname>.INI
+	if ( !initOk )
+	{
+		iniPath = FString::Printf( TEXT("..\\MAPS\\%s.INI"), *MapName );
+		desc->eventReset();
+		desc->eventInit( this, iniPath );
+	}
+
+	// If the MissionDescription didn't set a result string (+0xac), return raw name.
+	FString& descResult = *(FString*)( (BYTE*)desc + 0xac );
+	if ( !descResult.Len() )
+	{
+		*(FString*)Result = localName;
+		return;
+	}
+
+	// Use Localize() to get the display name from the correct INI section.
+	// The section identifier lives at desc+0xd0 (FString sectionName).
+	FString& sectionName = *(FString*)( (BYTE*)desc + 0xd0 );
+
+	if ( GModMgr->eventIsRavenShield() == 0 )
+	{
+		// Non-vanilla: use GModMgr->eventGetIniFilesDir() as the INI directory prefix.
+		FString iniDir = GModMgr->eventGetIniFilesDir();
+		FString prefix = FString::Printf( TEXT("..\\%s\\%s"), *iniDir, *sectionName );
+		const TCHAR* loc = Localize( *MapName, TEXT("ID_MENUNAME"), *prefix, NULL, 1, 0 );
+		if ( loc && *loc )
+			localName = FString(loc);
+	}
+
+	// Fallback (or vanilla RavenShield mode): try ..\\System\\<sectionName>
+	if ( !localName.Len() || GModMgr->eventIsRavenShield() != 0 )
+	{
+		FString prefix = FString::Printf( TEXT("..\\System\\%s"), *sectionName );
+		const TCHAR* loc = Localize( *MapName, TEXT("ID_MENUNAME"), *prefix, NULL, 1, 0 );
+		if ( loc && *loc )
+			localName = FString(loc);
+	}
+
+	*(FString*)Result = localName;
 	unguard;
 }
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execGetMapNameLocalisation );
