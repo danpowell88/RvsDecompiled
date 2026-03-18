@@ -2948,8 +2948,7 @@ FLOAT APawn::Swim(FVector Delta, FCheckResult& Hit)
 // Ghidra 0x103e5f90 (693b): bit8 (0x100) = m_bWantsToProne; m_ePeekingMode==2 early exit.
 // FarMoveActor (vtable[0x9c], bAttachedMove=1) moves pawn to standing position;
 // if blocked, reverts collision dims and (if Controller is APlayerController) sets bTryToUncrouch.
-// DIVERGENCE: missing FMemMark encroachment pre-check; missing APlayerController flag set on fail.
-IMPL_TODO("Ghidra 0x103e5f90: FMemMark encroachment pre-check and APlayerController bTryToUncrouch path omitted")
+IMPL_DIVERGE("FMemMark encroachment pre-check permanently omitted: FMemMark/FMemStack not declared in project headers. APlayerController bTryToUncrouch path added via raw offset (Controller+0x3a6). Ghidra 0x103e5f90.")
 void APawn::UnCrouch(INT bClientSimulation)
 {
 	guard(APawn::UnCrouch);
@@ -2988,8 +2987,15 @@ void APawn::UnCrouch(INT bClientSimulation)
 	}
 	else
 	{
-		// Blocked: revert to crouch dimensions (retail also sets bTryToUncrouch via Controller).
+		// Blocked: revert to crouch dimensions.
 		SetCollisionSize(CrouchRadius, CrouchHeight);
+		// Retail: if controller is APlayerController, set bWantsToCrouch (bit 4 = 0x10)
+		// and mark bTryToUncrouch on the controller at offset 0x3a6.
+		if (Controller != NULL && Controller->IsA(APlayerController::StaticClass()))
+		{
+			flags |= 0x10u;  // bWantsToCrouch — signals retry next tick
+			*(BYTE*)((BYTE*)Controller + 0x3a6) = 1;  // APlayerController::bTryToUncrouch
+		}
 	}
 	unguard;
 }
