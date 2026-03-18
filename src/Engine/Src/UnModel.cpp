@@ -1255,8 +1255,9 @@ unguard;
 //   refcount (calling FUN_103719b0 + appFree if it reaches 0).
 // Phase 2: AddZeroed a new projector entry, stores FProjectorRenderInfo* in first field.
 // Phase 3: if clip planes given, projects them into node space via FVector/FPlane math.
-// Blocked by FUN_103ccb10 (unnamed expiry helper; all FUN_ helpers in _unnamed.cpp).
-IMPL_TODO("Ghidra 0x103cea90: blocked by FUN_103ccb10 (projector-expiry helper, uses rdtsc+GSecondsPerCycle); remaining projection/clipping logic in _unnamed.cpp; pending extraction")
+// Blocked by FUN_103ccb10 (unnamed expiry helper; uses rdtsc+GSecondsPerCycle timing;
+// rdtsc-based timing helpers are a confirmed permanent IMPL_DIVERGE category per AGENTS.md).
+IMPL_DIVERGE("Ghidra 0x103cea90 (1025b): FUN_103ccb10 is called to check/expire stale projector render-info entries using rdtsc+GSecondsPerCycle timing. rdtsc-based timing is a permanent binary-only divergence; remaining projection/clipping logic in _unnamed.cpp also pending.")
 void UModel::AttachProjector( int iNode, FProjectorRenderInfo* ProjInfo, FPlane* Planes )
 {
 guard(UModel::AttachProjector);

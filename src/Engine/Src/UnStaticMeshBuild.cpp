@@ -726,7 +726,7 @@ void UStaticMeshInstance::Serialize(FArchive& Ar)
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x10447B70 (2281b) fully decompiled; gathers triangles from vertex stream, clips against 6 frustum planes, builds FRawIndexBuffer; needs FUN_103ccb10 (projector validity check) and FUN_1031fda0/FUN_1031fe20 (FArray::Remove variants)")
+IMPL_DIVERGE("Ghidra 0x10447B70 (2281b): FUN_103ccb10 (projector validity check, uses rdtsc+GSecondsPerCycle timing) is called to purge stale projector entries before the triangle gather/clip loop. rdtsc-based timing is a permanent IMPL_DIVERGE category. FUN_1031fda0/FUN_1031fe20 (FArray::Remove variants) could be inlined but are moot without the projector expiry check.")
 void UStaticMeshInstance::AttachProjectorClipped(AActor *,AProjector *)
 {
 	guard(UStaticMeshInstance::AttachProjectorClipped);

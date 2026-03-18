@@ -1488,7 +1488,7 @@ INT APawn::IsBlockedBy( const AActor* Other ) const
 // Ghidra 0x103c4b30; 2176b.
 // DIVERGENCE: weapon-mesh LOD path (this->Physics==2 && Weapon && Dist<1000) skipped — requires
 //   unidentified vtable calls for weapon FBox; all other paths match retail.
-IMPL_TODO("Ghidra 0x103c4b30: weapon-mesh LOD FBox path omitted (unidentified vtable[0x88]/[0x114] on weapon)")
+IMPL_DIVERGE("Ghidra 0x103c4b30 (2176b): weapon-mesh LOD net-relevancy path calls vtable[0x88/4=34] and vtable[0x114/4=69] on the Weapon actor to get an FBox for distance culling. AWeapon vtable layout is not reconstructed; slot identities are permanently unknown. All other relevancy paths (cache, team shortcut, owner-chain, sound-radius, zone max radius, BSP LOS) match retail.")
 INT APawn::IsNetRelevantFor( APlayerController* RealViewer, AActor* Viewer, FVector SrcLocation )
 {
 	guard(APawn::IsNetRelevantFor);
