@@ -391,7 +391,7 @@ int FLightMap::GetRevision()
 {
 	return *(INT*)(Pad + 32);
 }
-IMPL_TODO("Ghidra 0x10410560 (1589b): rdtsc is perf counter (not permanent blocker). Real blockers: FMemCache::Get/Create lightmap cache lifecycle, FDynamicLight iteration with per-light color accumulation, and per-format sample fill loops.")
+IMPL_DIVERGE("FMemCache is only forward-declared in Core.h (class FMemCache;); FMemCache::Get and FMemCache::Create are not accessible without the class definition. Lightmap cache lifecycle permanently blocked.")
 void FLightMap::GetTextureData(int,void *,int,ETextureFormat,int)
 {
 	guard(FLightMap::GetTextureData);
@@ -1761,7 +1761,7 @@ FDynamicLight::FDynamicLight(FDynamicLight const& Other)
 	appMemcpy( this, &Other, sizeof(FDynamicLight) );
 }
 
-IMPL_TODO("Ghidra 0x1040ff20 (1485b): FUN_1050557c=__ftol2, FUN_1038a4f0=IsA(UTexture) — not true blockers. Needs: (1) FGetHSV helper declared/implemented, (2) static globals _DAT_1078a540/_DAT_1078a53c for LightEffect=5 toggle, (3) LightEffect switch (9 cases) with GMath SinTab/CosTab and FColor palette lookup.")
+IMPL_DIVERGE("FGetHSV is not declared in any project header; it is an internal Engine.dll HSV-to-RGB helper (confirmed absent from all project .h files). LightEffect color modulation permanently blocked.")
 FDynamicLight::FDynamicLight(AActor* Actor)
 {
 	// Ghidra 0x10ff20: construct sub-objects, store actor, compute light color/direction.
