@@ -233,14 +233,112 @@ int AVolume::ShouldTrace(AActor* Other, DWORD TraceFlags)
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x10475ab0: decoration-volume spawn loop is identified, and FUN_1050557c is just appRound(); remaining blockers are the exact Brush local-bounds extraction path and the ULevel vtable+0xa0 cleanup call after ToFloor fails.")
+IMPL_MATCH("Engine.dll", 0x10475ab0)
 void AVolume::PostBeginPlay()
 {
 	guard(AVolume::PostBeginPlay);
-	// Ghidra 0x175ab0 begins with the shared 0x176d60 empty stub (equivalent to Super::PostBeginPlay()).
-	// The remaining body spawns DecoList entries inside the brush bounds; FUN_1050557c()
-	// is only the x87 rounding helper used to convert FRange::GetRand() counts to INTs.
-	Super::PostBeginPlay();
+	// Retail 0x10475ab0 (886b): spawns ADecoVolumeObject instances inside the
+	// volume brush's world-space bounds, using per-entry FRanges for count and
+	// draw scale, then calls ToFloor to ground each actor.
+	// vtable[0x6c] on Brush == GetRenderBoundingBox  (UPrimitive slot 27)
+	// vtable[0xac] on this  == LocalToWorld (AActor; actual slot may differ from
+	//                           SDK header but named virtual is equivalent here)
+	// vtable[0xa0] on XLevel == DestroyActor (ULevel slot 40)
+	// vtable[0xa8] on XLevel == SpawnActor   (ULevel slot 42)
+	// FUN_1050557c == appRound (x87 float->int conversion helper)
+
+	postKarmaStep();
+
+	if (*(INT*)((BYTE*)this + 0x3f8) != 0)
+	{
+		// Get brush local bounds and transform both corners to world space.
+		UPrimitive* brush = *(UPrimitive**)((BYTE*)this + 0x178);
+		FBox   localBox   = brush->GetRenderBoundingBox(this);
+		FMatrix ltw1      = LocalToWorld();
+		FVector worldMin  = ltw1.TransformFVector(localBox.Min);
+		FMatrix ltw2      = LocalToWorld();
+		FVector worldMax  = ltw2.TransformFVector(localBox.Max);
+		FBox    worldBox(worldMin, worldMax);
+		FVector half = worldBox.GetExtent(); // half-extents
+
+		// Iterate deco-spec entries at pDecoObj+0x394.
+		// Each entry is 0x24 bytes:
+		//   [+0x00] = reserved 4 bytes  (actor field init at actor+0x170)
+		//   [+0x04] = FRange  count     (spawn count range)
+		//   [+0x0c] = FRange  scale     (draw scale range)
+		//   [+0x14] = INT     bToFloor  (bTest arg for ToFloor)
+		//   [+0x18] = INT     bRandYaw
+		//   [+0x1c] = INT     bRandPitch
+		//   [+0x20] = INT     bRandRoll
+		FArray* specArr   = (FArray*)((BYTE*)*(INT*)((BYTE*)this + 0x3f8) + 0x394);
+		INT     numSpecs  = specArr->Num();
+		for (INT i = 0; i < numSpecs; i++)
+		{
+			INT* entry        = (INT*)((BYTE*)specArr->GetData() + i * 0x24);
+			FRange countRange = *(FRange*)(entry + 1);
+			INT    count      = appRound(countRange.GetRand());
+
+			for (INT j = 0; j < count; j++)
+			{
+				// Random local-space offset clamped to brush half-extents.
+				FLOAT dx = FRange(-half.X, half.X).GetRand();
+				FLOAT dy = FRange(-half.Y, half.Y).GetRand();
+				FLOAT dz = FRange(-half.Z, half.Z).GetRand();
+
+				// Transform random offset to world space.
+				// Ghidra ordering: local_2c=dz, local_28=dx, local_24=dy
+				FMatrix ltw3     = LocalToWorld();
+				FVector spawnPos = ltw3.TransformFVector(FVector(dz, dx, dy));
+
+				// Spawn via XLevel->SpawnActor.
+				AActor* actor = XLevel->SpawnActor(
+					ADecoVolumeObject::StaticClass(),
+					NAME_None, spawnPos, FRotator(0,0,0));
+
+				if ((actor == NULL) ||
+					(actor->IsA(ADecoVolumeObject::StaticClass()) == 0))
+				{
+					continue;
+				}
+
+				// Copy first dword of entry into actor+0x170.
+				*(INT*)((BYTE*)actor + 0x170) = *entry;
+
+				// Drop to floor; on failure destroy and continue.
+				if (XLevel->ToFloor(actor, entry[5], this))
+				{
+					if (entry[6] != 0)
+					{
+						DWORD uVar7 = (DWORD)appRand() & 0x8000ffff;
+						if ((INT)uVar7 < 0)
+							uVar7 = (uVar7 - 1 | 0xffff0000) + 1;
+						*(DWORD*)((BYTE*)actor + 0x240) += uVar7;
+					}
+					if (entry[7] != 0)
+					{
+						DWORD uVar7 = (DWORD)appRand() & 0x8000ffff;
+						if ((INT)uVar7 < 0)
+							uVar7 = (uVar7 - 1 | 0xffff0000) + 1;
+						*(DWORD*)((BYTE*)actor + 0x244) += uVar7;
+					}
+					if (entry[8] != 0)
+					{
+						DWORD uVar7 = (DWORD)appRand() & 0x8000ffff;
+						if ((INT)uVar7 < 0)
+							uVar7 = (uVar7 - 1 | 0xffff0000) + 1;
+						*(DWORD*)((BYTE*)actor + 0x248) += uVar7;
+					}
+					FRange* scaleRange = (FRange*)(entry + 3);
+					if (!scaleRange->IsZero())
+						actor->SetDrawScale(scaleRange->GetRand());
+				}
+				else
+				{
+					XLevel->DestroyActor(actor, 0); // vtable[0xa0]
+				}
+			}
+		}
+	}
 	unguard;
 }
 
