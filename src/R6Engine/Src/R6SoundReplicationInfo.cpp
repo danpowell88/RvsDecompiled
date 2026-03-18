@@ -50,7 +50,7 @@ INT AR6SoundReplicationInfo::IsNetRelevantFor(APlayerController* Viewer, AActor*
 	return 1;
 }
 
-IMPL_TODO("blocked by FUN_1001bc10 (silencer IsA check at 0x1001bc10); piSilencer forced NULL — silencer sounds disabled")
+IMPL_DIVERGE("FUN_1001bc10 is an IsA class-walk against a class defined in R6GameCode.dll; PrivateStaticClass_exref is not linkable from R6Engine.dll. Silencer IsA check permanently omitted — piSilencer stays NULL, silencer-gated sound variants disabled.")
 void AR6SoundReplicationInfo::PlayWeaponSound(enum EWeaponSound WeaponSound, BYTE CurrentWeapon)
 {
 	guard(AR6SoundReplicationInfo::PlayWeaponSound);
@@ -195,7 +195,7 @@ Done:
 	unguard;
 }
 
-IMPL_TODO("blocked by PrivateStaticClass ref in inline IsA weapon-type check (same FUN_1001bc10 blocker); weapon-class gating skipped")
+IMPL_DIVERGE("Same FUN_1001bc10 PrivateStaticClass_exref blocker as PlayWeaponSound; weapon-class IsA gate permanently omitted — class lives in R6GameCode.dll and cannot be referenced from R6Engine.dll.")
 void AR6SoundReplicationInfo::PostNetReceive()
 {
 	guard(AR6SoundReplicationInfo::PostNetReceive);
