@@ -717,21 +717,185 @@ guard(UModel::CompressLightmaps);
 unguard;
 }
 
+// ============================================================================
+// BSP convex-volume traversal helpers.
+// These are unnamed static helpers (FUN_103fa310 and FUN_10470830 in Ghidra)
+// extracted from Engine's _unnamed code segment.
+// ============================================================================
+
+// FUN_103fa310 (76 bytes, 0x103fa310):
+// Computes the projection of a box half-extent onto a plane normal as
+//   |normal.X * extent.X| + |normal.Y * extent.Y| + |normal.Z * extent.Z|
+// This is the "box radius along plane direction" used in AABB vs FPlane tests.
+static float BSPHalfExtentProject( const float* PlaneNormal, const float* Extent )
+{
+    float ax = PlaneNormal[0] * Extent[0]; if (ax < 0.f) ax = -ax;
+    float ay = PlaneNormal[1] * Extent[1]; if (ay < 0.f) ay = -ay;
+    float az = PlaneNormal[2] * Extent[2]; if (az < 0.f) az = -az;
+    return ax + ay + az;
+}
+
+// FUN_10470830 (621 bytes, 0x10470830):
+// Recursive BSP convex-volume traversal.  Starting at NodeIdx, compares
+// the AABB (Center ± ScaledExtent) against the node's splitting plane:
+//   - Entirely in front: recurse front child.
+//   - Entirely behind: recurse back child.
+//   - Straddling: add this node and all coplanar siblings (iCoplanar chain)
+//     to Result (if the dot(Extent, plane_normal) < VisRadius), then
+//     recurse both children.
+//
+// Parameters:
+//   Model       - UModel*
+//   NodeIdx     - current BSP node index (-1 terminates recursion)
+//   Cx/Cy/Cz   - AABB centre (from FBox::GetCenter)
+//   Ex/Ey/Ez    - scaled extent (Extent * 1.1f)
+//   Px/Py/Pz    - original, un-scaled extent (used for the VisRadius dot test)
+//   Result      - FArray* to collect hit node indices
+//   VisRadius   - dot-product threshold against the original extent
+static void BSPConvexVolumeTraverse( UModel* Model, INT NodeIdx,
+    float Cx, float Cy, float Cz,
+    float Ex, float Ey, float Ez,
+    float Px, float Py, float Pz,
+    FArray* Result, float VisRadius )
+{
+    if (NodeIdx == -1)
+        return;
+
+    BYTE* nodeBase = (BYTE*)MODEL_NODES(Model)->GetData();
+    FPlane* Plane  = (FPlane*)(nodeBase + NodeIdx * NODE_STRIDE);
+
+    float halfExtent  = BSPHalfExtentProject( (float*)Plane, &Ex );
+    FVector Center_( Cx, Cy, Cz );
+    float centerDot   = Plane->PlaneDot( Center_ );
+
+    if (halfExtent < centerDot)
+    {
+        // AABB is entirely in front of the plane → recurse front child only.
+        BSPConvexVolumeTraverse( Model, *(INT*)((BYTE*)Plane + 0x3c),
+            Cx, Cy, Cz, Ex, Ey, Ez, Px, Py, Pz, Result, VisRadius );
+        return;
+    }
+
+    if (centerDot < -halfExtent)
+    {
+        // AABB is entirely behind the plane → recurse back child only.
+        BSPConvexVolumeTraverse( Model, *(INT*)((BYTE*)Plane + 0x38),
+            Cx, Cy, Cz, Ex, Ey, Ez, Px, Py, Pz, Result, VisRadius );
+        return;
+    }
+
+    // AABB straddles the plane: walk the coplanar-node chain starting at
+    // NodeIdx, adding each node to Result when the vis-radius test passes,
+    // then recurse both children.
+    INT cur = NodeIdx;
+    do
+    {
+        BYTE* nd = nodeBase + cur * NODE_STRIDE;
+        float dot = Px * *(float*)nd + Py * *(float*)(nd + 4) + Pz * *(float*)(nd + 8);
+        if (dot < VisRadius)
+        {
+            INT slot = Result->Add( 1, 4 );
+            *(INT*)(*(INT*)Result + slot * 4) = cur;
+        }
+        cur = *(INT*)((BYTE*)MODEL_NODES(Model)->GetData() + 0x40 + cur * NODE_STRIDE);
+    } while (cur != -1);
+
+    BSPConvexVolumeTraverse( Model, *(INT*)((BYTE*)Plane + 0x3c),
+        Cx, Cy, Cz, Ex, Ey, Ez, Px, Py, Pz, Result, VisRadius );
+    BSPConvexVolumeTraverse( Model, *(INT*)((BYTE*)Plane + 0x38),
+        Cx, Cy, Cz, Ex, Ey, Ez, Px, Py, Pz, Result, VisRadius );
+}
+
 // Ghidra: Engine.dll 0x10470aa0, 419 bytes.
-// Empties Result, then if nodes exist computes FBox::GetCenter and FBox::GetExtent,
-// scales Extent by 1.1 (0x3f8ccccd), and passes them to FUN_10470830 (recursive BSP
-// convex-volume traversal, 621 bytes, in _unnamed.cpp).
-// After traversal, filters result array by surf-flags (checks FBspSurf flags at node+0x34).
-// FUN_10470830 body is fully available in _unnamed.cpp; pending extraction.
-IMPL_TODO("Ghidra 0x10470aa0: FUN_10470830 (BSP convex-volume traversal, 621 bytes) is in _unnamed.cpp and identifiable; pending extraction and integration")
+// Checks which BSP nodes of this model are inside the convex volume defined by
+// Planes[0..NumPlanes-1].  Box is the AABB of the volume, Extent is used for
+// the VisRadius dot-product test, Result receives the matching node indices,
+// and VisRadius is a maximum visibility distance threshold.
+//
+// Returns non-zero if at least one node is inside the volume.
+//
+// Implementation:
+//   1. Empty Result.
+//   2. Traverse BSP tree starting at node 0 using the scaled AABB (1.1x).
+//   3. Post-filter: remove any node whose surface has the hidden flag (bit 0 of
+//      FBspSurf.PolyFlags), and remove nodes that have at least one plane for
+//      which all vertices are in front (i.e. the node is outside the frustum).
+IMPL_MATCH("Engine.dll", 0x10470aa0)
 INT UModel::ConvexVolumeMultiCheck( FBox& Box, FPlane* Planes, INT NumPlanes, FVector Extent, TArray<INT>& Result, FLOAT VisRadius )
 {
 guard(UModel::ConvexVolumeMultiCheck);
-*(FArray*)&Result = FArray();
-if (MODEL_NODES(this)->Num() == 0)
-    return 0;
-// FUN_10470830: unnamed BSP convex-volume multi-check traversal -- pending extraction.
-return Result.Num() > 0 ? 1 : 0;
+
+    Result.Empty();
+    if (MODEL_NODES(this)->Num() == 0)
+        return 0;
+
+    // Scale the AABB extent by 1.1 to add a small fudge factor.
+    FVector ScaledExtent = Box.GetExtent() * 1.1f;
+    FVector Center       = Box.GetCenter();
+
+    BSPConvexVolumeTraverse( this, 0,
+        Center.X,       Center.Y,       Center.Z,
+        ScaledExtent.X, ScaledExtent.Y, ScaledExtent.Z,
+        Extent.X,       Extent.Y,       Extent.Z,
+        (FArray*)&Result, VisRadius );
+
+    // Filter out nodes whose surface is hidden (PolyFlags bit 0 set) and
+    // nodes that lie entirely outside any of the bounding planes.
+    // Ghidra: (*(byte*)(*(int*)(iVar1 + 0x34 + *(int*)(this+0x5c))) * 0x5c + 4 + *(int*)(this+0x9c)) & 1) == 0
+    BYTE* surfBase = (BYTE*)MODEL_SURFS(this)->GetData();
+    BYTE* nodeBase = (BYTE*)MODEL_NODES(this)->GetData();
+
+    for (INT i = 0; i < Result.Num(); )
+    {
+        INT nodeIdx = Result(i);
+        BYTE* nd    = nodeBase + nodeIdx * NODE_STRIDE;
+
+        // Check hidden flag (FBspSurf.PolyFlags & 1).
+        INT surfIdx = *(INT*)(nd + 0x34);
+        if (surfBase[surfIdx * SURF_STRIDE + 4] & 1)
+        {
+            // Hidden surface — remove from result.
+            Result.Remove( i, 1 );
+            continue;
+        }
+
+        // Check each frustum plane: if all vertices of this node are in
+        // front of plane j, the node is outside the frustum.
+        BYTE* vptr = (BYTE*)MODEL_VERTS(this)->GetData();
+        BYTE* ptBase = (BYTE*)MODEL_POINTS(this)->GetData();
+        INT numVerts = (INT)(BYTE)*(nd + 0x6e);
+        INT firstVert = *(INT*)(nd + 0x30);
+        INT bRemove = 0;
+        for (INT j = 0; j < NumPlanes && !bRemove; j++)
+        {
+            for (INT v = 0; v < numVerts; v++)
+            {
+                // vptr entry is 8 bytes: first 4 = point index.
+                INT ptIdx = *(INT*)(vptr + (firstVert + v) * 8);
+                FVector* pt = (FVector*)(ptBase + ptIdx * 0xc);
+                FLOAT d = (Planes + j)->PlaneDot( *pt );
+                if (d > 0.f)
+                {
+                    // At least one vertex is in front → node could be inside.
+                    bRemove = 0;
+                    break;
+                }
+                bRemove = 1; // tentatively: all verts so far are behind this plane
+            }
+        }
+
+        if (bRemove)
+        {
+            Result.Remove( i, 1 );
+        }
+        else
+        {
+            i++;
+        }
+    }
+
+    return Result.Num() > 0 ? 1 : 0;
+
 unguard;
 }
 
