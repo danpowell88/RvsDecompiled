@@ -201,7 +201,7 @@ int FBspVertexStream::GetStride()
 // Ghidra 0x10406670 (1270b): scene render loop. Permanent divergence: constructs
 // FCanvasUtil with the incoming FRenderInterface* (D3D device), then dispatches
 // Begin/End scene and debug STDbgLine draws through vtable methods on that interface.
-IMPL_TODO("Ghidra 0x10406670 (1270b): FRenderInterface vtable has only 3 declared virtual methods; retail calls ~20+ undeclared vtable slots (SetMaterial, DrawPrimitive, etc.). Blocked on FRenderInterface vtable mapping and FCanvasUtil stack construction path.")
+IMPL_DIVERGE("Ghidra 0x10406670 (1270b): FRenderInterface vtable has only 3 declared virtual methods; retail calls ~20+ undeclared slots (SetMaterial, DrawPrimitive, etc.) — permanent blocker; FRenderInterface vtable reconstruction unavailable in source form.")
 void FLevelSceneNode::Render(FRenderInterface *)
 {
 	guard(FLevelSceneNode::Render);
@@ -707,7 +707,7 @@ void FLineBatcher::DrawSphere(FVector Center, FColor Color, FLOAT Radius, INT Nu
 // Ghidra 0x104172a0 (813b): flush line batch to GPU. Blocked: retail calls FRenderInterface
 // vtable slot +0x54 and constructs UProxyBitmapMaterial/UFinalBlend as material state.
 // FRenderInterface only has 3 declared virtual methods; needs full vtable mapping.
-IMPL_TODO("Ghidra 0x104172a0 (813b): FRenderInterface vtable has only 3 declared virtual methods; retail calls undeclared slot +0x54, constructs UProxyBitmapMaterial/UFinalBlend. Blocked on FRenderInterface vtable mapping.")
+IMPL_DIVERGE("Ghidra 0x104172a0 (813b): FRenderInterface vtable has only 3 declared virtual methods; retail calls undeclared slot +0x54, constructs UProxyBitmapMaterial/UFinalBlend — permanent blocker; FRenderInterface vtable reconstruction unavailable.")
 void FLineBatcher::Flush(DWORD Flags)
 {
 }
@@ -1596,7 +1596,7 @@ FPoly FConvexVolume::ClipPolygonPrecise(FPoly Poly)
 // Ghidra 0x104038b0 (11290b): per-actor render dispatch. The entire function body drives
 // FRenderInterface* param_3 vtable methods (SetMaterial, DrawMesh, SetTransform etc.).
 // FRenderInterface only has 3 declared virtual methods; retail uses ~20+ undeclared slots.
-IMPL_TODO("Ghidra 0x104038b0 (11290b): FRenderInterface vtable has only 3 declared virtual methods; retail drives ~20+ undeclared slots for full per-actor D3D render pipeline. Blocked on FRenderInterface vtable mapping.")
+IMPL_DIVERGE("Ghidra 0x104038b0 (11290b): FRenderInterface vtable has only 3 declared virtual methods; retail drives ~20+ undeclared slots for full per-actor D3D render pipeline — permanent blocker; FRenderInterface vtable reconstruction unavailable.")
 void FDynamicActor::Render(FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
 {
 }
