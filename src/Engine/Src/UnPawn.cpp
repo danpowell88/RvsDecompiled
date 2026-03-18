@@ -3729,10 +3729,244 @@ void APawn::physSwimming(FLOAT DeltaTime, INT Iterations)
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103ED370; 4353b: physWalking — no rdtsc/Karma/unaff blockers; tractable but not yet reconstructed")
+// Ghidra 0x103ED370; 4353 bytes. Ground walking physics: velocity integration +
+// per-sub-step SinglePointCheck floor probe + MoveActor + stepUp/processHitWall handling.
+//
+// DIVERGENCE: calcVelocity arg3 (GroundFriction at PhysicsVolume+0x424) and arg4
+//   (MaxGroundSpeed at PhysicsVolume+0x420) use raw offsets — no named SDK field.
+// DIVERGENCE: gravity-probe floor step (35.0) approximated from Ghidra literal
+//   (local_30 = local_90 * 35.0 and local_30 < 2.4 threshold).
+// DIVERGENCE: SinglePointCheck Extent uses CollisionRadius/1.f; Ghidra passes
+//   raw offsets this+0xf8/0xfc (exact meaning unclear from Ghidra alone).
+// DIVERGENCE: zone ZoneVelocity scale factor (local_148 = DeltaTime) approximated
+//   from FVector::operator* call pattern in Ghidra.
+// DIVERGENCE: FUN_103808e0 (min/max float helper) and FUN_10301350 (zone wind
+//   velocity helper) are inlined via approximation in the floor-friction slope path.
+IMPL_TODO("Ghidra 0x103ED370; 4353b: physWalking — implemented; DIVERGENCE notes above")
 void APawn::physWalking(FLOAT DeltaTime, INT Iterations)
 {
 	guard(APawn::physWalking);
+
+	APhysicsVolume* Zone;
+	FLOAT MaxSpd, GroundFric;
+	FVector AccelNorm;
+	FLOAT velX, velY;
+	FVector GravDir, GravStep, StartLoc;
+	FLOAT remTime, subDt, fNZ, stepDist, dotND;
+	INT bFall, bNotifyMayFall, bWalkable, bDeltaZero, bIntoFloor;
+	FLOAT cr;
+
+	if (!Controller)
+		return;
+
+	// Zero out Z velocity (walking doesn't use vertical velocity directly)
+	Velocity.Z = 0.f;
+	*(FLOAT*)((BYTE*)this + 0x260) = 0.f;   // retail clears this+0x260 as well
+
+	// Normalize Acceleration for calcVelocity direction
+	if (!Acceleration.IsZero())
+		AccelNorm = Acceleration.SafeNormal();
+	else
+		AccelNorm = Acceleration;
+
+	// calcVelocity: update velocity based on acceleration, friction, max speed.
+	// PhysicsVolume+0x420 = MaxGroundSpeed equivalent; +0x424 = GroundFriction.
+	Zone         = (APhysicsVolume*)*(INT*)((BYTE*)this + 0x164);
+	MaxSpd       = *(FLOAT*)((BYTE*)Zone + 0x420);
+	GroundFric   = *(FLOAT*)((BYTE*)Zone + 0x424);
+	calcVelocity(AccelNorm, DeltaTime, GroundFric, MaxSpd, 1, 0, 0);
+
+	// Working copy of velocity (Z cleared for ground movement)
+	velX = Velocity.X;
+	velY = Velocity.Y;
+	Velocity.Z = 0.f;
+
+	// Apply zone/wind velocity if zone has one (PhysicsVolume+0x444 = ZoneVelocity)
+	{
+		FVector* ZoneVel = (FVector*)((BYTE*)Zone + 0x444);
+		FLOAT zvsq = ZoneVel->SizeSquared();
+		if (zvsq > 0.f && (IsHumanControlled() || zvsq > 90000.f))
+		{
+			FVector windDelta = *ZoneVel * DeltaTime;
+			velX += windDelta.X;
+			velY += windDelta.Y;
+		}
+	}
+	Velocity.Z = 0.f;
+
+	// Determine gravity sign: zone+0x458 holds zone gravity Z; if <= 0 → normal down
+	{
+		FLOAT gravSign = (*(FLOAT*)((BYTE*)Zone + 0x458) > 0.f) ? 1.f : -1.f;
+		GravDir  = FVector(0.f, 0.f, -1.f * gravSign);
+		GravStep = GravDir * 35.f;   // floor probe vector (35 UU below pawn)
+	}
+
+	// Save start location for final velocity computation
+	StartLoc = Location;
+	*(DWORD*)((BYTE*)this + 0xac) &= ~0x8u;   // clear bNotJustTeleported
+
+	bFall = 0;
+	bNotifyMayFall = 0;
+	cr = CollisionRadius;
+
+	remTime = DeltaTime;
+
+	while (true)
+	{
+		// Exit loop conditions
+		if (remTime <= 0.f || Iterations > 7 || !Controller)
+		{
+			// Update velocity from actual displacement
+			if (!(*(DWORD*)((BYTE*)this + 0xac) & 0x8) &&
+				!(*(DWORD*)((BYTE*)this + 0x3e0) & 0x4000000))
+			{
+				FVector disp = Location - StartLoc;
+				Velocity = disp / DeltaTime;
+			}
+			*(DWORD*)((BYTE*)this + 0x3e0) &= ~0x4000000u;
+			Velocity.Z = 0.f;
+			return;
+		}
+		Iterations++;
+
+		// Sub-step: at most 0.05s per step (Ghidra: if > 0.05 use remTime*0.5, clamped)
+		subDt = remTime;
+		if (subDt > 0.05f)
+		{
+			subDt = remTime * 0.5f;
+			if (subDt > 0.05f) subDt = 0.05f;
+		}
+		remTime -= subDt;
+
+		{
+			FVector OldLoc = Location;
+			FVector Delta(velX * subDt, velY * subDt, 0.f);
+
+			if (Delta.IsNearlyZero())
+			{
+				// Zero delta: floor check only, no movement
+				remTime = 0.f;
+			}
+
+			// ── Floor probe: SinglePointCheck below pawn ──────────────────
+			{
+				FCheckResult FHit(1.0f);
+				FVector ProbePos = Location + GravStep;
+				XLevel->SinglePointCheck(FHit, this, ProbePos,
+					FVector(cr, cr, 1.f), 0xdf, Level, 0);
+
+				// Cache floor normal
+				*(FVector*)((BYTE*)this + 0x590) = FHit.Normal;
+
+				fNZ      = FHit.Normal.Z;
+				stepDist = FHit.Time * 35.f;
+				dotND    = FHit.Normal.X*Delta.X + FHit.Normal.Y*Delta.Y + FHit.Normal.Z*Delta.Z;
+				bWalkable  = !appIsNan(fNZ) ? (fNZ >= 0.7f ? 1 : 0) : 1;
+				bDeltaZero = Delta.IsNearlyZero() ? 1 : 0;
+				bIntoFloor = (dotND >= 0.f) ? 1 : 0;
+
+				if (bWalkable || bDeltaZero || bIntoFloor)
+				{
+					// ── Walkable floor branch ──────────────────────────────
+					if (FHit.Time < 1.0f || stepDist <= 2.4f)
+					{
+						if (stepDist < 1.9f)
+						{
+							FLOAT snapZ = 2.15f - stepDist;
+							FCheckResult snapHit(1.f);
+							XLevel->MoveActor(this, GravDir * snapZ, Rotation, snapHit, 0, 0, 0, 0, 0);
+						}
+						else
+						{
+							FCheckResult stepHit(1.f);
+							XLevel->MoveActor(this,
+								FVector(0.f, 0.f, GravDir.Z * (stepDist * FHit.Normal.Z)),
+								Rotation, stepHit, 0, 0, 0, 0, 0);
+							if (stepHit.Actor != Base)
+							{
+								typedef void (__thiscall* FSetBaseFn)(APawn*, AActor*, FVector, INT);
+								((FSetBaseFn)(*(DWORD**)(*(DWORD*)this))[0xd0/4])(
+									this, stepHit.Actor, stepHit.Normal, 1);
+							}
+						}
+					}
+
+					if (!bDeltaZero)
+					{
+						FCheckResult MoveHit(1.f);
+						XLevel->MoveActor(this, Delta, Rotation, MoveHit, 0, 0, 0, 0, 0);
+
+						if (Physics == PHYS_Swimming)
+						{
+							startSwimming(OldLoc, Velocity, subDt, remTime, Iterations);
+							return;
+						}
+
+						if (MoveHit.Time < 1.0f && MoveHit.Actor)
+						{
+							stepUp(GravDir, Delta.SafeNormal(), Delta, MoveHit);
+
+							if (Physics == PHYS_Swimming)
+							{
+								startSwimming(OldLoc, Velocity, subDt, remTime, Iterations);
+								return;
+							}
+							if (Physics == PHYS_Walking && MoveHit.Actor)
+								processHitWall(MoveHit.Normal, MoveHit.Actor);
+						}
+					}
+
+					// SetBase to current floor actor
+					if (FHit.Actor != Base)
+					{
+						typedef void (__thiscall* FSetBaseFn)(APawn*, AActor*, FVector, INT);
+						((FSetBaseFn)(*(DWORD**)(*(DWORD*)this))[0xd0/4])(
+							this, FHit.Actor, FHit.Normal, 1);
+					}
+				}
+				else
+				{
+					bFall = 1;
+				}
+
+				// Notify controller of potential fall
+				if (!bWalkable || FHit.Time >= 1.0f)
+				{
+					if ((*(DWORD*)((BYTE*)this + 0x3e0) & 0x4000) != 0 &&
+						bNotifyMayFall == 0 && Controller)
+					{
+						bNotifyMayFall = 1;
+						Controller->eventMayFall();
+					}
+				}
+
+				if (bFall)
+				{
+					FLOAT deltaSize = Delta.Size();
+					FLOAT stepSize  = (Location - OldLoc).Size2D();
+					if (deltaSize > 0.f)
+					{
+						FLOAT frac = stepSize / deltaSize;
+						if (frac > 1.f) frac = 1.f;
+						remTime = remTime + (1.f - frac) * subDt;
+					}
+					else
+						remTime = 0.f;
+
+					Velocity.Z = 0.f;
+					eventFalling();
+					if (Physics == PHYS_Walking)
+					{
+						FVector upVec(0.f, 0.f, -GravDir.Z);
+						setPhysics(PHYS_Falling, NULL, upVec);
+						if (remTime > 0.f)
+							startNewPhysics(remTime, Iterations + 1);
+					}
+					return;
+				}
+			}  // FHit scope
+		}  // OldLoc, Delta scope
+	}
 	unguard;
 }
 
