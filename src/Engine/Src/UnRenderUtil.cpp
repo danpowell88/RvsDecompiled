@@ -391,7 +391,7 @@ int FLightMap::GetRevision()
 {
 	return *(INT*)(Pad + 32);
 }
-IMPL_DIVERGE("FMemCache is only forward-declared in Core.h (class FMemCache;); FMemCache::Get and FMemCache::Create are not accessible without the class definition. Lightmap cache lifecycle permanently blocked.")
+IMPL_TODO("Ghidra 0x10410560 (1589b): rdtsc is perf counter (not permanent blocker); FMemCache::Get/Create ARE available via SDK UnCache.h. Remaining work: FDynamicLight iteration with per-light color accumulation, and per-format (DXT1/DXT3/DXT5/P8/RGBA8) sample fill loops — complex but no permanent blockers.")
 void FLightMap::GetTextureData(int,void *,int,ETextureFormat,int)
 {
 	guard(FLightMap::GetTextureData);
