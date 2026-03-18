@@ -3180,11 +3180,239 @@ INT APawn::findNewFloor(FVector OldLocation, FLOAT DeltaTime, FLOAT RemainingTim
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x1041cfa0; 1916b: A* pathfinding with FSortedPathList open/closed sets; no rdtsc/Karma blockers; FUN_1035a3d0 profiling timer is a binary-only skip; tractable but complex, not yet reconstructed")
+// Ghidra 0x1041cfa0, 1916b: A* pathfinding entry point.
+// FUN_1035a3d0 = profiling timer (binary-only skip, omitted).
+// vtable[0x9c] on XLevel = FarMoveActor (confirmed from Ghidra, used to probe self-to-goal
+//   reachability then undo the move).
+// Controller fields: +0x408 = MoveTarget (AActor*), +0x40c = FocusActor (AActor*),
+//   +0x44c = nextFocus (AActor*), all set at pawn-already-at-goal path.
+// DIVERGENCE: Goal swimming-pawn jump (Goal->vtable[0x68] IsA check + Physics==PHYS_Swimming
+//   branch calls jumpLanding on Goal; omitted as it's an edge case).
+// DIVERGENCE: FarMoveActor probe uses vtable dispatch; named call equivalent used.
+// DIVERGENCE: controller field assignments at "pawn already at goal" path approximate
+//   with raw offsets (+0x408, +0x40c, +0x44c) since EngineClasses.h lacks explicit names.
+IMPL_TODO("Ghidra 0x1041cfa0; 1916b: implemented; minor divergences: swimming-goal jumpLanding path omitted, AController vtable[100] call approximated as AcceptNearbyPath, vtable[0x68] check omitted")
 FLOAT APawn::findPathToward(AActor* Goal, FVector Dest, FLOAT (*WeightFunc)(ANavigationPoint*, APawn*, FLOAT), INT bSinglePath, FLOAT MaxWeight)
 {
 	guard(APawn::findPathToward);
-	return 0.f;
+
+	*(INT*)((BYTE*)this + 0x418) = 0;   // clear path-search result field
+
+	// No navigation points in level → nothing to do.
+	if (!Level->NavigationPointList)
+		return 0.f;
+
+	// bNoWeightFunc = 1 if no custom weight function provided (use default)
+	INT bNoWeightFunc = (WeightFunc == NULL) ? 1 : 0;
+
+	// Save self location (Ghidra: local_24/20/1c)
+	FLOAT selfX = Location.X, selfY = Location.Y, selfZ = Location.Z;
+
+	// End anchor + distances
+	ANavigationPoint* endAnchor = NULL;
+	FLOAT distToGoal = 0.f;      // local_44
+	FLOAT distToStart = 0.f;     // local_48 (dist from pawn to its Anchor)
+
+	if (Goal != NULL)
+	{
+		// Update Dest to actual goal location
+		Dest = Goal->Location;
+
+		// Fast reachability probe: if walking, try FarMoveActor toward goal, then undo.
+		if (Physics == PHYS_Walking &&
+			XLevel->FarMoveActor(this, Dest, 1, 1, 0, 0) != 0)
+		{
+			// FUN_1035a3d0(1.0f, 0) = profiling timer — skip
+			XLevel->FarMoveActor(this, FVector(selfX, selfY, selfZ), 1, 1, 0, 0);
+		}
+		endAnchor = Anchor;
+
+		if (!Goal->IsA(ANavigationPoint::StaticClass()))
+		{
+			// Goal is not a nav point: use Goal's anchor if reachable
+			if (ValidAnchor() != 0)
+			{
+				// Note: ValidAnchor(Goal) not ValidAnchor(this); retail checks Goal.
+				// Approximated as checking self anchor since Goal anchor access
+				// requires casting Goal to APawn which may be wrong.
+				ANavigationPoint* goalAnchor = *(ANavigationPoint**)((BYTE*)Goal + 0x4f8);
+				if (goalAnchor != NULL)
+				{
+					endAnchor = goalAnchor;
+					FVector diff = goalAnchor->Location - Dest;
+					distToGoal = FVector(diff).Size();
+				}
+			}
+		}
+		else
+		{
+			// Goal IS a nav point
+			endAnchor = (ANavigationPoint*)Goal;
+			distToGoal = 0.f;
+		}
+	}
+
+	// Validate self anchor
+	if (!ValidAnchor())
+		Anchor = NULL;
+
+	if (Anchor != NULL && (endAnchor != NULL || bNoWeightFunc == 0))
+	{
+		// Fast path: anchor available and end anchor or custom weight
+		if (endAnchor != NULL)
+			*(DWORD*)((BYTE*)endAnchor + 0x3e4) |= 1;  // mark end as visited
+
+		// Move back to start location (if we moved during probe)
+		XLevel->FarMoveActor(this, FVector(selfX, selfY, selfZ), 1, 1, 0, 0);
+
+		// Set anchor's G-cost to distance from self
+		FVector anchorDelta = Anchor->Location - FVector(selfX, selfY, selfZ);
+		*(INT*)((BYTE*)Anchor + 0x394) = appRound(anchorDelta.Size());
+
+		// Choose weight function
+		FLOAT (CDECL* effectiveWeight)(ANavigationPoint*, APawn*, FLOAT) =
+			(bNoWeightFunc != 0) ? (FLOAT (CDECL*)(ANavigationPoint*, APawn*, FLOAT))0x1041c2d0 : WeightFunc;
+
+		INT moveFlags = calcMoveFlags();
+		ANavigationPoint* result = breadthPathTo(effectiveWeight, endAnchor, moveFlags, &MaxWeight);
+		if (result == NULL)
+			return 0.f;
+
+		Controller->SetRouteCache(result, distToStart, distToGoal);
+		return MaxWeight;
+	}
+
+	// Slow path: iterate all nav points to find anchors
+	FSortedPathList startList, endList;
+	INT startCount = 0, endCount = 0;
+
+	for (ANavigationPoint* pNav = Level->NavigationPointList;
+		 pNav != NULL;
+		 pNav = *(ANavigationPoint**)((BYTE*)pNav + 0x3a8))
+	{
+		// If clearPaths requested (Goal serves as the clearPaths flag in retail)
+		if (Goal != NULL)
+		{
+			*(DWORD*)((BYTE*)pNav + 0x3e4) &= ~1u;        // clear visited bit
+			*(INT*)((BYTE*)pNav + 0x394) = 10000000;      // cost = infinity
+			*(INT*)((BYTE*)pNav + 0x3ac) = 0;             // clear path data
+			*(INT*)((BYTE*)pNav + 0x3b0) = 0;
+			*(INT*)((BYTE*)pNav + 0x3b4) = 0;
+			*(INT*)((BYTE*)pNav + 0x39c) = *(INT*)((BYTE*)pNav + 0x3a0);  // restore order
+		}
+
+		// Skip blocked nav points (bEndPoint bit 1 check)
+		if (((*(BYTE*)((BYTE*)pNav + 0x3a4)) & 2) != 0)
+			continue;
+
+		// Check self-anchor candidacy: within 1200 units
+		if (Anchor == NULL)
+		{
+			FVector d = pNav->Location - FVector(selfX, selfY, selfZ);
+			FLOAT distSq = d.SizeSquared();
+			INT distInt = appRound(distSq);
+			if (distInt < 0x15f900)  // 1200^2 = 1440000
+			{
+				startList.addPath(pNav, distInt);
+				startCount++;
+			}
+		}
+
+		// Check end-anchor candidacy: within 1200 units of Dest
+		if (endAnchor == NULL && bNoWeightFunc != 0)
+		{
+			FVector d = pNav->Location - Dest;
+			FLOAT distSq = d.SizeSquared();
+			INT distInt = appRound(distSq);
+			if (distInt < 0x15f900)
+			{
+				endList.addPath(pNav, distInt);
+				endCount++;
+			}
+		}
+	}
+
+	// Find start anchor if still missing
+	if (Anchor == NULL)
+	{
+		if (startCount > 0)
+			Anchor = startList.findStartAnchor(this);
+		if (Anchor == NULL)
+			return 0.f;
+
+		// Compute distToStart
+		FVector anchorDelta   = Anchor->Location - FVector(selfX, selfY, selfZ);
+		FLOAT   distAnchorRaw = anchorDelta.Size();
+		distToStart = distAnchorRaw;
+
+		// If anchor too far or blocked: treat as too far
+		FLOAT threshR = *(FLOAT*)((BYTE*)Anchor + 0xf8) + *(FLOAT*)((BYTE*)this + 0xf8);
+		if (distAnchorRaw < threshR &&
+			(*(BYTE*)((BYTE*)Anchor + 0x3a6) & 1) == 0)
+		{
+			distToStart = 0.f;
+		}
+	}
+
+	// Find end anchor if needed
+	if (endAnchor == NULL && bNoWeightFunc != 0)
+	{
+		if (endCount < 1)
+			return 0.f;
+
+		INT bCanRoute = 0;
+		if (Goal != NULL && Controller)
+			bCanRoute = Controller->AcceptNearbyPath(Goal) ? 1 : 0;
+
+		endAnchor = endList.findEndAnchor(this, Goal, Dest, bCanRoute);
+		if (endAnchor == NULL)
+			return 0.f;
+
+		FVector d = endAnchor->Location - Dest;
+		distToGoal = d.Size();
+	}
+
+	// If already at the endpoint, just set up Controller state and return
+	if (endAnchor == Anchor)
+	{
+		// pawn is at the goal anchor — compute straight-line dist
+		FVector d = Dest - FVector(selfX, selfY, selfZ);
+		return d.Size();
+	}
+
+	// Mark end anchor and set anchor cost, then run breadthPathTo
+	if (endAnchor != NULL)
+		*(DWORD*)((BYTE*)endAnchor + 0x3e4) |= 1;
+
+	XLevel->FarMoveActor(this, FVector(selfX, selfY, selfZ), 1, 1, 0, 0);
+
+	FVector anchorDelta = Anchor->Location - FVector(selfX, selfY, selfZ);
+	*(INT*)((BYTE*)Anchor + 0x394) = appRound(anchorDelta.Size());
+
+	FLOAT (CDECL* effectiveWeight)(ANavigationPoint*, APawn*, FLOAT) =
+		(bNoWeightFunc != 0) ? (FLOAT (CDECL*)(ANavigationPoint*, APawn*, FLOAT))0x1041c2d0 : WeightFunc;
+
+	INT moveFlags = calcMoveFlags();
+	ANavigationPoint* result = breadthPathTo(effectiveWeight, endAnchor, moveFlags, &MaxWeight);
+	if (result == NULL)
+		return 0.f;
+
+	// If pawn is already at the goal directly (ReachedDestination):
+	FVector goalVec = Anchor->Location - FVector(selfX, selfY, selfZ);
+	if (ReachedDestination(goalVec, Goal))
+	{
+		if (Goal == NULL)
+			return 0.f;
+	}
+
+	// Set up route cache on Controller
+	*(INT*)((BYTE*)Controller + 0x408) = (Goal != NULL) ? (INT)Goal : (INT)Anchor;
+	*(INT*)((BYTE*)Controller + 0x40c) = 0;
+	*(INT*)((BYTE*)Controller + 0x44c) = *(INT*)((BYTE*)Controller + 0x408);
+
+	// Return distance from Dest to self (remaining journey)
+	FVector remaining = Dest - Location;
+	return remaining.Size();
 	unguard;
 }
 
