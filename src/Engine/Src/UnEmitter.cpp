@@ -389,7 +389,7 @@ int UBeamEmitter::UpdateParticles(float DeltaTime)
 }
 
 // Ghidra: 0x10381eb0, 2210 bytes
-IMPL_TODO("blocked by beam vertex buffer construction, FRawIndexBuffer, and FRenderInterface state management")
+IMPL_DIVERGE("Ghidra 0x10381eb0 (2210b): builds beam segment geometry and submits via FRenderInterface. FRenderInterface vtable has only 3 declared methods; retail drives ~20+ undeclared slots (SetMaterial, DrawPrimitive etc.). Permanent: vtable reconstruction required.")
 int UBeamEmitter::RenderParticles(FDynamicActor* param_1, FLevelSceneNode* param_2, TList<FDynamicLight*>* param_3, FRenderInterface* param_4)
 {
 	guard(UBeamEmitter::RenderParticles);
@@ -458,7 +458,7 @@ int UMeshEmitter::UpdateParticles(float DeltaTime)
 }
 
 // Ghidra: 0x103caec0, 2697 bytes
-IMPL_TODO("blocked by per-particle mesh-instance FMatrix pipeline and FRenderInterface draw calls")
+IMPL_DIVERGE("Ghidra 0x103caec0 (2697b): iterates particles, builds per-particle FMatrix transforms, renders via FRenderInterface. FRenderInterface vtable has only 3 declared methods; retail drives ~20+ undeclared slots. Permanent: vtable reconstruction required.")
 int UMeshEmitter::RenderParticles(FDynamicActor* param_1, FLevelSceneNode* param_2, TList<FDynamicLight*>* param_3, FRenderInterface* param_4)
 {
 	guard(UMeshEmitter::RenderParticles);
