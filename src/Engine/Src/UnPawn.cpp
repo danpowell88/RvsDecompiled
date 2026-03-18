@@ -2130,37 +2130,91 @@ void APawn::UpdateMovementAnimation( FLOAT DeltaSeconds )
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103ebfe0; 983b — nav-graph anchor cache and IsBlockedBy vtable check omitted; approximate with straight-line LOS/distance")
+IMPL_TODO("Ghidra 0x103ebfe0; 983b — APawn vtable[0x62] (slot 98, unknown virtual) and Goal vtable[0x1a] (slot 26, unknown mover-type check) omitted; PhysicsVolume+0x410&0x40 for bWaterVolume used as raw offset")
 INT APawn::actorReachable( AActor* Goal, INT bKnowVisible, INT bNoAnchorCheck )
 {
 	guard(APawn::actorReachable);
-	// Navigation reachability test.
-	// Full implementation requires the path-graph / ReachSpec network.
-	// This approximation uses a straight-line sight trace + distance bound which
-	// is correct for open geometry and serves as a fallback for nav-less maps.
 	if( !Goal )
 		return 0;
 
-	FVector Diff = Goal->Location - Location;
-	// Ignore height for walking proximity check.
-	FLOAT HorizDistSq = Diff.X*Diff.X + Diff.Y*Diff.Y;
-	// Reject if beyond MaxReachable (arbitrary: 8x GroundSpeed seconds of travel)
-	FLOAT MaxReach = 8.f * GroundSpeed;
-	if( HorizDistSq > MaxReach * MaxReach )
-		return 0;
+	// Fast path: if Goal is a NavigationPoint and our collision radius is small,
+	// check whether our cached anchor already matches — skip full physics test.
+	if( !bNoAnchorCheck
+	    && Goal->IsA(ANavigationPoint::StaticClass())
+	    && CollisionRadius < 40.0f )
+	{
+		FLOAT radius = CollisionRadius;
+		if( radius <= 48.0f ) radius = 48.0f;  // minimum nav clearance
+		if( ValidAnchor() && Anchor == Goal )
+		{
+			FLOAT dx = Goal->Location.X - Location.X;
+			FLOAT dy = Goal->Location.Y - Location.Y;
+			if( dx*dx + dy*dy < radius*radius )
+				return 1;
+		}
+	}
 
-	// Visibility: SingleLineCheck between centres.
+	// 3D distance squared to goal
+	FLOAT dx = Goal->Location.X - Location.X;
+	FLOAT dy = Goal->Location.Y - Location.Y;
+	FLOAT dz = Goal->Location.Z - Location.Z;
+	FLOAT distSq = dx*dx + dy*dy + dz*dz;
+
+	if( !GIsEditor )
+	{
+		// Reject if beyond 1200-unit reachability limit
+		if( distSq > 1440000.0f )
+			return 0;
+
+		// IMPL_TODO: APawn vtable[0x62] (slot 98) called with Goal omitted — purpose unknown
+
+		// Locomotion capability gate.
+		// Ghidra checks Goal->PhysicsVolume byte at +0x410 bit 0x40 (bWaterVolume).
+		APhysicsVolume* goalVol = Goal->PhysicsVolume;
+		UBOOL bInWater = goalVol && ( (*(BYTE*)((BYTE*)goalVol + 0x410)) & 0x40 );
+		if( bInWater )
+		{
+			if( !bCanSwim ) return 0;
+		}
+		else
+		{
+			if( !bCanWalk && !bCanFly ) return 0;
+		}
+	}
+
+	// Optional line-of-sight check (flag 0x86 = TRACE_World = Movers|Level|LevelGeometry)
 	if( !bKnowVisible )
 	{
 		FCheckResult Hit( 1.f );
-		if( !XLevel->SingleLineCheck( Hit, this, Goal->Location, Location,
-		    TRACE_World | TRACE_Level, FVector(0.f,0.f,0.f) ) )
-		{
-			// Something in the way — not directly reachable.
+		FVector eyePos = Location + eventEyePosition();
+		XLevel->SingleLineCheck( Hit, this, Goal->Location, eyePos,
+		                         TRACE_World, FVector(0.f,0.f,0.f) );
+		// Blocked by something that is not the Goal itself → unreachable
+		if( Hit.Time != 1.0f && Hit.Actor != Goal )
 			return 0;
-		}
 	}
-	return 1;
+
+	// IMPL_TODO: Goal vtable[0x1a] (slot 26) proximity check omitted —
+	// Ghidra: if that virtual returns non-zero, test combined-radii overlap and return 1.
+
+	// Physical reachability: try FarMoveActor to Goal's position, then back.
+	// Reachable() uses the position the pawn actually reached after the test move.
+	FVector origPos = Location;
+	FLOAT reachX = Goal->Location.X;
+	FLOAT reachY = Goal->Location.Y;
+	FLOAT reachZ = Goal->Location.Z;
+	INT bMoved = XLevel->FarMoveActor( this, Goal->Location, 1, 0, 0, 0 );
+	if( bMoved )
+	{
+		// FarMoveActor succeeded: pawn moved to (possibly adjusted) position
+		reachX = Location.X;
+		reachY = Location.Y;
+		reachZ = Location.Z;
+		// Return pawn to where it started (bNoCheck=1 = skip zone/touch events)
+		XLevel->FarMoveActor( this, origPos, 1, 1, 0, 0 );
+	}
+
+	return Reachable( FVector(reachX, reachY, reachZ), Goal );
 	unguard;
 }
 
