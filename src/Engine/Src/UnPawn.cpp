@@ -18,6 +18,9 @@
 =============================================================================*/
 #include "EnginePrivate.h"
 
+// GAudioMaxRadiusMultiplier is defined in Core.cpp but not declared in any public header.
+extern CORE_API FLOAT GAudioMaxRadiusMultiplier;
+
 IMPLEMENT_CLASS(APawn);
 IMPLEMENT_CLASS(AController);
 IMPLEMENT_CLASS(APlayerController);
@@ -1475,11 +1478,123 @@ INT APawn::IsBlockedBy( const AActor* Other ) const
 	return AActor::IsBlockedBy(Other);
 }
 
-IMPL_TODO("Ghidra 0x103c4b30; 2176b — complex net-relevancy caching; stub delegates to AActor::IsNetRelevantFor")
+// Ghidra 0x103c4b30; 2176b.
+// DIVERGENCE: weapon-mesh LOD path (this->Physics==2 && Weapon && Dist<1000) skipped — requires
+//   unidentified vtable calls for weapon FBox; all other paths match retail.
+IMPL_TODO("Ghidra 0x103c4b30: weapon-mesh LOD FBox path omitted (unidentified vtable[0x88]/[0x114] on weapon)")
 INT APawn::IsNetRelevantFor( APlayerController* RealViewer, AActor* Viewer, FVector SrcLocation )
 {
 	guard(APawn::IsNetRelevantFor);
-	return AActor::IsNetRelevantFor( RealViewer, Viewer, SrcLocation );
+	// Cache: if same viewer and same game time, return cached bNetRelevant.
+	if( NetRelevancyTime == Level->TimeSeconds && LastRealViewer == RealViewer && LastViewer == Viewer )
+		return bNetRelevant;
+
+	// Team-game teammate shortcut (Level->LevelFlags & 0x1000 = bTeamGame bit).
+	if( (*(DWORD*)((BYTE*)Level + 0x450) & 0x1000u) && RealViewer->Pawn &&
+		*(INT*)((BYTE*)this + 0x3b0) == *(INT*)((BYTE*)RealViewer->Pawn + 0x3b0) )
+	{
+		return CacheNetRelevancy(1, RealViewer, Viewer);
+	}
+
+	// Quick return via owner-chain walk: relevant if this is somewhere in
+	// the Owner chain of Viewer, or Viewer is in the Owner chain of this.
+	// Ghidra gate: bit-31 of flags-dword at +0xa0 must be clear.
+	if( -1 < *(INT*)((BYTE*)this + 0xa0) )
+	{
+		{
+			AActor* walk = this;
+			while( walk ) { if( walk == Viewer ) return CacheNetRelevancy(1, RealViewer, Viewer); walk = walk->Owner; }
+		}
+		{
+			AActor* walk = this;
+			while( walk ) { if( walk == (AActor*)RealViewer ) return CacheNetRelevancy(1, RealViewer, Viewer); walk = walk->Owner; }
+		}
+		if( this != Viewer && Viewer != Owner &&
+			!( (*(DWORD*)((BYTE*)RealViewer + 0x524) & 0x4000u) && *(APawn**)((BYTE*)RealViewer + 0x5b8) == this ) )
+		{
+			// Sound-radius culling.
+			if( *(INT*)((BYTE*)this + 0x14c) != 0 )
+			{
+				FLOAT dSq = (Location - *(FVector*)((BYTE*)Viewer + 0x234)).SizeSquared();
+				FLOAT sr  = *(FLOAT*)((BYTE*)this + 0xec) * GAudioMaxRadiusMultiplier;
+				if( dSq < sr * sr )
+					return CacheNetRelevancy(1, RealViewer, Viewer);
+			}
+
+			// If pawn is always-relevant or net-optional and has no sound radius, skip relevance.
+			if( ((*(DWORD*)((BYTE*)this + 0xa0) & 2u) || (*(DWORD*)((BYTE*)this + 0xa0) & 0x2000u)) &&
+				((*(DWORD*)((BYTE*)this + 0xa8) & 0x4000u) == 0) && *(INT*)((BYTE*)this + 0x14c) == 0 )
+			{
+				return CacheNetRelevancy(0, RealViewer, Viewer);
+			}
+
+			// Determine whether we use the ColBox actor's location for distance checks.
+			UBOOL bUseColBox = 0;
+			if( *(INT*)((BYTE*)this + 0x180) != 0 &&
+				(*(BYTE*)(*(INT*)((BYTE*)this + 0x180) + 0x394) & 1) )
+			{
+				bUseColBox = 1;
+			}
+
+			// Distance check from our location (and colbox location if present).
+			FVector viewerLoc( SrcLocation );
+			FLOAT distSq = (Location - viewerLoc).SizeSquared();
+			FLOAT colDistSq = distSq;
+			if( bUseColBox )
+			{
+				AActor* cb = *(AActor**)((BYTE*)this + 0x180);
+				colDistSq = (cb->Location - viewerLoc).SizeSquared();
+			}
+
+			// AZone max audio radius gate (zone+0x398 bit0 = has limit; zone+0x3a0 = max radius).
+			AActor* zone = *(AActor**)((BYTE*)this + 0x228);
+			if( (*(BYTE*)((BYTE*)zone + 0x398) & 1) )
+			{
+				FLOAT maxR = *(FLOAT*)((BYTE*)zone + 0x3a0);
+				if( maxR * maxR < distSq )
+				{
+					if( !bUseColBox || maxR * maxR < colDistSq )
+						return CacheNetRelevancy(0, RealViewer, Viewer);
+				}
+			}
+
+			// Line-of-sight check from our origin.
+			UModel* bsp = *(UModel**)(*(INT*)((BYTE*)this + 0x328) + 0x90);
+			if( bsp->FastLineCheck(Location, SrcLocation) )
+			{
+				return CacheNetRelevancy(1, RealViewer, Viewer);
+			}
+
+			// Line-of-sight check from our eye position.
+			FVector eyeOffset = eventEyePosition();
+			FVector eyeWorld( Location.X + eyeOffset.X, Location.Y + eyeOffset.Y, Location.Z + eyeOffset.Z );
+			if( bsp->FastLineCheck(eyeWorld, SrcLocation) )
+			{
+				if( bUseColBox )
+				{
+					AActor* cb = *(AActor**)((BYTE*)this + 0x180);
+					if( bsp->FastLineCheck(cb->Location, SrcLocation) )
+					{
+						return CacheNetRelevancy(1, RealViewer, Viewer);
+					}
+					// Crouching pawn: try forward-facing LOS from ColBox.
+					// (Ghidra: bIsCrouched bit 9 of pawn+0x3e0; FRotator::Vector * radius toward viewer.)
+					// IMPL_TODO: simplified - skip crouched ColBox secondary check
+				}
+				else
+				{
+					return CacheNetRelevancy(1, RealViewer, Viewer);
+				}
+			}
+			return CacheNetRelevancy(0, RealViewer, Viewer);
+		}
+	}
+	// Always relevant via owner-chain (LAB_103c5372).
+	*(DWORD*)((BYTE*)this + 0x3e4) |= 0x4000u;
+	NetRelevancyTime   = Level->TimeSeconds;
+	LastRealViewer     = RealViewer;
+	LastViewer         = Viewer;
+	return 1;
 	unguard;
 }
 
