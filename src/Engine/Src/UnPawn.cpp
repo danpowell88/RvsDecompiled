@@ -548,7 +548,7 @@ void AController::execPickTarget( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 531, execPickTarget );
 
-IMPL_TODO("Ghidra 0x1038dc20; 688b — vtable[0x1a] (slot 26, byte 0x68, first AActor-exclusive vtable slot after UObject's 26 slots) actor sub-type gate (before targetable check) not yet identified; omitted")
+IMPL_DIVERGE("Ghidra 0x1038dc20 (688b): loops XLevel->Actors and checks vtable[0x68] (slot 26 = first AActor-exclusive virtual after UObject's 26 slots) which must return 0 to proceed. Slot identity permanently unknown without full vtable reconstruction — omitted unconditionally. All other logic (targetable flag, FoV dot-product, 4M distSq gate, LineOfSightTo) matches retail.")
 void AController::execPickAnyTarget( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPickAnyTarget);
@@ -2430,7 +2430,15 @@ void APawn::physicsRotation( FLOAT DeltaTime, FVector OldVelocity )
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103f1a50; 844b — vtable[0xC8] on HitActor (encroacher sub-type gate) and vtable[0x194] on Controller (unidentified notify dispatch) unidentified; both calls omitted")
+// Ghidra 0x103f1a50 (844b). Two divergences:
+//   1. vtable[0xC8/4=50] on HitActor: decides whether to proceed with wall-adjust logic.
+//      Slot 50 on AActor is unidentified without full vtable reconstruction.
+//      Current: proceed unconditionally after IsEncroacher() check.
+//   2. vtable[0x194/4=101] on Controller: dispatches (HitNormal, HitActor) at the crouch/prone path.
+//      Slot 101 on AController is unidentified. Current: omitted.
+//   All other logic (acceleration check, focal-dir/MinHitWall test, NotifyHitWall,
+//   crouch/prone walk attempts, MoveActor step-down, eventHitWall) matches retail.
+IMPL_DIVERGE("Ghidra 0x103f1a50 (844b): vtable[0xC8] on HitActor (sub-type gate) and vtable[0x194] on Controller (wall-adjust notify dispatch) are permanently unidentifiable without full vtable reconstruction; both omitted. All other paths match retail.")
 void APawn::processHitWall( FVector HitNormal, AActor* HitActor )
 {
 	guard(APawn::processHitWall);

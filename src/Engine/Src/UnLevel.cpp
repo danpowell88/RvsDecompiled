@@ -2995,7 +2995,12 @@ void ALevelInfo::execSetBankSound( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execSetBankSound );
 
 // NotifyMatchStart() - notifies native code that a match has begun.
-IMPL_TODO("611-byte ALevelInfo::execNotifyMatchStart; FUN_103866c0 (R6 session helper) confirmed in Engine _unnamed.cpp; dispatches through R6GameInfo vtable at LevelInfo+0x328; tractable. Ghidra 0x103bc230")
+// Ghidra 0x103bc230 (611b): reads optional bool param via bytecode, then dispatches through
+// *(LevelInfo+0x328)->vtable[0x40..0x6c] — this field holds an R6GameInfo* whose class is
+// defined in R6GameCode.dll. All meaningful logic goes through that vtable: FGuid generation,
+// ArmPatch GUID propagation via FUN_103866c0, cache-file I/O per arm-patch entry.
+// R6GameCode.dll vtable dispatch and ArmPatch anti-cheat system are permanently out of scope.
+IMPL_DIVERGE("Ghidra 0x103bc230 (611b): entirely R6-specific match initialization — dispatches through R6GameInfo vtable at LevelInfo+0x328 (R6GameCode.dll) for ArmPatch GUID propagation and session setup. No Engine.dll equivalent; permanent blocker.")
 void ALevelInfo::execNotifyMatchStart( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execNotifyMatchStart);
