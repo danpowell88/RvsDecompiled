@@ -6,7 +6,7 @@ date: 2026-03-19T01:45
 tags: [decompilation, render, lightmap, D3D]
 ---
 
-Three more IMPL_TODOs gone in batch 15. All three turned out to be permanently blocked — each one by a different flavour of the same fundamental problem: missing type definitions. Forward declarations get you just far enough to compile a pointer to a type, but the moment you try to *call a method* on it, the compiler needs the full class definition. Here's what stopped us this time.
+Two IMPL_TODOs converted to IMPL_DIVERGE in batch 15, plus an important correction to a third that turned out to not be permanently blocked after all. A good reminder that in decompilation work, checking the *full* include path matters — not just the header you can see.
 
 <!-- truncate -->
 
@@ -18,25 +18,7 @@ A *full definition* is `class Foo { public: int bar(); ... };`. Once the compile
 
 The problem in a decompilation project is that the retail binary contains types that the community SDK only forward-declares. The runtime knows exactly how many bytes `Foo` is and exactly which vtable slot `bar()` maps to — but *we* don't, because the SDK only says `class Foo;`. Until someone writes out the full definition from Ghidra analysis, any function that tries to call methods on that type is permanently blocked.
 
-Three types tripped us up this batch.
-
-## FLightMap::GetTextureData (0x10410560, 1589 bytes)
-
-This function is responsible for reading lightmap texture data — the pre-baked lighting information stored in BSP surfaces. At its heart it runs a FMemCache lookup: check if this lightmap's data is already in the lightmap cache (`GCache.Get(...)`), and if not, compute it and store it (`GCache.Create(...)`).
-
-`GCache` is declared in Engine.h as:
-
-```cpp
-ENGINE_API extern class FMemCache GCache;
-```
-
-And in Core.h:
-
-```cpp
-class FMemCache;   // forward declaration only
-```
-
-That's all we have. `FMemCache::Get` and `FMemCache::Create` need the full class definition to generate a vtable call or a direct method call. Without it, this function can never be compiled. IMPL_DIVERGE.
+Two types caught us this batch — plus a near-miss on a third.
 
 ## FDynamicLight::FDynamicLight(AActor*) (0x1040ff20, 1485 bytes)
 
@@ -49,7 +31,7 @@ This is the constructor that builds a `FDynamicLight` (the CPU-side snapshot of 
 5. Multiply by `actor->LightBrightness / 255.0f` to get the final `FPlane` color  
 6. Set direction from `FRotator::Vector(actor->Rotation)` for directional/spotlight types
 
-Step 3 calls `FGetHSV` — an internal Engine.dll helper that converts hue/saturation values to RGB floats. It is not declared in any project header file (searched all `.h` files — zero results). It's a private internal function that the retail compiler inlined or kept internal; the SDK never exposed it.
+Step 3 calls `FGetHSV` — an internal Engine.dll helper that converts hue/saturation values to RGB floats. It is not declared in any project header file (confirmed: searched all `.h` files across both the project `src/` and the SDK — zero results). It's a private internal function that the retail compiler inlined or kept internal; the SDK never exposed it.
 
 Without FGetHSV, we can't initialise the light color at all. Everything downstream (the LightEffect switch, the brightness multiply) depends on the result of that HSV call. IMPL_DIVERGE.
 
@@ -76,22 +58,45 @@ IMPL_DIVERGE("... FillVertexBuffer (IMPL_TODO) handles the CPU-side ...")
 
 Since progress tracking works by grepping for `IMPL_TODO` in the source, this caused that function to be counted as a remaining TODO even though it was already marked IMPL_DIVERGE. Fixed in this commit.
 
+## A Near-Miss: FLightMap::GetTextureData
+
+An initial analysis flagged `FLightMap::GetTextureData` (0x10410560, 1589 bytes) as IMPL_DIVERGE, claiming `FMemCache::Get` and `Create` were inaccessible because Core.h only has:
+
+```cpp
+class FMemCache;   // forward declaration only
+```
+
+**This was wrong.** Core.h also includes `UnCache.h`, which resolves from the SDK path `sdk/Raven_Shield_C_SDK/432Core/Inc/UnCache.h`. That file contains the full `FMemCache` class definition including `Get()`, `Create()`, and the `FCacheItem` nested type. The project's build system adds the SDK core headers to the include path via `CSDK_CORE_INC`, so any translation unit that includes `Core.h` gets the full `FMemCache` definition.
+
+Evidence: `UnIn.cpp` already has this in a working anonymous namespace:
+
+```cpp
+FInputPropertyCache* Cache = (FInputPropertyCache*)GCache.Get(CacheId, Item, 8);
+// ...
+Cache = (FInputPropertyCache*)GCache.Create(CacheId, Item, CacheSize, 8);
+```
+
+This compiles fine, confirming FMemCache is fully available. `FLightMap::GetTextureData` was reverted to IMPL_TODO with an updated note.
+
+**Lesson:** When checking if a type is "only forward-declared", always check the full include chain — not just the starting header. A `class Foo;` on line 150 doesn't tell the whole story if there's an `#include "Foo.h"` on line 300.
+
 ## Tally
+
 
 | Function | File | Addr | Blocker |
 |---|---|---|---|
-| `FLightMap::GetTextureData` | UnRenderUtil.cpp | 0x10410560 | FMemCache forward-declared only |
-| `FDynamicLight::FDynamicLight(AActor*)` | UnRenderUtil.cpp | 0x1040ff20 | FGetHSV undeclared |
+| `FDynamicLight::FDynamicLight(AActor*)` | UnRenderUtil.cpp | 0x1040ff20 | FGetHSV undeclared (searched all SDK+project headers) |
 | `AR6PlayerController::UpdateReticule` | R6PlayerController.cpp | 0x10031010 | FCanvasUtil → FRenderInterface |
+| `FLightMap::GetTextureData` | UnRenderUtil.cpp | 0x10410560 | Reverted to IMPL_TODO — FMemCache IS available |
 
-Three out, build clean.
+Two out, one reverted, one count-pollution fix, build clean.
 
 ## Where We Are
 
-Batch 15 brings us to **71 remaining IMPL_TODOs** (excluding embedded strings and comments). Next up: the UnIn.cpp input system functions, some UnLevel network protocol handlers, and checking whether any UnStaticMeshBuild functions can be implemented from Ghidra.
+After the correction, batch 15 brings us to **72 remaining IMPL_TODOs**. Next batch will focus on identifying more tractable functions from the UnIn.cpp input dispatch, UnLevel network handlers, and UnStaticMeshBuild BVH operations.
 
 | Milestone | Count |
 |---|---|
-| Remaining IMPL_TODOs after batch 15 | ~71 |
-| Permanently blocked (IMPL_DIVERGE) | 83+ |
+| Remaining IMPL_TODOs after batch 15 | ~72 |
+| Permanently blocked (IMPL_DIVERGE) | 82+ |
 | Implemented to parity (IMPL_MATCH) | Growing steadily |
