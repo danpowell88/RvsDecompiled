@@ -749,7 +749,7 @@ int USpriteEmitter::UpdateParticles(float DeltaTime)
 }
 
 // Ghidra: 0x10445110, 981 bytes
-IMPL_DIVERGE("USpriteEmitter::RenderParticles takes FRenderInterface* and submits sprite vertex data through it; same permanent D3DDrv.dll runtime blocker. FillVertexBuffer (IMPL_TODO) handles the CPU-side vertex buffer fill separately")
+IMPL_DIVERGE("USpriteEmitter::RenderParticles takes FRenderInterface* and submits sprite vertex data through it; same permanent D3DDrv.dll runtime blocker. FillVertexBuffer handles the CPU-side vertex buffer fill separately and is tracked independently")
 int USpriteEmitter::RenderParticles(FDynamicActor* param_1, FLevelSceneNode* param_2, TList<FDynamicLight*>* param_3, FRenderInterface* param_4)
 {
 	guard(USpriteEmitter::RenderParticles);

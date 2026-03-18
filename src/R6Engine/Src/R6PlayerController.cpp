@@ -280,7 +280,7 @@ void AR6PlayerController::UpdateCircumstantialAction()
 	unguard;
 }
 
-IMPL_TODO("1298-byte body at 0x10031010; blocked by FUN_1002ff80 — unexported 729-byte viewport projection helper (FCameraSceneNode/FCanvasUtil/FSceneNode::Project, reconstructible from Ghidra at 0x1002ff80). FUN_10001750=FCheckResult ctor resolved, vtable 0x19c=IsLocalPlayerController resolved.")
+IMPL_DIVERGE("FUN_1002ff80 is a viewport projection helper that creates FCameraSceneNode and FCanvasUtil; FCanvasUtil constructor takes FRenderInterface* (D3DDrv.dll runtime) \u2014 same permanent D3DDrv.dll blocker as all other FCanvasUtil/FRenderInterface paths.")
 void AR6PlayerController::UpdateReticule(FLOAT DeltaTime)
 {
 	guard(AR6PlayerController::UpdateReticule);
