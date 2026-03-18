@@ -292,14 +292,114 @@ void UStaticMesh::PostLoad()
 }
 
 // (merged from earlier occurrence)
-IMPL_TODO("Ghidra 0x1044CDA0 (1017b) fully decompiled; BVH node walk uses CollisionNodes at this+0x114 / CollisionTriangles at this+0x108 with FBox::Intersect + FPlane::PlaneDot; needs FUN_1037a200 (TArray<INT>::Remove) and FUN_10322eb0 (TArray<INT>::~TArray) inlined")
-void UStaticMesh::TriangleSphereQuery(AActor *,FSphere &,TArray<FStaticMeshCollisionTriangle *> &)
+// Collision node layout (stride 0x2c = 44 bytes):
+//   INT[0] = TriangleIndex, INT[1] = NextLeafIdx, INT[2] = LeftChildIdx, INT[3] = RightChildIdx
+//   +0x10 (16 bytes in) = FBox (24 bytes: Min(12b) + Max(12b) — no IsValid in collision nodes)
+// Collision triangle layout (stride 0x54 = 84 bytes):
+//   +0x00: FPlane surface plane
+//   +0x10, +0x20, +0x30: FPlane edge planes 0, 1, 2
+//   +0x50: INT queryStamp (last sphere-query counter that visited this tri)
+// DIVERGENCE: FArray bounds-check assertions use check() (expands to appFailAssert in retail
+//   debug/profile; omitted in release). Functionally equivalent to retail path.
+IMPL_MATCH("Engine.dll", 0x1044CDA0)
+void UStaticMesh::TriangleSphereQuery(AActor* Actor, FSphere& Sphere, TArray<FStaticMeshCollisionTriangle*>& Triangles)
 {
 	guard(UStaticMesh::TriangleSphereQuery);
-	// Retail: transforms sphere bbox to local space via Actor->WorldToLocal(),
-	// then walks BVH node tree (this+0x114, stride 0x2c) testing FBox overlap
-	// and plane-dot distance. Matching leaf triangles (this+0x108, stride 0x54)
-	// are appended to the output TArray.
+
+	// Step 1: build aligned bounding box from sphere, transform to local space
+	FMatrix worldToLocal = Actor->WorldToLocal();
+	FVector center3(Sphere.X, Sphere.Y, Sphere.Z);
+	FVector radVec(Sphere.W, Sphere.W, Sphere.W);
+	FBox localBox = FBox(center3 - radVec, center3 + radVec).TransformBy(worldToLocal);
+	FVector center, extents;
+	localBox.GetCenterAndExtents(center, extents);
+
+	// Raw accessors for collision arrays (not exposed as named members)
+	FArray* pTriArr  = (FArray*)((BYTE*)this + 0x108);  // CollisionTriangles
+	FArray* pNodeArr = (FArray*)((BYTE*)this + 0x114);  // CollisionNodes
+
+	// Increment per-query stamp so each triangle is added at most once per call
+	INT queryStamp = ++(*(INT*)((BYTE*)this + 0x124));
+
+	// BVH traversal via inline DFS stack of node indices
+	// TArray<INT> auto-cleans via ~TArray when scope exits (inlines FUN_10322eb0 behaviour)
+	TArray<INT> nodeStack;
+	nodeStack.AddItem(0);  // root node is index 0
+
+	while (nodeStack.Num() > 0)
+	{
+		INT nodeIdx = nodeStack(nodeStack.Num() - 1);
+		nodeStack.Remove(nodeStack.Num() - 1);
+
+		check(nodeIdx >= 0 && nodeIdx < pNodeArr->Num());
+		INT* node = (INT*)((BYTE*)pNodeArr->GetData() + nodeIdx * 0x2c);
+
+		INT triIdx = node[0];
+		check(triIdx >= 0 && triIdx < pTriArr->Num());
+		BYTE* triBase = (BYTE*)pTriArr->GetData() + triIdx * 0x54;
+		FPlane* surfPlane = (FPlane*)triBase;
+
+		// Coarse AABB rejection: node BBox is at +0x10 (node + 4 as int pointer)
+		FBox* nodeBBox = (FBox*)(node + 4);
+		if (!localBox.Intersect(*nodeBBox))
+			continue;
+
+		// Plane-dot distance and sphere half-extent along the splitting plane normal
+		FLOAT planeDot = surfPlane->PlaneDot(center);
+		FLOAT hx = extents.X * surfPlane->X; if (hx < 0.0f) hx = -hx;
+		FLOAT hy = extents.Y * surfPlane->Y; if (hy < 0.0f) hy = -hy;
+		FLOAT hz = extents.Z * surfPlane->Z; if (hz < 0.0f) hz = -hz;
+		FLOAT halfExt = hx + hy + hz;
+
+		if (planeDot <= -halfExt)
+		{
+			// Sphere entirely behind splitting plane: descend into back subtree only
+			if (node[2] != -1)
+				nodeStack.AddItem(node[2]);
+		}
+		else
+		{
+			if (planeDot < halfExt)
+			{
+				// Sphere overlaps splitting plane: test leaf triangle chain
+				INT leafIdx = nodeIdx;
+				while (leafIdx != -1)
+				{
+					INT* leafNode = (INT*)((BYTE*)pNodeArr->GetData() + leafIdx * 0x2c);
+					BYTE* leafTri = (BYTE*)pTriArr->GetData() + leafNode[0] * 0x54;
+
+					// Deduplication via query stamp
+					if (*(INT*)(leafTri + 0x50) != queryStamp)
+					{
+						*(INT*)(leafTri + 0x50) = queryStamp;
+
+						// Test all 3 edge planes — sphere must be inside all of them
+						bool inside = true;
+						for (INT e = 0; e < 3 && inside; e++)
+						{
+							FPlane* edgePlane = (FPlane*)(leafTri + (e + 1) * 0x10);
+							FLOAT edgeDot = edgePlane->PlaneDot(center);
+							FLOAT ex = extents.X * edgePlane->X; if (ex < 0.0f) ex = -ex;
+							FLOAT ey = extents.Y * edgePlane->Y; if (ey < 0.0f) ey = -ey;
+							FLOAT ez = extents.Z * edgePlane->Z; if (ez < 0.0f) ez = -ez;
+							if (ex + ey + ez < edgeDot)
+								inside = false;
+						}
+						if (inside)
+							Triangles.AddItem((FStaticMeshCollisionTriangle*)leafTri);
+					}
+					leafIdx = leafNode[1];  // next leaf in chain (-1 = end)
+				}
+				// Also push back subtree when sphere overlaps the region
+				if (node[2] != -1)
+					nodeStack.AddItem(node[2]);
+			}
+			// Always push front subtree when sphere is not entirely behind
+			if (node[3] != -1)
+				nodeStack.AddItem(node[3]);
+		}
+	}
+
 	unguard;
 }
 IMPL_TODO("Ghidra 0x1044AD30 (3910b) fully decompiled; rebuilds vertex/index/section/collision data from source triangles at this+0x144; many internal helpers (FUN_10449ee0, FUN_10448ca0, FUN_1044a860 etc.) need decompilation")

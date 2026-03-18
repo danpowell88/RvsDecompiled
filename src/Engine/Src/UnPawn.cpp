@@ -196,10 +196,11 @@ IMPLEMENT_FUNCTION( AController, 502, execMoveToward );
 
 // Ghidra 0x1038d110, 534b. No SEH (no guard/unguard in retail).
 // bAdjusting checks: vtable[0x184/4=97] on Pawn (unidentified actorReachable variant)
-// approximated by moveToward result.  PHYS_Spider Z-offset calls FUN_10301350 (not
-// reconstructed); omitted.  PHYS_Flying adds CollisionHeight*0.7 to Destination Z
-// (Ghidra: MoveTarget+0xfc = CollisionHeight; vtable[26] guard omitted → always applied).
-IMPL_TODO("Ghidra 0x1038d110: bAdjusting vtable[97] approx'd as moveToward; PHYS_Spider FUN_10301350 (37-byte vector-scale helper, identifiable) not yet inlined; PHYS_Flying vtable[26] (byte 0x68, first AActor-exclusive slot) guard omitted")
+// approximated by moveToward result.  PHYS_Flying vtable[26] guard (MoveTarget->IsA check)
+// not identified; Z-offset applied unconditionally.
+// Ghidra trailing: writes Pawn+0x3f4 from unaff_EDI (caller-saved); Pawn+0x3e2 bit0 and
+// MoveTarget.NavSpec+0x410 bit6 guard for MoveTimer=-1.0f path — omitted approximation.
+IMPL_TODO("Ghidra 0x1038d110: bAdjusting vtable[97] approx'd as moveToward; PHYS_Flying vtable[26] (byte 0x68, first AActor-exclusive vtable slot after UObject's 26 slots) guard omitted; trailing MoveTimer=-1.0f path (Pawn+0x3e2/MoveTarget nav bit) omitted")
 void AController::execPollMoveToward( FFrame& Stack, RESULT_DECL )
 {
 	if( !MoveTarget || !Pawn || MoveTimer < 0.0f )
@@ -220,13 +221,19 @@ void AController::execPollMoveToward( FFrame& Stack, RESULT_DECL )
 	if( !bAdjusting )
 	{
 		Destination = MoveTarget->Location;
-		// PHYS_Flying: offset Destination Z upward by 70% of MoveTarget's CollisionHeight
-		// so pawn approaches the target slightly above floor level.
-		// (Ghidra: MoveTarget+0xfc = CollisionHeight; guarded by vtable[26] check, omitted.)
+		// PHYS_Flying: offset Destination Z upward by 70% of MoveTarget's CollisionHeight.
+		// Ghidra: guarded by vtable[0x68] (slot 26) on MoveTarget; guard not identified → omitted.
 		if( Pawn->Physics == PHYS_Flying )
 			Destination.Z += *(FLOAT*)((BYTE*)MoveTarget + 0xfc) * 0.7f;
-		// PHYS_Spider: retail adjusts Z via FUN_10301350 (spider surface attachment);
-		// not reconstructed — omitted.
+		// PHYS_Spider: offset Destination inward along spider attachment normal by CollisionRadius.
+		// Ghidra 0x1038d110: FUN_10301350(result, MoveTarget+0xf8, Pawn+0x590) = scale*vec;
+		// Destination -= spiderNormal * CollisionRadius.
+		else if( Pawn->Physics == PHYS_Spider )
+		{
+			FLOAT collR       = *(FLOAT*)((BYTE*)MoveTarget + 0xf8);
+			FVector spiderN   = *(FVector*)((BYTE*)Pawn + 0x590);
+			Destination      -= spiderN * collR;
+		}
 		if( Pawn->moveToward( Destination, MoveTarget ) )
 			GetStateFrame()->LatentAction = 0;
 	}
