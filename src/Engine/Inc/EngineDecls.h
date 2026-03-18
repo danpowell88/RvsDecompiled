@@ -18,6 +18,7 @@ public:
 	FLOAT GetCenter() const;
 	FLOAT GetMax() const;
 	FLOAT Size() const;
+	INT IsZero() const;
 };
 class CORE_API FRangeVector
 {
