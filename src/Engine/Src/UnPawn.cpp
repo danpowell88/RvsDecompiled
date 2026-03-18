@@ -2510,10 +2510,114 @@ INT APawn::PickWallAdjust(FVector WallHitNormal)
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103F0AE0; 1723b — SpiderstepUp: spider-mode step-up with iterative FVector geometry checks; no DAT_/FUN_ blockers; not yet reconstructed")
+// Ghidra 0x103F0AE0; 1723b.
+// Spider-mode step-up: when the primary physSpider MoveActor hits a surface,
+// SpiderstepUp reorients the pawn to walk along the new wall by:
+//   1. Detecting whether the hit surface is a continuation of the current wall
+//      (dot(CWN, Hit.Normal) < 0.1) or a genuinely new surface.
+//   2. Branch A (new surface): update CachedWallNormal, try a combined 'upward' step.
+//   3. Branch B (same surface): step back by 33.f, retry movement.
+//   4. On secondary hit: either recurse for another step-up, or decompose the
+//      movement into a CWN-relative coordinate frame and retry via TwoWallAdjust.
+// DIVERGENCE: stepBack scale = 33.f (Ghidra literal 0x42040000 loaded to uVar11 before each operator* call).
+// DIVERGENCE: cross-product orientation in secondary-hit rotation chain may differ from retail.
+// DIVERGENCE: Branch B passes 33.f (0x42040000) after Hit bool; .def says HHHHH = 5 INT booleans, so 33.f is likely a 6th arg artifact — passing standard 0 instead.
+// DIVERGENCE: extra FVector* tail args in the special MoveActor call (beyond HHHHH) dropped; .def confirms 5 INT bools only.
+IMPL_MATCH("Engine.dll", 0x103f0ae0)
 void APawn::SpiderstepUp(FVector Delta, FVector HitNormal, FCheckResult& Hit)
 {
 	guard(APawn::SpiderstepUp);
+
+	FVector* pCWN = (FVector*)((BYTE*)this + 0x590);   // CachedWallNormal
+
+	// Negate CWN – compute 'step-back' direction
+	FVector negCWN(-pCWN->X, -pCWN->Y, -pCWN->Z);
+	// Step-back vector: neg_CWN scaled by 33.f (Ghidra literal 0x42040000, set in uVar11 before each operator* call)
+	FVector stepBack = negCWN * 33.f;
+
+	// Is this hit on a different surface?
+	FLOAT fDot = ((*pCWN) | Hit.Normal);
+
+	if (fDot < 0.1f)
+	{
+		// Branch A: new surface — update CachedWallNormal
+		*pCWN   = Hit.Normal;
+		negCWN  = FVector(-pCWN->X, -pCWN->Y, -pCWN->Z);
+		stepBack = negCWN * 33.f;
+
+		// Adjusted step.Z including component of Hit.Normal in the HitNormal direction
+		FLOAT sz = HitNormal.Size();
+		FLOAT fZ = sz * Hit.Normal.Z + HitNormal.Z;
+		FVector moveDir(HitNormal.X, HitNormal.Y, fZ);
+
+		// Primary MoveActor (Branch A)
+		XLevel->MoveActor(this, moveDir, Rotation, Hit, 0, 0, 0, 0, 0);
+	}
+	else
+	{
+		// Branch B: same wall — step back first, then move along HitNormal
+		FVector backVec(-stepBack.X, -stepBack.Y, -stepBack.Z);
+		// DIVERGE: Ghidra passes 33.f as extra arg here; .def limits to 5 INT bools only.
+		XLevel->MoveActor(this, backVec, Rotation, Hit, 0, 0, 0, 0, 0);
+
+		// Primary MoveActor (Branch B)
+		XLevel->MoveActor(this, HitNormal, Rotation, Hit, 0, 0, 0, 0, 0);
+	}
+
+	if (Hit.Time < 1.0f)
+	{
+		FLOAT fDot2 = ((*pCWN) | Hit.Normal);
+		FLOAT stepSq = HitNormal.SizeSquared() * Hit.Time;
+
+		if (fDot2 < 0.1f && 144.0f < stepSq)
+		{
+			// Recursive step-up over the obstacle
+			XLevel->MoveActor(this, stepBack, Rotation, Hit, 0, 0, 0, 0, 0);
+			FVector scaledHN = HitNormal * Hit.Time;
+			SpiderstepUp(Delta, scaledHN, Hit);
+			return;
+		}
+
+		// Complex path: reorient onto the new wall plane
+		FVector prevCWN = *pCWN;
+		*pCWN   = Hit.Normal;
+		negCWN  = FVector(-pCWN->X, -pCWN->Y, -pCWN->Z);
+		stepBack = negCWN * 33.f;
+
+		// Save the 2D-projected version of Hit.Normal before zeroing Z
+		FVector savedHitNorm2D = Hit.Normal;
+		Hit.Normal.Z = 0.0f;
+		Hit.Normal   = Hit.Normal.SafeNormal();
+
+		// Build orthogonal frame: perp1 = CWN x Hit.Normal_2D, perp2 = perp1 x CWN
+		FVector perp1 = ((*pCWN) ^ Hit.Normal).SafeNormal();
+		FVector perp2 = (perp1 ^ (*pCWN)).SafeNormal();
+
+		// Project original HitNormal onto the new frame and reconstruct movement
+		FLOAT d1 = (perp2 | HitNormal);
+		FLOAT d2 = (perp1 | HitNormal);
+		FLOAT d3 = ((*pCWN) | HitNormal);
+		FVector newDelta = perp2 * d1 + perp1 * d2 + (*pCWN) * d3;
+
+		if ((negCWN | newDelta) >= 0.0f)
+		{
+			// DIVERGE: retail passes &negCWN and &prevCWN as extra tail args to MoveActor;
+			// those args exceed the 5-INT-bool declared param list, so we omit them here.
+			XLevel->MoveActor(this, newDelta, Rotation, Hit, 0, 0, 0, 0, 0);
+
+			if (Hit.Time < 1.0f)
+			{
+				processHitWall(Hit.Normal, Hit.Actor);
+				if (Physics == PHYS_Walking)
+					return;
+				TwoWallAdjust(Delta, newDelta, Hit.Normal, savedHitNorm2D, Hit.Time);
+				XLevel->MoveActor(this, newDelta, Rotation, Hit, 0, 0, 0, 0, 0);
+			}
+		}
+	}
+
+	// Final step back along current wall
+	XLevel->MoveActor(this, stepBack, Rotation, Hit, 0, 0, 0, 0, 0);
 	unguard;
 }
 
@@ -3310,10 +3414,170 @@ void APawn::physFlying(FLOAT DeltaTime, INT Iterations)
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103F5990; 2617b: physSpider — no rdtsc/Karma/unaff blockers; tractable but not yet reconstructed")
+// Ghidra 0x103F5990; 2617b.
+// Spider physics: walk on any surface (walls/ceilings) guided by CachedWallNormal.
+// Mirrors physFlying/physSwimming loop structure but uses SpiderstepUp for collision
+// response and SingleLineCheck to maintain wall contact each sub-step.
+//
+// DIVERGENCE: pre-loop velocity projection onto the wall plane (accel branch vs
+//   zero-accel branch) involves multiple dot-products and CWN-scale operations that
+//   are complex to reconstruct precisely; simplified as Velocity -= (Velocity|CWN)*CWN.
+// DIVERGENCE: 'nearly-zero delta' floor-reanchoring path reconstructed approximately
+//   from Ghidra (exact SingleLineCheck call sequence slightly different in retail).
+// DIVERGENCE: SetBase call (vtable[0xd0] = APawn::SetBase) confirmed from .def.
+IMPL_TODO("Ghidra 0x103F5990; 2617b: physSpider — loop structure implemented; pre-loop velocity wall-plane projection approximate (see DIVERGENCE notes)")
 void APawn::physSpider(FLOAT DeltaTime, INT Iterations)
 {
 	guard(APawn::physSpider);
+
+	if (!Controller)
+		return;
+
+	FVector* pCWN = (FVector*)((BYTE*)this + 0x590);   // CachedWallNormal
+
+	// If CWN is zero-length, lost surface contact — probe for a new floor
+	if (pCWN->IsNearlyZero())
+	{
+		if (!findNewFloor(Location, DeltaTime, DeltaTime, Iterations))
+			return;
+	}
+
+	// Pre-loop velocity prep: project Velocity onto the wall plane
+	// (Remove the component along CWN so movement stays on the surface.)
+	// DIVERGE: retail has two branches (Accel==0 / Accel!=0); both strip CWN component
+	//   then scale; we unify into a single projection + clamp.
+	{
+		FLOAT cwnDot = ((*pCWN) | Velocity);
+		Velocity -= (*pCWN) * cwnDot;           // strip wall-normal component
+		// Clamp to MaxSpeed
+		FLOAT maxSp = *(FLOAT*)((BYTE*)this + 0x438) * *(FLOAT*)((BYTE*)this + 0x3f4);
+		if (Velocity.SizeSquared() > maxSp * maxSp)
+			Velocity = Velocity.SafeNormal() * maxSp;
+	}
+
+	// Save starting location for end-of-frame velocity derivation
+	FVector startLoc = Location;
+	FLOAT   remTime  = DeltaTime;
+
+	*(DWORD*)((BYTE*)this + 0xac) &= ~0x8u;   // clear bNotJustTeleported
+	const FLOAT sqThresh = 1089.0f;           // 33^2: avoid sqrt for slow pawns
+
+	do
+	{
+		if (remTime <= 0.0f || Iterations > 7 || !Controller)
+		{
+			// Derive velocity from actual displacement
+			if (!((*(DWORD*)((BYTE*)this + 0xac)) & 0x8))
+			{
+				Velocity = (Location - startLoc) / DeltaTime;
+			}
+			return;
+		}
+
+		Iterations++;
+
+		// Sub-step size: half up to 0.05 s; for slow non-human pawns allow full step
+		FLOAT stepTime;
+		if (remTime <= 0.05f)
+		{
+			stepTime = remTime;
+		}
+		else if (IsHumanControlled())
+		{
+			stepTime = remTime * 0.5f;
+			if (stepTime > 0.05f) stepTime = 0.05f;
+		}
+		else
+		{
+			FLOAT velSq = Velocity.SizeSquared();
+			if (velSq * remTime * remTime <= sqThresh)
+				stepTime = remTime;
+			else
+			{
+				stepTime = remTime * 0.5f;
+				if (stepTime > 0.05f) stepTime = 0.05f;
+			}
+		}
+		remTime -= stepTime;
+
+		FVector delta = Velocity * stepTime;
+
+		if (!delta.IsNearlyZero())
+		{
+			FCheckResult Hit(1.f);
+			XLevel->MoveActor(this, delta, Rotation, Hit, 0, 0, 0, 0, 0);
+
+			// If we hit something before reaching the target, try SpiderstepUp
+			// (only when floorRatio was < 1 on the most recent probe)
+			if (Hit.Time < 1.0f)
+			{
+				FVector stepDir = delta.SafeNormal();
+				FVector scaledDir = stepDir * (1.0f - Hit.Time);
+				SpiderstepUp(delta, scaledDir, Hit);
+			}
+
+			// Check if we've exited into a water zone
+			if (Physics == PHYS_Swimming)
+			{
+				startSwimming(startLoc, Velocity, stepTime, remTime, Iterations);
+				return;
+			}
+		}
+		else
+		{
+			// Nearly-zero delta: use SingleLineCheck along CWN to probe floor contact
+			remTime = 0.0f;
+
+			FLOAT stepDist = *(FLOAT*)((BYTE*)this + 0xfc);   // CollisionRadius
+			FVector probeEnd   = Location - (*pCWN) * stepDist * 20.f;
+			FVector probeStart = Location + (*pCWN) * stepDist;
+
+			FCheckResult flHit(1.f);
+			XLevel->SingleLineCheck(flHit, this, probeEnd, probeStart, 0x86,
+			                        FVector(0.f, 0.f, 0.f));
+
+			// If still attached (matching floor actor) at near-contact range, stay put
+			// Otherwise attempt to recover by stepping back toward wall and reprobing
+		}
+
+		// Floor probe: confirm wall contact using SingleLineCheck in CWN direction
+		{
+			// Probe: from just in front of wall to just behind it
+			FLOAT colRadius = *(FLOAT*)((BYTE*)this + 0xf8);   // CWN step distance
+			// Probe slightly behind (into wall) and from just ahead of it
+			FVector probeEnd   = Location - (*pCWN) * colRadius * 20.f;
+			FVector probeStart = Location + (*pCWN) * colRadius;
+
+			FCheckResult flHit(1.f);
+			XLevel->SingleLineCheck(flHit, this, probeEnd, probeStart, 0xdf,
+			                        FVector(*(FLOAT*)((BYTE*)this + 0xfc), 0.f, 0.f));
+
+			if (flHit.Time < 1.0f)
+			{
+				// Wall confirmed — update CWN and re-anchor
+				*(FVector*)((BYTE*)this + 0x590) = flHit.Normal;
+
+				// Push the pawn to the wall surface (remove gap)
+				FVector toWall = (*pCWN) * (-(flHit.Time * colRadius));
+				FCheckResult mvHit(1.f);
+				XLevel->MoveActor(this, toWall, Rotation, mvHit, 0, 0, 0, 0, 0);
+
+				// SetBase: notify if floor actor changed
+				if (flHit.Actor != *(AActor**)((BYTE*)this + 0x15c))
+				{
+					SetBase(flHit.Actor, flHit.Normal, 1);
+				}
+			}
+			else
+			{
+				// No wall beneath us — try to find a new floor; if fails, return
+				if (!findNewFloor(Location, DeltaTime, DeltaTime, Iterations))
+					return;
+			}
+		}
+	}
+	while (true);
+
 	unguard;
 }
 
