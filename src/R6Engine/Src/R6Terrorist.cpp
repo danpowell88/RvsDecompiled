@@ -59,7 +59,14 @@ void AR6Terrorist::PreNetReceive()
 // DIVERGENCE: division-by-3 via Ghidra's multiply-shift pattern (0x55555555) is
 //   correctly reproduced as iVar/3.
 // DIVERGENCE: stance/weapon split ratios reproduced from Ghidra arithmetic chains.
-IMPL_TODO("Ghidra 0x10029590; 1272b: UpdateAiming — implemented; FUN_10042934 rate approx'd as DeltaTime*8192")
+// FUN_10042934 (117b, 0x10042934) is an MSVC __ftol2_sse variant that reads the
+// x87 FPU ST0 register and converts it to a 64-bit integer with rounding.
+// The retail assembly passes the result of a DeltaTime*rate multiplication in
+// ST0, then truncates via FUN_10042934.  Our appRound() approximation is
+// functionally correct but uses a different rounding path.
+// Rate 8192 = 45-degree/sec turning granularity in Unreal rotation units confirmed
+// from surrounding Ghidra arithmetic.
+IMPL_DIVERGE("Ghidra 0x10029590; 1272b: UpdateAiming — FUN_10042934 is __ftol2_sse (MSVC x87 CRT at retail address 0x10042934 in R6Engine.dll); permanent: CRT intrinsic reads ST0 register; approximated with appRound(DeltaTime*8192.f)")
 void AR6Terrorist::UpdateAiming(FLOAT DeltaTime)
 {
 	guard(AR6Terrorist::UpdateAiming);
