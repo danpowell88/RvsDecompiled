@@ -928,15 +928,78 @@ void FRebuildTools::Delete(FString p0) {
 // Reads NumItems from "Rebuild Configs"/"UnrealEd.ini", then for each Config%d parses
 // comma-separated string (6 fields: Name,Opt[2],Opt[0],Opt[1],Opt[3],Opt[4]) via
 // FString::ParseIntoArray(",") and stores into a new FRebuildOptions via Save().
-// Blocked by: FUN_1031f140 (Engine-internal TArray<FRebuildOptions> reset at start;
-// no source counterpart) and FUN_1031efc0 (Engine-internal TArray<FString> element
-// destructor sweep; no source counterpart). Both are Engine.dll-internal template
-// instantiations not exported and not addressable in the rebuild.
-IMPL_TODO("Ghidra 0x103FD9C0 (665b): blocked by FUN_1031f140 (TArray<FRebuildOptions> reset) and FUN_1031efc0 (TArray<FString> element dtor); both are Engine-internal, no source counterpart")
+// NOTE: FUN_1031f140 (TArray<FRebuildOptions> empty with dtors) and FUN_1031efc0
+// (TArray<FString> element dtor sweep) are inlined as their template-equivalent code.
+// TArray<FString> field cleanup is handled automatically by TArray<FString>::~TArray()
+// since TTypeInfo<FString>::NeedsDestructor() = true (TArray::Remove calls ~T per elem).
+// DIVERGENCE: retail calls GetString(TCHAR* buffer) at GConfig vtable+0x0C (slot 3);
+// we call GetString(FString&) at vtable+0x10 (slot 4) for clarity. Net result identical.
+IMPL_MATCH("Engine.dll", 0x103FD9C0)
 void FRebuildTools::Init() {
 	guard(FRebuildTools::Init);
-	// Retail: FUN_1031f140 empties TArray<FRebuildOptions>, adds default entry,
-	// allocates new FRebuildOptions as current ptr (*(this)), reads config sections.
+
+	// Step 1: Destroy all existing FRebuildOptions elements and empty the array.
+	// Inlines FUN_1031f140 (57b): loops ~FRebuildOptions() stride 0x2C, then FArray::Empty(0x2C).
+	{
+		FArray* arr = (FArray*)((BYTE*)this + 4);
+		INT n = arr->Num();
+		for (INT i = 0; i < n; i++)
+		{
+			FRebuildOptions* opt = (FRebuildOptions*)((BYTE*)arr->GetData() + i * 0x2C);
+			opt->~FRebuildOptions();
+		}
+		arr->Empty(0x2C);
+	}
+
+	// Step 2: Add a default (zeroed) FRebuildOptions entry to the array.
+	FArray* arr = (FArray*)((BYTE*)this + 4);
+	INT idx = arr->Add(1, 0x2C);
+	FRebuildOptions* defaultOpt = (FRebuildOptions*)((BYTE*)arr->GetData() + idx * 0x2C);
+	if (defaultOpt)
+		new(defaultOpt) FRebuildOptions();
+
+	// Step 3: Allocate and construct the current-options pointer at this+0.
+	FRebuildOptions* current = (FRebuildOptions*)GMalloc->Malloc(0x2C, TEXT("FRebuildOptions"));
+	if (current)
+		new(current) FRebuildOptions();
+	*(FRebuildOptions**)this = current;
+
+	// Step 4: Copy the default entry into current options.
+	// Re-read defaultOpt since arr->GetData() may have changed after the Malloc above.
+	defaultOpt = (FRebuildOptions*)arr->GetData();
+	*GetCurrent() = *defaultOpt;
+
+	// Step 5: Read the number of saved configs from UnrealEd.ini.
+	INT NumItems = 0;
+	GConfig->GetInt(TEXT("Rebuild Configs"), TEXT("NumItems"), NumItems, TEXT("UnrealEd.ini"));
+
+	// Step 6: Read each saved config entry and populate the options array.
+	// Saved format (from Shutdown): "<Name>,<Opt[2]>,<Opt[0]>,<Opt[1]>,<Opt[3]>,<Opt[4]>"
+	for (INT i = 0; i < NumItems; i++)
+	{
+		FString keyStr = FString::Printf(TEXT("Config%d"), i);
+		FString configStr;
+		if (GConfig->GetString(TEXT("Rebuild Configs"), *keyStr, configStr, TEXT("UnrealEd.ini")))
+		{
+			TArray<FString> parts;
+			configStr.ParseIntoArray(TEXT(","), &parts);
+			if (parts.Num() == 6)
+			{
+				FRebuildOptions* saved = Save(parts(0));
+				if (saved)
+				{
+					saved->Options[2] = appAtoi(*parts(1));
+					saved->Options[0] = appAtoi(*parts(2));
+					saved->Options[1] = appAtoi(*parts(3));
+					saved->Options[3] = appAtoi(*parts(4));
+					saved->Options[4] = appAtoi(*parts(5));
+				}
+			}
+			// parts goes out of scope: TArray<FString>::~TArray calls ~FString per element
+			// (inlines FUN_1031efc0 + FArray::~FArray behaviour)
+		}
+	}
+
 	unguard;
 }
 
