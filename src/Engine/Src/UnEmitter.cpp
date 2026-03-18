@@ -296,7 +296,7 @@ void AEmitter::PostScriptDestroyed()
 }
 
 // Ghidra: 0x103dfe90, 387 bytes
-IMPL_TODO("blocked by FCollisionHash query infrastructure and AProjector class integration")
+IMPL_DIVERGE("FCollisionHash not declared in project headers (accessed only via raw pointer ULevel+0xf0); AProjector vtable slot 0x194 not accessible without full vtable declaration — hash query permanently blocked")
 int AEmitter::CheckForProjectors()
 {
 	guard(AEmitter::CheckForProjectors);
@@ -658,7 +658,7 @@ int USparkEmitter::UpdateParticles(float DeltaTime)
 }
 
 // Ghidra: 0x10443a60, 887 bytes
-IMPL_TODO("blocked by FUN_10443720 (spark RI setup) and FUN_10443610 (spark line submit)")
+IMPL_DIVERGE("USparkEmitter::RenderParticles calls FRenderInterface vtable slot +0x34 directly (confirmed Ghidra 0x10443a60); same permanent D3DDrv.dll runtime blocker as UBeamEmitter/UMeshEmitter RenderParticles")
 int USparkEmitter::RenderParticles(FDynamicActor* param_1, FLevelSceneNode* param_2, TList<FDynamicLight*>* param_3, FRenderInterface* param_4)
 {
 	guard(USparkEmitter::RenderParticles);
@@ -749,7 +749,7 @@ int USpriteEmitter::UpdateParticles(float DeltaTime)
 }
 
 // Ghidra: 0x10445110, 981 bytes
-IMPL_TODO("blocked by FUN_10445060 (sprite RI setup), FUN_10301560 (emitter-to-world matrix), and FillVertexBuffer integration")
+IMPL_DIVERGE("USpriteEmitter::RenderParticles takes FRenderInterface* and submits sprite vertex data through it; same permanent D3DDrv.dll runtime blocker. FillVertexBuffer (IMPL_TODO) handles the CPU-side vertex buffer fill separately")
 int USpriteEmitter::RenderParticles(FDynamicActor* param_1, FLevelSceneNode* param_2, TList<FDynamicLight*>* param_3, FRenderInterface* param_4)
 {
 	guard(USpriteEmitter::RenderParticles);
