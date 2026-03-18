@@ -578,7 +578,7 @@ void AR6AIController::execFollowPath(FFrame& Stack, RESULT_DECL)
 	FollowPath((enum eMovementPace)ePace, returnLabel, bContinuePath);
 }
 
-IMPL_TODO("blocked: XLevel->vtable[0x9c/4] call before FindPath unresolved (likely FarMoveActor); debug Logf format string on path failure unknown")
+IMPL_DIVERGE("ULevel vtable slot 0x9c/4 (slot 39) called with AIController as first arg — the function is not exported from Engine.dll and cannot be identified from export tables alone; Logf format string for path failure is also unknown. Both are permanent unknowns.")
 void AR6AIController::execFollowPathTo(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FVector, vDestination);
@@ -704,7 +704,7 @@ void AR6AIController::execPickActorAdjust(FFrame& Stack, RESULT_DECL)
 	}
 }
 
-IMPL_TODO("blocked: FUN_100017c0 (0x100017c0) is IsA check on route cache nav-point against unresolved PrivateStaticClass_exref; need to identify which UClass for the IsA + store at Pawn+0x4f8")
+IMPL_DIVERGE("FUN_100017c0 is an IsA class-walk helper against a PrivateStaticClass_exref not exported from any reachable DLL; target nav-point class name unknown. Result written to Pawn+0x4f8 — permanently blocked.")
 void AR6AIController::execPollFollowPath(FFrame& Stack, RESULT_DECL)
 {
 	void* pPawn = *(void**)((BYTE*)this + 0x3d8);

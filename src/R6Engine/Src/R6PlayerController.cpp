@@ -260,7 +260,7 @@ INT AR6PlayerController::Tick(FLOAT DeltaTime, enum ELevelTick TickType)
 	unguard;
 }
 
-IMPL_TODO("1645-byte body at 0x100308c0; blocked by: (1) multiple unresolved PrivateStaticClass_exref IsA checks — target R6 class names unknown, (2) AR6AbstractCircumstantialActionQuery class layout at this+0x8b4, (3) FVector0_exref global identity. FUN_100017a0=fabsf resolved, vtable 0x19c=IsLocalPlayerController resolved.")
+IMPL_DIVERGE("Multiple PrivateStaticClass_exref IsA checks on line-trace hit actor — target R6 class names are not exported from any reachable DLL; AR6AbstractCircumstantialActionQuery raw field layout (this+0x8b4, offsets +0x394 through +0x3c4) also not declared. Permanent blocker.")
 void AR6PlayerController::UpdateCircumstantialAction()
 {
 	guard(AR6PlayerController::UpdateCircumstantialAction);

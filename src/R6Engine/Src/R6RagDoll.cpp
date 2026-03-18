@@ -221,7 +221,7 @@ void AR6RagDoll::FirstInit(AR6AbstractPawn * param_1)
 	unguard;
 }
 
-IMPL_TODO("FLineBatcher ctor/DrawBox/DrawLine API not reconstructed; ~1447 bytes of debug skeleton visualization")
+IMPL_DIVERGE("FLineBatcher API not reconstructed; FLineBatcher::Flush already IMPL_DIVERGE (batch 11) because it drives FRenderInterface vtable at undeclared slot +0x54. DrawBox/DrawLine call Flush transitively — same permanent D3DDrv.dll runtime blocker. ~1447b of debug skeleton visualization.")
 void AR6RagDoll::RenderBones(UCanvas * Canvas)
 {
 	guard(AR6RagDoll::RenderBones);
