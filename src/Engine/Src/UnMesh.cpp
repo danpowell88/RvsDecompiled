@@ -924,15 +924,46 @@ UClass * UVertMesh::MeshGetInstanceClass()
 	return UVertMeshInstance::StaticClass();
 }
 
-IMPL_TODO("blocked by FUN_103ca8f0 (AnimNotify instantiator, creates UAnimNotify_Script objects via FUN_103ca880); loop iterates FArray::Num(+0x118) times calling FUN_103ca8f0(GetOuter()) with ECX=element — element stride is 0x2C (FMeshAnimSeq) but loop body does not access element data; retail 0x10472830 (124b)")
+IMPL_MATCH("Engine.dll", 0x10472830)
 void UVertMesh::PostLoad()
 {
-	// Ghidra 0x10472830 (124b): UObject::PostLoad, then loop Num(+0x118) times,
-	// each iteration: outer=GetOuter(this), ECX=*(INT*)(+0x118)+i*0x2C,
-	// FUN_103ca8f0(outer) — instantiates UAnimNotify_Script per AnimSeq entry.
-	// FUN_103ca8f0 iterates sub-array at ECX+0x1C (AnimNotifys within the AnimSeq),
-	// creates UAnimNotify_Script objects and links them back.
+	guard(UVertMesh::PostLoad);
 	UObject::PostLoad();
+
+	// Ghidra 0x10472830 (124b):
+	// Loop over each FMeshAnimSeq (stride 0x2C) in the Anims array at this+0x118.
+	// For each seq, iterate its FMeshAnimNotify array (stride 0xC, at seq+0x1c).
+	// If a notify has a non-None FuncName at +4, create a UAnimNotify_Script via
+	// StaticConstructObject, copy the FName to inst+0x30 (NotifyName), store
+	// the instance pointer back at notify+8, then clear notify's FuncName.
+	// --- FUN_103ca8f0 + FUN_103ca880 inlined as template-equivalent calls ---
+	INT numSeqs = ((FArray*)((BYTE*)this + 0x118))->Num();
+	for (INT i = 0; i < numSeqs; i++)
+	{
+		BYTE* pAnimSeq = (BYTE*)(*(INT*)((BYTE*)this + 0x118)) + i * 0x2C;
+		UObject* outer = GetOuter();
+		if (outer == (UObject*)(INT)-1)
+			outer = (UObject*)UObject::GetTransientPackage();
+
+		// FMeshAnimNotify: stride 0xC: [+0: reserved][+4: FName FuncName][+8: UAnimNotify_Script*]
+		FArray* pNotifies = (FArray*)(pAnimSeq + 0x1c);
+		INT numNotifies = pNotifies->Num();
+		for (INT j = 0; j < numNotifies; j++)
+		{
+			BYTE* notifyEntry = (BYTE*)(*(INT*)pNotifies) + j * 0xC;
+			FName funcName = *(FName*)(notifyEntry + 4);
+			if (funcName != NAME_None)
+			{
+				UAnimNotify_Script* inst = (UAnimNotify_Script*)UObject::StaticConstructObject(
+					UAnimNotify_Script::StaticClass(), outer,
+					NAME_None, 0, NULL, GError);
+				*(FName*)((BYTE*)inst + 0x30) = *(FName*)(notifyEntry + 4); // inst->NotifyName = funcName
+				*(INT*)(notifyEntry + 8) = (INT)inst;                        // notify->Instance = inst
+				*(FName*)(notifyEntry + 4) = NAME_None;                      // clear notify->FuncName
+			}
+		}
+	}
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x1042f800)
