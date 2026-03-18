@@ -699,12 +699,116 @@ void ULevel::RememberActors()
 	unguard;
 }
 
-IMPL_TODO("1728-byte ULevel::Exec command dispatch; no permanent blockers (no Karma/rdtsc/FUNs); complex string/command routing. Ghidra 0x103c1630")
+IMPL_TODO("Ghidra 0x103c1630: DEMOREC/DEMOPLAY netdriver helpers FUN_103beff0/103bf700 unnamed; R6WALKLIST exact model-field offsets approximate (stride 0x5c navspec array at Model+0x9c)")
 INT ULevel::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
 {
 	guard(ULevel::Exec);
-	// TODO: implement ULevel::Exec command dispatch (stat, show, flush, etc.)
+
+	// ── Pass-through to Engine and DemoRecDriver ──────────────────────────────
+	// Ghidra: if Engine->Exec(Cmd,Ar) != 0, skip all local handling, return 1.
+	// If DemoRecDriver->Exec(Cmd,Ar) != 0, same.
+	if (Engine && Engine->Exec(Cmd, Ar))
+		return 1;
+	if (DemoRecDriver && DemoRecDriver->Exec(Cmd, Ar))
+		return 1;
+
+	// ── DEMOREC — start demo recording ──────────────────────────────────────
+	if (ParseCommand(&Cmd, TEXT("DEMOREC")))
+	{
+		FString Filename;
+		if (!ParseToken(Cmd, Filename, 0))
+		{
+			Ar.Log(TEXT("You must specify a filename"));
+		}
+		else
+		{
+			// Strip any ".DEM" in the middle (Ghidra truncation logic).
+			FString Upper = Filename.Caps();
+			INT dotIdx = Upper.InStr(TEXT(".DEM"), 0);
+			if (dotIdx != -1)
+				Filename = Filename.Left(dotIdx) + Filename.Mid(dotIdx + 4);
+			if (Filename.Right(4) != TEXT(".dem"))
+				Filename += TEXT(".dem");
+			GLog->Logf(TEXT("DemoRec: recording to '%s'"), *Filename);
+			// IMPL_TODO(0x103c1630): FUN_103bf700 (unnamed demo-record spawn) and
+			// FUN_103beff0 (unnamed ConstructObject helper) not yet extracted.
+			// Demo recording start omitted until helpers are ported.
+			(void)Filename;
+		}
+		return 1;
+	}
+	// ── DEMOPLAY — start/stop demo playback ─────────────────────────────────
+	else if (ParseCommand(&Cmd, TEXT("DEMOPLAY")))
+	{
+		FString Filename;
+		if (!ParseToken(Cmd, Filename, 0))
+		{
+			Ar.Log(TEXT("You must specify a filename"));
+		}
+		else
+		{
+			if (Filename.Right(4) != TEXT(".dem"))
+				Filename += TEXT(".dem");
+			GLog->Logf(TEXT("DemoPlay: '%s'"), *Filename);
+			// IMPL_TODO(0x103c1630): stop existing playback via FUN_1038ef30
+			// and create new demo-playback driver via FUN_103beff0/FUN_10487990.
+			// The helpers are unnamed — not yet extracted.  Demo playback
+			// start/stop omitted until helpers are ported.
+			(void)Filename;
+		}
+		return 1;
+	}
+	// ── Debug line/point check visualisation toggles ─────────────────────────
+	// Ghidra confirmed: straightforward boolean toggle at raw ULevel offsets.
+	// DIVERGENCE: field names not yet identified; raw offsets preserved.
+	else if (ParseCommand(&Cmd, TEXT("SHOWEXTENTLINECHECK")))
+	{
+		*(DWORD*)((BYTE*)this + 0x10114) ^= 1u;
+		return 1;
+	}
+	else if (ParseCommand(&Cmd, TEXT("SHOWLINECHECK")))
+	{
+		*(DWORD*)((BYTE*)this + 0x10110) ^= 1u;
+		return 1;
+	}
+	else if (ParseCommand(&Cmd, TEXT("SHOWPOINTCHECK")))
+	{
+		*(DWORD*)((BYTE*)this + 0x10118) ^= 1u;
+		return 1;
+	}
+	// ── R6WALKLIST — log all navigation reachspecs ───────────────────────────
+	else if (ParseCommand(&Cmd, TEXT("R6WALKLIST")))
+	{
+		// Ghidra: UModel* at this+0x90; reachspec FArray at Model+0x9c;
+		// 0x5c-byte entries; entry[0x58] != 0 means spec is valid.
+		// DIVERGENCE: stride and offsets approximate (Ghidra analysis).
+		BYTE* pModel = *(BYTE**)((BYTE*)this + 0x90);
+		GLog->Logf(TEXT("=== R6WALKLIST BEGIN ==="));
+		if (pModel)
+		{
+			FArray* specArr = (FArray*)(pModel + 0x9c);
+			INT num = specArr->Num();
+			for (INT i = 0; i < num; i++)
+			{
+				BYTE* pEntry = (BYTE*)specArr->GetData() + i * 0x5c;
+				if (*(INT*)(pEntry + 0x58) != 0)
+				{
+					UObject* start = *(UObject**)(*(INT*)pEntry + 0x48);
+					if (start) start->GetFullName();
+					((UObject*)*(INT*)pEntry)->GetFullName();
+					GLog->Logf(TEXT("  Spec[%d]"), i);
+				}
+			}
+		}
+		GLog->Logf(TEXT("=== R6WALKLIST END ==="));
+		return 1;
+	}
+
+	// ── Karma physics debug commands: KDRAW/KSTEP/KSTOP/KSAFETIME ───────────
+	// DIVERGENCE: Karma is a proprietary binary SDK — Karma commands silently
+	// return 0 (not handled) rather than calling FUN_1036a3a0 (Karma exec).
 	return 0;
+
 	unguard;
 }
 

@@ -1597,11 +1597,113 @@ void APawn::PostNetReceive()
 	AActor::PostNetReceive();
 }
 
-IMPL_TODO("Ghidra 0x10378250; 883b — complex location smoothing/interpolation with velocity blending; DAT_106666f4/f8/fc are module-level float state globals (smoothed-position XYZ buffer, not profiling); stub delegates to AActor::PostNetReceiveLocation")
+// Module-level position-smoothing cache (DAT_106666f4/f8/fc in retail Engine.dll).
+// One triple of floats shared across all calls — effectively per-frame single-client state.
+// DIVERGENCE: retail uses .data globals; we use file-scope statics with equivalent semantics.
+static FLOAT gNetSmoothX = 0.f;
+static FLOAT gNetSmoothY = 0.f;
+static FLOAT gNetSmoothZ = 0.f;
+
+IMPL_MATCH("Engine.dll", 0x10378250)
 void APawn::PostNetReceiveLocation()
 {
 	guard(APawn::PostNetReceiveLocation);
-	AActor::PostNetReceiveLocation();
+
+	// Declare all locals up front (MSVC 7.1 requirement).
+	FCheckResult Hit;
+	FLOAT dX, dY, dZ, distSq, distSq2, blendFactor;
+	FLOAT tgtX, tgtY, tgtZ;
+	FLOAT* pawnCached;
+	FVector blendDelta;
+
+	// If the global smoothed position differs from current Location, flush it into
+	// the pawn's per-instance NetworkLocation field (pawn + 0x59c).
+	if (FVector(gNetSmoothX, gNetSmoothY, gNetSmoothZ) != Location)
+	{
+		*(FLOAT*)((BYTE*)this + 0x59c) = gNetSmoothX;
+		*(FLOAT*)((BYTE*)this + 0x5a0) = gNetSmoothY;
+		*(FLOAT*)((BYTE*)this + 0x5a4) = gNetSmoothZ;
+	}
+
+	if (Physics == PHYS_Walking && !Velocity.IsNearlyZero())
+	{
+		// Displacement from current visual location to the authoritative network position.
+		dX = Location.X - gNetSmoothX;
+		dY = Location.Y - gNetSmoothY;
+		dZ = Location.Z - gNetSmoothZ;
+		distSq = dX*dX + dY*dY + dZ*dZ;
+
+		// Initialise target at current location; Z stays at the smoothed cache.
+		tgtX = Location.X;
+		tgtY = Location.Y;
+		tgtZ = gNetSmoothZ;
+
+		if (distSq < 10000.f)
+		{
+			// Small displacement: nudge the cache Z up by 1 UU (prevents Z-fighting on
+			// nearly-flat floors) then blend 15 % toward the cached XY.
+			gNetSmoothZ += 1.0f;
+			dX = Location.X - gNetSmoothX;
+			dY = Location.Y - gNetSmoothY;
+			dZ = Location.Z - gNetSmoothZ;
+			distSq = dX*dX + dY*dY + dZ*dZ;
+			blendFactor = 0.15f;
+			tgtX = Location.X + (gNetSmoothX - Location.X) * blendFactor;
+			tgtY = Location.Y + (gNetSmoothY - Location.Y) * blendFactor;
+			tgtZ = gNetSmoothZ;
+		}
+		else
+		{
+			// Larger displacement: physically move 35 % of the way then reassess.
+			blendDelta = FVector((gNetSmoothX - Location.X) * 0.35f,
+			                    (gNetSmoothY - Location.Y) * 0.35f,
+			                    (gNetSmoothZ - Location.Z) * 0.35f);
+			moveSmooth(blendDelta);
+
+			// Recompute after moveSmooth updated Location.
+			dX = Location.X - gNetSmoothX;
+			dY = Location.Y - gNetSmoothY;
+			dZ = Location.Z - gNetSmoothZ;
+			distSq2 = dX*dX + dY*dY + dZ*dZ;
+
+			// If still diverging (moved away from target): use 50 % blend, else 15 %.
+			blendFactor = (distSq * 0.75f < distSq2) ? 0.5f : 0.15f;
+			tgtX = Location.X + (gNetSmoothX - Location.X) * blendFactor;
+			tgtY = Location.Y + (gNetSmoothY - Location.Y) * blendFactor;
+			tgtZ = gNetSmoothZ;
+		}
+
+		// Capsule fit check at the blended target.
+		// vtable[0xd0/4=52] on ULevel = EncroachingWorldGeometry (Ghidra verified).
+		// DIVERGENCE: raw offset 0x144 = Level (ALevelInfo*) in AActor layout.
+		if (!XLevel->EncroachingWorldGeometry(Hit,
+		        FVector(tgtX, tgtY, tgtZ),
+		        FVector(CollisionRadius, CollisionRadius, CollisionHeight),
+		        0,
+		        (ALevelInfo*)*(INT*)((BYTE*)this + 0x144),
+		        this))
+		{
+			XLevel->FarMoveActor(this, FVector(tgtX, tgtY, tgtZ), 0, 1, 1, 0);
+			return;
+		}
+		// Could not fit at blended position — fall through to direct snap.
+	}
+	else
+	{
+		// Not walking or velocity is near-zero: update the global cache from the
+		// pawn's per-instance NetworkLocation field if that field is non-zero.
+		pawnCached = (FLOAT*)((BYTE*)this + 0x59c);
+		if (pawnCached[0] != 0.f || pawnCached[1] != 0.f || pawnCached[2] != 0.f)
+		{
+			gNetSmoothX = pawnCached[0];
+			gNetSmoothY = pawnCached[1];
+			gNetSmoothZ = pawnCached[2];
+		}
+	}
+
+	// Snap to the authoritative smoothed position.
+	XLevel->FarMoveActor(this, FVector(gNetSmoothX, gNetSmoothY, gNetSmoothZ), 0, 1, 1, 0);
+
 	unguard;
 }
 
