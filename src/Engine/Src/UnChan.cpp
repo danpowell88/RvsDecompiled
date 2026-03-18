@@ -34,12 +34,89 @@ guard(UFileChannel::StaticConstructor);
 unguard;
 }
 
-IMPL_TODO("Ghidra 0x10481460 (453b): file-sending tick with ParseParam/lanplay static, MaxSendBytes loop, FOutBunch serialize; blocked by undecoded UFileChannel field offsets (0x270 PackageIndex, 0x274 SentData)")
+IMPL_MATCH("Engine.dll", 0x10481460)
 void UFileChannel::Tick()
 {
 guard(UFileChannel::Tick);
-// Retail: UChannel::Tick(), then loop sending file data in FOutBunch chunks.
 UChannel::Tick();
+
+// Mark the connection as having an active file transfer.
+*(INT*)((BYTE*)Connection + 0x134) = 1;
+
+// One-time lanplay flag initialisation (static DAT_107a2574/78).
+static INT s_LanplayInited = 0;
+static INT s_Lanplay       = 0;
+if (!(s_LanplayInited & 1))
+{
+	s_LanplayInited |= 1;
+	s_Lanplay = ParseParam(appCmdLine(), TEXT("lanplay"));
+}
+
+// Outgoing-only: loop sending file data in FOutBunch chunks.
+while (true)
+{
+	// OpenedLocally == InType: if incoming (remote opened), we aren't sending.
+	if (OpenedLocally || *(INT*)((BYTE*)this + 0x6c) == 0)
+		return;
+
+	if (!IsNetReady(s_Lanplay))
+		return;
+
+	INT max = MaxSendBytes();
+	if (max == 0)
+		break;
+
+	// Remaining bytes: PackageMap->List[PackageIndex].FileSize - SentData.
+	BYTE* conn   = (BYTE*)Connection;
+	BYTE* pmBase = *(BYTE**)(*(BYTE**)(conn + 0xC8) + 0x2c); // List.GetData()
+	INT   idx    = *(INT*)((BYTE*)this + 0x270);             // PackageIndex
+	INT   total  = *(INT*)(pmBase + idx * 0x44 + 0x24);      // FileSize
+	INT   sent   = *(INT*)((BYTE*)this + 0x274);             // SentData
+	INT   remain = total - sent;
+
+	// bClose = 1 if this is the last chunk.
+	INT   bLast  = (remain <= max) ? 1 : 0;
+	INT   chunk  = bLast ? remain : max;
+
+	FOutBunch Bunch(this, bLast);
+
+	// Read chunk from SendFile (FArchive vtable[1] = Serialize).
+	BYTE localBuf[512];
+	BYTE* buf = (chunk > 0) ? localBuf : NULL;
+
+	FArchive* sendFile = *(FArchive**)((BYTE*)this + 0x6c);
+	typedef void (__thiscall* SerializeFn)(FArchive*, void*, INT);
+	((SerializeFn)(*(INT*)(*(INT*)sendFile + 4)))(sendFile, buf, chunk);
+	sendFile->IsError();
+
+	*(INT*)((BYTE*)this + 0x274) += chunk;
+
+	// Write into bunch via FBitWriter::Serialize (static, non-virtual call in retail).
+	// FOutBunch inherits from FBitWriter; cast is valid.
+	((FBitWriter*)&Bunch)->Serialize(buf, chunk);
+
+	// check(!Bunch.IsError())
+	check(!((FArchive*)&Bunch)->IsError());
+
+	SendBunch(&Bunch, 0);
+
+	// Flush connection (vtable[0x80/4=32] = Flush).
+	typedef void (__thiscall* FlushFn)(UNetConnection*);
+	((FlushFn)(*(INT*)(*(INT*)Connection + 0x80)))(Connection);
+
+	// If last chunk: delete the send file archive.
+	if (bLast)
+	{
+		sendFile = *(FArchive**)((BYTE*)this + 0x6c);
+		if (sendFile)
+		{
+			// Call scalar deleting destructor: vtable[0] with deleting=1.
+			typedef void (__thiscall* DtorFn)(FArchive*, INT);
+			((DtorFn)(*(INT*)(*(INT*)sendFile)))(sendFile, 1);
+		}
+		*(INT*)((BYTE*)this + 0x6c) = 0;
+	}
+}
 unguard;
 }
 
@@ -50,10 +127,48 @@ guard(UFileChannel::ReceivedBunch);
 unguard;
 }
 
-IMPL_TODO("Ghidra 0x10481660 (268b): FString::Printf File='%s', Sent/Received=%i/%i with UFileChannel field offsets 0x68 (Download), 0x6C (SendFile), 0x70 (Filename), 0x270 (PackageIndex), 0x274 (SentData); blocked by undecoded UFileChannel layout")
+IMPL_MATCH("Engine.dll", 0x10481660)
 FString UFileChannel::Describe()
 {
-return FString();
+	// Ghidra 0x181660 (268b):
+	// "File='%s', Sent=%i/%i " (outgoing) or "File='%s', Received=%i/%i " (incoming)
+	// + UChannel::Describe()
+	INT    pkgIdx  = *(INT*)((BYTE*)this + 0x270);    // PackageIndex
+	BYTE*  conn    = (BYTE*)Connection;
+
+	// PackageMap->List.GetData() base pointer.
+	BYTE*  pkgMap  = *(BYTE**)(*(BYTE**)(conn + 0xC8) + 0x2c);
+	INT    total   = *(INT*)(pkgMap + pkgIdx * 0x44 + 0x24); // List[pkgIdx].FileSize
+
+	const TCHAR* sendRecv;
+	INT          current;
+	const TCHAR* filename;
+
+	if (!OpenedLocally)
+	{
+		// Outgoing: sending a file.
+		sendRecv = TEXT("Sent");
+		current  = *(INT*)((BYTE*)this + 0x274);            // SentData
+		filename = *(const TCHAR**)((BYTE*)this + 0x70);    // Filename.GetData()
+	}
+	else if (*(INT*)((BYTE*)this + 0x68) == 0)
+	{
+		// Incoming but no Download yet.
+		sendRecv = TEXT("Received");
+		current  = 0;
+		filename = TEXT("");
+	}
+	else
+	{
+		// Incoming with Download object.
+		BYTE* dl  = *(BYTE**)((BYTE*)this + 0x68);
+		sendRecv  = TEXT("Received");
+		current   = *(INT*)(dl + 0x44c);                    // Download bytes received
+		filename  = *(const TCHAR**)(dl + 0x4c);            // Download filename string
+	}
+
+	return FString::Printf(TEXT("File='%s', %s=%i/%i "), filename, sendRecv, current, total)
+		 + UChannel::Describe();
 }
 
 IMPL_MATCH("Engine.dll", 0x10484100)
