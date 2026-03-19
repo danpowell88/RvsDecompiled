@@ -1607,17 +1607,52 @@ FDynamicActor::FDynamicActor(const FDynamicActor& Other)
 	appMemcpy(this, &Other, 0x80);
 }
 
-IMPL_TODO("Ghidra 0x103ffb70 (1798b): no FUN_ blockers. Needs: (1) AActor vtable +0xac (GetRenderBoundingBox) and +0xc0 (GetMesh) mapped to named virtual methods, (2) UMesh vtable +0x6c (GetBoundingBox) and +0x70 (GetSphere) identified, (3) AEmitter/SkeletalMesh/Karma specialised bound paths translated.")
+IMPL_TODO("Ghidra 0x103ffb70 (1798b): StaticMesh-specific transform path and PrePivotRotation path omitted (both use default LocalToWorld); emitter bounding box path uses raw offset +0x3DC; skeletal mesh attachment bounding box expansion omitted; ambient lighting (zone lights + AmbientGlow) omitted — set to black; FUN_103ffa20 (this+0x7C init) omitted")
 FDynamicActor::FDynamicActor(AActor* Actor)
 {
-	// Ghidra 0xffb70: construct sub-objects, store actor pointer, compute transform/bounds.
-	// FMatrix at this+4, FBox at this+0x48, FSphere at this+0x64 (offset 100); actor pointer at this+0.
-	// After construction: calls actor vtable+0xac (GetRenderBoundingBox -> FMatrix) to fill this+4..+44,
-	// computes Determinant into this+0x44, then dispatches on DrawType/Emitter/SkeletalMesh for bounds.
-	new ((BYTE*)this + 0x04) FMatrix();
-	new ((BYTE*)this + 0x48) FBox();
-	new ((BYTE*)this + 0x64) FSphere();
+	// Store actor pointer at +0x00
 	*(AActor**)this = Actor;
+
+	// Construct sub-objects in place
+	FMatrix*  pMatrix = new ((BYTE*)this + 0x04) FMatrix();
+	FBox*     pBox    = new ((BYTE*)this + 0x48) FBox();
+	FSphere*  pSphere = new ((BYTE*)this + 0x64) FSphere();
+
+	// Compute local-to-world transform matrix
+	// Ghidra has 3 paths: StaticMesh-specific, PrePivotRotation, and default.
+	// All produce the actor's current transform matrix; we use LocalToWorld() for all.
+	*pMatrix = Actor->LocalToWorld();
+
+	// Determinant at +0x44
+	*(FLOAT*)((BYTE*)this + 0x44) = pMatrix->Determinant();
+
+	// Compute bounding box and sphere based on DrawType
+	if ( Actor->DrawType == DT_Particle && Actor->IsA(AEmitter::StaticClass()) )
+	{
+		// Emitter path: copy bounding box from emitter-specific field at +0x3DC
+		appMemcpy( pBox, (BYTE*)Actor + 0x3DC, sizeof(FBox) );
+		// Construct sphere from box center and half-extent
+		FVector Center = (pBox->Min + pBox->Max) * 0.5f;
+		FVector HalfExt = (pBox->Max - pBox->Min) * 0.5f;
+		*(FVector*)pSphere = Center;
+		*((FLOAT*)pSphere + 3) = HalfExt.Size();
+	}
+	else
+	{
+		// Mesh / StaticMesh / other actors: get bounds from primitive
+		UPrimitive* Prim = Actor->GetPrimitive();
+		if ( Prim )
+		{
+			*pBox    = Prim->GetRenderBoundingBox(Actor);
+			*pSphere = Prim->GetRenderBoundingSphere(Actor);
+		}
+	}
+
+	// Ambient lighting: Ghidra iterates zone lights from Actor->TouchingZones (+0x32C)
+	// and computes FGetHSV-weighted color. Approximated as black (no ambient contribution).
+	*(DWORD*)((BYTE*)this + 0x74) = 0;  // FColor = black
+	*(DWORD*)((BYTE*)this + 0x78) = 0;  // unknown field
+	*(DWORD*)((BYTE*)this + 0x7C) = 0;  // FUN_103ffa20() result omitted
 }
 
 IMPL_MATCH("Engine.dll", 0x10309a70)

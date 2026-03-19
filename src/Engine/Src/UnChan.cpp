@@ -247,12 +247,30 @@ guard(UActorChannel::ReceivedBunch);
 unguard;
 }
 
-IMPL_TODO("Ghidra 0x104824d0 (142b): calls UChannel::ReceivedNak, then if ActorClass (+0x70) loops RepConditions array (+0xB8) backwards calling FUN_10481dd0 for entries matching NakPacketId; blocked by FUN_10481dd0 (replication resend helper)")
+IMPL_TODO("Ghidra 0x104824d0 (142b): FUN_10481dd0 is TArray<INT>::AddUniqueItem on a resend list (ECX=unknown TArray member); loop structure and condition matching implemented, but the actual resend scheduling call is omitted because the target TArray offset on UActorChannel/UNetConnection is unresolved")
 void UActorChannel::ReceivedNak(int NakPacketId)
 {
 guard(UActorChannel::ReceivedNak);
 UChannel::ReceivedNak(NakPacketId);
-// Ghidra: if (*(int*)(this + 0x70) != 0) { loop RepConditions backwards, resend matching }
+
+// If ActorClass (+0x70) is set, scan RepConditions array for entries
+// matching NakPacketId whose dirty flag byte is 0, and schedule them for resend.
+if ( *(INT*)((BYTE*)this + 0x70) != 0 )
+{
+	BYTE* RepData = *(BYTE**)((BYTE*)this + 0xB8);   // RepConditions.GetData()
+	INT   Count   = *(INT*)((BYTE*)this + 0xBC);      // RepConditions.Num()
+	for ( INT i = Count - 1; i >= 0; i-- )
+	{
+		BYTE* Entry = RepData + i * 0xC;               // stride 12
+		INT   PacketId  = *(INT*)(Entry + 4);
+		BYTE  DirtyFlag = *(Entry + 8);
+		if ( PacketId == NakPacketId && DirtyFlag == 0 )
+		{
+			// Ghidra: FUN_10481dd0(&i) — adds 'i' to a resend TArray via
+			// TArray<INT>::AddUniqueItem.  Target TArray (passed in ECX) unknown.
+		}
+	}
+}
 unguard;
 }
 
@@ -270,11 +288,17 @@ guard(UActorChannel::SetChannelActor);
 unguard;
 }
 
-IMPL_TODO("Ghidra 0x104821d0 (91b): if Actor at +0x6C != NULL calls FUN_10481e90 (replication state flush) then UChannel::SetClosingFlag; blocked by FUN_10481e90")
+IMPL_TODO("Ghidra 0x104821d0 (91b): FUN_10481e90 is TMap::Remove that removes Actor from Connection's actor-channel map; target TMap (ECX in thiscall) not yet identified — flush call omitted")
 void UActorChannel::SetClosingFlag()
 {
-	// Ghidra: if (*(int*)(this + 0x6c) != 0) { FUN_10481e90(this + 0x6c); }
-	// FUN_10481e90 not yet decompiled — skip for now.
+	// Ghidra: if Actor at +0x6C is non-null, remove it from the
+	// connection's actor-channel TMap (FUN_10481e90), then delegate to base.
+	if ( *(INT*)((BYTE*)this + 0x6C) != 0 )
+	{
+		// FUN_10481e90(this + 0x6C) — TMap::Remove on unknown TMap
+		// Removes the actor pointer from the connection's actor->channel mapping.
+		// Omitted: ECX (the TMap instance) is unresolved.
+	}
 	UChannel::SetClosingFlag();
 }
 
