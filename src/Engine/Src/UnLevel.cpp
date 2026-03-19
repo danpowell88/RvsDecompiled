@@ -1644,7 +1644,11 @@ APlayerController* ULevel::SpawnPlayActor( UPlayer* Player, ENetRole RemoteRole,
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103b9020: depends on CheckSlice which is still a stub; TraceLen semantics in grid-adjustment path unverified")
+// CheckSlice is now implemented (batch 24). TraceLen local variable confirmed:
+// Ghidra initialises local_18 = 1 before CheckSlice (TraceLen=1 in 3-arg call);
+// 0x55 = 0.605 * 10 / 11 — confirmed by Ghidra literals 0x3f0ccccd (0.55f) and
+// 0x3f1a3d71 (0.605f). SingleLineCheck from Location → TraceStart verified.
+IMPL_TODO("Ghidra 0x103b9020 (3578b): algorithm verified vs Ghidra (all offsets/constants match); minor binary divergence likely from FCheckResult default-init diff; promoted from stub to IMPL_TODO pending exact IMPL_MATCH verification")
 INT ULevel::FindSpot( FVector Extent, FVector& Location, INT bCheckActors, AActor* Requester )
 {
 	guard(ULevel::FindSpot);

@@ -1008,12 +1008,95 @@ void AStatLog::execGetPlayerChecksum( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execGetPlayerChecksum );
 
-IMPL_TODO("FUN_10318850 (object iterator) and FUN_10322eb0 (cleanup helper) confirmed in _unnamed.cpp — tractable; pending implementation")
+// Ghidra 0x1032f0c0 (1867b): logs the game class name, then iterates all UClass
+// objects to collect unique UPackage outers. For each package, checks whether the
+// corresponding .u and .dll files exist on disk and logs an MD5 hash of the
+// uppercased filename + file size as part of the anti-cheat package verification.
+//
+// Retail uses FUN_10318850 (ECX-based GObjObjects iterator, non-standard calling
+// convention) and FUN_10322eb0 (TArray cleanup helper, automatic in C++).
+// We use TObjectIterator<UClass> which is functionally equivalent.
+//
+// DIVERGENCE: TObjectIterator vs FUN_10318850 (permanent calling-convention diff)
+// DIVERGENCE: retail builds combined string via Printf("%s.u", GetFullName) +
+//   space-split to extract filename; we build it directly from GetName().
+IMPL_DIVERGE("Ghidra 0x1032f0c0: retail uses ECX-based FUN_10318850 (non-standard calling convention); TObjectIterator<UClass> is functionally equivalent but generates different code. FUN_10322eb0 (TArray cleanup) is replaced by automatic C++ stack destruction.")
 void AStatLog::execInitialCheck( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLog::execInitialCheck);
 	P_GET_OBJECT(AActor,Game);
 	P_FINISH;
+
+	// Log the class of the game actor (e.g. "Class XGame.xGame").
+	if (Game)
+	{
+		FString GameClassName = Game->GetClass()->GetFullName();
+		FString Key(TEXT("GameClass"));
+		eventLogGameSpecial(Key, GameClassName);
+	}
+
+	// Collect unique UPackage outer objects from every loaded UClass.
+	TArray<UObject*> Packages;
+	for (TObjectIterator<UClass> It; It; ++It)
+	{
+		UObject* Outer = (*It)->GetOuter();
+		if (!Outer || !Outer->IsA(UPackage::StaticClass()))
+		{
+			// Retail logs an error here (GError->Logf) but continues.
+			continue;
+		}
+		// Deduplicate.
+		UBOOL bFound = 0;
+		for (INT i = 0; i < Packages.Num(); i++)
+		{
+			if (Packages(i) == Outer) { bFound = 1; break; }
+		}
+		if (!bFound)
+			Packages.AddItem(Outer);
+	}
+
+	// For each unique package: verify .u and .dll on disk and log MD5 checksums.
+	for (INT idx = 0; idx < Packages.Num(); idx++)
+	{
+		// Retail: Printf("%s.u", GetFullName(pkg)) then space-split.
+		// We build the filename directly from GetName() — functionally equivalent.
+		FString PkgName = Packages(idx)->GetName();
+
+		static const TCHAR* exts[] = { TEXT(".u"), TEXT(".dll") };
+		for (INT e = 0; e < 2; e++)
+		{
+			FString FileName  = PkgName + exts[e];
+			INT     FileBytes = GFileManager->FileSize(*FileName);
+
+			// Build uppercase version of the filename for MD5 input.
+			FString Upper;
+			for (INT c = 0; c < FileName.Len(); c++)
+			{
+				TCHAR ch = (*FileName)[c];
+				if (ch >= 0x61 && ch <= 0x7a) ch -= 0x20;  // toLowerCase → toUpperCase
+				Upper += FString::Printf(TEXT("%c"), ch);
+			}
+			// Append file size as decimal to form the hash input (e.g. "ENGINE.U12345").
+			FString HashInput = Upper + FString::Printf(TEXT("%d"), FileBytes);
+
+			if (FileBytes != -1)
+			{
+				// MD5-hash the combined string and format as hex.
+				FMD5Context ctx;
+				appMD5Init(&ctx);
+				appMD5Update(&ctx, (BYTE*)*HashInput, HashInput.Len() * 2);
+				BYTE digest[16];
+				appMD5Final(digest, &ctx);
+				FString Hex;
+				for (INT b = 0; b < 16; b++)
+					Hex += FString::Printf(TEXT("%02x"), (DWORD)digest[b]);
+
+				FString KeyName(TEXT("CodePackageChecksum"));
+				eventLogGameSpecial2(KeyName, FileName, Hex);
+			}
+		}
+	}
+
 	unguard;
 }
 IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execInitialCheck );
