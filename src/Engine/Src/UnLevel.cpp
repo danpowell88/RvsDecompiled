@@ -1792,11 +1792,156 @@ INT ULevel::CheckSlice( FVector& Adjusted, FVector Extent, INT& NumIterations, A
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103bad70 (1594 bytes): builds FMatrix from actor transforms, iterates hash query results, calls moveSmooth + IsJoinedTo + IsVolumeBrush; static helpers now resolved (FUN_1036d760=SwapFVectors, FUN_1035a3d0=collision-query init struct); full FMatrix/moveSmooth/IsVolumeBrush translation pending")
+IMPL_TODO("Ghidra 0x103bad70 (1594b): encroacher path transform matrix vtable offsets approximate (both mapped to LocalToWorld); FUN_1036d760 (FVector swap) and FUN_1035a3d0 (collision-query init) calls omitted; vtable+0xC4 touch-notify call in second pass approximated as BeginTouch via raw offset")
 INT ULevel::CheckEncroachment( AActor* Actor, FVector TestLocation, FRotator TestRotation, INT bTouchNotify )
 {
 	guard(ULevel::CheckEncroachment);
-	// TODO: implement ULevel::CheckEncroachment (collision check for actor placement validity)
+
+	check(Actor != NULL);
+
+	DWORD ActorFlags = *(DWORD*)((BYTE*)Actor + 0xA8);
+	if ( (ActorFlags & 0x6800) == 0 && !Actor->IsEncroacher() )
+		return 0;
+
+	// Build old+new transform matrices for encroaching actors (Movers/KActors).
+	FMatrix OldMatrix;
+	FMatrix NewMatrix;
+	if ( Actor->IsEncroacher() )
+	{
+		// Old transform at current position (Ghidra vtable+0xB0)
+		OldMatrix = Actor->LocalToWorld();
+
+		// Save current Location/Rotation, temporarily apply test pose
+		FVector  SavedLoc = Actor->Location;
+		FRotator SavedRot = Actor->Rotation;
+		Actor->Location = TestLocation;
+		Actor->Rotation = TestRotation;
+
+		// New transform at test position (Ghidra vtable+0xAC)
+		NewMatrix = Actor->LocalToWorld();
+
+		// Restore
+		Actor->Location = SavedLoc;
+		Actor->Rotation = SavedRot;
+	}
+
+	FMemMark Mark(GMem);
+
+	// Query hash for overlapping actors at the test position
+	FCollisionHashBase* Hash = *(FCollisionHashBase**)((BYTE*)this + 0xF0);
+	FCheckResult* Results = NULL;
+	if ( Hash )
+		Results = Hash->ActorEncroachmentCheck( GMem, Actor, TestLocation, TestRotation, 0x9F, 0 );
+
+	// First pass: check each overlapping actor for encroachment
+	for ( FCheckResult* Check = Results; Check; Check = Check->GetNext() )
+	{
+		AActor* Other = Check->Actor;
+		if ( Other == Actor )
+			continue;
+		if ( Other == (AActor*)GetLevelInfo() )
+			continue;
+		if ( Other->IsJoinedTo(Actor) )
+			continue;
+		if ( !Actor->IsBlockedBy(Other) )
+			continue;
+		// Skip if Other is based on Actor
+		if ( *(AActor**)((BYTE*)Other + 0x180) == Actor )
+			continue;
+
+		// Encroacher vs non-encroacher: try to push Other out of the way
+		if ( Actor->IsEncroacher() && !Other->IsEncroacher() )
+		{
+			FVector Disp;
+			Disp.X = TestLocation.X - Actor->Location.X;
+			Disp.Y = TestLocation.Y - Actor->Location.Y;
+			Disp.Z = TestLocation.Z - Actor->Location.Z;
+			Other->moveSmooth(Disp);
+
+			// Point check: see if Other is still overlapping after displacement
+			INT bStillOverlapping;
+			FCheckResult PointHit(1.f);
+			if ( !Other->IsVolumeBrush() )
+			{
+				UPrimitive* Prim = Actor->GetPrimitive();
+				FVector Ext = Other->GetCylinderExtent();
+				bStillOverlapping = Prim
+					? !Prim->PointCheck( PointHit, Actor, Other->Location, Ext, 0 )
+					: 0;
+			}
+			else
+			{
+				UPrimitive* Prim = Other->GetPrimitive();
+				FVector Ext = Actor->GetCylinderExtent();
+				bStillOverlapping = Prim
+					? !Prim->PointCheck( PointHit, Other, Actor->Location, Ext, 0 )
+					: 0;
+			}
+
+			if ( bStillOverlapping )
+			{
+				// Push Other back with reversed displacement via MoveActor
+				FVector RevDisp( -Disp.X, -Disp.Y, -Disp.Z );
+				FVector SavedActorLoc = Actor->Location;
+				Actor->Location = TestLocation;
+				FCheckResult MoveHit(1.f);
+				MoveActor( Other, RevDisp, Other->Rotation, MoveHit, 0, 0, 0, 0, 0 );
+				Actor->Location = SavedActorLoc;
+			}
+		}
+
+		// Check if Actor wants to block the encroachment
+		if ( Actor->eventEncroachingOn(Other) )
+		{
+			Mark.Pop();
+			return 1;
+		}
+	}
+
+	// Touch cleanup: if bTouchNotify, remove stale touches
+	if ( bTouchNotify )
+	{
+		TArray<AActor*>& Touching = *(TArray<AActor*>*)((BYTE*)Actor + 0x1C8);
+		INT i = 0;
+		while ( i < Touching.Num() )
+		{
+			AActor* TouchActor = Touching(i);
+			if ( !TouchActor || Actor->IsOverlapping(TouchActor, NULL) )
+				i++;
+			else
+				Actor->EndTouch( Touching(i), 0 );
+		}
+	}
+
+	// Second pass: notify encroached actors
+	for ( FCheckResult* Check = Results; Check; Check = Check->GetNext() )
+	{
+		AActor* Other = Check->Actor;
+		if ( Other == Actor )
+			continue;
+		if ( Other->IsJoinedTo(Actor) )
+			continue;
+		// GetLevelInfo inline check (Actors(0))
+		if ( Other == *(AActor**)(*(BYTE**)((BYTE*)this + 0x30)) )
+			continue;
+		if ( *(AActor**)((BYTE*)Other + 0x180) == Actor )
+			continue;
+
+		if ( !Actor->IsBlockedBy(Other) )
+		{
+			if ( bTouchNotify )
+			{
+				// Ghidra vtable+0xC4: touch-notify for non-blocking actor
+				typedef void (__thiscall* TouchNotifyFn)(AActor*, AActor*);
+				((TouchNotifyFn)(*(INT*)(*(INT*)Actor + 0xC4)))(Actor, Other);
+			}
+			continue;
+		}
+
+		Other->eventEncroachedBy(Actor);
+	}
+
+	Mark.Pop();
 	return 0;
 	unguard;
 }
