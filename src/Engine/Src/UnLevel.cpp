@@ -940,11 +940,96 @@ INT ULevel::IsServer()
 		return 1;
 	return 0;
 }
-IMPL_TODO("5565-byte ULevel::MoveActor sweep/collision loop; no permanent blockers (no Karma/rdtsc/FUNs); large complex function. Ghidra 0x103b9750")
+IMPL_TODO("Ghidra 0x103b9750 (5565b): zero-delta and rotation-only fast paths implemented; main collision sweep/response loop (MoveActorFirstBlocking, step-up, sliding, base handling) not yet ported; Karma updates in rotation path omitted (proprietary SDK)")
 INT ULevel::MoveActor( AActor* Actor, FVector Delta, FRotator NewRotation, FCheckResult& Hit, INT bTest, INT bIgnorePawns, INT bIgnoreBases, INT bNoFail, INT bExtra )
 {
 	guard(ULevel::MoveActor);
-	// TODO: implement ULevel::MoveActor sweep/collision
+
+	check(Actor != NULL);
+
+	// Init Hit result to empty (12 DWORDs = 48 bytes)
+	appMemzero(&Hit, sizeof(FCheckResult));
+	Hit.Time = 1.f;
+	Hit.Item = INDEX_NONE;
+
+	UBOOL bStatic  = (*(BYTE*)((BYTE*)Actor + 0xA0) & 1) != 0;
+	UBOOL bMovable = (*(DWORD*)((BYTE*)Actor + 0xA8) & 0x20) != 0;
+
+	// Only proceed for movable actors or in editor
+	if ( (!bStatic && bMovable) || GIsEditor )
+	{
+		// Zero-delta + same-rotation → nothing to do
+		if ( Delta.IsNearlyZero() )
+		{
+			if ( NewRotation == Actor->Rotation )
+				return 1;
+
+			// Rotation-only fast path: no attachments needed
+			INT NumAttached = *(INT*)((BYTE*)Actor + 0x1D4 + 4); // Attached.Num()
+			DWORD ActorFlags = *(DWORD*)((BYTE*)Actor + 0xA8);
+
+			UBOOL bRotationOnly = (NumAttached == 0)
+				&& ( (ActorFlags & 0x2000) == 0
+				  || *(BYTE*)((BYTE*)Actor + 0x2F) != DT_StaticMesh
+				  || (ActorFlags & 0x400000) != 0 );
+
+			if ( bRotationOnly )
+			{
+				// Notify hash of removal before position/rotation change
+				FCollisionHashBase* Hash = *(FCollisionHashBase**)((BYTE*)this + 0xF0);
+				if ( (ActorFlags & 0x800) && Hash )
+					Hash->RemoveActor(Actor);
+
+				// Apply rotation
+				*(FRotator*)((BYTE*)Actor + 0x240) = NewRotation;
+
+				// Update relative rotation for attached actors
+				if ( !bIgnoreBases )
+					Actor->UpdateRelativeRotation();
+
+				// Re-add to hash
+				if ( (ActorFlags & 0x800) && Hash )
+					Hash->AddActor(Actor);
+
+				// Update render data (vtable+0x140)
+				typedef INT (__thiscall* UpdateRenderFn)(AActor*);
+				((UpdateRenderFn)(*(INT*)(*(INT*)Actor + 0x140)))(Actor);
+
+				// Karma physics updates omitted (proprietary SDK)
+				return 1;
+			}
+		}
+	}
+	else
+	{
+		// Actor cannot be moved (static and not in editor)
+		return 0;
+	}
+
+	// Main collision sweep/response loop
+	// TODO: 0x103b9750 — remainder of 5565-byte function:
+	// - FMemMark + compute normalized direction
+	// - Build swept collision extent
+	// - MultiLineCheck for blocking geometry
+	// - MoveActorFirstBlocking to find nearest hit
+	// - Step-up logic for stairs
+	// - Sliding along walls
+	// - Base/attachment matrix transforms
+	// - Touch/UnTouch notifications
+	// - CheckEncroachment for encroachers
+	// Approximation: apply the full delta without collision checking
+	FVector OldLocation = Actor->Location;
+	Actor->Location += Delta;
+	*(FRotator*)((BYTE*)Actor + 0x240) = NewRotation;
+
+	// Notify hash
+	FCollisionHashBase* Hash = *(FCollisionHashBase**)((BYTE*)this + 0xF0);
+	if ( Hash && (*(DWORD*)((BYTE*)Actor + 0xA8) & 0x800) )
+	{
+		Hash->RemoveActor(Actor);
+		Hash->AddActor(Actor);
+	}
+
 	return 1;
 	unguard;
 }
