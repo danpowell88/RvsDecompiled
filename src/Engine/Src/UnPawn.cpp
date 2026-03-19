@@ -3013,10 +3013,194 @@ INT APawn::Pick3DWallAdjust(FVector WallHitNormal)
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103eb2e0; 2629b — PickWallAdjust: complex wall-adjust path selection; FUN_1035a3d0 (54-byte __thiscall struct-init helper) not yet named; not fully reconstructed")
+IMPL_MATCH("Engine.dll", 0x103eb2e0)
 INT APawn::PickWallAdjust(FVector WallHitNormal)
 {
 	guard(APawn::PickWallAdjust);
+
+	// No wall adjustment if falling or no controller.
+	if( Physics == PHYS_Falling || !Controller )
+		return 0;
+
+	// Flying/swimming pawns use the 3D variant.
+	if( Physics == PHYS_Flying || Physics == PHYS_Swimming )
+		return Pick3DWallAdjust( WallHitNormal );
+
+	FCheckResult Hit( 1.f );
+
+	// Eye position for traces.
+	FVector EyeOfs = eventEyePosition();
+	FVector EyePos( Location.X + EyeOfs.X, Location.Y + EyeOfs.Y, Location.Z + EyeOfs.Z );
+
+	// Direction from pawn to Controller's Destination (XY only).
+	FVector Dir( Controller->Destination.X - Location.X,
+				 Controller->Destination.Y - Location.Y,
+				 0.f );
+	FLOAT DestHeight = Controller->Destination.Z - Location.Z;
+	FLOAT Dist = Dir.Size();
+
+	FLOAT SideStepDist = CollisionRadius * 1.5f + 16.f;
+
+	// Get collision floor from MoveTarget (if available).
+	FLOAT FloorZ = 0.f;
+	if( Controller->MoveTarget )
+		FloorZ = Controller->MoveTarget->CollisionHeight;
+
+	// If destination is close enough in Z and XY distance is nonzero:
+	if( (!(DestHeight < CollisionHeight) ||
+		 !(Dir.X * Dir.X + Dir.Y * Dir.Y - CollisionRadius * CollisionRadius < 0.f))
+		&& Dist != 0.f )
+	{
+		// Normalize direction.
+		Dir = Dir / Dist;
+
+		// Trace from destination back to eye to check for clear line of sight.
+		XLevel->SingleLineCheck( Hit, this, Controller->Destination, EyePos,
+			0x286, FVector(0.f, 0.f, 0.f) );
+
+		if( (FLOAT)(INT)Hit.Actor != FloorZ )
+			SideStepDist += CollisionRadius;
+
+		// Perpendicular direction (side-step direction in XY plane).
+		FVector SideDir( -Dir.Y, Dir.X, 0.f );
+		FLOAT bTriedOtherSide = 0.f;
+
+		// Scale side direction by collision radius.
+		FVector SideOfs = SideDir * (CollisionRadius * 0.7f);
+		FVector TraceOfs = SideOfs;
+		FVector TraceStart( EyePos.X + TraceOfs.X, EyePos.Y + TraceOfs.Y, EyePos.Z + TraceOfs.Z );
+
+		// Trace from side-offset eye position to Destination.
+		XLevel->SingleLineCheck( Hit, this, Controller->Destination, TraceStart,
+			0x286, FVector(0.f, 0.f, 0.f) );
+
+		if( (FLOAT)(INT)Hit.Actor != FloorZ )
+		{
+			// First side blocked — try the other side.
+			SideDir.X = -SideDir.X;
+			bTriedOtherSide = 1.f;
+			SideDir.Y = -SideDir.Y;
+			SideDir.Z = -SideDir.Z;
+			TraceOfs.X = -TraceOfs.X;
+			TraceOfs.Y = -TraceOfs.Y;
+			TraceOfs.Z = -TraceOfs.Z;
+			TraceStart = FVector( EyePos.X + TraceOfs.X, EyePos.Y + TraceOfs.Y, EyePos.Z + TraceOfs.Z );
+
+			XLevel->SingleLineCheck( Hit, this, Controller->Destination, TraceStart,
+				0x286, FVector(0.f, 0.f, 0.f) );
+
+			if( (FLOAT)(INT)Hit.Actor != FloorZ )
+				return 0;
+		}
+
+		// Forward offset for target position checks.
+		FVector FwdOfs( Dir.Y * 14.f, Dir.X * (-14.f), Dir.Z * 14.f );
+
+		// Walking + can jump: try stepping up 33 units.
+		if( Physics == PHYS_Walking && bCanJump )
+		{
+			FVector UpStart( Location.X, Location.Y, Location.Z + 33.f );
+			FVector UpDelta( 0.f, 0.f, 33.f );
+			FVector Extent = GetCylinderExtent();
+
+			XLevel->SingleLineCheck( Hit, this, UpStart, Location, TRACE_World,
+				Extent );
+
+			if( Hit.Time > 0.5f )
+			{
+				// Step up trace succeeded — check if we can reach destination from up there.
+				FVector UpPos = Location + UpDelta * Hit.Time;
+				FVector FwdEnd( UpPos.X + FwdOfs.X, UpPos.Y + FwdOfs.Y, UpPos.Z + FwdOfs.Z );
+
+				XLevel->SingleLineCheck( Hit, this, FwdEnd, UpStart, 0x286,
+					Extent );
+
+				if( Hit.Time == 1.f )
+				{
+					// Jump over the obstacle.
+					WallHitNormal = WallHitNormal * -1.f;
+					FVector JumpDir( WallHitNormal.X, WallHitNormal.Y, 0.f );
+					Velocity = JumpDir * GroundSpeed;
+					Acceleration = JumpDir * AccelRate;
+					Velocity.Z = JumpZ;
+					bNoJumpAdjust = 1;
+					setPhysics( PHYS_Falling, NULL, FVector(0.f, 0.f, 1.f) );
+					return 1;
+				}
+			}
+		}
+
+		// Side-step adjustment: trace from pawn to side-offset position.
+		FVector SideTarget( Location.X + SideDir.X * SideStepDist,
+						    Location.Y + SideDir.Y * SideStepDist,
+						    Location.Z + SideDir.Z * SideStepDist );
+		FVector Extent = GetCylinderExtent();
+
+		XLevel->SingleLineCheck( Hit, this, SideTarget, Location, 0x286, Extent );
+
+		if( Hit.Time == 1.f )
+		{
+			// Side is clear — check the forward path from there.
+			FVector FwdTarget( SideTarget.X + FwdOfs.X,
+							   SideTarget.Y + FwdOfs.Y,
+							   SideTarget.Z + FwdOfs.Z );
+
+			XLevel->SingleLineCheck( Hit, this, FwdTarget, SideTarget, 0x286, Extent );
+
+			if( Hit.Time == 1.f )
+			{
+				// Both side and forward clear — set adjusted target.
+				Controller->SetAdjustLocation(
+					FVector( SideTarget.X + SideDir.X * SideStepDist,
+							 SideTarget.Y + SideDir.Y * SideStepDist,
+							 SideTarget.Z + SideDir.Z * SideStepDist ) );
+				return 1;
+			}
+		}
+
+		// Try the other side if we haven't already.
+		if( bTriedOtherSide == 0.f )
+		{
+			SideDir.X = -SideDir.X;
+			SideDir.Y = -SideDir.Y;
+			SideDir.Z = -SideDir.Z;
+			TraceOfs.X = -TraceOfs.X;
+			TraceOfs.Y = -TraceOfs.Y;
+			TraceOfs.Z = -TraceOfs.Z;
+			TraceStart = FVector( EyePos.X + TraceOfs.X, EyePos.Y + TraceOfs.Y, EyePos.Z + TraceOfs.Z );
+
+			XLevel->SingleLineCheck( Hit, this, Controller->Destination, TraceStart,
+				0x286, FVector(0.f, 0.f, 0.f) );
+
+			if( Hit.Time >= 1.f )
+			{
+				SideTarget = FVector( Location.X + SideDir.X * SideStepDist,
+									  Location.Y + SideDir.Y * SideStepDist,
+									  Location.Z + SideDir.Z * SideStepDist );
+
+				XLevel->SingleLineCheck( Hit, this, SideTarget, Location, 0x286, Extent );
+
+				if( Hit.Time == 1.f )
+				{
+					FVector FwdTarget( SideTarget.X + FwdOfs.X,
+									   SideTarget.Y + FwdOfs.Y,
+									   SideTarget.Z + FwdOfs.Z );
+
+					XLevel->SingleLineCheck( Hit, this, FwdTarget, SideTarget, 0x286, Extent );
+
+					if( Hit.Time == 1.f )
+					{
+						Controller->SetAdjustLocation(
+							FVector( SideTarget.X + SideDir.X * SideStepDist,
+									 SideTarget.Y + SideDir.Y * SideStepDist,
+									 SideTarget.Z + SideDir.Z * SideStepDist ) );
+						return 1;
+					}
+				}
+			}
+		}
+	}
+
 	return 0;
 	unguard;
 }
