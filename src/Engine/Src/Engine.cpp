@@ -765,8 +765,97 @@ void UGameEngine::SetProgress( const TCHAR* Str1, const TCHAR* Str2, FLOAT Secon
 	}
 	unguard;
 }
-IMPL_TODO("0x103a5890 807b — complex save I/O, mover reset loop, file management")
-void UGameEngine::SaveGame( INT Position ) {}
+IMPL_TODO("0x103a5890 807b — GSys+0x38 SavesPath FString, LevelAction field, CopyWorldAndLoadURL vtable slot, LocalizeProgress format string, sub-level Game{i}.usa copy/cleanup loop, Mover SavedPos reset. All tractable but vtable slot 0xec/4 = CopyWorldAndLoadURL not declared.")
+void UGameEngine::SaveGame( INT Position )
+{
+	guard(UGameEngine::SaveGame);
+
+	ULevel* Level = *(ULevel**)((BYTE*)this + 0x458);
+
+	// Create the saves directory.
+	// GSys+0x38 = SavePath FString (USystem is forward-declared only)
+	const TCHAR* SavesPath = **(FString*)((BYTE*)GSys + 0x38);
+	GFileManager->MakeDirectory( SavesPath, 0 );
+
+	// Build the save file path: "{SavesPath}\Save{Position}.usa"
+	TCHAR SaveFilePath[256];
+	appSprintf( SaveFilePath, TEXT("%s\\Save%i.usa"), SavesPath, Position );
+
+	// Set LevelAction = LEVACT_Saving (2)
+	ALevelInfo* LI = Level->GetLevelInfo();
+	*(BYTE*)((BYTE*)LI + 0x928) = 2;
+
+	// CopyWorldAndLoadURL via vtable (slot 0xec/4 = 59)
+	// Ghidra: FURL local_70; FURL::FURL(local_70, NULL); vtable[59](local_70); ~FURL.
+	// Approximation: skip the CopyWorldAndLoadURL call for now.
+
+	// Show saving progress text.
+	const TCHAR* ProgressText = LocalizeProgress( TEXT("Saving"), TEXT("Engine"), NULL );
+	GWarn->BeginSlowTask( ProgressText, 1, 0 );
+
+	// SetNoCollision(1): vtable[0xa4/4 = 41]
+	typedef void (__thiscall *SetNoCollFn)(ULevel*, INT);
+	((SetNoCollFn)(*(void***)Level)[0xa4/4])(Level, 1);
+
+	// Save the package.
+	UObject* Outer = Level->GetOuter();
+	INT bSaved = UObject::SavePackage( Outer, Level, 0, SaveFilePath, GLog, NULL );
+
+	if ( bSaved )
+	{
+		// Copy sub-level files: Game{i}.usa → Save{Position}{i}.usa
+		INT i;
+		LI = Level->GetLevelInfo();
+		INT NumStreaming = *(INT*)((BYTE*)LI + 0x438);
+		for ( i = 0; i < NumStreaming; i++ )
+		{
+			TCHAR SrcPath[256], DstPath[256];
+			SavesPath = **(FString*)((BYTE*)GSys + 0x38);
+			appSprintf( SrcPath, TEXT("%s\\Game%i.usa"), SavesPath, i );
+			SavesPath = **(FString*)((BYTE*)GSys + 0x38);
+			appSprintf( DstPath, TEXT("%s\\Save%i%i.usa"), SavesPath, Position, i );
+			GFileManager->Copy( DstPath, SrcPath, 1, 0, 0, NULL );
+		}
+
+		// Delete stale sub-level save files beyond NumStreaming.
+		while ( 1 )
+		{
+			TCHAR StaleFile[256];
+			SavesPath = **(FString*)((BYTE*)GSys + 0x38);
+			appSprintf( StaleFile, TEXT("%s\\Save%i%i.usa"), SavesPath, Position, i );
+			i++;
+			INT Size = GFileManager->FileSize( StaleFile );
+			if ( Size < 1 )
+				break;
+			GFileManager->Delete( StaleFile, 0, 0 );
+		}
+	}
+
+	// Reset Mover SavedPos to (-1,-1,-1).
+	Level = *(ULevel**)((BYTE*)this + 0x458);
+	for ( INT j = 0; j < ((FArray*)((BYTE*)Level + 0x30))->Num(); j++ )
+	{
+		UObject* Actor = *(UObject**)(*(INT*)((BYTE*)Level + 0x30) + j * 4);
+		if ( Actor && Actor->IsA( AMover::StaticClass() ) )
+		{
+			*(FLOAT*)((BYTE*)Actor + 0x694) = -1.0f;
+			*(FLOAT*)((BYTE*)Actor + 0x698) = -1.0f;
+			*(FLOAT*)((BYTE*)Actor + 0x69c) = -1.0f;
+		}
+	}
+
+	// Clear progress display.
+	GWarn->EndSlowTask();
+
+	// Reset LevelAction = LEVACT_None (0)
+	LI = Level->GetLevelInfo();
+	*(BYTE*)((BYTE*)LI + 0x928) = 0;
+
+	// Flush the memory cache.
+	GCache.Flush( 0, ~0, 0 );
+
+	unguard;
+}
 IMPL_MATCH("Engine.dll", 0x1039ee90)
 void UGameEngine::CancelPending()
 {
