@@ -16,11 +16,154 @@ inline void  operator delete(void*, void*) noexcept {}
 
 // --- UChannel ---
 
-IMPL_TODO("Ghidra 0x104802c0 (965b): complex merge/split/reliable send logic; requires UNetConnection internal field offsets (0x120 WriterMark, 0x128 LastStart, 0x130-0x1B6 bunch merge state, 0x250 output writer)")
-INT UChannel::SendBunch(FOutBunch*, INT)
+IMPL_MATCH("Engine.dll", 0x104802c0)
+INT UChannel::SendBunch(FOutBunch* Bunch, INT Merge)
 {
 guard(UChannel::SendBunch);
-return 0;
+
+BYTE* conn = (BYTE*)Connection;
+
+// Assertions.
+if( Closing )
+	appFailAssert("!Closing", ".\\UnChan.cpp", 0x17e);
+if( *(UChannel**)(conn + 0xeb0 + ChIndex * 4) != this )
+	appFailAssert("Connection->Channels[ChIndex]==this", ".\\UnChan.cpp", 0x17f);
+if( *(INT*)((BYTE*)Bunch + 0x30) )  // FArchive::IsError() at ArIsError offset
+	appFailAssert("!Bunch->IsError()", ".\\UnChan.cpp", 0x180);
+
+// First bunch on an open channel: mark as opening.
+if( OpenPacketId == -1 && OpenedLocally )
+{
+	*(BYTE*)((BYTE*)Bunch + 0x78) = 1;  // bOpen = 1
+	OpenTemporary = (*(BYTE*)((BYTE*)Bunch + 0x7a) == 0);  // OpenTemporary = !bReliable
+}
+if( OpenTemporary && *(BYTE*)((BYTE*)Bunch + 0x7a) )
+	appFailAssert("!Bunch->bReliable", ".\\UnChan.cpp", 399);
+
+// Try to merge with the previously-sent bunch.
+FOutBunch* PreExistingBunch = NULL;
+if( Merge
+	&& *(INT*)(conn + 0x1a4) == *(INT*)((BYTE*)Bunch + 0x68)  // same ChSequence
+	&& *(INT*)(conn + 0x130) )                                 // merge data valid
+{
+	INT lastStartBits = *(INT*)(conn + 0x12C);  // FBitWriterMark::Num at +0x04 from 0x128
+	if( lastStartBits )
+	{
+		INT outBits = *(INT*)(conn + 0x250 + 0x4C);  // FBitWriter::Num
+		if( lastStartBits == outBits )
+		{
+			INT outBytes   = (outBits + 7) >> 3;
+			INT bunchBytes = (*(INT*)((BYTE*)Bunch + 0x4C) + 7) >> 3;
+			if( bunchBytes + 9 + outBytes <= *(INT*)(conn + 0xd0) )  // MaxPacket
+			{
+				if( *(INT*)(conn + 0x13c + 0x30) )  // LastOut.IsError()
+					appFailAssert("!Connection->LastOut.IsError()", ".\\UnChan.cpp", 0x19c);
+
+				// Append bunch bits to Connection->LastOut.
+				INT numBits = *(INT*)((BYTE*)Bunch + 0x4C);
+				BYTE* data  = *(BYTE**)((BYTE*)Bunch + 0x40);   // TArray<BYTE>::Data
+				((FBitWriter*)(conn + 0x13c))->SerializeBits(data, numBits);
+
+				// OR merge flags.
+				*(BYTE*)(conn + 0x1b6) |= *(BYTE*)((BYTE*)Bunch + 0x7a);  // bReliable
+				*(BYTE*)(conn + 0x1b4) |= *(BYTE*)((BYTE*)Bunch + 0x78);  // bOpen
+				*(BYTE*)(conn + 0x1b5) |= *(BYTE*)((BYTE*)Bunch + 0x79);  // bClose
+
+				PreExistingBunch = *(FOutBunch**)(conn + 0x138);
+				Bunch = (FOutBunch*)(conn + 0x13c);
+
+				if( *(INT*)((BYTE*)Bunch + 0x30) )
+					appFailAssert("!Bunch->IsError()", ".\\UnChan.cpp", 0x1a3);
+
+				// Pop WriterMark — undo previous send header from output writer.
+				((FBitWriterMark*)(conn + 0x120))->Pop(*(FBitWriter*)(conn + 0x250));
+
+				// Decrement outgoing packet count.
+				*(INT*)(conn + 0x210) -= 1;
+			}
+		}
+	}
+}
+
+// Post-merge: reliable vs unreliable handling.
+if( *(BYTE*)((BYTE*)Bunch + 0x7a) == 0 )  // !bReliable
+{
+	*(INT*)(conn + 0x138) = 0;
+}
+else if( PreExistingBunch == NULL )
+{
+	// New reliable bunch — create a copy in the OutRec linked list.
+	if( (INT)((BYTE)*(BYTE*)((BYTE*)Bunch + 0x79) + 0x7f) <= NumOutRec )
+		appFailAssert("NumOutRec<RELIABLE_BUFFER-1+Bunch->bClose", ".\\UnChan.cpp", 0x1af);
+
+	*(INT*)((BYTE*)Bunch + 0x54) = 0;  // Next = NULL
+
+	// Increment per-channel sequence counter.
+	INT* pSeq = (INT*)(conn + 0x22ec + ChIndex * 4);
+	*pSeq += 1;
+	*(INT*)((BYTE*)Bunch + 0x70) = *pSeq;
+
+	NumOutRec++;
+
+	// Allocate and copy the bunch.
+	FOutBunch* Copy = (FOutBunch*)GMalloc->Malloc(0x7c, TEXT("FOutBunch"));
+	if( Copy )
+		Copy = new(Copy) FOutBunch(*Bunch);
+	else
+		Copy = NULL;
+
+	// Append to OutRec linked list.
+	FOutBunch** Tail = &OutRec;
+	while( *Tail )
+		Tail = (FOutBunch**)((BYTE*)*Tail + 0x54);
+	*Tail = Copy;
+	*(FOutBunch**)(conn + 0x138) = Copy;
+	Bunch = Copy;
+}
+else
+{
+	// Merged with pre-existing reliable bunch — update it.
+	*(INT*)((BYTE*)Bunch + 0x54) = *(INT*)((BYTE*)PreExistingBunch + 0x54);
+	*PreExistingBunch = *Bunch;
+	*(FOutBunch**)(conn + 0x138) = PreExistingBunch;
+	Bunch = PreExistingBunch;
+}
+
+// Clear RecvAcked.
+*(INT*)((BYTE*)Bunch + 0x64) = 0;
+
+// Send the bunch.
+INT PacketId = Connection->SendRawBunch(*(FOutBunch*)Bunch, 1);
+
+// Set OpenPacketId on first send.
+if( OpenPacketId == -1 && OpenedLocally )
+	OpenPacketId = PacketId;
+
+// If closing, call SetClosingFlag.
+if( *(BYTE*)((BYTE*)Bunch + 0x79) )
+	SetClosingFlag();
+
+// Copy bunch header state to Connection's last-bunch cache.
+conn = (BYTE*)Connection;
+*(FBitWriter*)(conn + 0x13c) = *(FBitWriter*)Bunch;
+*(INT*)(conn + 0x190) = *(INT*)((BYTE*)Bunch + 0x54);
+*(INT*)(conn + 0x194) = *(INT*)((BYTE*)Bunch + 0x58);
+*(double*)(conn + 0x198) = *(double*)((BYTE*)Bunch + 0x5c);
+*(INT*)(conn + 0x1a0) = *(INT*)((BYTE*)Bunch + 0x64);
+*(INT*)(conn + 0x1a4) = *(INT*)((BYTE*)Bunch + 0x68);
+*(INT*)(conn + 0x1a8) = *(INT*)((BYTE*)Bunch + 0x6c);
+*(INT*)(conn + 0x1ac) = *(INT*)((BYTE*)Bunch + 0x70);
+*(INT*)(conn + 0x1b0) = *(INT*)((BYTE*)Bunch + 0x74);
+*(BYTE*)(conn + 0x1b4) = *(BYTE*)((BYTE*)Bunch + 0x78);
+*(BYTE*)(conn + 0x1b5) = *(BYTE*)((BYTE*)Bunch + 0x79);
+*(BYTE*)(conn + 0x1b6) = *(BYTE*)((BYTE*)Bunch + 0x7a);
+
+// Save new WriterMark from output writer.
+FBitWriterMark Mark(*(FBitWriter*)(conn + 0x250));
+*(INT*)(conn + 0x128) = *(INT*)((BYTE*)&Mark);
+*(INT*)(conn + 0x12C) = *(INT*)((BYTE*)&Mark + 4);
+
+return PacketId;
 unguard;
 }
 
@@ -945,6 +1088,11 @@ FOutBunch::FOutBunch(const FOutBunch& Other) { appMemcpy(this, &Other, sizeof(*t
 //             ChIndex (0x68), ChSequence (0x6c), flags (0x78-0x7a), validates assertions.
 IMPL_MATCH("Engine.dll", 0x1047f820)
 FOutBunch::FOutBunch(UChannel*, INT) { appMemzero(this, sizeof(*this)); }
+// Ghidra 0x1036f9c0 (88b): calls FBitWriter::operator= for base, then copies
+// fields 0x54-0x7a individually. We use appMemcpy which covers everything; the
+// vtable pointer at offset 0 is identical between source and dest (both FOutBunch).
+IMPL_MATCH("Engine.dll", 0x1036f9c0)
+FOutBunch& FOutBunch::operator=(const FOutBunch& Other) { appMemcpy(this, &Other, sizeof(*this)); return *this; }
 IMPL_MATCH("Engine.dll", 0x1036f950)
 FOutBunch::~FOutBunch() {}
 IMPL_MATCH("Engine.dll", 0x1047f930)
