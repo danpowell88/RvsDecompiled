@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
 	UnLevel.cpp: ULevel, ALevelInfo, AGameInfo and related classes.
 	Reconstructed for Ravenshield decompilation project.
 
@@ -2523,13 +2523,390 @@ INT ULevel::NotifyAcceptingChannel( UChannel* Channel )
 }
 IMPL_MATCH("Engine.dll", 0x103116c0)
 ULevel* ULevel::NotifyGetLevel() { return this; }
-IMPL_TODO("3802-byte ULevel::NotifyReceivedText network protocol dispatcher; FUN_103bef10/FUN_103bfaf0 confirmed in Engine _unnamed.cpp; DAT_1077fbfc is UNetDriver ptr (settings field +0x4c); no permanent blockers. Ghidra 0x103c1d30")
+// Helper: serialize a FGuid into an FArchive — replaces FUN_103bef40 (118b, _unnamed.cpp).
+// Called as a thiscall in retail where ECX = FOutBunch; here we pass it explicitly.
+static void SerializeGuidToArchive( FArchive& Ar, FGuid& G )
+{
+	Ar.ByteOrderSerialize( &G.A, 4 );
+	Ar.ByteOrderSerialize( &G.B, 4 );
+	Ar.ByteOrderSerialize( &G.C, 4 );
+	Ar.ByteOrderSerialize( &G.D, 4 );
+}
+
+// Helper: build a FGuid from a 16-byte MD5 digest (4 DWORDs, little-endian).
+static FGuid GuidFromMD5( const BYTE* Digest16 )
+{
+	FGuid G;
+	appMemcpy( &G.A, Digest16,      4 );
+	appMemcpy( &G.B, Digest16 + 4,  4 );
+	appMemcpy( &G.C, Digest16 + 8,  4 );
+	appMemcpy( &G.D, Digest16 + 12, 4 );
+	return G;
+}
+
+// Helper: verify an ARM patch file vs a GUID, optionally write it to disk.
+// Returns 0 if file exists and GUID matches (no download needed), 1 otherwise.
+// Replaces the file-read + appMD5 + FUN_103bef10 pattern from Ghidra 0x103c1d30.
+static INT VerifyArmPatchFile( const TCHAR* FileName, const FGuid& Expected )
+{
+	FArchive* FileAr = GFileManager->CreateFileReader( FileName, 0, GLog );
+	if ( !FileAr )
+		return 1;
+
+	INT FileSize = FileAr->TotalSize();
+	if ( FileSize <= 0 )
+	{
+		delete FileAr;
+		return 1;
+	}
+
+	BYTE* FileBuf = (BYTE*)GMalloc->Malloc( FileSize, NULL );
+	if ( !FileBuf )
+	{
+		delete FileAr;
+		return 1;
+	}
+
+	FileAr->Serialize( FileBuf, FileSize );
+	delete FileAr;
+
+	FMD5Context Ctx;
+	appMD5Init( &Ctx );
+	appMD5Update( &Ctx, FileBuf, FileSize );
+	BYTE Digest[16];
+	appMD5Final( Digest, &Ctx );
+	FGuid ComputedGuid = GuidFromMD5( Digest );
+
+	INT bNeedsDownload = 1;
+	if ( Expected == ComputedGuid )
+	{
+		bNeedsDownload = 0;
+		FArchive* OutAr = GFileManager->CreateFileWriter( FileName, 0, GNull );
+		if ( OutAr )
+		{
+			OutAr->Serialize( FileBuf, FileSize );
+			delete OutAr;
+		}
+	}
+
+	GMalloc->Free( FileBuf );
+	return bNeedsDownload;
+}
+
+IMPL_TODO("Ghidra 0x103c1d30 (3802b): full network handshake dispatcher. Log format strings (DAT_*) approximated empty; rdtsc challenge -> appSeconds(); LOGIN challenge check approximated (engine vtable[42] = GetChallengeResponse skipped); WelcomePlayer call after LOGIN via ULevel vtable[0xf0/4] (slot 60) skipped; JOIN vtable[0xb4/4=45] VerifyLogin skipped; ARMPATCH download channel send bunch (FBitWriter via Pad[256] not directly serialisable via our FOutBunch declaration) skipped; FUN_103bfaf0 remove-FPackageInfo-entry approximated as raw FArray::Remove.")
 void ULevel::NotifyReceivedText( UNetConnection* Connection, const TCHAR* Text )
 {
 	guard(ULevel::NotifyReceivedText);
-	// DIVERGENCE: retail full network command dispatch (HELLO/NETSPEED/HAVE/JOIN/FILEREQ/
-	// WELCOME/UPGRADE/FAILURE etc.) — 3802 bytes of network protocol handling (Ghidra 0xc1d30).
-	// Unresolved — accepting connections will not progress through the handshake.
+
+	const TCHAR* Cmd = Text;
+
+	// -------------------------------------------------------------------------
+	// USERFLAG — universal, applies to both server and client
+	// -------------------------------------------------------------------------
+	if ( ParseCommand( &Cmd, TEXT("USERFLAG") ) )
+	{
+		*(INT*)((BYTE*)Connection + 0xe4) = appAtoi( Cmd );
+		return;
+	}
+
+	// -------------------------------------------------------------------------
+	// SERVER PATH: NetDriver->ServerConnection == NULL  (we are the server)
+	// -------------------------------------------------------------------------
+	if ( *(INT*)((BYTE*)NetDriver + 0x3c) == 0 )
+	{
+		if ( !ParseCommand( &Cmd, TEXT("HELLO") ) )
+		{
+			// --------------------------------------------------------------
+			// NETSPEED — adjust per-connection bandwidth cap
+			// --------------------------------------------------------------
+			if ( ParseCommand( &Cmd, TEXT("NETSPEED") ) )
+			{
+				INT Speed = appAtoi( Cmd );
+				if ( Speed > 499 )
+				{
+					INT MaxSpeed = *(INT*)((BYTE*)NetDriver + 0x4c);
+					if ( Speed > MaxSpeed )
+						Speed = MaxSpeed;
+					*(INT*)((BYTE*)Connection + 0x48) = Speed;
+				}
+				debugf( TEXT("") ); // format from DAT_* — approximated
+				Connection->InitOut();
+				return;
+			}
+
+			// --------------------------------------------------------------
+			// HAVE GUID=... GEN=... — client reports a package version
+			// --------------------------------------------------------------
+			if ( ParseCommand( &Cmd, TEXT("HAVE") ) )
+			{
+				FGuid ClientGuid( 0, 0, 0, 0 );
+				Parse( Cmd, TEXT("GUID="), ClientGuid );
+
+				INT pkgMapObj = *(INT*)((BYTE*)Connection + 0xc8);
+				if ( pkgMapObj )
+				{
+					FArray* pkgArr = (FArray*)((BYTE*)pkgMapObj + 0x2c);
+					INT nEntries = pkgArr->Num();
+					BYTE* entriesBase = *(BYTE**)pkgArr;
+					for ( INT i = 0; i < nEntries; i++ )
+					{
+						BYTE* entry = entriesBase + i * 0x44;
+						// FUN_103bef10 replacement: FGuid == operator
+					if ( *(FGuid*)(entry + 0x14) == ClientGuid )
+					{
+						INT Gen = 0;
+						if ( Parse( Cmd, TEXT("GEN="), Gen ) )
+							*(INT*)(entry + 0x3c) = Gen;
+					}
+					}
+				}
+				Connection->InitOut();
+				return;
+			}
+
+			// --------------------------------------------------------------
+			// SKIP GUID=... — client requests a package be skipped
+			// --------------------------------------------------------------
+			if ( ParseCommand( &Cmd, TEXT("SKIP") ) )
+			{
+				FGuid SkipGuid( 0, 0, 0, 0 );
+				Parse( Cmd, TEXT("GUID="), SkipGuid );
+
+				INT pkgMapObj = *(INT*)((BYTE*)Connection + 0xc8);
+				if ( pkgMapObj )
+				{
+					FArray* pkgArr = (FArray*)((BYTE*)pkgMapObj + 0x2c);
+					INT nEntries = pkgArr->Num();
+					BYTE* entriesBase = *(BYTE**)pkgArr;
+					for ( INT i = 0; i < nEntries; i++ )
+					{
+						BYTE* entry = entriesBase + i * 0x44;
+						if ( *(FGuid*)(entry + 0x14) == SkipGuid )
+						{
+							debugf( TEXT("") ); // log filename
+							// FUN_103bfaf0 approximation: raw remove
+							pkgArr->Remove( i, 1, 0x44 );
+							break;
+						}
+					}
+				}
+				Connection->InitOut();
+				return;
+			}
+
+			// --------------------------------------------------------------
+			// LOGIN RESPONSE=... — client challenge reply + URL for joining
+			// --------------------------------------------------------------
+			if ( ParseCommand( &Cmd, TEXT("LOGIN") ) )
+			{
+				INT Response = 0;
+				UBOOL bParsed = Parse( Cmd, TEXT("RESPONSE="), Response );
+
+				// IMPL_TODO: retail verifies Response against Engine->GetChallengeResponse()
+				// called via FNetworkNotify->Engine vtable[0xa8/4]. Approximation: accept always.
+				if ( !bParsed )
+				{
+					debugf( TEXT("") ); // log bad response
+					Connection->InitOut();
+					*(INT*)((BYTE*)Connection + 0x80) = 1; // USOCK_Closed
+					return;
+				}
+
+				*(INT*)((BYTE*)Connection + 0x11c) = 1; // bVersionChecked
+
+				// Parse URL, replace '?' with ' '
+				TCHAR urlBuf[0x400];
+				appMemzero( urlBuf, sizeof(urlBuf) );
+				if ( ((FString*)((BYTE*)Connection + 0xe8))->Len() > 0 )
+					appStrncpy( urlBuf, **(FString*)((BYTE*)Connection + 0xe8), 0x400 );
+				for ( INT ci = 0; urlBuf[ci]; ci++ )
+					if ( urlBuf[ci] == TEXT('?') ) urlBuf[ci] = TEXT(' ');
+
+				// Find the options part starting from '?' in the original URL
+				const TCHAR* rawUrl = **(FString*)((BYTE*)Connection + 0xe8);
+				const TCHAR* pOpts = rawUrl;
+				while ( *pOpts && *pOpts != TEXT('?') )
+					pOpts++;
+				FString URLOptions( pOpts );
+
+				FString Error, Optional;
+				ALevelInfo* li = GetLevelInfo();
+				if ( li && li->Game )
+					li->Game->eventPreLogin( *(FString*)((BYTE*)Connection + 0xe8), *(FString*)((BYTE*)Connection + 0xe8), Error, Optional );
+
+				if ( Error != TEXT("") )
+				{
+					debugf( TEXT("") ); // log rejection message
+					Connection->InitOut();
+					*(INT*)((BYTE*)Connection + 0x80) = 1;
+					return;
+				}
+
+				// IMPL_TODO: retail calls ULevel vtable[0xf0/4=60] (WelcomePlayer) here
+				Connection->InitOut();
+				return;
+			}
+
+			// --------------------------------------------------------------
+			// JOIN — player requests to join; build FURL and spawn actor
+			// --------------------------------------------------------------
+			if ( ParseCommand( &Cmd, TEXT("JOIN") ) && *(INT*)((BYTE*)Connection + 0x34) == 0 )
+			{
+				// IMPL_TODO: retail calls PackageMap vtable[0x7c/4] and
+				// ULevel vtable[0xb4/4] (VerifyLogin); approximated below
+				FString Error;
+				FString urlStr = *(FString*)((BYTE*)Connection + 0xe8);
+
+				// Parse ArmPatch= GUID from URL
+				TCHAR urlBuf[0x400];
+				appMemzero( urlBuf, sizeof(urlBuf) );
+				if ( urlStr.Len() > 0 )
+					appStrncpy( urlBuf, *urlStr, 0x400 );
+				for ( INT ci = 0; urlBuf[ci]; ci++ )
+					if ( urlBuf[ci] == TEXT('?') ) urlBuf[ci] = TEXT(' ');
+
+				FGuid Patch( 0, 0, 0, 0 );
+				if ( Parse( urlBuf, TEXT("ARMPATCH="), Patch ) )
+				{
+					*(INT*)((BYTE*)Connection + 0x68) = Patch.A;
+					*(INT*)((BYTE*)Connection + 0x6c) = Patch.B;
+					*(INT*)((BYTE*)Connection + 0x70) = Patch.C;
+					*(INT*)((BYTE*)Connection + 0x74) = Patch.D;
+				}
+
+				Connection->InitOut();
+				return;
+			}
+
+			// --------------------------------------------------------------
+			// SERVERPING — fall through to log + InitOut
+			// ARMPATCH SEND — ARM patch file verify + download setup
+			// --------------------------------------------------------------
+			if ( !ParseCommand( &Cmd, TEXT("SERVERPING") ) )
+			{
+				if ( !ParseCommand( &Cmd, TEXT("ARMPATCH") ) || !ParseCommand( &Cmd, TEXT("SEND") ) )
+				{
+					Connection->InitOut();
+					return;
+				}
+
+				// Parse ArmPatch GUID and size from connection URL
+				TCHAR urlBuf[0x400];
+				appMemzero( urlBuf, sizeof(urlBuf) );
+				FString* connUrl = (FString*)((BYTE*)Connection + 0xe8);
+				if ( connUrl->Len() > 0 )
+					appStrncpy( urlBuf, **connUrl, 0x400 );
+				for ( INT ci = 0; urlBuf[ci]; ci++ )
+					if ( urlBuf[ci] == TEXT('?') ) urlBuf[ci] = TEXT(' ');
+
+				FGuid ArmGuid( 0, 0, 0, 0 );
+				DWORD ArmSize = 0;
+				if ( Parse( urlBuf, TEXT("ARMPATCH="), ArmGuid ) &&
+				     Parse( urlBuf, TEXT("ARMPATCHSIZE="), ArmSize ) )
+				{
+					FString FileName = FString::Printf( TEXT("%s"), ArmGuid.String() );
+					INT bNeeds = VerifyArmPatchFile( *FileName, ArmGuid );
+					if ( bNeeds )
+					{
+						// IMPL_TODO: create download channel + send initial FOutBunch
+						// Ghidra: CreateChannel(CHTYPE_File,1,0x7ffffffe) →
+						//   FUN_103bf770 → StaticConstructObject(UBinaryFileDownload) →
+						//   setup download+packinfo+send FGuid×2 via FUN_103bef40
+					}
+				}
+			}
+			// SERVERPING log (DAT_* format — approximated)
+			debugf( TEXT("") );
+		}
+		else
+		{
+			// ------------------------------------------------------------------
+			// HELLO — server receives initial version announcement from client
+			// ------------------------------------------------------------------
+			INT MinVer = 0xdb, Ver = 0xdb;
+			Parse( Cmd, TEXT("MINVER="), MinVer );
+			Parse( Cmd, TEXT("VER="),    Ver    );
+
+			if ( Ver < 600 || MinVer > 0x39f )
+			{
+				debugf( TEXT("") ); // version mismatch notice
+				Connection->InitOut();
+				*(INT*)((BYTE*)Connection + 0x80) = 1; // USOCK_Closed
+				return;
+			}
+
+			INT ClampedVer = (Ver > 0x39f) ? 0x39f : Ver;
+			*(INT*)((BYTE*)Connection + 0xe0) = ClampedVer;
+
+			GetLevelInfo();
+
+			// IMPL_DIVERGE: retail uses rdtsc() low 32 bits as challenge seed.
+				*(INT*)((BYTE*)Connection + 0xdc) = (INT)appSeconds().GetFloat();
+			debugf( TEXT("") ); // welcome text (DAT_* format)
+		}
+
+		Connection->InitOut();
+		return;
+	}
+
+	// -------------------------------------------------------------------------
+	// CLIENT PATH — messages received from the server
+	// -------------------------------------------------------------------------
+
+	// FAILURE — server reports a fatal error; notify local engine
+	if ( ParseCommand( &Cmd, TEXT("FAILURE") ) )
+	{
+		void* EngObj = (void*)Engine;
+		INT nVP = 0;
+		if ( EngObj )
+		{
+			void* client = *(void**)((BYTE*)EngObj + 0x44);
+			if ( client )
+				nVP = ((FArray*)((BYTE*)client + 0x30))->Num();
+		}
+		if ( nVP == 0 )
+			appFailAssert( "Engine->Client->Viewports.Num()", ".\\UnLevel.cpp", 0x3c0 );
+		if ( EngObj )
+		{
+			void* client = *(void**)((BYTE*)EngObj + 0x44);
+			typedef void (__thiscall *TLoseConn)(void*);
+			((TLoseConn)(*(void***)client)[0xa4/4])( client );
+		}
+		return;
+	}
+
+	// SERVERPINGANSWER — record server pong timestamp
+	if ( ParseCommand( &Cmd, TEXT("SERVERPINGANSWER") ) )
+	{
+		// IMPL_DIVERGE: retail uses rdtsc via FUN_10301000 for high-res timing.
+		*(DOUBLE*)((BYTE*)this + 0x10160) = (DOUBLE)appSeconds().GetFloat();
+		*(INT*)((BYTE*)this + 0x10168) = 1;
+		return;
+	}
+
+	// ARMPATCH REQUIRED GUID=... SIZE=... — server requires a patch download
+	if ( ParseCommand( &Cmd, TEXT("ARMPATCH") ) && ParseCommand( &Cmd, TEXT("REQUIRED") ) )
+	{
+		FGuid ArmGuid( 0, 0, 0, 0 );
+		DWORD ArmSize = 0;
+		Parse( Cmd, TEXT("GUID="), ArmGuid );
+		Parse( Cmd, TEXT("SIZE="), ArmSize );
+
+		FString FileName = FString::Printf( TEXT("%s"), ArmGuid.String() );
+		INT bNeeds = VerifyArmPatchFile( *FileName, ArmGuid );
+
+		if ( bNeeds )
+		{
+			// IMPL_TODO: create download channel + send initial FOutBunch
+			// Ghidra: CreateChannel(CHTYPE_File,1,0x7fffffff) →
+			//   FUN_103bf770 → StaticConstructObject(UBinaryFileDownload) →
+			//   setup download+packinfo+send FGuid×2 via FUN_103bef40, then InitOut+Close
+		}
+
+		Connection->InitOut();
+	}
+	// unrecognised client command — ignored
+
 	unguard;
 }
 IMPL_DIVERGE("retail this=FNetworkNotify(ULevel+0x2c); this+0x14 maps to NetDriver in retail (Ghidra 0x103bf590)")
