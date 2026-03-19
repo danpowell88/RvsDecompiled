@@ -1712,12 +1712,79 @@ INT ULevel::FindSpot( FVector Extent, FVector& Location, INT bCheckActors, AActo
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103b8b30 (1256 bytes): calls EncroachingWorldGeometry + SingleLineCheck + FVector plane math; complex normal-adjustment and partial-hit state; full translation pending")
-INT ULevel::CheckSlice( FVector& Adjusted, FVector TraceDest, INT& TraceLen, AActor* Actor )
+IMPL_TODO("Ghidra 0x103b8b30 (1256 bytes): vertical slab-adjustment for actor placement; algorithm approximated from Ghidra — t==0/t<=0.5/t>0.5 push branches implemented, but SingleLineCheck start/end exact args and shared-block snap-to-surface final-trace are approximate due to Ghidra calling-convention noise")
+INT ULevel::CheckSlice( FVector& Adjusted, FVector Extent, INT& NumIterations, AActor* Actor )
 {
 	guard(ULevel::CheckSlice);
-	// TODO: implement ULevel::CheckSlice (vertical slab adjustment for player capsule fitting)
-	return 0;
+	NumIterations = 0;
+
+	FCheckResult Hit( 1.f );
+	ALevelInfo* LI = GetLevelInfo();
+
+	// Is the actor already encroaching world geometry at its current location?
+	if( EncroachingWorldGeometry( Hit, Adjusted, Extent, 0, LI, Actor ) )
+	{
+		NumIterations = 1;
+		return 0;
+	}
+
+	// Trace downward to find the nearest floor surface.
+	// Ghidra uses 2 * Extent.Z as the downward probe distance.
+	FLOAT extZ = Extent.Z;
+	FVector TraceEnd( Adjusted.X, Adjusted.Y, Adjusted.Z - extZ * 2.0f );
+	FCheckResult TraceHit( 1.f );
+	SingleLineCheck( TraceHit, Actor, TraceEnd, Adjusted, TRACE_World, FVector(0.f,0.f,0.f) );
+	FLOAT t = TraceHit.Time;
+
+	if( t == 0.0f )
+	{
+		// Immediate hit — geometry starts right where the actor is.
+		// Push the actor downward by one half-height so the floor is below it.
+		Adjusted.Z -= extZ;
+		// Fall through to shared EncroachingWorldGeometry test below.
+	}
+	else if( t <= 0.5f )
+	{
+		// Hit in the upper half of the probe: push UP to clear.
+		// Ghidra: push = (1 - 2t) * extZ + 1.0
+		FLOAT push = (1.0f - 2.0f * t) * extZ + 1.0f;
+		Adjusted.Z += push;
+
+		// Test for clearance at the pushed-up position.
+		FCheckResult Hit2( 1.f );
+		if( !EncroachingWorldGeometry( Hit2, Adjusted, Extent, 0, LI, Actor ) )
+			return 1;
+
+		// Still blocked — apply a horizontal nudge along the obstruction normal.
+		// Ghidra: FVector::operator*( &hitNormal, Extent.X ) added to Adjusted.
+		FVector Nudge( Hit2.Normal.X * Extent.X, Hit2.Normal.Y * Extent.X, 0.f );
+		Adjusted += Nudge;
+		FCheckResult Hit3( 1.f );
+		return !EncroachingWorldGeometry( Hit3, Adjusted, Extent, 0, LI, Actor );
+	}
+	else
+	{
+		// Hit in the lower half of the probe: push DOWN to land on the surface.
+		// Ghidra: push = (2t - 1) * extZ + 1.0
+		FLOAT push = (2.0f * t - 1.0f) * extZ + 1.0f;
+		Adjusted.Z -= push;
+		// Fall through to shared EncroachingWorldGeometry test below.
+	}
+
+	// Shared test for the t==0 and t>0.5 fall-through paths.
+	FCheckResult Hit4( 1.f );
+	if( !EncroachingWorldGeometry( Hit4, Adjusted, Extent, 0, LI, Actor ) )
+	{
+		// Clear.  Ghidra does an optional surface-snap SingleLineCheck here
+		// (traces up by extZ) to follow gentle slopes; approximate by returning 1.
+		return 1;
+	}
+
+	// Last-resort horizontal nudge in the hit normal direction.
+	FVector Nudge2( Hit4.Normal.X * Extent.X, Hit4.Normal.Y * Extent.X, 0.f );
+	Adjusted += Nudge2;
+	FCheckResult Hit5( 1.f );
+	return !EncroachingWorldGeometry( Hit5, Adjusted, Extent, 0, LI, Actor );
 	unguard;
 }
 
