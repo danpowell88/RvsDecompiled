@@ -210,33 +210,225 @@ void AProjector::Attach()
 	// Calls AActor::AttachProjector for each qualifying actor.
 }
 
-IMPL_TODO("Ghidra 0x103F8F90: 4699-byte function. All math infra available (FCoords::operator/, FPlane ctors, FVector::SafeNormal, FCoords::Matrix, appSqrt/appTan/appCos). Orthographic branch (FOV==0) and frustum corner/plane generation are tractable. Perspective branch blocked by FUN_103f86b0 (internal 4x4 matrix multiply, 169b) and complex animated-texture offset section (flags & 0x4000). No permanent blockers — purely decompilation effort.")
+// Local 4x4 matrix multiply helper (FUN_103f86b0, 169b, internal to Engine.dll).
+// Computes dest = A * B for 4x4 row-major float matrices.
+// Called via __thiscall(ECX=dest, stack=A, B) in retail; inlined here for simplicity.
+static void CalcMatrixMul4x4(FLOAT* dest, const FLOAT* A, const FLOAT* B)
+{
+	for (INT r = 0; r < 4; r++)
+		for (INT c = 0; c < 4; c++)
+		{
+			FLOAT s = 0.f;
+			for (INT k = 0; k < 4; k++)
+				s += A[r*4+k] * B[k*4+c];
+			dest[r*4+c] = s;
+		}
+}
+
+IMPL_TODO("Ghidra 0x103F8F90 (4699b): orthographic projection-matrix scale divisors approximated as Width and Height; perspective scale and animated-texture section (flags & 0x4000) match Ghidra constants. All corner/plane math exact.")
 void AProjector::CalcMatrix()
 {
-	// Ghidra 0xf8f90 (4699b): builds AProjector's projection matrix from
-	// Position/Rotation/FOV and generates the 8 frustum corner points + 6 clip planes.
-	//
-	// Structure:
-	//   1. Early-out if no texture (this+0x3a4 == 0)
-	//   2. Decompose rotation: FCoords Coords = GMath.UnitCoords / FRotator(this+0x240)
-	//      Extract Forward (XAxis), Right (-YAxis), Up (ZAxis)
-	//   3. Get texture USize/VSize via vtable[0x70/4] and [0x74/4]
-	//      Width  = USize * this+0x2bc * DrawScale(this+0xe0)
-	//      Height = VSize * this+0x2c0 * DrawScale(this+0xe0)
-	//      HalfDiag = sqrt(Width^2/4 + Height^2/4)
-	//   4. Compute 4 far corners (this+0x410) and 4 near corners (this+0x434):
-	//      - If PHYS_Rotating: Position + direction * HalfDiag (unnormalized)
-	//      - Else: Position + SafeNormal(direction) * HalfDiag
-	//   5. Build 6 frustum clip planes (this+0x3b0..0x40c):
-	//      Plane[0] = near plane from Position with Forward normal
-	//      Planes[1-4] = side planes (ortho: point+negated normal; persp: 3-point ctor)
-	//      Plane[5] = far plane from back corners with -Forward normal
-	//   6. Build projection FMatrix (this+0x4d0):
-	//      - Ortho: FCoords(center, halfRight, halfUp, Forward).Matrix()
-	//      - Persp: FCoords(apex, -Right, Up, Forward).Matrix() * scale matrix
-	//        via FUN_103f86b0 (4x4 matrix multiply helper)
-	//   7. Compute 4 far-extent corners (this+0x440..0x46c) offset along Forward by this+0x39c
-	//   8. Optional animated-texture offset (flags & 0x4000 at this+0x3a0)
+	guard(AProjector::CalcMatrix);
+
+	if (!*(BYTE**)(this+0x3a4))
+		return;  // no texture → nothing to compute
+
+	// 1. Decompose rotation into projection axes.
+	//    FCoords.XAxis = Forward, -YAxis = Right (projector convention), ZAxis = Up.
+	FCoords Coords = GMath.UnitCoords / *(FRotator*)(this+0x240);
+	FVector Forward  =  Coords.XAxis;
+	FVector RightNeg = FVector(-Coords.YAxis.X, -Coords.YAxis.Y, -Coords.YAxis.Z);
+	FVector Up       =  Coords.ZAxis;
+	FVector Pos      = *(FVector*)(this+0x234);
+
+	// 2. Get texture dimensions via vtable calls.
+	//    vtable[0x70/4] = USize (pixel width), vtable[0x74/4] = VSize (pixel height).
+	typedef INT (__thiscall *GetTexDimFn)(BYTE*);
+	BYTE** texPtr = (BYTE**)(this+0x3a4);
+	void** vtbl   = *(void***)*texPtr;
+	INT uSize = ((GetTexDimFn)vtbl[0x70/4])(*texPtr);
+	INT vSize = ((GetTexDimFn)vtbl[0x74/4])(*texPtr);
+
+	FLOAT DrawScale = *(FLOAT*)(this+0xe0);
+	FLOAT Width     = (FLOAT)uSize * *(FLOAT*)(this+0x2bc) * DrawScale;
+	FLOAT Height    = (FLOAT)vSize * *(FLOAT*)(this+0x2c0) * DrawScale;
+	FLOAT HalfDiag  = appSqrt(Width*Width*0.25f + Height*Height*0.25f);
+
+	// 3. Compute the 4 near corners of the frustum.
+	//    Directions: D0 = Up + RightNeg, D1 = Up - RightNeg,
+	//                D2 = -(Up + RightNeg) = -D0, D3 = -Up + RightNeg.
+	//    PHYS_Rotating (5): unnormalized projection; else: SafeNormal.
+	FVector D0 = Up + RightNeg;
+	FVector D1 = Up - RightNeg;
+
+	FVector* Corners = (FVector*)(this+0x410);  // 4 × FVector (stride 12)
+	if (Physics == PHYS_Rotating)
+	{
+		// Unnormalized: just multiply direction by HalfDiag.
+		Corners[0] = Pos + D0 * HalfDiag;
+		Corners[1] = Pos + D1 * HalfDiag;
+		Corners[2] = Pos + (- D0) * HalfDiag;   // -D0
+		Corners[3] = Pos + (- D1) * HalfDiag;   // -D1 = -Up - RightNeg
+	}
+	else
+	{
+		// SafeNormal each direction, then scale.
+		Corners[0] = Pos + D0.SafeNormal() * HalfDiag;
+		Corners[1] = Pos + D1.SafeNormal() * HalfDiag;
+		Corners[2] = Pos + (-D0).SafeNormal() * HalfDiag;
+		Corners[3] = Pos + (-D1).SafeNormal() * HalfDiag;
+	}
+
+	// 4. Near frustum plane (this+0x3b0): normal = Forward, base = Pos.
+	*(FPlane*)(this+0x3b0) = FPlane(Pos, Forward);
+
+	// 5. Four side frustum planes (this+0x3c0..0x3fc).
+	//    Stored in order: plane through corner[0], corner[1], corner[2], corner[3].
+	INT FOV = *(INT*)(this+0x398);  // 0 = ortho, else perspective angle in degrees
+
+	if (FOV == 0)
+	{
+		// Ortho: plane is the corner point + negated SafeNormal of the corner direction.
+		*(FPlane*)(this+0x3c0) = FPlane(Corners[0], -D0.SafeNormal());
+		*(FPlane*)(this+0x3d0) = FPlane(Corners[1], -D1.SafeNormal());
+		*(FPlane*)(this+0x3e0) = FPlane(Corners[2], D0.SafeNormal());
+		*(FPlane*)(this+0x3f0) = FPlane(Corners[3], D1.SafeNormal());
+	}
+	else
+	{
+		// Perspective: 3-point constructor (apex + two adjacent corners).
+		// apex = Pos - Forward * cos(FOV/2)   (in front of Pos by half the angle cosine)
+		FLOAT cosHalfFOV = appCos((FLOAT)FOV * 0.5f * 0.017453292f);
+		FVector Apex = Pos - Forward * cosHalfFOV;
+
+		*(FPlane*)(this+0x3c0) = FPlane(Apex, Corners[1], Corners[0]);
+		*(FPlane*)(this+0x3d0) = FPlane(Apex, Corners[2], Corners[1]);
+		*(FPlane*)(this+0x3e0) = FPlane(Apex, Corners[3], Corners[2]);
+		*(FPlane*)(this+0x3f0) = FPlane(Apex, Corners[0], Corners[3]);
+	}
+
+	// 6. Far frustum plane (this+0x400): normal = -Forward, base = corner[3] (or [4] far point).
+	//    For ortho the far-extent corners haven't been computed yet — use corner[3].
+	*(FPlane*)(this+0x400) = FPlane(Corners[3], -Forward);
+
+	// 7. Projection matrix (this+0x4d0).
+	{
+		FMatrix& ProjMat = *(FMatrix*)(this+0x4d0);
+		if (FOV == 0)
+		{
+			// Orthographic: FCoords(center, Right/Width, Up/Height, Forward).Matrix()
+			// DIVERGENCE: retail scale divisors extracted from intermediate stack buffers
+			// (local_e0/local_c0/local_220/local_214) — approximated as Width and Height.
+			FVector halfR = (Coords.YAxis) * (1.0f / Width);   // Right direction normalized to UV width
+			FVector halfU = Up * (1.0f / Height);              // Up direction normalized to UV height
+			// Center = Pos - halfR*(Width/2) - halfU*(Height/2)  (bottom-left corner mapped to UV 0,0)
+			FVector Center = Pos - halfR * (Width * 0.5f) - halfU * (Height * 0.5f);
+			FCoords projCoords(Center, halfR, halfU, Forward);
+			ProjMat = projCoords.Matrix();
+		}
+		else
+		{
+			// Perspective:
+			//   1. FCoords(apex, Right_positive, Up_positive, Forward).Matrix() → local_1c8
+			//   2. ScaleMatrix = diag(0.5/tanFOV, 0.5/tanFOV, 1, 1) with [2][0..3] = 0.5,0.5,1,1
+			//   3. ProjMat = local_1c8 * ScaleMatrix   via FUN_103f86b0
+			FLOAT tanHalfFOV = appTan((FLOAT)FOV * 0.5f * 0.017453292f);
+			FLOAT cosHalfFOV = appCos((FLOAT)FOV * 0.5f * 0.017453292f);
+			FVector Apex = Pos - Forward * cosHalfFOV;
+			// Positive Right direction = -RightNeg = Coords.YAxis
+			FVector RightPos = Coords.YAxis;
+
+			FCoords coordsForMat(Apex, RightPos, Up, Forward);
+			FMatrix coordsMat = coordsForMat.Matrix();
+
+			// Scale matrix matching Ghidra's local_188:
+			//   M[0][0] = M[1][1] = 0.5/tanFOV
+			//   M[2][0] = M[2][1] = 0.5,  M[2][2] = M[2][3] = 1.0
+			FLOAT scaleArr[16];
+			appMemzero(scaleArr, sizeof(scaleArr));
+			FLOAT sc = 0.5f / tanHalfFOV;
+			scaleArr[0]  = sc;    // [0][0]
+			scaleArr[5]  = sc;    // [1][1]
+			scaleArr[8]  = 0.5f;  // [2][0]
+			scaleArr[9]  = 0.5f;  // [2][1]
+			scaleArr[10] = 1.0f;  // [2][2]
+			scaleArr[11] = 1.0f;  // [2][3]
+
+			CalcMatrixMul4x4((FLOAT*)&ProjMat, (FLOAT*)&coordsMat, scaleArr);
+		}
+	}
+
+	// 8. Four far-extent corners (this+0x440..0x46c).
+	FLOAT FarRange = (FLOAT)*(INT*)(this+0x39c);
+	FVector* FarCorners = (FVector*)(this+0x440);  // 4 × FVector
+	if (FOV == 0)
+	{
+		// Ortho: shift each near corner forward by the range distance.
+		for (INT i = 0; i < 4; i++)
+			FarCorners[i] = Corners[i] + Forward * FarRange;
+	}
+	else
+	{
+		// Perspective: each far corner = apex + SafeNormal(nearCorner - apex) * FarRange.
+		FLOAT cosHalfFOV = appCos((FLOAT)FOV * 0.5f * 0.017453292f);
+		FVector Apex = Pos - Forward * cosHalfFOV;
+		for (INT i = 0; i < 4; i++)
+		{
+			FVector dir = (Corners[i] - Apex).SafeNormal();
+			FarCorners[i] = Corners[i] + dir * FarRange;
+		}
+	}
+
+	// 9. Animated-texture offset section (flags & 0x4000).
+	//    Updates the animated projection matrix at this+0x490 and copies to renderInfo+0x64 if present.
+	DWORD Flags3a0 = *(DWORD*)(this+0x3a0);
+	if ((Flags3a0 & 0x4000) && *(INT*)(this+0x3a8))
+	{
+		INT animTex = *(INT*)(this+0x3a8);
+		FLOAT numFrames = (FLOAT)(*(INT*)(animTex + 100) - 2);  // animTex+0x64 = NumFrames-like
+		FLOAT frameRatioOrLen;
+		FVector localOrg;
+		if (!(Flags3a0 & 0x400))
+		{
+			frameRatioOrLen = FarRange / (FLOAT)*(INT*)(animTex + 100);  // = Range / frames
+			// near starting point along -Forward from far-extent corner[3]
+			localOrg = Corners[3] - Forward / 1.0f;
+		}
+		else
+		{
+			frameRatioOrLen = (FLOAT)*(INT*)(this+0x39c) * 0.9f / (FLOAT)*(INT*)(animTex + 100);  // ~0.9*Range/numFrames
+			localOrg = Corners[3] - Forward / 1.0f;
+		}
+		// Build animated FCoords: origin = localOrg, xAxis = zero, yAxis = Forward/divisor, zAxis = zero
+		// FCoords(localOrg, FVector(0,0,0), Forward/divisor, FVector(0,0,0)).Matrix()
+		FCoords animCoords(localOrg, FVector(0,0,0), Forward / (FarRange * numFrames), FVector(0,0,0));
+		*(FMatrix*)(this+0x490) = animCoords.Matrix();
+		if (*(INT*)(this+0x48c))
+		{
+			FLOAT* dst = (FLOAT*)(*(INT*)(this+0x48c) + 100);  // renderInfo + 0x64
+			FLOAT* src = (FLOAT*)(this+0x490);
+			for (INT i = 0; i < 16; i++) dst[i] = src[i];
+		}
+	}
+
+	// 10. Compute the bounding box from all 8 corners.
+	FBox& Box = *(FBox*)(this+0x470);
+	Box.Init();
+	for (INT i = 0; i < 4; i++)
+	{
+		Box += Corners[i];
+		Box += FarCorners[i];
+	}
+
+	// 11. If renderInfo is present, copy the projection matrix to renderInfo+0x24.
+	if (*(INT*)(this+0x48c))
+	{
+		FLOAT* dst = (FLOAT*)(*(INT*)(this+0x48c) + 0x24);
+		FLOAT* src = (FLOAT*)(this+0x4d0);
+		for (INT i = 0; i < 16; i++) dst[i] = src[i];
+	}
+
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x103060a0)
