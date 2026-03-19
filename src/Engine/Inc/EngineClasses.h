@@ -1551,6 +1551,7 @@ public:
 	FOutBunch();
 	FOutBunch(const FOutBunch&);
 	FOutBunch(UChannel*, INT);
+	FOutBunch& operator=(const FOutBunch&);
 	virtual ~FOutBunch();
 	virtual FArchive& operator<<(UObject*&);
 	virtual FArchive& operator<<(FName&);

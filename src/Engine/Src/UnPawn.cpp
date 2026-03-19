@@ -651,12 +651,25 @@ IMPLEMENT_FUNCTION( AController, INDEX_NONE, execStopWaiting );
 
 /*-- APlayerController functions ---------------------------------------*/
 
-IMPL_TODO("Ghidra 0x103900a0; 1734b — complex stair-rotation physics (FRotator traces, delta-time blend); stub returns Rotation.Pitch only")
+IMPL_TODO("Ghidra 0x103900a0; 1734b — stair-rotation camera pitch for walking; traces forward from eye to detect steps/stairs, returns blended pitch adjustment; Ghidra decompilation has heavy stack-variable reuse making confident reconstruction difficult; core algorithm: early-return Rotation.Pitch if !Pawn or DeltaTime>0.33, get horizontal ViewDir from FRotator(0,Yaw,Roll).Vector(), trace TraceDist=2*(EyeOfsZ+CollisionHeight) forward with collision extent, then compute pitch delta from step geometry (0xfffff060=-4000 for ascending, 0xe10=3600 for descending), blend with DeltaTime; stub matches early-return path only")
 void APlayerController::execFindStairRotation( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execFindStairRotation);
 	P_GET_FLOAT(DeltaTime);
 	P_FINISH;
+
+	// Early return: no Pawn or large timestep — return current pitch unchanged.
+	// Ghidra: if (*(int*)(this+0x3d8)==0 || 0.33 < DeltaTime) { *Result = *(this+0x240); return; }
+	if( !Pawn || DeltaTime > 0.33f )
+	{
+		*(INT*)Result = Rotation.Pitch;
+		return;
+	}
+
+	// TODO: Full stair-trace algorithm (approx 1500 bytes remaining).
+	// Clamp Rotation.Pitch to signed 16-bit, construct FRotator(0, Yaw, Roll),
+	// get Vector() for horizontal forward, compute eye position, trace forward
+	// with SingleLineCheck, detect step geometry, return blended pitch.
 	*(INT*)Result = Rotation.Pitch;
 	unguard;
 }
