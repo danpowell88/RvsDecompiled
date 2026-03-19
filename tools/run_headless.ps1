@@ -8,6 +8,7 @@
 #   3. Inter-DLL cross-reference analysis (cross_reference.py)
 #   4. UT99 source matching for Core/Engine (ut99_matcher.py)
 #   5. Raw C++ decompilation export (export_cpp.py)
+#   6. Raw assembly disassembly export (export_asm.py)
 #
 # Prerequisites:
 #   - Ghidra 11.x installed, GHIDRA_HOME set or passed via -GhidraHome
@@ -186,11 +187,23 @@ foreach ($Binary in $TargetBinaries) {
             -log "$ReportsDir\${BinaryName}_export.log"
     }
 
+    # Step 6: Export raw disassembly
+    if (-not $SkipExport) {
+        Write-Host "  Exporting disassembly..."
+        & $AnalyzeHeadless `
+            $GhidraProject "RavenShield" `
+            -process $Binary `
+            -noanalysis `
+            -postScript "$GhidraScripts\export_asm.py" `
+            -scriptPath $GhidraScripts `
+            -log "$ReportsDir\${BinaryName}_asm.log"
+    }
+
     $Results += [PSCustomObject]@{ Binary=$Binary; Status="OK" }
     Write-Host "  Done." -ForegroundColor Green
 }
 
-# --- Step 6: Aggregate cross-references ---
+# --- Step 7: Aggregate cross-references ---
 Write-Host ""
 Write-Host "--- Aggregating cross-reference matrix ---" -ForegroundColor Yellow
 & $AnalyzeHeadless `
