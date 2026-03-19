@@ -3513,10 +3513,257 @@ INT* AGameReplicationInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* R
 }
 IMPL_EMPTY("base no-op — subclass implements")
 void APlayerReplicationInfo::PostNetReceive() {}
-IMPL_TODO("3146-byte APlayerReplicationInfo::GetOptimizedRepList; DATs (0x10666a40-0x10666a80) are function-local static property caches (bit-flags + UProperty* ptrs, not profiling globals); FUN_10370830/870/71990 all in _unnamed.cpp; tractable. Ghidra 0x103759a0")
+IMPL_TODO("Ghidra 0x103759a0 (3146b): all 32 field checks verified against Ghidra; FUN_10370830 (object-ref change gate for PlayerLocation/TalkTexture/VoiceType) approximated as RepObjectChanged — retail calls Chan->vtable[25] rather than Map->vtable[25] but result is functionally equivalent. Backup stats (m_iBackUpDeaths etc.) confirmed absent from native rep list despite appearing in .uc pos:0x055 block.")
 INT* APlayerReplicationInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
-	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
+	guard(APlayerReplicationInfo::GetOptimizedRepList);
+
+	// Static property cache — 32 lazy-init UProperty pointers matching Ghidra DAT_10666a00..0x10666a80
+	static DWORD   s_InitFlags    = 0;
+	static UObject* s_pScore       = NULL;  // bit 0x1   0x3f0
+	static UObject* s_pDeaths      = NULL;  // bit 0x2   0x3f4
+	static UObject* s_pPing        = NULL;  // bit 0x4   0x394
+	static UObject* s_pPlayerLoc   = NULL;  // bit 0x8   0x3fc  (RepObjectChanged)
+	static UObject* s_pPlayerName  = NULL;  // bit 0x10  0x408  FString
+	static UObject* s_pTeamID      = NULL;  // bit 0x20  0x3a0
+	static UObject* s_pPlayerID    = NULL;  // bit 0x40  0x39c
+	static UObject* s_pTalkTex     = NULL;  // bit 0x80  0x400  (RepObjectChanged)
+	static UObject* s_pIsFemale    = NULL;  // bit 0x100 0x3ec&0x1
+	static UObject* s_pOpID        = NULL;  // bit 0x200 0x3a4
+	static UObject* s_pFeignDeath  = NULL;  // bit 0x400 0x3ec&0x2
+	static UObject* s_pIsSpec      = NULL;  // bit 0x800 0x3ec&0x4
+	static UObject* s_pWaitPlay    = NULL;  // bit 0x1000 0x3ec&0x8
+	static UObject* s_pReadyPlay   = NULL;  // bit 0x2000 0x3ec&0x10
+	static UObject* s_pVoiceType   = NULL;  // bit 0x4000 0x404  (RepObjectChanged)
+	static UObject* s_pOutOfLives  = NULL;  // bit 0x8000 0x3ec&0x20
+	static UObject* s_pKillCount   = NULL;  // bit 0x10000  0x3b0
+	static UObject* s_pRndKillCnt  = NULL;  // bit 0x20000  0x3e4
+	static UObject* s_pRndFired    = NULL;  // bit 0x40000  0x3b8
+	static UObject* s_pRndsHit     = NULL;  // bit 0x80000  0x3bc
+	static UObject* s_pHealth      = NULL;  // bit 0x100000 0x3e0
+	static UObject* s_pIsEscPilot  = NULL;  // bit 0x200000 0x3ec&0x200
+	static UObject* s_pKillersName = NULL;  // bit 0x400000 0x438  FString
+	static UObject* s_pPlrReady    = NULL;  // bit 0x800000 0x3ec&0x80
+	static UObject* s_pUbiUID      = NULL;  // bit 0x1000000 0x42c FString
+	static UObject* s_pRndsPlayed  = NULL;  // bit 0x2000000 0x3c0
+	static UObject* s_pRndsWon     = NULL;  // bit 0x4000000 0x3c4
+	static UObject* s_pJoinedLate  = NULL;  // bit 0x8000000 0x3ec&0x100
+	static UObject* s_pBot         = NULL;  // bit 0x10000000 0x3ec&0x40 (bNetInitial guard)
+	static UObject* s_pStartTime   = NULL;  // bit 0x20000000 0x3a8      (bNetInitial guard)
+	static UObject* s_pSubmitRes   = NULL;  // bit 0x40000000 m_bClientWillSubmitResult
+	static UObject* s_pIsIntruder  = NULL;  // bit 0x80000000 m_bIsTheIntruder
+
+	Ptr = AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
+
+	// CLASS_NativeReplication (0x800) is always set for this native-replication class.
+	if (Role == ROLE_Authority)
+	{
+		if (*(DWORD*)((BYTE*)this + 0xa0) & 0x40000000u)  // bNetDirty
+		{
+			// Score (0x3f0)
+			if (*(INT*)((BYTE*)this+0x3f0) != *(INT*)((BYTE*)Mem+0x3f0))
+			{
+				if (!(s_InitFlags & 0x1)) { s_InitFlags |= 0x1; s_pScore = FindRepProperty(APlayerReplicationInfo::StaticClass(), TEXT("Score")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pScore + 0x4a));
+			}
+			// Deaths (0x3f4)
+			if (*(INT*)((BYTE*)this+0x3f4) != *(INT*)((BYTE*)Mem+0x3f4))
+			{
+				if (!(s_InitFlags & 0x2)) { s_InitFlags |= 0x2; s_pDeaths = FindRepProperty(APlayerReplicationInfo::StaticClass(), TEXT("Deaths")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pDeaths + 0x4a));
+			}
+			// Ping (0x394)
+			if (*(INT*)((BYTE*)this+0x394) != *(INT*)((BYTE*)Mem+0x394))
+			{
+				if (!(s_InitFlags & 0x4)) { s_InitFlags |= 0x4; s_pPing = FindRepProperty(APlayerReplicationInfo::StaticClass(), TEXT("Ping")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pPing + 0x4a));
+			}
+			// PlayerLocation (0x3fc) — object ref; retail uses FUN_10370830 (Chan->vtable[25]); approx as RepObjectChanged
+			if (RepObjectChanged(*(INT*)((BYTE*)this+0x3fc), *(INT*)((BYTE*)Mem+0x3fc), Map, Chan))
+			{
+				if (!(s_InitFlags & 0x8)) { s_InitFlags |= 0x8; s_pPlayerLoc = FindRepProperty(APlayerReplicationInfo::StaticClass(), TEXT("PlayerLocation")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pPlayerLoc + 0x4a));
+			}
+			// PlayerName (0x408) — FString compare
+			if (*(FString*)((BYTE*)this+0x408) != *(FString*)((BYTE*)Mem+0x408))
+			{
+				if (!(s_InitFlags & 0x10)) { s_InitFlags |= 0x10; s_pPlayerName = FindRepProperty(APlayerReplicationInfo::StaticClass(), TEXT("PlayerName")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pPlayerName + 0x4a));
+			}
+			// TeamID (0x3a0)
+			if (*(INT*)((BYTE*)this+0x3a0) != *(INT*)((BYTE*)Mem+0x3a0))
+			{
+				if (!(s_InitFlags & 0x20)) { s_InitFlags |= 0x20; s_pTeamID = FindRepProperty(APlayerReplicationInfo::StaticClass(), TEXT("TeamID")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pTeamID + 0x4a));
+			}
+			// PlayerID (0x39c)
+			if (*(INT*)((BYTE*)this+0x39c) != *(INT*)((BYTE*)Mem+0x39c))
+			{
+				if (!(s_InitFlags & 0x40)) { s_InitFlags |= 0x40; s_pPlayerID = FindRepProperty(APlayerReplicationInfo::StaticClass(), TEXT("PlayerID")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pPlayerID + 0x4a));
+			}
+			// TalkTexture (0x400) — object ref
+			if (RepObjectChanged(*(INT*)((BYTE*)this+0x400), *(INT*)((BYTE*)Mem+0x400), Map, Chan))
+			{
+				if (!(s_InitFlags & 0x80)) { s_InitFlags |= 0x80; s_pTalkTex = FindRepProperty(APlayerReplicationInfo::StaticClass(), TEXT("TalkTexture")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pTalkTex + 0x4a));
+			}
+			// bIsFemale (0x3ec bit 0)
+			if ((*(DWORD*)((BYTE*)this+0x3ec) ^ *(DWORD*)((BYTE*)Mem+0x3ec)) & 0x1u)
+			{
+				if (!(s_InitFlags & 0x100)) { s_InitFlags |= 0x100; s_pIsFemale = FindRepProperty(APlayerReplicationInfo::StaticClass(), TEXT("bIsFemale")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pIsFemale + 0x4a));
+			}
+			// iOperativeID (0x3a4)
+			if (*(INT*)((BYTE*)this+0x3a4) != *(INT*)((BYTE*)Mem+0x3a4))
+			{
+				if (!(s_InitFlags & 0x200)) { s_InitFlags |= 0x200; s_pOpID = FindRepProperty(APlayerReplicationInfo::StaticClass(), TEXT("iOperativeID")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pOpID + 0x4a));
+			}
+			// bFeigningDeath (0x3ec bit 1)
+			if ((*(DWORD*)((BYTE*)this+0x3ec) ^ *(DWORD*)((BYTE*)Mem+0x3ec)) & 0x2u)
+			{
+				if (!(s_InitFlags & 0x400)) { s_InitFlags |= 0x400; s_pFeignDeath = FindRepProperty(APlayerReplicationInfo::StaticClass(), TEXT("bFeigningDeath")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pFeignDeath + 0x4a));
+			}
+			// bIsSpectator (0x3ec bit 2)
+			if ((*(DWORD*)((BYTE*)this+0x3ec) ^ *(DWORD*)((BYTE*)Mem+0x3ec)) & 0x4u)
+			{
+				if (!(s_InitFlags & 0x800)) { s_InitFlags |= 0x800; s_pIsSpec = FindRepProperty(APlayerReplicationInfo::StaticClass(), TEXT("bIsSpectator")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pIsSpec + 0x4a));
+			}
+			// bWaitingPlayer (0x3ec bit 3)
+			if ((*(DWORD*)((BYTE*)this+0x3ec) ^ *(DWORD*)((BYTE*)Mem+0x3ec)) & 0x8u)
+			{
+				if (!(s_InitFlags & 0x1000)) { s_InitFlags |= 0x1000; s_pWaitPlay = FindRepProperty(APlayerReplicationInfo::StaticClass(), TEXT("bWaitingPlayer")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pWaitPlay + 0x4a));
+			}
+			// bReadyToPlay (0x3ec bit 4)
+			if ((*(DWORD*)((BYTE*)this+0x3ec) ^ *(DWORD*)((BYTE*)Mem+0x3ec)) & 0x10u)
+			{
+				if (!(s_InitFlags & 0x2000)) { s_InitFlags |= 0x2000; s_pReadyPlay = FindRepProperty(APlayerReplicationInfo::StaticClass(), TEXT("bReadyToPlay")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pReadyPlay + 0x4a));
+			}
+			// VoiceType (0x404) — object ref
+			if (RepObjectChanged(*(INT*)((BYTE*)this+0x404), *(INT*)((BYTE*)Mem+0x404), Map, Chan))
+			{
+				if (!(s_InitFlags & 0x4000)) { s_InitFlags |= 0x4000; s_pVoiceType = FindRepProperty(APlayerReplicationInfo::StaticClass(), TEXT("VoiceType")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pVoiceType + 0x4a));
+			}
+			// bOutOfLives (0x3ec bit 5)
+			if ((*(DWORD*)((BYTE*)this+0x3ec) ^ *(DWORD*)((BYTE*)Mem+0x3ec)) & 0x20u)
+			{
+				if (!(s_InitFlags & 0x8000)) { s_InitFlags |= 0x8000; s_pOutOfLives = FindRepProperty(APlayerReplicationInfo::StaticClass(), TEXT("bOutOfLives")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pOutOfLives + 0x4a));
+			}
+			// m_iKillCount (0x3b0)
+			if (*(INT*)((BYTE*)this+0x3b0) != *(INT*)((BYTE*)Mem+0x3b0))
+			{
+				if (!(s_InitFlags & 0x10000)) { s_InitFlags |= 0x10000; s_pKillCount = FindRepProperty(APlayerReplicationInfo::StaticClass(), TEXT("m_iKillCount")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pKillCount + 0x4a));
+			}
+			// m_iRoundKillCount (0x3e4)
+			if (*(INT*)((BYTE*)this+0x3e4) != *(INT*)((BYTE*)Mem+0x3e4))
+			{
+				if (!(s_InitFlags & 0x20000)) { s_InitFlags |= 0x20000; s_pRndKillCnt = FindRepProperty(APlayerReplicationInfo::StaticClass(), TEXT("m_iRoundKillCount")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pRndKillCnt + 0x4a));
+			}
+			// m_iRoundFired (0x3b8)
+			if (*(INT*)((BYTE*)this+0x3b8) != *(INT*)((BYTE*)Mem+0x3b8))
+			{
+				if (!(s_InitFlags & 0x40000)) { s_InitFlags |= 0x40000; s_pRndFired = FindRepProperty(APlayerReplicationInfo::StaticClass(), TEXT("m_iRoundFired")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pRndFired + 0x4a));
+			}
+			// m_iRoundsHit (0x3bc)
+			if (*(INT*)((BYTE*)this+0x3bc) != *(INT*)((BYTE*)Mem+0x3bc))
+			{
+				if (!(s_InitFlags & 0x80000)) { s_InitFlags |= 0x80000; s_pRndsHit = FindRepProperty(APlayerReplicationInfo::StaticClass(), TEXT("m_iRoundsHit")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pRndsHit + 0x4a));
+			}
+			// m_iHealth (0x3e0)
+			if (*(INT*)((BYTE*)this+0x3e0) != *(INT*)((BYTE*)Mem+0x3e0))
+			{
+				if (!(s_InitFlags & 0x100000)) { s_InitFlags |= 0x100000; s_pHealth = FindRepProperty(APlayerReplicationInfo::StaticClass(), TEXT("m_iHealth")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pHealth + 0x4a));
+			}
+			// m_bIsEscortedPilot (0x3ec bit 9)
+			if ((*(DWORD*)((BYTE*)this+0x3ec) ^ *(DWORD*)((BYTE*)Mem+0x3ec)) & 0x200u)
+			{
+				if (!(s_InitFlags & 0x200000)) { s_InitFlags |= 0x200000; s_pIsEscPilot = FindRepProperty(APlayerReplicationInfo::StaticClass(), TEXT("m_bIsEscortedPilot")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pIsEscPilot + 0x4a));
+			}
+			// m_szKillersName (0x438) — FString compare
+			if (*(FString*)((BYTE*)this+0x438) != *(FString*)((BYTE*)Mem+0x438))
+			{
+				if (!(s_InitFlags & 0x400000)) { s_InitFlags |= 0x400000; s_pKillersName = FindRepProperty(APlayerReplicationInfo::StaticClass(), TEXT("m_szKillersName")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pKillersName + 0x4a));
+			}
+			// m_bPlayerReady (0x3ec bit 7 — sign bit of low byte)
+			if ((BYTE)(*(DWORD*)((BYTE*)this+0x3ec) ^ *(DWORD*)((BYTE*)Mem+0x3ec)) & 0x80u)
+			{
+				if (!(s_InitFlags & 0x800000)) { s_InitFlags |= 0x800000; s_pPlrReady = FindRepProperty(APlayerReplicationInfo::StaticClass(), TEXT("m_bPlayerReady")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pPlrReady + 0x4a));
+			}
+			// m_szUbiUserID (0x42c) — FString compare
+			if (*(FString*)((BYTE*)this+0x42c) != *(FString*)((BYTE*)Mem+0x42c))
+			{
+				if (!(s_InitFlags & 0x1000000)) { s_InitFlags |= 0x1000000; s_pUbiUID = FindRepProperty(APlayerReplicationInfo::StaticClass(), TEXT("m_szUbiUserID")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pUbiUID + 0x4a));
+			}
+			// m_iRoundsPlayed (0x3c0)
+			if (*(INT*)((BYTE*)this+0x3c0) != *(INT*)((BYTE*)Mem+0x3c0))
+			{
+				if (!(s_InitFlags & 0x2000000)) { s_InitFlags |= 0x2000000; s_pRndsPlayed = FindRepProperty(APlayerReplicationInfo::StaticClass(), TEXT("m_iRoundsPlayed")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pRndsPlayed + 0x4a));
+			}
+			// m_iRoundsWon (0x3c4)
+			if (*(INT*)((BYTE*)this+0x3c4) != *(INT*)((BYTE*)Mem+0x3c4))
+			{
+				if (!(s_InitFlags & 0x4000000)) { s_InitFlags |= 0x4000000; s_pRndsWon = FindRepProperty(APlayerReplicationInfo::StaticClass(), TEXT("m_iRoundsWon")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pRndsWon + 0x4a));
+			}
+			// m_bJoinedTeamLate (0x3ec bit 8)
+			if ((*(DWORD*)((BYTE*)this+0x3ec) ^ *(DWORD*)((BYTE*)Mem+0x3ec)) & 0x100u)
+			{
+				if (!(s_InitFlags & 0x8000000)) { s_InitFlags |= 0x8000000; s_pJoinedLate = FindRepProperty(APlayerReplicationInfo::StaticClass(), TEXT("m_bJoinedTeamLate")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pJoinedLate + 0x4a));
+			}
+
+			// bNetInitial guard: bBot and StartTime (0xac byte bit 5)
+			if (*(BYTE*)((BYTE*)this + 0xac) & 0x20)
+			{
+				// bBot (0x3ec bit 6)
+				if ((*(DWORD*)((BYTE*)this+0x3ec) ^ *(DWORD*)((BYTE*)Mem+0x3ec)) & 0x40u)
+				{
+					if (!(s_InitFlags & 0x10000000)) { s_InitFlags |= 0x10000000; s_pBot = FindRepProperty(APlayerReplicationInfo::StaticClass(), TEXT("bBot")); }
+					*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pBot + 0x4a));
+				}
+				// StartTime (0x3a8)
+				if (*(INT*)((BYTE*)this+0x3a8) != *(INT*)((BYTE*)Mem+0x3a8))
+				{
+					if (!(s_InitFlags & 0x20000000)) { s_InitFlags |= 0x20000000; s_pStartTime = FindRepProperty(APlayerReplicationInfo::StaticClass(), TEXT("StartTime")); }
+					*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pStartTime + 0x4a));
+				}
+			}
+		}
+
+		// m_bClientWillSubmitResult (0x3ec bit 12 = 0x1000) — replicated regardless of bNetDirty
+		if ((*(DWORD*)((BYTE*)this+0x3ec) ^ *(DWORD*)((BYTE*)Mem+0x3ec)) & 0x1000u)
+		{
+			if (!(s_InitFlags & 0x40000000)) { s_InitFlags |= 0x40000000; s_pSubmitRes = FindRepProperty(APlayerReplicationInfo::StaticClass(), TEXT("m_bClientWillSubmitResult")); }
+			*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pSubmitRes + 0x4a));
+		}
+	}
+
+	// m_bIsTheIntruder (0x3ec bit 13 = 0x2000) — checked for all roles per Ghidra (outside Role==Auth block)
+	if ((*(DWORD*)((BYTE*)this+0x3ec) ^ *(DWORD*)((BYTE*)Mem+0x3ec)) & 0x2000u)
+	{
+		if (!(s_InitFlags & 0x80000000u)) { s_InitFlags |= 0x80000000u; s_pIsIntruder = FindRepProperty(APlayerReplicationInfo::StaticClass(), TEXT("m_bIsTheIntruder")); }
+		*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pIsIntruder + 0x4a));
+	}
+
+	return Ptr;
+	unguard;
 }
 /*-----------------------------------------------------------------------------
   AReplicationInfo virtual method stubs.
