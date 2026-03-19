@@ -3506,10 +3506,241 @@ INT ALevelInfo::IsSoundAudibleFromZone(INT Zone1, INT Zone2)
 }
 IMPL_EMPTY("base no-op — subclass implements")
 void AGameReplicationInfo::PostNetReceive() {}
-IMPL_TODO("4039-byte AGameReplicationInfo::GetOptimizedRepList; DATs (0x10666ax) are function-local static property caches (bit-flags + UProperty* ptrs, not profiling globals); FUN_10370870 (string diff) in _unnamed.cpp; tractable. Ghidra 0x10376620")
+IMPL_TODO("Ghidra 0x10376620 (4039b): all checks verified; FUN_10370870 for FString compare used inline per Ghidra; m_iMapIndex confirmed absent from native rep list despite appearing in .uc pos:0x00D block.")
 INT* AGameReplicationInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
-	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
+	guard(AGameReplicationInfo::GetOptimizedRepList);
+
+	// Static lazy-init property cache matching Ghidra DAT_10666a84..0x10666afc
+	static DWORD   s_Init          = 0;
+	static UObject* s_pSrvState    = NULL;  // 0x1   m_eCurrectServerState
+	static UObject* s_pMObjDesc    = NULL;  // 0x2   m_aRepMObjDescription[16]
+	static UObject* s_pMObjDescLoc = NULL;  // 0x4   m_aRepMObjDescriptionLocFile[16]
+	static UObject* s_pMObjComp    = NULL;  // 0x8   m_aRepMObjCompleted[16]
+	static UObject* s_pMObjFailed  = NULL;  // 0x10  m_aRepMObjFailed[16]
+	static UObject* s_pInProgress  = NULL;  // 0x20  m_bRepMObjInProgress
+	static UObject* s_pMObjSucc    = NULL;  // 0x40  m_bRepMObjSuccess
+	static UObject* s_pLastRound   = NULL;  // 0x80  m_bRepLastRoundSuccess
+	static UObject* s_pNbWeapons   = NULL;  // 0x100 m_iNbWeaponsTerro
+	static UObject* s_pSrvRadar    = NULL;  // 0x200 m_bServerAllowRadar
+	static UObject* s_pRepRadarOpt = NULL;  // 0x400 m_bRepAllowRadarOption
+	static UObject* s_pGameOver    = NULL;  // 0x800 m_bGameOverRep
+	static UObject* s_pPostRound   = NULL;  // 0x1000 m_bInPostBetweenRoundTime
+	static UObject* s_pRestartJoin = NULL;  // 0x2000 m_bRestartableByJoin
+	static UObject* s_pPunkBuster  = NULL;  // 0x4000 m_bPunkBuster
+	static UObject* s_pGrpID       = NULL;  // 0x8000 m_iGameSvrGroupID
+	static UObject* s_pLobbyID     = NULL;  // 0x10000 m_iGameSvrLobbyID
+	static UObject* s_pGTFlagRep   = NULL;  // 0x20000 m_szGameTypeFlagRep (bNetInitial)
+	static UObject* s_pGameName    = NULL;  // 0x40000 GameName
+	static UObject* s_pGameClass   = NULL;  // 0x80000 GameClass
+	static UObject* s_pSrvName     = NULL;  // 0x100000 ServerName
+	static UObject* s_pShortName   = NULL;  // 0x200000 ShortName
+	static UObject* s_pAdminName   = NULL;  // 0x400000 AdminName
+	static UObject* s_pAdminEmail  = NULL;  // 0x800000 AdminEmail
+	static UObject* s_pSrvRegion   = NULL;  // 0x1000000 ServerRegion
+	static UObject* s_pMOTD1       = NULL;  // 0x2000000 MOTDLine1
+	static UObject* s_pMOTD2       = NULL;  // 0x4000000 MOTDLine2
+	static UObject* s_pMOTD3       = NULL;  // 0x8000000 MOTDLine3
+	static UObject* s_pMOTD4       = NULL;  // 0x10000000 MOTDLine4
+	static UObject* s_pTimeLimit   = NULL;  // 0x20000000 TimeLimit
+
+	Ptr = AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
+
+	// CLASS_NativeReplication always set; check Role == Authority.
+	if (Role == ROLE_Authority)
+	{
+		// m_eCurrectServerState (byte at this+0x396)
+		if (*(BYTE*)((BYTE*)this+0x396) != *(BYTE*)((BYTE*)Mem+0x396))
+		{
+			if (!(s_Init & 0x1)) { s_Init |= 0x1; s_pSrvState = FindRepProperty(AGameReplicationInfo::StaticClass(), TEXT("m_eCurrectServerState")); }
+			*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pSrvState + 0x4a));
+		}
+
+		// m_aRepMObjDescription[16] — each element uses RepIndex+i
+		if (!(s_Init & 0x2)) { s_Init |= 0x2; s_pMObjDesc = FindRepProperty(AGameReplicationInfo::StaticClass(), TEXT("m_aRepMObjDescription")); }
+		for (INT i = 0; i < 16; i++)
+		{
+			if (*(FString*)((BYTE*)this + i*0xc + 0x458) != *(FString*)((BYTE*)Mem + i*0xc + 0x458))
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pMObjDesc + 0x4a)) + i;
+		}
+
+		// m_aRepMObjDescriptionLocFile[16]
+		if (!(s_Init & 0x4)) { s_Init |= 0x4; s_pMObjDescLoc = FindRepProperty(AGameReplicationInfo::StaticClass(), TEXT("m_aRepMObjDescriptionLocFile")); }
+		for (INT i = 0; i < 16; i++)
+		{
+			if (*(FString*)((BYTE*)this + i*0xc + 0x518) != *(FString*)((BYTE*)Mem + i*0xc + 0x518))
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pMObjDescLoc + 0x4a)) + i;
+		}
+
+		// m_aRepMObjCompleted[16] — byte array
+		if (!(s_Init & 0x8)) { s_Init |= 0x8; s_pMObjComp = FindRepProperty(AGameReplicationInfo::StaticClass(), TEXT("m_aRepMObjCompleted")); }
+		for (INT i = 0; i < 16; i++)
+		{
+			if (*(BYTE*)((BYTE*)this + 0x398 + i) != *(BYTE*)((BYTE*)Mem + 0x398 + i))
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pMObjComp + 0x4a)) + i;
+		}
+
+		// m_aRepMObjFailed[16] — byte array
+		if (!(s_Init & 0x10)) { s_Init |= 0x10; s_pMObjFailed = FindRepProperty(AGameReplicationInfo::StaticClass(), TEXT("m_aRepMObjFailed")); }
+		for (INT i = 0; i < 16; i++)
+		{
+			if (*(BYTE*)((BYTE*)this + 0x3a8 + i) != *(BYTE*)((BYTE*)Mem + 0x3a8 + i))
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pMObjFailed + 0x4a)) + i;
+		}
+
+		// m_bRepMObjInProgress (byte at 0x3b8)
+		if (*(BYTE*)((BYTE*)this+0x3b8) != *(BYTE*)((BYTE*)Mem+0x3b8))
+		{
+			if (!(s_Init & 0x20)) { s_Init |= 0x20; s_pInProgress = FindRepProperty(AGameReplicationInfo::StaticClass(), TEXT("m_bRepMObjInProgress")); }
+			*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pInProgress + 0x4a));
+		}
+		// m_bRepMObjSuccess (byte at 0x3b9)
+		if (*(BYTE*)((BYTE*)this+0x3b9) != *(BYTE*)((BYTE*)Mem+0x3b9))
+		{
+			if (!(s_Init & 0x40)) { s_Init |= 0x40; s_pMObjSucc = FindRepProperty(AGameReplicationInfo::StaticClass(), TEXT("m_bRepMObjSuccess")); }
+			*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pMObjSucc + 0x4a));
+		}
+		// m_bRepLastRoundSuccess (byte at 0x3ba)
+		if (*(BYTE*)((BYTE*)this+0x3ba) != *(BYTE*)((BYTE*)Mem+0x3ba))
+		{
+			if (!(s_Init & 0x80)) { s_Init |= 0x80; s_pLastRound = FindRepProperty(AGameReplicationInfo::StaticClass(), TEXT("m_bRepLastRoundSuccess")); }
+			*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pLastRound + 0x4a));
+		}
+		// m_iNbWeaponsTerro (byte at 0x397)
+		if (*(BYTE*)((BYTE*)this+0x397) != *(BYTE*)((BYTE*)Mem+0x397))
+		{
+			if (!(s_Init & 0x100)) { s_Init |= 0x100; s_pNbWeapons = FindRepProperty(AGameReplicationInfo::StaticClass(), TEXT("m_iNbWeaponsTerro")); }
+			*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pNbWeapons + 0x4a));
+		}
+
+		// Bitfield at 0x3d0: m_bShowPlayerStates(0)=not replicated, m_bInPostBetweenRoundTime(1), m_bServerAllowRadar(2), m_bRepAllowRadarOption(3), m_bGameOverRep(4), m_bRestartableByJoin(5), m_bPunkBuster(6)
+		{
+			DWORD bits = *(DWORD*)((BYTE*)this+0x3d0) ^ *(DWORD*)((BYTE*)Mem+0x3d0);
+			if (bits & 0x4u) { // m_bServerAllowRadar
+				if (!(s_Init & 0x200)) { s_Init |= 0x200; s_pSrvRadar = FindRepProperty(AGameReplicationInfo::StaticClass(), TEXT("m_bServerAllowRadar")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pSrvRadar + 0x4a));
+			}
+			if (bits & 0x8u) { // m_bRepAllowRadarOption
+				if (!(s_Init & 0x400)) { s_Init |= 0x400; s_pRepRadarOpt = FindRepProperty(AGameReplicationInfo::StaticClass(), TEXT("m_bRepAllowRadarOption")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pRepRadarOpt + 0x4a));
+			}
+			if (bits & 0x10u) { // m_bGameOverRep
+				if (!(s_Init & 0x800)) { s_Init |= 0x800; s_pGameOver = FindRepProperty(AGameReplicationInfo::StaticClass(), TEXT("m_bGameOverRep")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pGameOver + 0x4a));
+			}
+			if (bits & 0x2u) { // m_bInPostBetweenRoundTime
+				if (!(s_Init & 0x1000)) { s_Init |= 0x1000; s_pPostRound = FindRepProperty(AGameReplicationInfo::StaticClass(), TEXT("m_bInPostBetweenRoundTime")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pPostRound + 0x4a));
+			}
+			if (bits & 0x20u) { // m_bRestartableByJoin
+				if (!(s_Init & 0x2000)) { s_Init |= 0x2000; s_pRestartJoin = FindRepProperty(AGameReplicationInfo::StaticClass(), TEXT("m_bRestartableByJoin")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pRestartJoin + 0x4a));
+			}
+			if (bits & 0x40u) { // m_bPunkBuster
+				if (!(s_Init & 0x4000)) { s_Init |= 0x4000; s_pPunkBuster = FindRepProperty(AGameReplicationInfo::StaticClass(), TEXT("m_bPunkBuster")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pPunkBuster + 0x4a));
+			}
+		}
+
+		// m_iGameSvrGroupID (INT at 0x3c8)
+		if (*(INT*)((BYTE*)this+0x3c8) != *(INT*)((BYTE*)Mem+0x3c8))
+		{
+			if (!(s_Init & 0x8000)) { s_Init |= 0x8000; s_pGrpID = FindRepProperty(AGameReplicationInfo::StaticClass(), TEXT("m_iGameSvrGroupID")); }
+			*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pGrpID + 0x4a));
+		}
+		// m_iGameSvrLobbyID (INT at 0x3cc)
+		if (*(INT*)((BYTE*)this+0x3cc) != *(INT*)((BYTE*)Mem+0x3cc))
+		{
+			if (!(s_Init & 0x10000)) { s_Init |= 0x10000; s_pLobbyID = FindRepProperty(AGameReplicationInfo::StaticClass(), TEXT("m_iGameSvrLobbyID")); }
+			*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pLobbyID + 0x4a));
+		}
+
+		// bNetDirty && bNetInitial block: server config FStrings and scalar fields
+		if ((*(DWORD*)((BYTE*)this + 0xa0) & 0x40000000u) && (*(BYTE*)((BYTE*)this + 0xac) & 0x20))
+		{
+			// m_szGameTypeFlagRep (FString at 0x44c)
+			if (*(FString*)((BYTE*)this+0x44c) != *(FString*)((BYTE*)Mem+0x44c))
+			{
+				if (!(s_Init & 0x20000)) { s_Init |= 0x20000; s_pGTFlagRep = FindRepProperty(AGameReplicationInfo::StaticClass(), TEXT("m_szGameTypeFlagRep")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pGTFlagRep + 0x4a));
+			}
+			// GameName (FString at 0x3d4)
+			if (*(FString*)((BYTE*)this+0x3d4) != *(FString*)((BYTE*)Mem+0x3d4))
+			{
+				if (!(s_Init & 0x40000)) { s_Init |= 0x40000; s_pGameName = FindRepProperty(AGameReplicationInfo::StaticClass(), TEXT("GameName")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pGameName + 0x4a));
+			}
+			// GameClass (FString at 0x3e0)
+			if (*(FString*)((BYTE*)this+0x3e0) != *(FString*)((BYTE*)Mem+0x3e0))
+			{
+				if (!(s_Init & 0x80000)) { s_Init |= 0x80000; s_pGameClass = FindRepProperty(AGameReplicationInfo::StaticClass(), TEXT("GameClass")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pGameClass + 0x4a));
+			}
+			// ServerName (FString at 0x3ec)
+			if (*(FString*)((BYTE*)this+0x3ec) != *(FString*)((BYTE*)Mem+0x3ec))
+			{
+				if (!(s_Init & 0x100000)) { s_Init |= 0x100000; s_pSrvName = FindRepProperty(AGameReplicationInfo::StaticClass(), TEXT("ServerName")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pSrvName + 0x4a));
+			}
+			// ShortName (FString at 0x3f8)
+			if (*(FString*)((BYTE*)this+0x3f8) != *(FString*)((BYTE*)Mem+0x3f8))
+			{
+				if (!(s_Init & 0x200000)) { s_Init |= 0x200000; s_pShortName = FindRepProperty(AGameReplicationInfo::StaticClass(), TEXT("ShortName")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pShortName + 0x4a));
+			}
+			// AdminName (FString at 0x404)
+			if (*(FString*)((BYTE*)this+0x404) != *(FString*)((BYTE*)Mem+0x404))
+			{
+				if (!(s_Init & 0x400000)) { s_Init |= 0x400000; s_pAdminName = FindRepProperty(AGameReplicationInfo::StaticClass(), TEXT("AdminName")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pAdminName + 0x4a));
+			}
+			// AdminEmail (FString at 0x410)
+			if (*(FString*)((BYTE*)this+0x410) != *(FString*)((BYTE*)Mem+0x410))
+			{
+				if (!(s_Init & 0x800000)) { s_Init |= 0x800000; s_pAdminEmail = FindRepProperty(AGameReplicationInfo::StaticClass(), TEXT("AdminEmail")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pAdminEmail + 0x4a));
+			}
+			// ServerRegion (INT at 0x3c0)
+			if (*(INT*)((BYTE*)this+0x3c0) != *(INT*)((BYTE*)Mem+0x3c0))
+			{
+				if (!(s_Init & 0x1000000)) { s_Init |= 0x1000000; s_pSrvRegion = FindRepProperty(AGameReplicationInfo::StaticClass(), TEXT("ServerRegion")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pSrvRegion + 0x4a));
+			}
+			// MOTDLine1 (FString at 0x41c)
+			if (*(FString*)((BYTE*)this+0x41c) != *(FString*)((BYTE*)Mem+0x41c))
+			{
+				if (!(s_Init & 0x2000000)) { s_Init |= 0x2000000; s_pMOTD1 = FindRepProperty(AGameReplicationInfo::StaticClass(), TEXT("MOTDLine1")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pMOTD1 + 0x4a));
+			}
+			// MOTDLine2 (FString at 0x428)
+			if (*(FString*)((BYTE*)this+0x428) != *(FString*)((BYTE*)Mem+0x428))
+			{
+				if (!(s_Init & 0x4000000)) { s_Init |= 0x4000000; s_pMOTD2 = FindRepProperty(AGameReplicationInfo::StaticClass(), TEXT("MOTDLine2")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pMOTD2 + 0x4a));
+			}
+			// MOTDLine3 (FString at 0x434)
+			if (*(FString*)((BYTE*)this+0x434) != *(FString*)((BYTE*)Mem+0x434))
+			{
+				if (!(s_Init & 0x8000000)) { s_Init |= 0x8000000; s_pMOTD3 = FindRepProperty(AGameReplicationInfo::StaticClass(), TEXT("MOTDLine3")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pMOTD3 + 0x4a));
+			}
+			// MOTDLine4 (FString at 0x440)
+			if (*(FString*)((BYTE*)this+0x440) != *(FString*)((BYTE*)Mem+0x440))
+			{
+				if (!(s_Init & 0x10000000)) { s_Init |= 0x10000000; s_pMOTD4 = FindRepProperty(AGameReplicationInfo::StaticClass(), TEXT("MOTDLine4")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pMOTD4 + 0x4a));
+			}
+			// TimeLimit (INT at 0x3bc)
+			if (*(INT*)((BYTE*)this+0x3bc) != *(INT*)((BYTE*)Mem+0x3bc))
+			{
+				if (!(s_Init & 0x20000000)) { s_Init |= 0x20000000; s_pTimeLimit = FindRepProperty(AGameReplicationInfo::StaticClass(), TEXT("TimeLimit")); }
+				*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_pTimeLimit + 0x4a));
+			}
+		}
+	}
+
+	return Ptr;
+	unguard;
 }
 IMPL_EMPTY("base no-op — subclass implements")
 void APlayerReplicationInfo::PostNetReceive() {}
