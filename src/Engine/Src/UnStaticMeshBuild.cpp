@@ -607,26 +607,82 @@ void UStaticMesh::Serialize(FArchive& Ar)
 
 	unguard;
 }
-IMPL_TODO("Ghidra 0x1044EB60 (931b) fully decompiled; needs FUN_1044c480/FUN_1044bf80 (line-vs-BVH setup helpers) and FUN_1044e6e0/FUN_1044caf0 (BVH traversal+result gather); also uses rdtsc perf counters at DAT_10799554/DAT_10799734")
-int UStaticMesh::LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD,DWORD)
+IMPL_TODO("Ghidra 0x1044EB60 (931b): BVH traversal paths (FUN_1044c480/FUN_1044bf80 setup + FUN_1044e6e0/FUN_1044caf0 traverse) omitted; UPrimitive::LineCheck fallback and collision model (+0x120) simple-collision delegate implemented; rdtsc perf counters and hit-time epsilon adjustment omitted")
+int UStaticMesh::LineCheck(FCheckResult& Result, AActor* Owner, FVector End, FVector Start, FVector Extent, DWORD TraceFlags, DWORD ExtraNodeFlags)
 {
 	guard(UStaticMesh::LineCheck);
-	// Retail: transforms ray to local space, branches on UseSimpleLineCollision/UseSimpleBoxCollision
-	// flags and GUseStaticMeshSimpleCollision. For complex collision, calls FUN_1044c480 or
-	// FUN_1044bf80 to setup then FUN_1044e6e0/FUN_1044caf0 to traverse BVH. Fills FCheckResult
-	// on hit; adjusts Time by 4/Size epsilon. Returns 1 (no hit) or 0 (hit).
-	return 1;
+
+	INT bBlocked = 0;
+
+	if ( *(DWORD*)((BYTE*)Owner + 0xA8) & 0x400000 )
+	{
+		// bCollideActors path: delegate to UPrimitive base
+		bBlocked = (UPrimitive::LineCheck(Result, Owner, End, Start, Extent, TraceFlags, ExtraNodeFlags) == 0);
+	}
+	else
+	{
+		UBOOL bZeroExtent = (Extent == FVector(0.f, 0.f, 0.f));
+
+		// Check if we should use the simple collision model at +0x120
+		extern UBOOL GUseStaticMeshSimpleCollision;
+		UBOOL bUseSimple = GUseStaticMeshSimpleCollision != 0
+			&& *(INT*)((BYTE*)this + 0x120) != 0
+			&& !( (*(INT*)((BYTE*)this + 0x12C) == 0 || !bZeroExtent)
+			    && (*(INT*)((BYTE*)this + 0x128) == 0 || bZeroExtent) )
+			&& !(ExtraNodeFlags & 0x100);
+
+		if ( !bUseSimple )
+		{
+			// BVH traversal path
+			INT triCount = ((FArray*)((BYTE*)this + 0x114))->Num();
+			if ( triCount != 0 )
+			{
+				// TODO: FUN_1044c480/FUN_1044bf80 (line-vs-BVH setup)
+				// + FUN_1044e6e0/FUN_1044caf0 (BVH traversal + result gather)
+				// Would fill Result with hit Actor/Primitive/Normal/Time on collision.
+			}
+		}
+		else
+		{
+			// Simple collision model delegate: call LineCheck via vtable+0x68
+			UPrimitive* CollisionModel = *(UPrimitive**)((BYTE*)this + 0x120);
+			bBlocked = (CollisionModel->LineCheck(Result, Owner, End, Start, Extent, TraceFlags, ExtraNodeFlags) == 0);
+		}
+	}
+
+	return bBlocked ? 0 : 1;
 	unguard;
 }
-IMPL_TODO("Ghidra 0x1044EF40 (403b) fully decompiled; needs FUN_1044c220 (point-vs-BVH setup) and FUN_1044e390 (BVH traversal+gather); also uses rdtsc perf counters at DAT_10799554/DAT_10799734")
-int UStaticMesh::PointCheck(FCheckResult &,AActor *,FVector,FVector,DWORD)
+IMPL_TODO("Ghidra 0x1044EF40 (403b): BVH traversal path (FUN_1044c220 setup + FUN_1044e390 traverse) omitted; UPrimitive::PointCheck fallback and collision model (+0x120) delegate implemented; rdtsc perf counters omitted")
+int UStaticMesh::PointCheck(FCheckResult& Result, AActor* Owner, FVector Location, FVector Extent, DWORD ExtraNodeFlags)
 {
 	guard(UStaticMesh::PointCheck);
-	// Retail: branches on Actor flags and UseSimpleBoxCollision. For complex
-	// collision, calls FUN_1044c220 (setup) then FUN_1044e390 (BVH traverse).
-	// On overlap, fills FCheckResult Actor/Primitive and normalizes Normal.
-	// Falls back to this+0x120 model vtable[0x64/4] or UPrimitive::PointCheck.
-	return 1;
+
+	INT bBlocked = 0;
+
+	if ( *(DWORD*)((BYTE*)Owner + 0xA8) & 0x400000 )
+	{
+		// bCollideActors path: delegate to UPrimitive base
+		bBlocked = (UPrimitive::PointCheck(Result, Owner, Location, Extent, ExtraNodeFlags) == 0);
+	}
+	else if ( *(INT*)((BYTE*)this + 0x120) == 0 || *(INT*)((BYTE*)this + 0x12C) == 0 )
+	{
+		// No collision model or UseSimpleBoxCollision off: try BVH tree
+		INT triCount = ((FArray*)((BYTE*)this + 0x114))->Num();
+		if ( triCount != 0 )
+		{
+			// TODO: FUN_1044c220 (point-vs-BVH setup) + FUN_1044e390 (BVH traverse)
+			// Would check point against collision triangle BVH and fill Result on hit.
+		}
+	}
+	else
+	{
+		// Collision model exists and UseSimpleBoxCollision set: delegate
+		UPrimitive* CollisionModel = *(UPrimitive**)((BYTE*)this + 0x120);
+		bBlocked = (CollisionModel->PointCheck(Result, Owner, Location, Extent, ExtraNodeFlags) == 0);
+	}
+
+	return bBlocked ? 0 : 1;
 	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x104469d0)
