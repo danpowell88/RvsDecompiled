@@ -1903,16 +1903,166 @@ INT APawn::Reachable( FVector Dest, AActor* GoalActor )
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103e6280; 4240b — navpoint anchor proximity and per-class default collision radius checks omitted; approximate with simple XY distance/threshold")
+IMPL_MATCH("Engine.dll", 0x103e6280)
 INT APawn::ReachedDestination( FVector Dest, AActor* GoalActor )
 {
 	guard(APawn::ReachedDestination);
-	// Destination reached within pawn+goal collision radius if XY distance is small enough.
-	FVector GoalLoc      = GoalActor ? GoalActor->Location : Dest;
-	FLOAT   Threshold    = CollisionRadius + (GoalActor ? GoalActor->CollisionRadius : 0.f);
-	FVector Diff         = Location - GoalLoc;
-	Diff.Z               = 0.f;   // XY plane only
-	return Diff.SizeSquared() <= Threshold * Threshold;
+
+	// Dest is the delta vector: GoalLocation - this->Location (computed by callers).
+	// Get default collision height from this pawn's class defaults.
+	UClass* Cls = GetClass();
+	AActor* DefaultActor = Cls->GetDefaultActor();
+	FLOAT DefaultHeight = DefaultActor->CollisionHeight;
+
+	// Height thresholds: how far above/below the goal the pawn can be.
+	FLOAT HeightDown = CollisionHeight;
+	FLOAT RadThreshold = CollisionRadius;
+	FLOAT HeightUp = (DefaultHeight + DefaultHeight) - CollisionHeight;
+
+	if( GoalActor )
+	{
+		if( GoalActor->IsA(ANavigationPoint::StaticClass()) )
+		{
+			ANavigationPoint* Nav = (ANavigationPoint*)GoalActor;
+
+			// m_bExactMove navpoints require very precise positioning.
+			if( Nav->m_bExactMove )
+			{
+				FLOAT AbsZ = Dest.Z;
+				if( AbsZ < 0.f )
+					AbsZ = -AbsZ;
+				if( !(AbsZ < HeightUp) )
+					return 0;
+				FLOAT Dist2D = FVector(Dest.X, Dest.Y, 0.f).Size();
+				if( Dist2D < 0.f )
+					Dist2D = -Dist2D;
+				if( Dist2D < 10.f )
+					return 1;
+				return 0;
+			}
+
+			// Ladder checks for spider-physics pawns.
+			if( Physics == PHYS_Spider && GoalActor->IsA(ALadder::StaticClass()) )
+			{
+				HeightUp *= 0.5f;
+				HeightDown *= 0.5f;
+			}
+			else
+			{
+				// Standard navpoint threshold: collision radii + 33 + 2.
+				FLOAT v = (GoalActor->CollisionRadius + 2.f) - CollisionRadius + 33.f;
+				if( HeightUp < v )
+					HeightUp = v;
+				v = (CollisionRadius + 2.f + 33.f) - GoalActor->CollisionRadius;
+				if( HeightDown < v )
+					HeightDown = v;
+			}
+		}
+		else
+		{
+			// Non-navpoint actor.
+			if( GoalActor->IsEncroacher() )
+			{
+				// Encroacher: clamp height thresholds to goal's collision height.
+				if( HeightUp < GoalActor->CollisionHeight )
+					HeightUp = GoalActor->CollisionHeight;
+				if( HeightDown < GoalActor->CollisionHeight )
+					HeightDown = GoalActor->CollisionHeight;
+
+				// Radius: min(MeleeRange, CollisionRadius*1.5) + both radii.
+				FLOAT Reach = MeleeRange;
+				FLOAT MaxReach = CollisionRadius * 1.5f;
+				if( MaxReach <= Reach )
+					Reach = MaxReach;
+				RadThreshold = Reach + GoalActor->CollisionRadius + CollisionRadius;
+			}
+			else
+			{
+				// Non-encroacher: add goal's collision height to thresholds.
+				HeightUp += GoalActor->CollisionHeight;
+				HeightDown += GoalActor->CollisionHeight;
+				if( GoalActor->bBlockActors || GIsEditor )
+					RadThreshold = GoalActor->CollisionRadius + CollisionRadius;
+			}
+		}
+
+		RadThreshold += DestinationOffset;
+	}
+
+	// 2D distance check: zero the Z and compare squared distance.
+	FLOAT SavedZ = Dest.Z;
+	Dest.Z = 0.f;
+	FLOAT DistSq = Dest.SizeSquared();
+
+	if( !(RadThreshold * RadThreshold < DistSq) )
+	{
+		// Within XY range — check Z.
+		if( SavedZ <= 0.f )
+		{
+			FLOAT AbsZ = SavedZ;
+			if( SavedZ < 0.f )
+				AbsZ = -SavedZ;
+			if( AbsZ <= HeightDown )
+				return 1;
+		}
+		else if( SavedZ <= HeightUp )
+		{
+			return 1;
+		}
+
+		// Marginal zone: check double thresholds before giving up.
+		if( SavedZ <= 0.f )
+		{
+			FLOAT AbsZ = SavedZ;
+			if( SavedZ < 0.f )
+				AbsZ = -SavedZ;
+			if( HeightDown + HeightDown < AbsZ )
+				return 0;
+		}
+		else if( HeightUp + HeightUp < SavedZ )
+		{
+			return 0;
+		}
+
+		// Slope trace: trace downward 6 units to check ground slope.
+		FCheckResult Hit(1.f);
+		FVector TraceEnd( Location.X, Location.Y, Location.Z - 6.f );
+		GetLevel()->SingleLineCheck( Hit, this, TraceEnd, Location,
+			TRACE_World, FVector(CollisionRadius, CollisionRadius, CollisionHeight) );
+
+		if( Hit.Time < 0.95f && 0.7f <= Hit.Time )
+		{
+			// On a slope: check if vertical offset is reachable given the angle.
+			// Hit.Normal.Z is the cosine of the slope angle.
+			if( SavedZ >= 0.f ||
+				(CollisionRadius * appSqrt(1.f / (Hit.Normal.Z * Hit.Normal.Z) - 1.f) + DefaultHeight <= -SavedZ) )
+			{
+				// Get the goal's collision radius for slope allowance.
+				FLOAT GoalRadius;
+				if( GoalActor == NULL )
+				{
+					AActor* DefNav = ANavigationPoint::StaticClass()->GetDefaultActor();
+					GoalRadius = DefNav->CollisionRadius;
+				}
+				else
+				{
+					GoalRadius = GoalActor->CollisionRadius;
+				}
+
+				if( CollisionRadius < GoalRadius )
+					return 0;
+
+				FLOAT SlopeAllowance = ((GoalRadius + 15.f) - CollisionRadius)
+					* appSqrt(1.f / (Hit.Normal.Z * Hit.Normal.Z) - 1.f)
+					+ DefaultHeight;
+				if( SlopeAllowance <= SavedZ )
+					return 0;
+			}
+			return 1;
+		}
+	}
+
+	return 0;
 	unguard;
 }
 
@@ -2571,15 +2721,90 @@ void APawn::processLanded( FVector HitNormal, AActor* HitActor, FLOAT RemainingT
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103eea80; 2043b — capsule geometry adjustments for crouch state and FUN_10317620 (24-byte fabsf helper) inlining omitted; AR6ColBox::CanStepUp is implemented (R6EngineIntegration.cpp); unconditionally delegates to AActor::stepUp")
+IMPL_MATCH("Engine.dll", 0x103eea80)
 void APawn::stepUp( FVector GravDir, FVector DesiredDir, FVector Delta, FCheckResult& Hit )
 {
 	guard(APawn::stepUp);
-	// DIVERGENCE: APawn::stepUp delegates to AActor::stepUp without the pawn-specific
-	// pre/post adjustments (crouch state checks, step height clamping).
-	// GHIDRA REF: pawn step-up adds collision capsule half-height adjustment before
-	// calling the base AActor::stepUp, then corrects Z after.
-	AActor::stepUp( GravDir, DesiredDir, Delta, Hit );
+
+	FVector Down = GravDir * 33.f; // MaxStepHeight = 33.0 (0x42040000)
+
+	// R6-specific: prone pawn collision box check.
+	if( m_bIsProne )
+	{
+		if( m_collisionBox && !m_collisionBox->CanStepUp(Delta) )
+			return;
+		// Ghidra: Hit.Actor vtable[0x6c](33.f) — if nonzero, reduce step to 1 unit.
+		// The exact virtual is unresolved; approximated as a cap-height check.
+		if( Hit.Actor && Hit.Actor->IsA(AR6ColBox::StaticClass()) )
+			Down = GravDir;
+	}
+
+	if( Abs(Hit.Normal.Z) >= 0.08f )
+	{
+		// Surface is not steep — step along the slope.
+		if( Hit.Normal.Z >= 0.7f || Physics != PHYS_Walking )
+		{
+			FLOAT StepH = Delta.Size() * Hit.Normal.Z;
+			FVector StepDelta( Delta.X, Delta.Y, Delta.Z + StepH );
+			GetLevel()->MoveActor( this, StepDelta, Rotation, Hit, 0, 0, 0, 0, 0 );
+		}
+	}
+	else
+	{
+		// Steep/vertical wall — step up first, then move forward.
+		FVector NegDown = Down * -1.f;
+		GetLevel()->MoveActor( this, NegDown, Rotation, Hit, 0, 0, 0, 0, 0 );
+		GetLevel()->MoveActor( this, Delta, Rotation, Hit, 0, 0, 0, 0, 0 );
+	}
+
+	if( Hit.Time < 1.f )
+	{
+		if( Abs(Hit.Normal.Z) >= 0.08f || Delta.SizeSquared() * Hit.Time <= 144.f )
+		{
+			// Wall-slide: project remaining delta onto the wall plane.
+			processHitWall( Hit.Normal, Hit.Actor );
+			if( Physics == PHYS_Falling )
+				return;
+
+			FVector OldHitNormal = Hit.Normal;
+			Hit.Normal.Z = 0.f;
+			Hit.Normal = Hit.Normal.SafeNormal();
+
+			FVector OldDelta = Delta;
+			FVector SavedNormal = Hit.Normal;
+
+			// Remove wall-normal component from delta.
+			FVector WallProj = Hit.Normal * (Delta | Hit.Normal);
+			FVector SlideDir( Delta.X - WallProj.X, Delta.Y - WallProj.Y, Delta.Z - WallProj.Z );
+			FLOAT RemainTime = 1.f - Hit.Time;
+			Delta = SlideDir * RemainTime;
+
+			if( (Delta | OldDelta) >= 0.f )
+			{
+				GetLevel()->MoveActor( this, Delta, Rotation, Hit, 0, 0, 0, 0, 0 );
+				if( Hit.Time < 1.f )
+				{
+					processHitWall( Hit.Normal, Hit.Actor );
+					if( Physics == PHYS_Falling )
+						return;
+					TwoWallAdjust( DesiredDir, Delta, Hit.Normal, SavedNormal, Hit.Time );
+					GetLevel()->MoveActor( this, Delta, Rotation, Hit, 0, 0, 0, 0, 0 );
+				}
+			}
+			// Fall through to step-down.
+		}
+		else
+		{
+			// Large momentum on steep wall — settle down, then retry with remaining delta.
+			GetLevel()->MoveActor( this, Down, Rotation, Hit, 0, 0, 0, 0, 0 );
+			Delta = Delta * (1.f - Hit.Time);
+			stepUp( GravDir, DesiredDir, Delta, Hit );
+			return;
+		}
+	}
+
+	// Step back down to settle onto the ground.
+	GetLevel()->MoveActor( this, Down, Rotation, Hit, 0, 0, 0, 0, 0 );
 	unguard;
 }
 
