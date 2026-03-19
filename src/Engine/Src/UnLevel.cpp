@@ -1720,12 +1720,86 @@ void ULevel::SpawnViewActor( UViewport* Viewport )
 	unguard;
 }
 
-IMPL_TODO("3578-byte ULevel::SpawnPlayActor; DAT_10529f90/DAT_1052a448 are wide-string literals (not profiling globals); no permanent blockers. Ghidra 0x103be0c0")
+IMPL_TODO("Ghidra 0x103be0c0 (3578b): core Login+SetPlayer+RemoteRole flow implemented; inventory CLASS=/NAME= parsing from URL options omitted; FUN_103af650 (character name resolver) and FUN_103bc690 (inventory entry constructor) unnamed; PackageMap URL option copy for net connections omitted")
 APlayerController* ULevel::SpawnPlayActor( UPlayer* Player, ENetRole RemoteRole, const FURL& URL, FString& Error )
 {
 	guard(ULevel::SpawnPlayActor);
-	// TODO: implement ULevel::SpawnPlayActor (creates PlayerController, sets up connection replication)
-	return NULL;
+
+	// Clear error string (DAT_10529f90 is L"")
+	Error = TEXT("");
+
+	// If Player is a UNetConnection, get its PackageMap
+	UPackageMap* PkgMap = NULL;
+	if ( Player && Player->IsA(UNetConnection::StaticClass()) )
+		PkgMap = *(UPackageMap**)((BYTE*)Player + 200); // +0xC8
+
+	// Build options string from URL.Op array
+	TCHAR OptionsStr[1024];
+	OptionsStr[0] = 0;
+	FArray* OpArray = (FArray*)((BYTE*)&URL + 0x28);
+	for ( INT i = 0; i < OpArray->Num(); i++ )
+	{
+		appStrcat(OptionsStr, TEXT("?"));
+		FString* pOpt = (FString*)((BYTE*)OpArray->GetData() + i * 0xC);
+		appStrcat(OptionsStr, **pOpt);
+	}
+
+	FString Options(OptionsStr);
+	FString Portal = *(FString*)((BYTE*)&URL + 0x34);
+
+	// Get GameInfo and call Login
+	INT OldActorCount = Actors.Num();
+	ALevelInfo* LI = GetLevelInfo();
+	AGameInfo* Game = LI ? *(AGameInfo**)((BYTE*)LI + 0x4CC) : NULL;
+	if ( !Game )
+	{
+		Error = TEXT("No GameInfo");
+		return NULL;
+	}
+
+	APlayerController* NewPlayer = Game->eventLogin(Portal, Options, Error);
+	if ( !NewPlayer )
+	{
+		GLog->Logf(TEXT("Login failed: %s"), *Error);
+		return NULL;
+	}
+
+	// Bind player to controller
+	NewPlayer->SetPlayer(Player);
+	GLog->Logf(TEXT("%s spawned for %s"), NewPlayer->GetName(), Player->GetName());
+
+	// Set Role/RemoteRole
+	*(BYTE*)((BYTE*)NewPlayer + 0x2D) = ROLE_Authority; // Role
+	*(BYTE*)((BYTE*)NewPlayer + 0x2E) = (BYTE)RemoteRole;
+
+	// Net timing fields
+	*(DWORD*)((BYTE*)NewPlayer + 0x4F8) = 0x334cc80c;
+	*(DWORD*)((BYTE*)NewPlayer + 0x504) = 5;
+
+	// Network game: parse AuthId, NAME, inventory from URL options
+	if ( LI && *(BYTE*)((BYTE*)LI + 0x425) != 0 ) // NetMode != NM_Standalone
+	{
+		// AuthId2 / AuthId1 from URL options
+		FString AuthId2 = URL.GetOption(TEXT("AuthId2="), TEXT(""));
+		*(FString*)((BYTE*)NewPlayer + 0x6B8) = AuthId2;
+
+		FString AuthId1 = URL.GetOption(TEXT("AuthId1="), TEXT(""));
+		*(FString*)((BYTE*)NewPlayer + 0x69C) = AuthId1;
+		*(INT*)((BYTE*)NewPlayer + 0x698) = 1;
+
+		// TODO: NAME= option → FUN_103af650 (character name resolver)
+		// TODO: CLASS=/NAME= inventory construction loops (FUN_103bc690)
+		// These build the player's loadout from URL parameters — omitted for now.
+	}
+
+	// If new actors were spawned during Login, notify level change
+	INT NewActorCount = Actors.Num();
+	if ( OldActorCount != NewActorCount )
+	{
+		// Level actors changed: mark for potential replication/notification
+	}
+
+	return NewPlayer;
 	unguard;
 }
 
