@@ -3384,12 +3384,279 @@ void * UVertMeshInstance::GetAnimNamed(FName Name)
 	return NULL;
 }
 
-IMPL_TODO("2457-byte vertex animation pipeline; FCoords construction chain uses FGlobalMath tables and nested FCoords::operator* calls. Tractable but large. Ghidra 0x10473c20")
-void UVertMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,DWORD)
+IMPL_TODO("Ghidra 0x10473c20 (2457b): PATH A (CurrentFrame>=0) and PATH B (blend cross-fade) implemented; blend scalar (local_a8/local_c4) inferred as Local24 due to Ghidra stack-alias ambiguity.")
+void UVertMeshInstance::GetFrame(AActor* /*Actor*/, FLevelSceneNode* /*SceneNode*/,
+	FVector* OutVerts, INT Stride, INT& NumVerts, DWORD OutFlag)
 {
 	guard(UVertMeshInstance::GetFrame);
-	// Retail 0x10473c20 (2457b): transforms vertex mesh frames.
-	// TODO: implement UVertMeshInstance::GetFrame (retail 0x10473c20, 2457 bytes: transforms vertex mesh frames)
+
+	// GetMesh() via vtable[0x8C/4 = 35].  Called multiple times because the cache
+	// validity check (Ghidra) calls it three times; we mirror that structure.
+	typedef BYTE* (__thiscall *GetMeshFn)(UVertMeshInstance*);
+	GetMeshFn fp = (GetMeshFn)(*(void***)this)[0x8C / 4];
+	BYTE* Mesh = fp(this);
+
+	// Determine working vertex count: min(requested, mesh capacity).
+	FLOAT MeshNV   = *(FLOAT*)(Mesh + 0x60);
+	FLOAT LocalNV  = (NumVerts <= (INT)MeshNV) ? (FLOAT)NumVerts : MeshNV;
+
+	// local_24: 1.4013e-45 = "cache already valid" marker; 0.0 = "just initialised".
+	FLOAT InitFlag = 1.4013e-45f;
+
+	// -- Cache validity --------------------------------------------------
+	// Rebuild caches if empty or if the underlying mesh pointer changed.
+	TArray<FVector>* VertCache = (TArray<FVector>*)((BYTE*)this + 0x80);
+	TArray<FVector>* NormCache = (TArray<FVector>*)((BYTE*)this + 0x8c);
+
+	if (VertCache->Num() == 0 || fp(this) != *(BYTE**)((BYTE*)this + 0xa4))
+	{
+		if (fp(this) != *(BYTE**)((BYTE*)this + 0xa4))
+		{
+			VertCache->Empty();
+			NormCache->Empty();
+		}
+		VertCache->Add((INT)MeshNV);
+		NormCache->Add((INT)MeshNV);
+		InitFlag                        = 0.0f;
+		*(FLOAT*)((BYTE*)this + 0xa8)  = 1.0f;   // reset blend weight
+		*(BYTE**)((BYTE*)this + 0xa4)  = fp(this);
+		*(FName*)((BYTE*)this + 0x9c)  = FName(NAME_None);
+		*(FLOAT*)((BYTE*)this + 0x98)  = 0.0f;
+	}
+
+	FMeshAnimSeq* Seq = GetAnimSeq(*(FName*)((BYTE*)this + 0xb8));
+
+	FLOAT CurFrame = *(FLOAT*)((BYTE*)this + 0xc0);
+
+	// Flat position / normal arrays stored in mesh data (one INT32 per vertex per frame).
+	INT*   AllPos  = (INT*)  *(INT*)(Mesh + 0x64);
+	DWORD* AllNorm = (DWORD*)*(INT*)(Mesh + 0x100);
+	INT    NV      = (INT)MeshNV;
+
+	// ====================================================================
+	// PATH A: standard frame computation (CurFrame >= 0 OR freshly initialised)
+	// ====================================================================
+	if (CurFrame >= 0.0f || InitFlag == 0.0f)
+	{
+		NumVerts = (INT)LocalNV;
+		*(FLOAT*)((BYTE*)this + 0xa0) = LocalNV;
+
+		INT   FrameABase = 0;
+		FLOAT Frac       = 0.0f;
+		INT   FrameBBase = 0;
+
+		if (Seq)
+		{
+			FLOAT Frame = CurFrame;
+			if (Frame < 0.0f) Frame = 0.0f;
+			INT NumFrames  = *(INT*)((BYTE*)Seq + 0x14);
+			Frame         *= (FLOAT)NumFrames;
+			INT FloorF     = appFloor(Frame);
+			Frac           = Frame - (FLOAT)FloorF;
+			INT FirstFrame = *(INT*)((BYTE*)Seq + 0x10);
+			FrameABase = (FloorF     % NumFrames + FirstFrame) * NV;
+			FrameBBase = ((FloorF+1) % NumFrames + FirstFrame) * NV;
+		}
+
+		if (Frac > 0.0f)
+		{
+			// Interpolate between frame A and frame B.
+			INT*   PosA  = AllPos  + FrameABase;
+			INT*   PosB  = AllPos  + FrameBBase;
+			DWORD* NormA = AllNorm + FrameABase;
+			DWORD* NormB = AllNorm + FrameBBase;
+
+			for (INT i = 0; i < (INT)LocalNV; i++)
+			{
+				// Decode packed position A: Z[31:22](10b) Y[21:11](11b) X[10:0](11b)
+				INT pA = PosA[i];
+				FLOAT xA = (FLOAT)((pA << 21) >> 21);
+				FLOAT yA = (FLOAT)((pA << 10) >> 21);
+				FLOAT zA = (FLOAT)(pA >> 22);
+
+				// Lerp position toward B.
+				INT pB = PosB[i];
+				FVector dPos((FLOAT)((pB << 21) >> 21) - xA,
+				             (FLOAT)((pB << 10) >> 21) - yA,
+				             (FLOAT)(pB >> 22)         - zA);
+				FVector sc = dPos * Frac;
+				(*VertCache)(i) = FVector(xA + sc.X, yA + sc.Y, zA + sc.Z);
+
+				// Decode packed normal A: X[9:0] Y[19:10] Z[29:20], bias -512
+				DWORD nA = NormA[i];
+				FLOAT nxA = (FLOAT)(nA & 0x3ff)        - 512.f;
+				FLOAT nyA = (FLOAT)((nA >> 10) & 0x3ff) - 512.f;
+				FLOAT nzA = (FLOAT)((nA >> 20) & 0x3ff) - 512.f;
+
+				// Lerp normal toward B.
+				DWORD nB = NormB[i];
+				FVector dNorm((FLOAT)(nB & 0x3ff)        - 512.f - nxA,
+				              (FLOAT)((nB >> 10) & 0x3ff) - 512.f - nyA,
+				              (FLOAT)((nB >> 20) & 0x3ff) - 512.f - nzA);
+				FVector ns = dNorm * Frac;
+				(*NormCache)(i) = FVector(nxA + ns.X, nyA + ns.Y, nzA + ns.Z);
+			}
+		}
+		else
+		{
+			// Single frame (no fractional interpolation).
+			INT*   PosData  = AllPos  + FrameABase;
+			DWORD* NormData = AllNorm + FrameABase;
+
+			for (INT i = 0; i < (INT)LocalNV; i++)
+			{
+				INT p = PosData[i];
+				(*VertCache)(i) = FVector((FLOAT)((p << 21) >> 21),
+				                          (FLOAT)((p << 10) >> 21),
+				                          (FLOAT)(p >> 22));
+
+				DWORD n = NormData[i];
+				(*NormCache)(i) = FVector((FLOAT)(n & 0x3ff)        - 512.f,
+				                          (FLOAT)((n >> 10) & 0x3ff) - 512.f,
+				                          (FLOAT)((n >> 20) & 0x3ff) - 512.f);
+			}
+		}
+	}
+	else
+	{
+		// ================================================================
+		// PATH B: blend-weight cross-fade (CurFrame < 0 and not freshly init'd)
+		// This handles anim transitions where the engine drives a gradual
+		// per-vertex blend from the cached pose toward the target frame.
+		// ================================================================
+
+		// Clamp to previously cached vertex count.
+		FLOAT FullNV    = LocalNV;   // original requested count (local_58)
+		FLOAT CachedNV  = *(FLOAT*)((BYTE*)this + 0xa0);
+		if ((INT)CachedNV < (INT)LocalNV)
+			LocalNV = CachedNV;      // local_30 after clamp
+
+		*(FLOAT*)((BYTE*)this + 0xa0) = LocalNV;
+		NumVerts                       = (INT)LocalNV;
+
+		// Reference frame offset and per-frame-count rate.
+		FLOAT FV12    = 0.0f;  // firstFrame * meshNumVerts  (base index in flat array)
+		FLOAT Local20 = 0.0f;  // -1/numFrames (stored in this+0x98 on anim change)
+		if (Seq)
+		{
+			FV12    = (FLOAT)(*(INT*)((BYTE*)Seq + 0x10) * *(INT*)(Mesh + 0x60));
+			Local20 = -1.0f / (FLOAT)*(INT*)((BYTE*)Seq + 0x14);
+		}
+
+		// Blend fraction: how far current frame has drifted from the stored rate.
+		FLOAT AnimRate = *(FLOAT*)((BYTE*)this + 0x98);
+		FLOAT Local24  = (AnimRate != 0.0f) ? (1.0f - CurFrame / AnimRate) : 0.0f;
+
+		// Detect animation change, reset blend weight if so.
+		if (*(FName*)((BYTE*)this + 0x9c) != *(FName*)((BYTE*)this + 0xb8))
+			*(FLOAT*)((BYTE*)this + 0xa8) = 0.0f;
+
+		if (*(FName*)((BYTE*)this + 0x9c) != *(FName*)((BYTE*)this + 0xb8) ||
+		    Local24 < 0.0f || Local24 > 1.0f)
+		{
+			*(FLOAT*)((BYTE*)this + 0x98) = Local20;
+			Local24 = 0.0f;
+			*(FName*)((BYTE*)this + 0x9c) = *(FName*)((BYTE*)this + 0xb8);
+		}
+
+		// Update accumulated blend weight toward 1.0.
+		FLOAT BlendW = *(FLOAT*)((BYTE*)this + 0xa8);
+		FLOAT fVar2  = (1.0f - BlendW) * Local24 + BlendW;
+		*(FLOAT*)((BYTE*)this + 0xa8) = fVar2;
+
+		if (fVar2 > 0.97f)
+		{
+			// Blend is nearly complete: reset and expand cache if needed.
+			Local24 = 0.0f;
+			if ((INT)LocalNV < (INT)FullNV)
+			{
+				// Fill newly-required vertices from the reference frame.
+				INT*   TgtPos  = AllPos  + (INT)FV12;
+				DWORD* TgtNorm = AllNorm + (INT)FV12;
+				INT    Start   = (INT)LocalNV;
+				while (Start < (INT)FullNV)
+				{
+					INT p = TgtPos[Start];
+					(*VertCache)(Start) = FVector((FLOAT)((p << 21) >> 21),
+					                               (FLOAT)((p << 10) >> 21),
+					                               (FLOAT)(p >> 22));
+					DWORD n = TgtNorm[Start];
+					(*NormCache)(Start) = FVector((FLOAT)(n & 0x3ff)        - 512.f,
+					                               (FLOAT)((n >> 10) & 0x3ff) - 512.f,
+					                               (FLOAT)((n >> 20) & 0x3ff) - 512.f);
+					Start++;
+				}
+				NumVerts = (INT)FullNV;
+				LocalNV  = FullNV;
+				*(FLOAT*)((BYTE*)this + 0xa0) = FullNV;
+			}
+		}
+
+		// Apply per-vertex weighted blend toward the target reference frame.
+		// Scalar (local_a8 / local_c4 in Ghidra) inferred as Local24.
+		if (Local24 > 0.0f)
+		{
+			INT*   TgtPos  = AllPos  + (INT)FV12;
+			DWORD* TgtNorm = AllNorm + (INT)FV12;
+
+			for (INT i = 0; i < (INT)LocalNV; i++)
+			{
+				// Blend cached position toward target.
+				INT pT = TgtPos[i];
+				FLOAT tX = (FLOAT)((pT << 21) >> 21);
+				FLOAT tY = (FLOAT)((pT << 10) >> 21);
+				FLOAT tZ = (FLOAT)(pT >> 22);
+				FVector& V   = (*VertCache)(i);
+				FVector  dPos(tX - V.X, tY - V.Y, tZ - V.Z);
+				FVector  mov = dPos * Local24;
+				V.X += mov.X;  V.Y += mov.Y;  V.Z += mov.Z;
+
+				// Blend cached normal toward target.
+				DWORD nT = TgtNorm[i];
+				FLOAT tnX = (FLOAT)(nT & 0x3ff)        - 512.f;
+				FLOAT tnY = (FLOAT)((nT >> 10) & 0x3ff) - 512.f;
+				FLOAT tnZ = (FLOAT)((nT >> 20) & 0x3ff) - 512.f;
+				FVector& N   = (*NormCache)(i);
+				FVector  dN(tnX - N.X, tnY - N.Y, tnZ - N.Z);
+				FVector  mn = dN * Local24;
+				N.X += mn.X;  N.Y += mn.Y;  N.Z += mn.Z;
+			}
+		}
+	}
+
+	// LAB_10474131: store last-seen frame, then write to caller's output buffer.
+	*(FLOAT*)((BYTE*)this + 0x98) = *(FLOAT*)((BYTE*)this + 0xc0);
+
+	BYTE* OutPtr = (BYTE*)OutVerts;
+
+	if (OutFlag == 1)
+	{
+		// Positions only, sequential over all NumVerts.
+		for (INT i = 0; i < NumVerts; i++)
+		{
+			*(FVector*)OutPtr = (*VertCache)(i);
+			OutPtr += Stride;
+		}
+	}
+	else
+	{
+		// Positions + normals, with LOD vertex-remap table at Mesh+0xc4.
+		// Each remap entry is 0xc bytes; first WORD is the source vertex index.
+		INT   RemapNum  = *(INT*)  (Mesh + 0xc4 + 4);  // FArray.ArrayNum
+		BYTE* RemapData = *(BYTE**)(Mesh + 0xc4);       // FArray.Data
+
+		for (INT i = 0; i < RemapNum; i++)
+		{
+			INT vtxIdx = (INT)*(unsigned short*)(RemapData + i * 0xc);
+			if (vtxIdx < NumVerts)
+			{
+				*(FVector*)OutPtr         = (*VertCache)(vtxIdx);
+				*(FVector*)(OutPtr + 0xc) = (*NormCache)(vtxIdx);
+			}
+			OutPtr += Stride;
+		}
+	}
+
 	unguard;
 }
 
