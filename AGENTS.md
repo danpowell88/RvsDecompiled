@@ -191,9 +191,18 @@ Function decompilations are in `ghidra/exports/`:
 - `ghidra/exports/R6Engine/` — R6Engine.dll decompilations
 - etc.
 
-For each DLL there is a `_global.cpp` with all exported functions. Search by address:
+For each DLL there is a `_global.cpp` (decompiled C) and `_global.asm` (raw disassembly) with all exported functions. When the decompiler output is ambiguous, check the `.asm` for ground truth.
+
+Search by address in C decompilation:
 ```powershell
 $content = Get-Content "ghidra\exports\Engine\_global.cpp" -Raw
 $idx = $content.IndexOf("// Address: 0x103b4130")
+if ($idx -ge 0) { $content.Substring($idx, [Math]::Min(2000, $content.Length - $idx)) }
+```
+
+Search by address in assembly:
+```powershell
+$content = Get-Content "ghidra\exports\Engine\_global.asm" -Raw
+$idx = $content.IndexOf("; Address: 0x103b4130")
 if ($idx -ge 0) { $content.Substring($idx, [Math]::Min(2000, $content.Length - $idx)) }
 ```
