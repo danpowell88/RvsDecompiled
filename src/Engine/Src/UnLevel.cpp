@@ -38,12 +38,13 @@ static void SwapFVectors( FVector* A, FVector* B )
 // Returns TRUE when the property should be added to the rep list:
 //   - If newObj is already mapped on this connection → FALSE (client already knows).
 //   - If not mapped → mark channel dirty and return (newObj != NULL).
-// vtable[25] of Map (byte offset 100/0x64) = MapObject check.
-static UBOOL RepObjectChanged( INT newObj, INT /*oldObj*/, UPackageMap* Map, UActorChannel* Chan )
+// Retail dispatches through Chan->vtable[25] (byte offset 100/0x64).
+// Ghidra: param_3[0x23]=1 → Chan+0x8C = bActorMustStayDirty.
+static UBOOL RepObjectChanged( INT newObj, INT /*oldObj*/, UPackageMap* /*Map*/, UActorChannel* Chan )
 {
-	DWORD* vtbl = *(DWORD**)Map;
-	typedef INT (__thiscall* MapObjectFn)(UPackageMap*, INT);
-	if ( ((MapObjectFn)vtbl[25])( Map, newObj ) != 0 )
+	DWORD* vtbl = *(DWORD**)Chan;
+	typedef INT (__thiscall* MapObjectFn)(UActorChannel*, INT);
+	if ( ((MapObjectFn)vtbl[25])( Chan, newObj ) != 0 )
 		return 0;  // already mapped — no change from client's perspective
 	*(INT*)((BYTE*)Chan + 0x8c) = 1;  // Chan->bActorMustStayDirty
 	return (newObj != 0);
@@ -4425,7 +4426,7 @@ INT* AGameReplicationInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* R
 }
 IMPL_EMPTY("base no-op — subclass implements")
 void APlayerReplicationInfo::PostNetReceive() {}
-IMPL_TODO("Ghidra 0x103759a0 (3146b): all 32 field checks verified against Ghidra; FUN_10370830 (object-ref change gate for PlayerLocation/TalkTexture/VoiceType) approximated as RepObjectChanged — retail calls Chan->vtable[25] rather than Map->vtable[25] but result is functionally equivalent. Backup stats (m_iBackUpDeaths etc.) confirmed absent from native rep list despite appearing in .uc pos:0x055 block.")
+IMPL_MATCH("Engine.dll", 0x103759a0)
 INT* APlayerReplicationInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	guard(APlayerReplicationInfo::GetOptimizedRepList);
