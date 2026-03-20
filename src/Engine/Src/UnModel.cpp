@@ -1060,7 +1060,7 @@ unguard;
 // Phase 8 (EmptyPolys): creates new UPolys via StaticAllocateObject + zone table reset.
 // DIVERGENCE: GUndo callbacks omitted (editor-only, NULL at runtime).
 // DIVERGENCE: +0xe8 TLazyArray dtors approximated as FArray dtors.
-IMPL_TODO("Ghidra 0x103cfd80: per-node projector FArray::~FArray in separate loop vs inline Empty; +0xe8 TLazyArray dtors approximated (no TLazyArray<BYTE>::~TLazyArray available); GUndo LAB_ callbacks omitted (editor-only, NULL at runtime)")
+IMPL_TODO("Ghidra 0x103cfd80: +0xe8 TLazyArray dtors approximated as FArray dtors (no TLazyArray<BYTE>::~TLazyArray available); GUndo LAB_ callbacks omitted (editor-only, NULL at runtime)")
 void UModel::EmptyModel( INT EmptySurfs, INT EmptyPolys )
 {
 guard(UModel::EmptyModel);
