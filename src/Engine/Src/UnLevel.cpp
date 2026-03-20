@@ -3444,7 +3444,7 @@ INT ULevel::ToFloor( AActor* Actor, INT bTest, AActor* IgnoreActor )
 	return 0;
 	unguard;
 }
-IMPL_DIVERGE("calls FUN_10481dd0 (Karma terrain registration; MeSDK binary-only); permanent blocker (Ghidra 0x103c11a0)")
+IMPL_TODO("Ghidra 0x103c11a0 (393b): FUN_10481dd0 is a simple add-if-not-present TArray helper (59b, confirmed in _unnamed.cpp) — NOT Karma/MeSDK. Missing: ECX for FUN_10481dd0 = terrain's zone Terrains TArray at zone+0x3c0; zone determination from terrain actor unclear without assembly")
 void ULevel::UpdateTerrainArrays()
 {
 	guard(ULevel::UpdateTerrainArrays);
@@ -3469,12 +3469,12 @@ void ULevel::UpdateTerrainArrays()
 			 && (INT)(*(signed char*)((BYTE*)a + 0xa0)) >= -1
 			 && a->IsA(ATerrainInfo::StaticClass()) )
 		{
-			// SetCollision on terrain info (vtable slot 0x10c bytes into ULevel vtable)
+			// SetCollision(1, 0) on terrain actor via vtable slot 0x10c/4=67
 			typedef void (__thiscall* SetCollisionFn)(AActor*, INT, INT);
-			((SetCollisionFn)(*(DWORD*)(*(DWORD*)this + 0x10c)))((AActor*)Actors(0), 1, 0);
-			// FUN_10481dd0 = terrain zone registration helper: links ATerrainInfo to its
-			// zone actor and populates the Terrains TArray.
-			// TODO: implement terrain zone registration (FUN_10481dd0 = terrain zone registration helper)
+			((SetCollisionFn)(*(DWORD*)(*(DWORD*)a + 0x10c)))(a, 1, 0);
+			// FUN_10481dd0: add terrain actor to zone's Terrains TArray (add-if-not-present).
+			// ECX = zone's Terrains array at zone+0x3c0; zone determination from actor unclear.
+			// TODO: implement terrain zone registration (FUN_10481dd0 = add-if-not-present helper)
 		}
 	}
 
