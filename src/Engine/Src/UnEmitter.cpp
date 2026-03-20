@@ -336,7 +336,7 @@ void UBeamEmitter::UpdateActorHitList()
 }
 
 // Ghidra: 0x10381920, 1208 bytes
-IMPL_TODO("blocked by FUN_10301560 world-space transform helper and FUN_10370d70 matrix multiply")
+IMPL_TODO("Ghidra 0x10381920 (1208b): particle-loop bbox expansion implemented; CoordSystem==1 world-space FMatrix transform chain (FUN_10301560 translation + FUN_10370d70 rotation + FMatrix::operator*) omitted — complexity vs accuracy tradeoff")
 int UBeamEmitter::UpdateParticles(float DeltaTime)
 {
 	guard(UBeamEmitter::UpdateParticles);
@@ -367,8 +367,52 @@ int UBeamEmitter::UpdateParticles(float DeltaTime)
 	}
 	INT local_2c = UParticleEmitter::UpdateParticles(DeltaTime);
 	*(FBox*)((BYTE*)this + 0x304) = FBox(0);
+
+	// Per-particle bounding box expansion.
+	// Ghidra: iterates active particles, adds beam segment endpoints to bbox.
+	// CoordSystem at this+0x2d (BYTE): 1 = owner-relative, else = world-space.
+	BYTE CoordSystem = *((BYTE*)this + 0x2d);
+	INT numParticles = *(INT*)((BYTE*)this + 0x2c4);
+	FBox* bbox = (FBox*)((BYTE*)this + 0x304);
+	INT segStride = *(INT*)((BYTE*)this + 0x344);  // beam segment count
+	BYTE* beamData = (BYTE*)*(INT*)((BYTE*)this + 0x3e0);  // beam vertex data
+	BYTE* particleData = (BYTE*)*(INT*)((BYTE*)this + 0x2f8);  // particle array
+	INT owner = *(INT*)((BYTE*)this + 0x2f4);  // Outer actor
+
 	iVar7 = 0;
-	while (iVar7 < *(INT*)((BYTE*)this + 0x2c4)) { iVar7++; } // empty loop per Ghidra
+	while (iVar7 < numParticles)
+	{
+		// Check if particle is active: flag byte at particleData + iVar7*0x8c + 0x80, bit 0.
+		if ((*(BYTE*)(particleData + iVar7 * 0x8c + 0x80) & 1) != 0)
+		{
+			FLOAT* segStart = (FLOAT*)(beamData + segStride * iVar7 * 0x10);
+			FLOAT* segEnd   = (FLOAT*)(beamData + ((iVar7 + 1) * segStride * 0x10 - 0x10));
+
+			if (CoordSystem != 1)
+			{
+				// World-space: add segment endpoints directly.
+				*bbox += *(FVector*)segStart;
+				*bbox += *(FVector*)segEnd;
+			}
+			else
+			{
+				// Owner-relative: offset by Owner->Location.
+				FVector pos1;
+				pos1.X = *(FLOAT*)(owner + 0x234) + segStart[0];
+				pos1.Y = *(FLOAT*)(owner + 0x238) + segStart[1];
+				pos1.Z = *(FLOAT*)(owner + 0x23c) + segStart[2];
+				*bbox += pos1;
+
+				FVector pos2;
+				pos2.X = *(FLOAT*)(owner + 0x234) + segEnd[0];
+				pos2.Y = *(FLOAT*)(owner + 0x238) + segEnd[1];
+				pos2.Z = *(FLOAT*)(owner + 0x23c) + segEnd[2];
+				*bbox += pos2;
+			}
+		}
+		iVar7++;
+	}
+
 	FLOAT sizeB = ((FRange*)((BYTE*)this + 0x3b4))->Size();
 	FLOAT sizeG = ((FRange*)((BYTE*)this + 0x3ac))->Size();
 	FLOAT sizeR = ((FRange*)((BYTE*)this + 0x3a4))->Size();
@@ -382,8 +426,15 @@ int UBeamEmitter::UpdateParticles(float DeltaTime)
 	(void)sizeW;
 	FBox expanded = ((FBox*)((BYTE*)this + 0x304))->ExpandBy(0.0f);
 	*(FBox*)((BYTE*)this + 0x304) = expanded;
-	// FUN_10301560 = emitter-to-world FMatrix builder; FUN_10370d70 = FMatrix multiply.
-	// World-space bbox transform not yet applied.
+
+	// CoordSystem==1 world-space transform: retail builds a combined rotation+translation
+	// FMatrix from Owner->Location and Owner->Rotation, then calls FBox::TransformBy.
+	// FUN_10301560 = FCoords(position) translation matrix constructor (132b).
+	// FUN_10370d70 = FRotator→FMatrix rotation constructor (852b).
+	// The full chain: T = translate(Owner.Loc), R = rotate(Owner.Rot), T_inv = translate(-Owner.Loc),
+	// Combined = T_inv * R * ..., then bbox = bbox.TransformBy(Combined).
+	// Omitted due to complexity of the exact matrix multiplication sequence.
+
 	return local_2c;
 	unguard;
 }
