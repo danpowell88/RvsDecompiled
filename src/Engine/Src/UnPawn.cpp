@@ -2536,7 +2536,7 @@ void APawn::UpdateMovementAnimation( FLOAT DeltaSeconds )
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103ebfe0; 983b — APawn vtable[0x62] (slot 98, unknown virtual) and Goal vtable[0x1a] (slot 26, unknown mover-type check) omitted; PhysicsVolume+0x410&0x40 for bWaterVolume used as raw offset")
+IMPL_TODO("Ghidra 0x103ebfe0; 983b — APawn vtable[0x62] (slot 98, unknown culling virtual) omitted; vtable[26] approximated as IsA(ANavigationPoint); PhysicsVolume+0x410&0x40 for bWaterVolume used as raw offset")
 INT APawn::actorReachable( AActor* Goal, INT bKnowVisible, INT bNoAnchorCheck )
 {
 	guard(APawn::actorReachable);
@@ -2602,6 +2602,19 @@ INT APawn::actorReachable( AActor* Goal, INT bKnowVisible, INT bNoAnchorCheck )
 
 	// IMPL_TODO: Goal vtable[0x1a] (slot 26) proximity check omitted —
 	// Ghidra: if that virtual returns non-zero, test combined-radii overlap and return 1.
+	// vtable[26] approximated as IsA(ANavigationPoint) — same pattern as execPollMoveToward.
+	if( Goal->IsA(ANavigationPoint::StaticClass()) )
+	{
+		// Ghidra: fVar1 = Min(this+0x410, CollisionRadius*1.5)
+		// Combined reach = Goal->CollisionRadius + this->CollisionRadius + fVar1
+		FLOAT navField = *(FLOAT*)((BYTE*)this + 0x410);
+		FLOAT maxField = CollisionRadius * 1.5f;
+		if( maxField < navField )
+			navField = maxField;
+		FLOAT combinedR = *(FLOAT*)((BYTE*)Goal + 0xf8) + CollisionRadius + navField;
+		if( distSq <= combinedR * combinedR )
+			return 1;
+	}
 
 	// Physical reachability: try FarMoveActor to Goal's position, then back.
 	// Reachable() uses the position the pawn actually reached after the test move.
