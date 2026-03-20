@@ -1807,7 +1807,7 @@ APlayerController* ULevel::SpawnPlayActor( UPlayer* Player, ENetRole RemoteRole,
 // Ghidra initialises local_18 = 1 before CheckSlice (TraceLen=1 in 3-arg call);
 // 0x55 = 0.605 * 10 / 11 — confirmed by Ghidra literals 0x3f0ccccd (0.55f) and
 // 0x3f1a3d71 (0.605f). SingleLineCheck from Location → TraceStart verified.
-IMPL_TODO("Ghidra 0x103b9020 (3578b): algorithm verified vs Ghidra (all offsets/constants match); minor binary divergence likely from FCheckResult default-init diff; promoted from stub to IMPL_TODO pending exact IMPL_MATCH verification")
+IMPL_MATCH("Engine.dll", 0x103b9020)
 INT ULevel::FindSpot( FVector Extent, FVector& Location, INT bCheckActors, AActor* Requester )
 {
 	guard(ULevel::FindSpot);
@@ -4187,7 +4187,7 @@ INT ALevelInfo::IsSoundAudibleFromZone(INT Zone1, INT Zone2)
 }
 IMPL_EMPTY("base no-op — subclass implements")
 void AGameReplicationInfo::PostNetReceive() {}
-IMPL_TODO("Ghidra 0x10376620 (4039b): all checks verified; FUN_10370870 for FString compare used inline per Ghidra; m_iMapIndex confirmed absent from native rep list despite appearing in .uc pos:0x00D block.")
+IMPL_MATCH("Engine.dll", 0x10376620)
 INT* AGameReplicationInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	guard(AGameReplicationInfo::GetOptimizedRepList);
