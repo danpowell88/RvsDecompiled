@@ -3059,7 +3059,8 @@ void ULevel::NotifyReceivedText( UNetConnection* Connection, const TCHAR* Text )
 					return;
 				}
 
-				// IMPL_TODO: retail calls ULevel vtable[0xf0/4=60] (WelcomePlayer) here
+				// WelcomePlayer: retail calls ULevel vtable[0xf0/4=60].
+				WelcomePlayer( Connection, (TCHAR*)*Optional );
 				Connection->InitOut();
 				return;
 			}
