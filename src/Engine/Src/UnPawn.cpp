@@ -153,11 +153,11 @@ IMPLEMENT_FUNCTION( AController, INDEX_NONE, execPollMoveTo );
 
 // Ghidra 0x10390940, 1402b.  Key additions vs stub:
 //   Pawn->bReducedSpeed cleared; DesiredSpeed clamped by WalkSpeedMod;
-//   setMoveTimer with Destination.Size() (vtable[26] quick-reach check omitted → DIVERGE);
+//   setMoveTimer or MoveTimer=1.2f based on vtable[26] (IsA(ANavigationPoint) approximation);
 //   bAdvancedTactics set from bCanJump (Ghidra: bitfield bit3 XOR from param);
 //   ClearSerpentine + CurrentPath=NULL added.
-//   NavigationPoint eventSuggestMovePreparation + ReachSpec UReachSpec::supports path omitted → DIVERGE.
-IMPL_DIVERGE("Ghidra 0x10390940; 1402b — vtable[26] quick-reach guard and NavigationPoint prep+ReachSpec path unidentified; setMoveTimer always used")
+//   NavigationPoint: eventSuggestMovePreparation, GetReachSpecTo, supports, eventPrepareForMove.
+IMPL_TODO("Ghidra 0x10390940; 1402b — vtable[26] approximated as IsA(ANavigationPoint); __ftol2 parameter order for supports() unconfirmed")
 void AController::execMoveToward( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execMoveToward);
@@ -177,9 +177,11 @@ void AController::execMoveToward( FFrame& Stack, RESULT_DECL )
 	MoveTarget = NewTarget;
 	Focus = ViewFocus;
 	Destination = MoveTarget->Location;
-	// Retail: vtable[26] on MoveTarget → if non-zero: MoveTimer=1.2f; else setMoveTimer(dist)
-	// DIVERGE: vtable[26] unidentified → always use distance-based timer
-	Pawn->setMoveTimer( Destination.Size() );
+	// Ghidra: vtable[26] on MoveTarget → if nav point: MoveTimer=1.2f; else setMoveTimer(dist)
+	if (MoveTarget->IsA(ANavigationPoint::StaticClass()))
+		MoveTimer = 1.2f;
+	else
+		Pawn->setMoveTimer( Destination.Size() );
 	AdjustLoc = Destination;
 	GetStateFrame()->LatentAction = AI_PollMoveToward;
 	bAdjusting = 0;
@@ -187,9 +189,38 @@ void AController::execMoveToward( FFrame& Stack, RESULT_DECL )
 	bAdvancedTactics = bCanJump ? 1 : 0;
 	CurrentPath = NULL;
 	Pawn->ClearSerpentine();
-	// DIVERGE: retail checks MoveTarget->IsA(ANavigationPoint) + bSuggestPreparation flag,
-	// then calls ValidAnchor + GetReachSpecTo + UReachSpec::supports + eventPrepareForMove.
-	// This NavigationPoint path-preparation logic is not reconstructed.
+	// NavigationPoint path-preparation: if MoveTarget is a nav point, optionally call
+	// eventSuggestMovePreparation and check reachability via ReachSpec.
+	// Ghidra: IsA(ANavigationPoint) check; bSuggestPreparation bit (flags+0x3a4 & 0x100);
+	// ValidAnchor → GetReachSpecTo → supports → eventPrepareForMove.
+	if (MoveTarget->IsA(ANavigationPoint::StaticClass()))
+	{
+		ANavigationPoint* NavTarget = (ANavigationPoint*)MoveTarget;
+		DWORD navFlags = *(DWORD*)((BYTE*)NavTarget + 0x3a4);
+		if (navFlags & 0x100)
+			NavTarget->eventSuggestMovePreparation(Pawn);
+		if (Pawn->ValidAnchor())
+		{
+			UReachSpec* spec = Pawn->Anchor->GetReachSpecTo(NavTarget);
+			CurrentPath = spec;
+			if (spec)
+			{
+				if (!(spec->bForced & 1) || !(navFlags & 0x4000))
+				{
+					if (!spec->supports(
+							(INT)Pawn->CollisionRadius,
+							(INT)Pawn->CollisionHeight,
+							Pawn->calcMoveFlags(),
+							(INT)Pawn->MaxFallSpeed))
+						eventPrepareForMove(NavTarget, spec);
+				}
+				else
+				{
+					NavTarget->eventSuggestMovePreparation(Pawn);
+				}
+			}
+		}
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AController, 502, execMoveToward );
@@ -5411,7 +5442,7 @@ INT APawn::pointReachable(FVector Dest, INT bKnowVisible)
 	unguard;
 }
 
-IMPL_DIVERGE("rotateToward: vtable[0x68] on MoveTarget (AActor slot 26, identity unknown) approximated by MoveTarget != NULL check; MoveTarget->Controller raw offset used")
+IMPL_DIVERGE("rotateToward: vtable[0x68] on MoveTarget approximated as IsA(ANavigationPoint); MoveTarget->Controller raw offset used")
 void APawn::rotateToward(AActor* Focus, FVector FocalPoint)
 {
 guard(APawn::rotateToward);
@@ -5461,13 +5492,13 @@ FVector delta = TargetPos - Location;
 DesiredRotation = delta.Rotation();
 DesiredRotation.Yaw &= 0xFFFF;
 
-// Walking: zero pitch unless a valid MoveTarget exists.
-// DIVERGENCE: Ghidra calls vtable[0x68] on MoveTarget to test reachability;
-// approximated here by checking MoveTarget != NULL only.
+// Walking: zero pitch unless MoveTarget is a navigation point (vtable[26]).
+// Ghidra: calls vtable[0x68] on MoveTarget; approximated as IsA(ANavigationPoint).
 if (Physics == PHYS_Walking)
 {
 INT ctrlPtr = *(INT*)(this + 0x4ec);
-if (!ctrlPtr || !*(INT*)(ctrlPtr + 0x3e0)) // Controller->MoveTarget
+AActor* mt = ctrlPtr ? *(AActor**)(ctrlPtr + 0x3e0) : NULL;
+if (!mt || !mt->IsA(ANavigationPoint::StaticClass()))
 DesiredRotation.Pitch = 0;
 }
 
