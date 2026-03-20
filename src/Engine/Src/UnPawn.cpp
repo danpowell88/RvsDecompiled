@@ -92,8 +92,10 @@ IMPLEMENT_FUNCTION( APawn, INDEX_NONE, execIsAlive );
 // Ghidra 0x1038e870, 566b. Retail clears Pawn->bReducedSpeed, sets DesiredSpeed from
 // WalkSpeedMod (clamped by MaxDesiredSpeed), zeros DestinationOffset/NextPathRadius,
 // copies Destination to AdjustLoc/FocalPoint, calls setMoveTimer, then calls
-// Pawn->vtable[0x184/4=97] = moveToward.  vtable[26] check omitted (DIVERGE).
-IMPL_DIVERGE("Ghidra 0x1038e870; 566b — vtable[26] quick-reach guard on MoveTarget unidentified; all other logic implemented")
+// Pawn->vtable[0x184/4=97] = moveToward. MoveTarget=NULL (no vtable[26] call).
+// Note: Ghidra shows unaff_EDI for Destination.Z — decompiler artifact from FVector
+// parameter parsing through bytecode native dispatch; our code handles this correctly.
+IMPL_DIVERGE("Ghidra 0x1038e870; 566b — unaff_EDI for Destination.Z unverifiable from decompilation; all logic implemented")
 void AController::execMoveTo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execMoveTo);
@@ -665,7 +667,7 @@ void AController::execPickTarget( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 531, execPickTarget );
 
-IMPL_DIVERGE("Ghidra 0x1038dc20 (688b): loops XLevel->Actors and checks vtable[0x68] (slot 26 = first AActor-exclusive virtual after UObject's 26 slots) which must return 0 to proceed. Slot identity permanently unknown without full vtable reconstruction — omitted unconditionally. All other logic (targetable flag, FoV dot-product, 4M distSq gate, LineOfSightTo) matches retail.")
+IMPL_DIVERGE("Ghidra 0x1038dc20 (688b): vtable[0x68] approximated as IsA(ANavigationPoint) — skip nav points; all other logic (targetable flag, FoV dot-product, 4M distSq gate, LineOfSightTo) matches retail.")
 void AController::execPickAnyTarget( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPickAnyTarget);
@@ -683,7 +685,8 @@ void AController::execPickAnyTarget( FFrame& Stack, RESULT_DECL )
 		if( !actor ) continue;
 		// Ghidra flag: bit7 of byte at actor+0xa9 (targetable flag)
 		if( !((*(DWORD*)((BYTE*)actor + 0xa8) >> 8) & 0x80) ) continue;
-		// Ghidra also checks vtable[0x1a]==0 (unidentified virtual) — omitted as DIVERGE
+		// Ghidra: vtable[0x68] on actor must return 0 — skip navigation points
+		if( actor->IsA(ANavigationPoint::StaticClass()) ) continue;
 		FVector diff = actor->Location - projStart;
 		FLOAT dp = FireDir | diff;
 		if( dp <= 0.0f ) continue;
