@@ -725,26 +725,183 @@ IMPLEMENT_FUNCTION( AController, INDEX_NONE, execStopWaiting );
 
 /*-- APlayerController functions ---------------------------------------*/
 
-IMPL_TODO("Ghidra 0x103900a0; 1734b — stair-rotation camera pitch for walking; traces forward from eye to detect steps/stairs, returns blended pitch adjustment; Ghidra decompilation has heavy stack-variable reuse making confident reconstruction difficult; core algorithm: early-return Rotation.Pitch if !Pawn or DeltaTime>0.33, get horizontal ViewDir from FRotator(0,Yaw,Roll).Vector(), trace TraceDist=2*(EyeOfsZ+CollisionHeight) forward with collision extent, then compute pitch delta from step geometry (0xfffff060=-4000 for ascending, 0xe10=3600 for descending), blend with DeltaTime; stub matches early-return path only")
+IMPL_TODO("Ghidra 0x103900a0; 1734b — stair-rotation camera pitch; algorithm implemented from Ghidra analysis: forward trace, midpoint down-probe, step classification, pitch blending; exact geometric midpoint computation may diverge due to heavy stack-variable reuse in Ghidra decompilation; all thresholds, trace flags, magic numbers (0.33, 0.8, 3.0, 0.7, 6.0, 10.0, -4000/3600, 4.0/4000, 0.25, 0.9) match Ghidra values")
 void APlayerController::execFindStairRotation( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execFindStairRotation);
 	P_GET_FLOAT(DeltaTime);
 	P_FINISH;
 
-	// Early return: no Pawn or large timestep — return current pitch unchanged.
-	// Ghidra: if (*(int*)(this+0x3d8)==0 || 0.33 < DeltaTime) { *Result = *(this+0x240); return; }
+	// Early return: no Pawn or large timestep.
 	if( !Pawn || DeltaTime > 0.33f )
 	{
 		*(INT*)Result = Rotation.Pitch;
 		return;
 	}
 
-	// TODO: Full stair-trace algorithm (approx 1500 bytes remaining).
-	// Clamp Rotation.Pitch to signed 16-bit, construct FRotator(0, Yaw, Roll),
-	// get Vector() for horizontal forward, compute eye position, trace forward
-	// with SingleLineCheck, detect step geometry, return blended pitch.
-	*(INT*)Result = Rotation.Pitch;
+	// Sign-extend Rotation.Pitch to signed 16-bit range.
+	// Ghidra: if (0x8000 < *(uint*)(this+0x240)) *(uint*)(this+0x240) = (*(uint*)(this+0x240) & 0xffff) - 0x10000;
+	INT SignedPitch = Rotation.Pitch;
+	if( (DWORD)SignedPitch > 0x8000 )
+		SignedPitch = (INT)((DWORD)Rotation.Pitch & 0xffff) - 0x10000;
+
+	// Horizontal forward direction (zero pitch for flat forward).
+	FRotator HorizRot( 0, Rotation.Yaw, Rotation.Roll );
+	FVector ViewDir = HorizRot.Vector();
+
+	// Eye position = Pawn->Location + eye offset.
+	FVector EyeOfs = Pawn->eventEyePosition();
+	FVector EyePos;
+	EyePos.X = *(FLOAT*)((BYTE*)Pawn + 0x234) + EyeOfs.X;
+	EyePos.Y = *(FLOAT*)((BYTE*)Pawn + 0x238) + EyeOfs.Y;
+	EyePos.Z = *(FLOAT*)((BYTE*)Pawn + 0x23c) + EyeOfs.Z;
+
+	// Trace distance = 2 * (EyePosition.Z + CollisionHeight).
+	FVector EyeOfs2 = Pawn->eventEyePosition();
+	FLOAT CollHeight = *(FLOAT*)((BYTE*)Pawn + 0xfc);
+	FLOAT EyeH = EyeOfs2.Z + CollHeight;
+	FLOAT TraceDist = EyeH + EyeH;
+
+	// Collision extent from Pawn.
+	FLOAT CollRadius = *(FLOAT*)((BYTE*)Pawn + 0xf8);
+	FVector Extent( CollRadius, CollRadius, CollRadius );
+
+	// Trace forward from eye position.
+	FVector End;
+	End.X = ViewDir.X * TraceDist + EyePos.X;
+	End.Y = ViewDir.Y * TraceDist + EyePos.Y;
+	End.Z = ViewDir.Z * TraceDist + EyePos.Z;
+
+	ULevel* Level = *(ULevel**)((BYTE*)this + 0x328);
+	FCheckResult Hit( 1.0f );
+	Level->SingleLineCheck( Hit, this, End, EyePos, TRACE_World, Extent );
+
+	INT TargetPitch = 0;
+	FLOAT HitDist = Hit.Time * TraceDist + Hit.Time * TraceDist;
+
+	if( TraceDist * 0.8f < HitDist )
+	{
+		FLOAT HalfDist = HitDist * 0.5f;
+		FLOAT VertProbe = TraceDist * 3.0f;
+
+		// Probe point: midpoint along forward trace, then trace downward.
+		FVector ProbeTop;
+		ProbeTop.X = ViewDir.X * HalfDist + EyePos.X;
+		ProbeTop.Y = ViewDir.Y * HalfDist + EyePos.Y;
+		ProbeTop.Z = ViewDir.Z * HalfDist + EyePos.Z;
+
+		FVector ProbeBottom;
+		ProbeBottom.X = ProbeTop.X;
+		ProbeBottom.Y = ProbeTop.Y;
+		ProbeBottom.Z = ProbeTop.Z - VertProbe;
+
+		FCheckResult Hit2( 1.0f );
+		Level->SingleLineCheck( Hit2, this, ProbeBottom, ProbeTop, TRACE_World, Extent );
+
+		if( Hit2.Time < 1.0f )
+		{
+			FLOAT StepDist = VertProbe * Hit2.Time;
+
+			if( StepDist < TraceDist * 0.7f - 6.0f )
+			{
+				// Floor ahead is HIGH (closer than expected) — ascending stairs.
+				// Confirmation trace: offset along ViewDir, trace down from Pawn location.
+				FVector ScaledDir;
+				ScaledDir.X = ViewDir.X * HitDist;
+				ScaledDir.Y = ViewDir.Y * HitDist;
+				ScaledDir.Z = ViewDir.Z * HitDist;
+
+				FVector ConfTop;
+				ConfTop.X = *(FLOAT*)((BYTE*)Pawn + 0x234) + ScaledDir.X;
+				ConfTop.Y = *(FLOAT*)((BYTE*)Pawn + 0x238) + ScaledDir.Y;
+				ConfTop.Z = *(FLOAT*)((BYTE*)Pawn + 0x23c) + ScaledDir.Z;
+
+				FVector ConfBottom;
+				ConfBottom.X = ConfTop.X;
+				ConfBottom.Y = ConfTop.Y;
+				ConfBottom.Z = ConfTop.Z - VertProbe;
+
+				FCheckResult Hit3( 1.0f );
+				Level->SingleLineCheck( Hit3, this, ConfBottom, ConfTop, TRACE_World, Extent );
+
+				// Default: if pitch is already positive (looking up), keep 0; else keep current pitch.
+				TargetPitch = (SignedPitch <= 0) ? 0 : SignedPitch;
+
+				if( VertProbe * Hit3.Time < StepDist - 10.0f )
+					TargetPitch = 3600;  // 0xe10 = descending stairs pitch (look up)
+			}
+			else if( StepDist > TraceDist * 0.7f + 6.0f )
+			{
+				// Floor ahead is LOW (farther than expected) — descending stairs.
+				// Confirmation trace: offset scaled by 0.9.
+				FVector ScaledDir;
+				ScaledDir.X = ViewDir.X * (HitDist * 0.9f);
+				ScaledDir.Y = ViewDir.Y * (HitDist * 0.9f);
+				ScaledDir.Z = ViewDir.Z * (HitDist * 0.9f);
+
+				FVector ConfStart;
+				ConfStart.X = *(FLOAT*)((BYTE*)Pawn + 0x234) + ScaledDir.X;
+				ConfStart.Y = *(FLOAT*)((BYTE*)Pawn + 0x238) + ScaledDir.Y;
+				ConfStart.Z = *(FLOAT*)((BYTE*)Pawn + 0x23c) + ScaledDir.Z;
+
+				// Trace with zero extent, TRACE_World | TRACE_StopAtFirstHit (0x286).
+				FCheckResult Hit3a( 1.0f );
+				Level->SingleLineCheck( Hit3a, this, ConfStart, ConfStart, 0x286, FVector(0,0,0) );
+
+				if( Hit3a.Time == 1.0f )
+				{
+					// No obstruction — do another vertical probe.
+					FVector Scaled2;
+					Scaled2.X = ViewDir.X * HitDist;
+					Scaled2.Y = ViewDir.Y * HitDist;
+					Scaled2.Z = ViewDir.Z * HitDist;
+
+					FVector VPTop;
+					VPTop.X = EyeH + Scaled2.X;
+					VPTop.Y = EyePos.X + Scaled2.Y;
+					VPTop.Z = (End.X + Scaled2.Z) - VertProbe;
+
+					FVector VPBottom = VPTop;
+
+					FCheckResult Hit4( 1.0f );
+					Level->SingleLineCheck( Hit4, this, VPTop, VPBottom, TRACE_World, Extent );
+
+					// Default: if pitch is non-negative, use 0; else keep current pitch.
+					TargetPitch = (SignedPitch >= 0) ? 0 : SignedPitch;
+
+					if( StepDist + 10.0f < VertProbe * Hit4.Time )
+						TargetPitch = -4000;  // 0xfffff060 = ascending stairs pitch (look down)
+				}
+			}
+		}
+	}
+
+	// Blending: interpolate current pitch toward target pitch.
+	INT CurrentPitch = SignedPitch;
+	INT Diff = CurrentPitch - (INT)TargetPitch;
+	if( Diff < 0 ) Diff = -Diff;
+
+	if( Diff > 0 && *(FLOAT*)(*(INT*)((BYTE*)this + 0x144) + 0x45c) - *(FLOAT*)((BYTE*)this + 0x3d0) > 0.25f )
+	{
+		FLOAT BlendSpeed = 4.0f;
+		if( Diff < 1000 )
+			BlendSpeed = (FLOAT)(INT)(4000 / (INT)Diff);
+
+		FLOAT Alpha = BlendSpeed * DeltaTime;
+		if( Alpha > 1.0f )
+			Alpha = 1.0f;
+
+		*(INT*)Result = appRound( Alpha * (FLOAT)(INT)TargetPitch + (1.0f - Alpha) * (FLOAT)CurrentPitch );
+		return;
+	}
+
+	if( Diff < 10 && (INT)TargetPitch < 10 && (INT)TargetPitch > -10 )
+	{
+		// Reset stair check timestamp when pitch is stable near zero.
+		*(FLOAT*)((BYTE*)this + 0x3d0) = *(FLOAT*)(*(INT*)((BYTE*)this + 0x144) + 0x45c);
+	}
+
+	*(INT*)Result = CurrentPitch;
 	unguard;
 }
 IMPLEMENT_FUNCTION( APlayerController, 524, execFindStairRotation );
