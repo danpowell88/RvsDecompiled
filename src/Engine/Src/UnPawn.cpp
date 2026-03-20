@@ -4111,12 +4111,11 @@ INT APawn::findNewFloor(FVector OldLocation, FLOAT DeltaTime, FLOAT RemainingTim
 //   reachability then undo the move).
 // Controller fields: +0x408 = MoveTarget (AActor*), +0x40c = FocusActor (AActor*),
 //   +0x44c = nextFocus (AActor*), all set at pawn-already-at-goal path.
-// DIVERGENCE: Goal swimming-pawn jump (Goal->vtable[0x68] IsA check + Physics==PHYS_Swimming
-//   branch calls jumpLanding on Goal; omitted as it's an edge case).
+// DIVERGENCE: vtable[0x68] approximated as IsA(ANavigationPoint) (same as execPollMoveToward).
 // DIVERGENCE: FarMoveActor probe uses vtable dispatch; named call equivalent used.
 // DIVERGENCE: controller field assignments at "pawn already at goal" path approximate
 //   with raw offsets (+0x408, +0x40c, +0x44c) since EngineClasses.h lacks explicit names.
-IMPL_TODO("Ghidra 0x1041cfa0; 1916b: implemented; minor divergences: swimming-goal jumpLanding path omitted, AController vtable[100] call approximated as AcceptNearbyPath, vtable[0x68] check omitted")
+IMPL_TODO("Ghidra 0x1041cfa0; 1916b: implemented; AController vtable[100] call approximated as AcceptNearbyPath; vtable[0x68] approximated as IsA(ANavigationPoint)")
 FLOAT APawn::findPathToward(AActor* Goal, FVector Dest, FLOAT (*WeightFunc)(ANavigationPoint*, APawn*, FLOAT), INT bSinglePath, FLOAT MaxWeight)
 {
 	guard(APawn::findPathToward);
@@ -4129,6 +4128,20 @@ FLOAT APawn::findPathToward(AActor* Goal, FVector Dest, FLOAT (*WeightFunc)(ANav
 
 	// bNoWeightFunc = 1 if no custom weight function provided (use default)
 	INT bNoWeightFunc = (WeightFunc == NULL) ? 1 : 0;
+
+	// Swimming-goal jumpLanding: if Goal is a nav point in PHYS_Swimming and we're
+	// not flying, call jumpLanding with Goal's velocity to test landing, then clear
+	// Goal and use its saved location as Dest. Ghidra: param_1!=NULL, this+0x2c!=4,
+	// vtable[0x68] on Goal nonzero, Goal+0x2c==2.
+	if (Goal != NULL && Physics != PHYS_Flying &&
+	    Goal->IsA(ANavigationPoint::StaticClass()) &&
+	    *(BYTE*)((BYTE*)Goal + 0x2c) == PHYS_Swimming)
+	{
+		FVector savedGoalLoc = Goal->Location;
+		jumpLanding(*(FVector*)((BYTE*)Goal + 0x24C), 0);
+		Goal = NULL;
+		Dest = savedGoalLoc;
+	}
 
 	// Save self location (Ghidra: local_24/20/1c)
 	FLOAT selfX = Location.X, selfY = Location.Y, selfZ = Location.Z;
