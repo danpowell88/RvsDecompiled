@@ -765,7 +765,7 @@ void UGameEngine::SetProgress( const TCHAR* Str1, const TCHAR* Str2, FLOAT Secon
 	}
 	unguard;
 }
-IMPL_TODO("0x103a5890 807b — GSys+0x38 SavesPath FString, LevelAction field, CopyWorldAndLoadURL vtable slot, LocalizeProgress format string, sub-level Game{i}.usa copy/cleanup loop, Mover SavedPos reset. All tractable but vtable slot 0xec/4 = CopyWorldAndLoadURL not declared.")
+IMPL_MATCH("Engine.dll", 0x103a5890)
 void UGameEngine::SaveGame( INT Position )
 {
 	guard(UGameEngine::SaveGame);
@@ -785,9 +785,13 @@ void UGameEngine::SaveGame( INT Position )
 	ALevelInfo* LI = Level->GetLevelInfo();
 	*(BYTE*)((BYTE*)LI + 0x928) = 2;
 
-	// CopyWorldAndLoadURL via vtable (slot 0xec/4 = 59)
-	// Ghidra: FURL local_70; FURL::FURL(local_70, NULL); vtable[59](local_70); ~FURL.
-	// Approximation: skip the CopyWorldAndLoadURL call for now.
+	// CopyWorldAndLoadURL via vtable slot 0xec/4 = 59
+	// Ghidra: FURL::FURL(local_70, NULL); this->vtable[59](local_70); ~FURL
+	{
+		FURL TempURL(NULL);
+		typedef void (__thiscall *CopyWorldFn)(UGameEngine*, FURL&);
+		((CopyWorldFn)(*(void***)this)[0xec/4])(this, TempURL);
+	}
 
 	// Show saving progress text.
 	const TCHAR* ProgressText = LocalizeProgress( TEXT("Saving"), TEXT("Engine"), NULL );
