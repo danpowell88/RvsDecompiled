@@ -905,13 +905,12 @@ unguard;
 // Phase 3: per-node projector FArray::~FArray + FArray::Empty for Nodes.
 // Phase 4: Empty LightMap, VertIdx, and several other BSP arrays.
 // Phase 5: element-destructor loops for +0xf4 and +0xe8 implemented.
-// Phase 6: sections array (FUN_10324a50 per element — unnamed, skipped; just Empty).
+// Phase 6: sections array — per-section FUN_10324a50 destructor implemented.
 // Phase 7 (EmptySurfs): GUndo skipped; empties Points, Vectors, Surfs with per-surf cleanup.
 // Phase 8 (EmptyPolys): creates new UPolys via StaticAllocateObject + zone table reset.
 // DIVERGENCE: GUndo callbacks omitted (editor-only, NULL at runtime).
 // DIVERGENCE: +0xe8 TLazyArray dtors approximated as FArray dtors.
-// DIVERGENCE: per-section FUN_10324a50 unnamed, skipped.
-IMPL_TODO("Ghidra 0x103cfd80: per-node projector FArray::~FArray in separate loop vs inline Empty; +0xe8 TLazyArray dtors approximated (no TLazyArray<BYTE>::~TLazyArray available); per-section FUN_10324a50 unnamed; GUndo LAB_ callbacks omitted (editor-only, NULL at runtime)")
+IMPL_TODO("Ghidra 0x103cfd80: per-node projector FArray::~FArray in separate loop vs inline Empty; +0xe8 TLazyArray dtors approximated (no TLazyArray<BYTE>::~TLazyArray available); GUndo LAB_ callbacks omitted (editor-only, NULL at runtime)")
 void UModel::EmptyModel( INT EmptySurfs, INT EmptyPolys )
 {
 guard(UModel::EmptyModel);
@@ -937,8 +936,18 @@ for (INT i = 0; i < numNodes; i++)
 		}
 		projectors->Remove(num - 1, 1, PROJ_STRIDE);
 	}
-	// Phase 3: free projector FArray backing buffer before Nodes is emptied.
-	projectors->Empty(PROJ_STRIDE, 0);
+}
+// GUndo->SaveArray for Nodes omitted (LAB_ callbacks are editor undo machinery;
+// GUndo==NULL during gameplay).
+// Phase 3: separate loop to destruct each node's projector sub-FArray.
+// Ghidra: FUN_1033bbc0(0, count) + FArray::~FArray per node.
+for (INT i = 0; i < numNodes; i++)
+{
+	FArray* projectors = (FArray*)(nodeData + i * NODE_STRIDE + 0x84);
+	INT cnt = projectors->Num();
+	if (cnt > 0)
+		projectors->Remove(0, cnt, PROJ_STRIDE);
+	projectors->~FArray();
 }
 // GUndo->SaveArray for Nodes omitted (LAB_ callbacks are editor undo machinery;
 // GUndo==NULL during gameplay).
@@ -993,8 +1002,21 @@ MODEL_VERTS(this)->Empty(8, 0);
 }
 ((FArray*)((BYTE*)this + 0xe8))->Empty(0x6c, 0);
 
-// Phase 6: render sections (FUN_10324a50 per section — unnamed section dtor).
-// DIVERGENCE: per-section cleanup helper FUN_10324a50 not yet identified; skipped.
+// Phase 6: render sections — FUN_10324a50 per section destructs sub-FArray (stride 0x28).
+// Ghidra: iterates *(this+0xe0) sections, each element starts with an FArray that owns
+// stride-0x28 entries (index buffer data). FUN_10324a50 = Remove(0,Num,0x28) + ~FArray.
+{
+	INT numSections = *(INT*)((BYTE*)this + 0xe0);
+	BYTE* secData = (BYTE*)MODEL_SECTIONS(this)->GetData();
+	for (INT j = 0; j < numSections; j++)
+	{
+		FArray* subArr = (FArray*)(secData + j * 0x2c);
+		INT cnt = subArr->Num();
+		if (cnt > 0)
+			subArr->Remove(0, cnt, 0x28);
+		subArr->~FArray();
+	}
+}
 MODEL_SECTIONS(this)->Empty(0x2c, 0);
 
 if (EmptySurfs)

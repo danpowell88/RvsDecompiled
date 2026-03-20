@@ -195,12 +195,12 @@ void AController::execMoveToward( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( AController, 502, execMoveToward );
 
 // Ghidra 0x1038d110, 534b. No SEH (no guard/unguard in retail).
-// bAdjusting checks: vtable[0x184/4=97] on Pawn (unidentified actorReachable variant)
-// approximated by moveToward result.  PHYS_Flying vtable[26] guard (MoveTarget->IsA check)
-// not identified; Z-offset applied unconditionally.
-// Ghidra trailing: writes Pawn+0x3f4 from unaff_EDI (caller-saved); Pawn+0x3e2 bit0 and
-// MoveTarget.NavSpec+0x410 bit6 guard for MoveTimer=-1.0f path — omitted approximation.
-IMPL_TODO("Ghidra 0x1038d110: bAdjusting vtable[97] approx'd as moveToward; PHYS_Flying vtable[26] (byte 0x68, first AActor-exclusive vtable slot after UObject's 26 slots) guard omitted; trailing MoveTimer=-1.0f path (Pawn+0x3e2/MoveTarget nav bit) omitted")
+// bAdjusting: vtable[0x184/4=97] on Pawn = moveToward.
+// PHYS_Flying: vtable[26] on MoveTarget guards Z-offset = nav-point check (IsA approximation).
+// Trailing: refresh Destination, vtable[26] guard, MoveTimer=-1.0f nav-node path.
+// DIVERGENCE: vtable[26] approximated as IsA(ANavigationPoint).
+// DIVERGENCE: trailing Pawn+0x3f4 write from unaff_EDI (caller-saved register) unrecoverable.
+IMPL_TODO("Ghidra 0x1038d110: vtable[26] approximated as IsA(ANavigationPoint); trailing Pawn+0x3f4 write from unaff_EDI unrecoverable; Pawn+0x3e2 bit0 and MoveTarget+0x164+0x410 bit6 flag fields unidentified")
 void AController::execPollMoveToward( FFrame& Stack, RESULT_DECL )
 {
 	if( !MoveTarget || !Pawn || MoveTimer < 0.0f )
@@ -214,20 +214,17 @@ void AController::execPollMoveToward( FFrame& Stack, RESULT_DECL )
 	if( bAdjusting )
 	{
 		// Retail: vtable[0x184/4] on Pawn to test if AdjustLoc is still useful.
-		// Approximated: treat the result of moveToward toward AdjustLoc as the test.
 		INT bArrived = Pawn->moveToward( AdjustLoc, MoveTarget );
 		bAdjusting = (bArrived == 0);
 	}
 	if( !bAdjusting )
 	{
 		Destination = MoveTarget->Location;
-		// PHYS_Flying: offset Destination Z upward by 70% of MoveTarget's CollisionHeight.
-		// Ghidra: guarded by vtable[0x68] (slot 26) on MoveTarget; guard not identified → omitted.
-		if( Pawn->Physics == PHYS_Flying )
+		// PHYS_Flying + nav-point guard: offset Destination Z upward by 70% of
+		// MoveTarget's CollisionHeight. Ghidra: vtable[0x68] (slot 26) on MoveTarget.
+		if( Pawn->Physics == PHYS_Flying && MoveTarget->IsA(ANavigationPoint::StaticClass()) )
 			Destination.Z += *(FLOAT*)((BYTE*)MoveTarget + 0xfc) * 0.7f;
 		// PHYS_Spider: offset Destination inward along spider attachment normal by CollisionRadius.
-		// Ghidra 0x1038d110: FUN_10301350(result, MoveTarget+0xf8, Pawn+0x590) = scale*vec;
-		// Destination -= spiderNormal * CollisionRadius.
 		else if( Pawn->Physics == PHYS_Spider )
 		{
 			FLOAT collR       = *(FLOAT*)((BYTE*)MoveTarget + 0xf8);
@@ -236,6 +233,21 @@ void AController::execPollMoveToward( FFrame& Stack, RESULT_DECL )
 		}
 		if( Pawn->moveToward( Destination, MoveTarget ) )
 			GetStateFrame()->LatentAction = 0;
+
+		// Trailing section: refresh Destination, nav-point MoveTimer=-1.0f path.
+		// Ghidra: refreshes Destination from MoveTarget->Location, calls vtable[26],
+		// then checks Pawn+0x3e2 bit0 and MoveTarget's nav spec flag at +0x164→+0x410 bit6.
+		Destination = MoveTarget->Location;
+		if( MoveTarget->IsA(ANavigationPoint::StaticClass()) )
+		{
+			// Ghidra: writes unaff_EDI to Pawn+0x3f4 — unrecoverable register value, omitted.
+			if( (*(BYTE*)((BYTE*)Pawn + 0x3e2) & 1) == 0 )
+			{
+				INT navSpec = *(INT*)((BYTE*)MoveTarget + 0x164);
+				if( navSpec != 0 && (*(BYTE*)(navSpec + 0x410) & 0x40) != 0 )
+					MoveTimer = -1.0f;
+			}
+		}
 	}
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execPollMoveToward );
