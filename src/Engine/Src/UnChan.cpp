@@ -263,10 +263,70 @@ while (true)
 unguard;
 }
 
-IMPL_TODO("Ghidra 0x10481890 (1243b): receive handler with ArmPatch GUID logic, FOutBunch/FInBunch serialization, download creation via GFileManager; FUN_103bef40=FArchive<<FGuid, FUN_103bef10=FGuid::operator==, FUN_103beff0=ConstructObject — helpers now identified, pending full decompilation")
-void UFileChannel::ReceivedBunch(FInBunch&)
+IMPL_TODO("Ghidra 0x10481890 (1243b): ArmPatch file-send path and normal package download-request path omitted; download-write path (OpenedLocally) and close-bunch paths implemented")
+void UFileChannel::ReceivedBunch(FInBunch& Bunch)
 {
 guard(UFileChannel::ReceivedBunch);
+
+// Assert !Closing
+check(!Closing);
+
+if (!OpenedLocally)
+{
+	// Server side: received a request or message from client.
+	// Check Connection->Driver->Notify->bDedicated (offset chain: Connection+0x7c → Driver, then +0x74)
+	BYTE* conn = (BYTE*)Connection;
+	INT bDedicated = *(INT*)(*(INT*)(*(INT*)(conn + 0x7c) + 0x74));
+
+	if (!bDedicated)
+	{
+		// Not dedicated server: reject with close bunch
+		FOutBunch CloseBunch(this, 1);
+		SendBunch(&CloseBunch, 0);
+	}
+	else if (*(INT*)((BYTE*)this + 0x6c) == 0)
+	{
+		// No SendFile yet: process file request.
+		// Read GUID from incoming bunch.
+		// ArmPatch handling and normal PackageMap iteration omitted —
+		// full implementation requires FGuid by-value construction (forward-declared only).
+		// DIVERGE: ArmPatch file transfer path and PackageMap iteration not implemented.
+
+		// Fall through: send close bunch to reject
+		FOutBunch CloseBunch(this, 1);
+		SendBunch(&CloseBunch, 0);
+	}
+	else
+	{
+		// SendFile exists: check for "SKIP" command from client.
+		FString Cmd;
+		Bunch << Cmd;
+		if (!Bunch.IsError() && Cmd == TEXT("SKIP"))
+		{
+			// Log and skip this package.
+			GLog->Logf(*(const TCHAR**)((BYTE*)this + 0x70));  // Filename string
+			// FUN_103bfaf0: SkipPackage helper — omitted (unknown internal)
+		}
+		else
+		{
+			// Unknown command: send close bunch
+			FOutBunch CloseBunch(this, 1);
+			SendBunch(&CloseBunch, 0);
+		}
+	}
+}
+else if (*(INT*)((BYTE*)this + 0x68) != 0)
+{
+	// Client side with active Download: write received data to it.
+	INT numBytes = Bunch.GetNumBytes();
+	BYTE* data = Bunch.GetData();
+
+	// Download vtable[0x6c/4=27] = ReceivedData(Data, Count)
+	void* dl = *(void**)((BYTE*)this + 0x68);
+	typedef void (__thiscall* RecvDataFn)(void*, BYTE*, INT);
+	((RecvDataFn)(*(INT*)(*(INT*)dl + 0x6c)))(dl, data, numBytes);
+}
+
 unguard;
 }
 
