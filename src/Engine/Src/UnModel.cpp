@@ -820,7 +820,7 @@ unguard;
 // If sections non-empty: optionally releases GPU resources via RenDev vtable[0x78/4],
 // clears FirstRenderSection (+0x78) and NumRenderSections (+0x7c) on all nodes to -1,
 // calls FUN_10324a50 (unnamed) per section, then empties the sections array.
-IMPL_TODO("Ghidra 0x103cef10: 220-byte ClearRenderData — FBspSection::~FBspSection called per section (same as retail FUN_10324a50)")
+IMPL_TODO("Ghidra 0x103cef10: 220-byte ClearRenderData — FUN_10324a50 (Remove+~FArray at section+0x04) called per section; functionally matches but code generation may differ from retail's thiscall convention")
 void UModel::ClearRenderData( URenderDevice* RenDev )
 {
 guard(UModel::ClearRenderData);
@@ -843,15 +843,19 @@ for (INT i = 0; i < nodes->Num(); i++)
     *(INT*)(*(INT*)nodes + i * NODE_STRIDE + 0x78) = INDEX_NONE;
     *(INT*)(*(INT*)nodes + i * NODE_STRIDE + 0x7c) = INDEX_NONE;
 }
-// Per-section destructor: destroy TArray<FBspVertex> at section+0x04.
-// Retail calls FUN_10324a50 = FBspSection::~FBspSection (confirmed at 0x103278e0).
+// Per-section destructor: FUN_10324a50 destroys TArray<FBspVertex> at section+0x04.
+// Retail: Read ArrayNum, Remove(0, Num, 0x28), then ~FArray.
+// FUN_10324a50 ECX = FArray* at section+0x04 (NOT the section base).
 {
     INT numSec = sections->Num();
     BYTE* secData = (BYTE*)sections->GetData();
     for (INT i = 0; i < numSec; i++)
     {
-        FBspSection* sec = (FBspSection*)(secData + i * 0x2c);
-        sec->~FBspSection();
+        FArray* vertArr = (FArray*)(secData + i * 0x2c + 4);
+        INT cnt = vertArr->Num();
+        if (cnt > 0)
+            vertArr->Remove(0, cnt, 0x28);
+        vertArr->~FArray();
     }
 }
 sections->Empty(0x2c, 0);
@@ -1155,12 +1159,13 @@ MODEL_VERTS(this)->Empty(8, 0);
 // Phase 6: render sections — FUN_10324a50 per section destructs sub-FArray (stride 0x28).
 // Ghidra: iterates *(this+0xe0) sections, each element starts with an FArray that owns
 // stride-0x28 entries (index buffer data). FUN_10324a50 = Remove(0,Num,0x28) + ~FArray.
+// ECX for FUN_10324a50 = FArray at section+0x04 (after vtable/pad slot at +0x00).
 {
 	INT numSections = *(INT*)((BYTE*)this + 0xe0);
 	BYTE* secData = (BYTE*)MODEL_SECTIONS(this)->GetData();
 	for (INT j = 0; j < numSections; j++)
 	{
-		FArray* subArr = (FArray*)(secData + j * 0x2c);
+		FArray* subArr = (FArray*)(secData + j * 0x2c + 4);
 		INT cnt = subArr->Num();
 		if (cnt > 0)
 			subArr->Remove(0, cnt, 0x28);
