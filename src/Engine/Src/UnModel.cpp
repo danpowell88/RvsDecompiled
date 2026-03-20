@@ -27,8 +27,11 @@ extern FArchive& operator<<(FArchive& Ar, FPoly& V);
 // All offsets verified from Ghidra constructor at 0x103d06d0.
 #define MODEL_NODES(m)       ((FArray*)((BYTE*)(m) + 0x5c))  // TArray<FBspNode>, elem=0x90
 #define MODEL_VERTS(m)       ((FArray*)((BYTE*)(m) + 0x6c))  // TArray<FVert>, elem=8
-#define MODEL_POINTS(m)      ((FArray*)((BYTE*)(m) + 0x7c))  // TArray<FVector>, elem=0xc
-#define MODEL_VECTORS(m)     ((FArray*)((BYTE*)(m) + 0x8c))  // TArray<FVector>, elem=0xc
+// NOTE: In UE2 the class declaration order is Vectors (normals/tex dirs) then Points
+// (vertex positions). Ghidra ConvexVolumeMultiCheck 0x10470aa0 and BuildRenderData
+// 0x103cf020 both confirm +0x8c = Points (positions) and +0x7c = Vectors (directions).
+#define MODEL_VECTORS(m)     ((FArray*)((BYTE*)(m) + 0x7c))  // TArray<FVector>, elem=0xc (normals, texture U/V)
+#define MODEL_POINTS(m)      ((FArray*)((BYTE*)(m) + 0x8c))  // TArray<FVector>, elem=0xc (vertex positions)
 #define MODEL_SURFS(m)       ((FArray*)((BYTE*)(m) + 0x9c))  // TArray<FBspSurf>, elem=0x5c
 #define MODEL_LIGHTMAP(m)    ((FArray*)((BYTE*)(m) + 0xac))  // lightmap array, elem=0x1c
 #define MODEL_VERTIDX(m)     ((FArray*)((BYTE*)(m) + 0xb8))  // TArray<INT>, elem=4
@@ -664,15 +667,152 @@ unguard;
 }
 
 // Ghidra: Engine.dll 0x103cf020, 880 bytes -- builds BSP render sections from nodes/surfs.
-// Iterates all nodes, maps each to a surf material (defaulting via FUN_10317670 which
-// calls UClass::GetDefaultObject + another unnamed helper), then builds or grows a
-// FBspSection entry in the sections array via unnamed FUN_ helpers.
-// FUN_10317670 is identifiable (GetDefaultObject + vtable call), other section-builder
-// helpers are in _unnamed.cpp and pending extraction.
-IMPL_TODO("Ghidra 0x103cf020: 880-byte BuildRenderData — ClearRenderData, node/surf iteration, and GetDefaultObject call identified; section-builder helpers (unnamed) pending extraction from _unnamed.cpp")
+// Iterates all nodes, maps each to a surf material (defaulting to UMaterial CDO's
+// DefaultMaterial at +0x30), then builds or grows FBspSection entries via the
+// sections array. Vertex positions, texture UVs, lightmap UVs, and normals are
+// computed per-vertex using FCoords/FMatrix transforms.
+IMPL_TODO("Ghidra 0x103cf020: 880-byte BuildRenderData — FUN_10317670 (CastChecked<UMaterial>) skipped (CDO always passes); vtable+0x70/0x74 approximated as MaterialUSize/MaterialVSize")
 void UModel::BuildRenderData()
 {
 guard(UModel::BuildRenderData);
+
+ClearRenderData( NULL );
+
+FArray* nodes    = MODEL_NODES(this);
+FArray* surfs    = MODEL_SURFS(this);
+FArray* sections = MODEL_SECTIONS(this);
+
+for (INT i = 0; i < nodes->Num(); i++)
+{
+    BYTE* node = (BYTE*)nodes->GetData() + i * NODE_STRIDE;
+    INT iSurf  = *(INT*)(node + 0x34);
+    BYTE* surf = (BYTE*)surfs->GetData() + iSurf * SURF_STRIDE;
+
+    // Lightmap data pointer (stride 0xa4 in array at +0xf4)
+    BYTE* lmData = NULL;
+    INT lmIndex = *(INT*)(node + 0x80);
+    if (lmIndex != -1)
+        lmData = (BYTE*)(*(INT*)((BYTE*)this + 0xf4)) + lmIndex * 0xa4;
+
+    // Material from surf.Texture (+0x00); fall back to UMaterial CDO's DefaultMaterial (+0x30)
+    UMaterial* material = *(UMaterial**)surf;
+    if (!material)
+    {
+        UObject* defObj = UMaterial::StaticClass()->GetDefaultObject();
+        // FUN_10317670 = CastChecked<UMaterial>, always passes for CDO
+        material = *(UMaterial**)(((BYTE*)defObj) + 0x30);
+    }
+
+    // PolyFlags mask & lightmap ref for section matching
+    DWORD polyFlags = *(DWORD*)(surf + 0x04) & 0x2400100;
+    INT lmRef = lmData ? *(INT*)(lmData + 8) : -1;
+
+    // Skip nodes with no vertices
+    BYTE numVerts = *(BYTE*)(node + 0x6E);
+    if (numVerts == 0)
+        continue;
+
+    // Search existing sections for a compatible match
+    BYTE* sectionPtr = NULL;
+    for (INT j = 0; j < sections->Num(); j++)
+    {
+        BYTE* sec = (BYTE*)sections->GetData() + j * 0x2c;
+        if (*(UMaterial**)(sec + 0x20) == material &&
+            *(DWORD*)(sec + 0x24) == polyFlags &&
+            *(INT*)(sec + 0x28) == lmRef)
+        {
+            FArray* va = (FArray*)(sec + 0x04);
+            if ((INT)((DWORD)numVerts + va->Num()) < 0xFFFF)
+            {
+                sectionPtr = sec;
+                break;
+            }
+        }
+    }
+
+    // Create new section if no match found
+    if (!sectionPtr)
+    {
+        INT idx = sections->Add(1, 0x2c);
+        sectionPtr = (BYTE*)sections->GetData() + idx * 0x2c;
+        if (sectionPtr)
+            new (sectionPtr) FBspSection();
+        else
+            sectionPtr = NULL;
+        *(UMaterial**)(sectionPtr + 0x20) = material;
+        *(DWORD*)(sectionPtr + 0x24) = polyFlags;
+        *(INT*)(sectionPtr + 0x28) = lmRef;
+    }
+
+    // Store section index in node (+0x78 = FirstRenderSection)
+    *(INT*)(node + 0x78) = (INT)(sectionPtr - (BYTE*)sections->GetData()) / 0x2c;
+
+    // Add vertices to the section's vertex array (+0x04)
+    FArray* vertArr = (FArray*)(sectionPtr + 0x04);
+    INT firstVert = vertArr->Add((INT)numVerts, 0x28);
+    *(INT*)(node + 0x7C) = firstVert;
+
+    // Build texture coordinate system from surf vectors
+    // +0x8c = Points (positions), +0x7c = Vectors (normals/texture dirs)
+    BYTE* points  = (BYTE*)(*(INT*)((BYTE*)this + 0x8c));
+    BYTE* vectors = (BYTE*)(*(INT*)((BYTE*)this + 0x7c));
+    INT pBase     = *(INT*)(surf + 0x08);
+    INT vTextureU = *(INT*)(surf + 0x10);
+    INT vTextureV = *(INT*)(surf + 0x14);
+    INT vNormal   = *(INT*)(surf + 0x0C);
+
+    FCoords texCoords(
+        *(FVector*)(points + pBase * 0x0c),
+        *(FVector*)(vectors + vTextureU * 0x0c),
+        *(FVector*)(vectors + vTextureV * 0x0c),
+        *(FVector*)(vectors + vNormal * 0x0c)
+    );
+    FMatrix texMatrix = texCoords.Matrix();
+
+    // Get material USize/VSize (vtable +0x70 / +0x74)
+    FLOAT uSize = (FLOAT)material->MaterialUSize();
+    FLOAT vSize = (FLOAT)material->MaterialVSize();
+
+    // Fill vertex data (stride 0x28 per vertex)
+    BYTE* vertBase = (BYTE*)vertArr->GetData() + firstVert * 0x28;
+    BYTE* vertsData = (BYTE*)(*(INT*)((BYTE*)this + 0x6c));  // Verts array data
+
+    for (INT v = 0; v < (INT)numVerts; v++)
+    {
+        // Get vertex position: Points[ Verts[iVertPool + v].iVertex ]
+        INT iVertPool = *(INT*)(node + 0x30);
+        INT iVertex = *(INT*)(vertsData + (iVertPool + v) * 8);
+        FVector pos = *(FVector*)(points + iVertex * 0x0c);
+
+        BYTE* vout = vertBase + v * 0x28;
+
+        // Position (+0x00)
+        *(FVector*)vout = pos;
+
+        // Texture UV (+0x18, +0x1C): transform position through texture matrix
+        FVector texUV = texMatrix.TransformFVector(pos);
+        *(FLOAT*)(vout + 0x18) = texUV.X / uSize;
+        *(FLOAT*)(vout + 0x1C) = texUV.Y / vSize;
+
+        // Lightmap UV (+0x20, +0x24)
+        if (lmData)
+        {
+            FVector lmUV = ((FMatrix*)(lmData + 0x28))->TransformFVector(pos);
+            *(FLOAT*)(vout + 0x20) = ((FLOAT)*(INT*)(lmData + 0x14) + lmUV.X) * (1.0f / 512.0f);
+            *(FLOAT*)(vout + 0x24) = ((FLOAT)*(INT*)(lmData + 0x18) + lmUV.Y) * (1.0f / 512.0f);
+        }
+
+        // Normal (+0x0C): from node splitting plane
+        *(FLOAT*)(vout + 0x0C) = *(FLOAT*)(node + 0x00);
+        *(FLOAT*)(vout + 0x10) = *(FLOAT*)(node + 0x04);
+        *(FLOAT*)(vout + 0x14) = *(FLOAT*)(node + 0x08);
+    }
+
+    // Increment section counters
+    *(INT*)(sectionPtr + 0x18) = *(INT*)(sectionPtr + 0x18) + 1;
+    *(INT*)(sectionPtr + 0x1C) = *(INT*)(sectionPtr + 0x1C) + 1;
+}
+
 unguard;
 }
 
@@ -680,7 +820,7 @@ unguard;
 // If sections non-empty: optionally releases GPU resources via RenDev vtable[0x78/4],
 // clears FirstRenderSection (+0x78) and NumRenderSections (+0x7c) on all nodes to -1,
 // calls FUN_10324a50 (unnamed) per section, then empties the sections array.
-IMPL_DIVERGE("permanent: FUN_10324a50 is an unexported section destructor that must be called per section before emptying — cannot call it without the source; sections are freed without per-section cleanup (acceptable for runtime; editor undo path skipped)")
+IMPL_TODO("Ghidra 0x103cef10: 220-byte ClearRenderData — FBspSection::~FBspSection called per section (same as retail FUN_10324a50)")
 void UModel::ClearRenderData( URenderDevice* RenDev )
 {
 guard(UModel::ClearRenderData);
@@ -703,7 +843,17 @@ for (INT i = 0; i < nodes->Num(); i++)
     *(INT*)(*(INT*)nodes + i * NODE_STRIDE + 0x78) = INDEX_NONE;
     *(INT*)(*(INT*)nodes + i * NODE_STRIDE + 0x7c) = INDEX_NONE;
 }
-// FUN_10324a50: per-section cleanup -- unnamed, pending extraction.
+// Per-section destructor: destroy TArray<FBspVertex> at section+0x04.
+// Retail calls FUN_10324a50 = FBspSection::~FBspSection (confirmed at 0x103278e0).
+{
+    INT numSec = sections->Num();
+    BYTE* secData = (BYTE*)sections->GetData();
+    for (INT i = 0; i < numSec; i++)
+    {
+        FBspSection* sec = (FBspSection*)(secData + i * 0x2c);
+        sec->~FBspSection();
+    }
+}
 sections->Empty(0x2c, 0);
 unguard;
 }
