@@ -159,7 +159,7 @@ IMPLEMENT_FUNCTION( AController, INDEX_NONE, execPollMoveTo );
 //   bAdvancedTactics set from bCanJump (Ghidra: bitfield bit3 XOR from param);
 //   ClearSerpentine + CurrentPath=NULL added.
 //   NavigationPoint: eventSuggestMovePreparation, GetReachSpecTo, supports, eventPrepareForMove.
-IMPL_TODO("Ghidra 0x10390940; 1402b — vtable[26] approximated as IsA(ANavigationPoint); __ftol2 parameter order for supports() unconfirmed")
+IMPL_TODO("Ghidra 0x10390940; 1402b — vtable[26] confirmed as IsA(ANavigationPoint); __ftol2 parameter order for supports() matches natural right-to-left evaluation (CollisionRadius, CollisionHeight, calcMoveFlags, MaxFallSpeed)")
 void AController::execMoveToward( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execMoveToward);
@@ -229,11 +229,11 @@ IMPLEMENT_FUNCTION( AController, 502, execMoveToward );
 
 // Ghidra 0x1038d110, 534b. No SEH (no guard/unguard in retail).
 // bAdjusting: vtable[0x184/4=97] on Pawn = moveToward.
-// PHYS_Flying: vtable[26] on MoveTarget guards Z-offset = nav-point check (IsA approximation).
+// PHYS_Flying: vtable[26] on MoveTarget guards Z-offset = confirmed IsA(ANavigationPoint).
 // Trailing: refresh Destination, vtable[26] guard, MoveTimer=-1.0f nav-node path.
-// DIVERGENCE: vtable[26] approximated as IsA(ANavigationPoint).
+// vtable[26] confirmed as IsA(ANavigationPoint) — no longer a divergence.
 // DIVERGENCE: trailing Pawn+0x3f4 write from unaff_EDI (caller-saved register) unrecoverable.
-IMPL_TODO("Ghidra 0x1038d110: vtable[26] approximated as IsA(ANavigationPoint); trailing Pawn+0x3f4 write from unaff_EDI unrecoverable; Pawn+0x3e2 bit0 and MoveTarget+0x164+0x410 bit6 flag fields unidentified")
+IMPL_TODO("Ghidra 0x1038d110: vtable[26] confirmed as IsA(ANavigationPoint); trailing Pawn+0x3f4 write from unaff_EDI unrecoverable; Pawn+0x3e2 bit0 and MoveTarget+0x164+0x410 bit6 flag fields unidentified")
 void AController::execPollMoveToward( FFrame& Stack, RESULT_DECL )
 {
 	if( !MoveTarget || !Pawn || MoveTimer < 0.0f )
@@ -2570,7 +2570,7 @@ void APawn::UpdateMovementAnimation( FLOAT DeltaSeconds )
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103ebfe0; 983b — APawn vtable[0x62] (slot 98, unknown culling virtual) omitted; vtable[26] approximated as IsA(ANavigationPoint); PhysicsVolume+0x410&0x40 for bWaterVolume used as raw offset")
+IMPL_TODO("Ghidra 0x103ebfe0; 983b — APawn vtable[0x62] (slot 98, unknown culling virtual) omitted; vtable[26] confirmed as IsA(ANavigationPoint); PhysicsVolume+0x410&0x40 for bWaterVolume used as raw offset")
 INT APawn::actorReachable( AActor* Goal, INT bKnowVisible, INT bNoAnchorCheck )
 {
 	guard(APawn::actorReachable);
