@@ -700,7 +700,7 @@ void ULevel::RememberActors()
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103c1630: DEMOREC/DEMOPLAY netdriver helpers FUN_103beff0/103bf700 unnamed; R6WALKLIST exact model-field offsets approximate (stride 0x5c navspec array at Model+0x9c)")
+IMPL_TODO("Ghidra 0x103c1630: DEMOREC recording start implemented (StaticLoadClass + StaticConstructObject + InitListen); DEMOPLAY playback start omitted (UGameEngine internal layout at +0x460 unverified); R6WALKLIST exact model-field offsets approximate (stride 0x5c navspec array at Model+0x9c)")
 INT ULevel::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
 {
 	guard(ULevel::Exec);
@@ -731,10 +731,33 @@ INT ULevel::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
 			if (Filename.Right(4) != TEXT(".dem"))
 				Filename += TEXT(".dem");
 			GLog->Logf(TEXT("DemoRec: recording to '%s'"), *Filename);
-			// IMPL_TODO(0x103c1630): FUN_103bf700 (unnamed demo-record spawn) and
-			// FUN_103beff0 (unnamed ConstructObject helper) not yet extracted.
-			// Demo recording start omitted until helpers are ported.
-			(void)Filename;
+
+			// Load the demo recording driver class and construct an instance.
+			// Ghidra: StaticLoadClass(UNetDriver, NULL, "ini:Engine.Engine.DemoRecordingDevice", NULL, LOAD_NoFail, NULL)
+			//         FUN_103bf700 = ConstructObject<UNetDriver>(Class, GetTransientPackage(), NAME_None, 0)
+			UClass* DemoClass = UObject::StaticLoadClass(
+				UNetDriver::StaticClass(), NULL,
+				TEXT("ini:Engine.Engine.DemoRecordingDevice"), NULL,
+				LOAD_NoFail, NULL );
+			DemoRecDriver = (UNetDriver*)UObject::StaticConstructObject(
+				DemoClass, UObject::GetTransientPackage(),
+				FName(NAME_None), 0, NULL, GError, NULL );
+
+			// Call InitListen (vtable+0x78) with this level as FNetworkNotify, Filename as URL.
+			FString InitError;
+			FURL DemoURL( NULL, *Filename, TRAVEL_Absolute );
+			INT bOK = DemoRecDriver->InitListen( this, DemoURL, InitError );
+			if (!bOK)
+			{
+				GLog->Logf(TEXT("DemoRec: failed to start recording"));
+				if (DemoRecDriver)
+					DemoRecDriver->Destroy();
+				DemoRecDriver = NULL;
+			}
+			else
+			{
+				GLog->Logf(TEXT("DemoRec: recording started to '%s'"), *Filename);
+			}
 		}
 		return 1;
 	}
@@ -751,10 +774,11 @@ INT ULevel::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
 			if (Filename.Right(4) != TEXT(".dem"))
 				Filename += TEXT(".dem");
 			GLog->Logf(TEXT("DemoPlay: '%s'"), *Filename);
-			// IMPL_TODO(0x103c1630): stop existing playback via FUN_1038ef30
-			// and create new demo-playback driver via FUN_103beff0/FUN_10487990.
-			// The helpers are unnamed — not yet extracted.  Demo playback
-			// start/stop omitted until helpers are ported.
+			// Retail: FUN_1038ef30 = CastChecked<UGameEngine>(Engine), gets the game engine.
+			// Then checks if the engine has an existing demo playback driver at a deep
+			// internal offset (+0x460), destroys it, creates a new one via FUN_103beff0
+			// (StaticConstructObject) and FUN_10487990 (demo playback init).
+			// The exact UGameEngine internal layout at +0x460 is unverified — omitted.
 			(void)Filename;
 		}
 		return 1;

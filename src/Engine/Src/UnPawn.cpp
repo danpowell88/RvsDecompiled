@@ -2634,9 +2634,8 @@ INT APawn::actorReachable( AActor* Goal, INT bKnowVisible, INT bNoAnchorCheck )
 			return 0;
 	}
 
-	// IMPL_TODO: Goal vtable[0x1a] (slot 26) proximity check omitted —
-	// Ghidra: if that virtual returns non-zero, test combined-radii overlap and return 1.
-	// vtable[26] approximated as IsA(ANavigationPoint) — same pattern as execPollMoveToward.
+	// Nav-point proximity check: if Goal is a navigation point, test combined-radii overlap.
+	// vtable[26] identified as IsA(ANavigationPoint).
 	if( Goal->IsA(ANavigationPoint::StaticClass()) )
 	{
 		// Ghidra: fVar1 = Min(this+0x410, CollisionRadius*1.5)
