@@ -194,10 +194,8 @@ int AVolume::ShouldTrace(AActor* Other, DWORD TraceFlags)
 		{
 			if ((*(DWORD*)((BYTE*)this + 0xa0) & 0x2000000) && Other)
 			{
-				// vtable[26] on Other — IsStaticActor or similar
-				typedef int (__thiscall* VFn26)(AActor*);
-				int r = ((VFn26)(*(INT*)(*(INT*)Other + 0x68)))(Other);
-				if (!r)
+				// vtable[26] on Other — IsA(ANavigationPoint): only trace against nav points
+				if (!Other->IsA(ANavigationPoint::StaticClass()))
 					return 0;
 			}
 			if ((*(DWORD*)((BYTE*)this + 0xa0) & 0x100000) && (SBYTE)TraceFlags < 0)
