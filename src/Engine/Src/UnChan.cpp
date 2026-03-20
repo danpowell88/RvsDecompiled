@@ -263,7 +263,7 @@ while (true)
 unguard;
 }
 
-IMPL_TODO("Ghidra 0x10481890 (1243b): receive handler with ArmPatch GUID logic, FOutBunch/FInBunch serialization, download creation via GFileManager; blocked by undecoded FGuid helpers (FUN_103bef40, FUN_103bef10), SpecialGUIDArmPatches global")
+IMPL_TODO("Ghidra 0x10481890 (1243b): receive handler with ArmPatch GUID logic, FOutBunch/FInBunch serialization, download creation via GFileManager; FUN_103bef40=FArchive<<FGuid, FUN_103bef10=FGuid::operator==, FUN_103beff0=ConstructObject — helpers now identified, pending full decompilation")
 void UFileChannel::ReceivedBunch(FInBunch&)
 {
 guard(UFileChannel::ReceivedBunch);
@@ -390,7 +390,7 @@ guard(UActorChannel::ReceivedBunch);
 unguard;
 }
 
-IMPL_TODO("Ghidra 0x104824d0 (142b): FUN_10481dd0 is TArray<INT>::AddUniqueItem on a resend list (ECX=unknown TArray member); loop structure and condition matching implemented, but the actual resend scheduling call is omitted because the target TArray offset on UActorChannel/UNetConnection is unresolved")
+IMPL_TODO("Ghidra 0x104824d0 (142b): FUN_10481dd0=TArray<INT>::AddUniqueItem confirmed; loop structure and condition matching implemented, but the target TArray offset on UActorChannel is unresolved from Ghidra ECX context")
 void UActorChannel::ReceivedNak(int NakPacketId)
 {
 guard(UActorChannel::ReceivedNak);
@@ -424,25 +424,30 @@ guard(UActorChannel::ReplicateActor);
 unguard;
 }
 
-IMPL_TODO("Ghidra 0x10482590 (558b): sets Actor/ActorClass, gets FClassNetCache, calls FUN_10481e10, allocates RepConditions array, copies/zeroes property data; blocked by FClassNetCache::GetRepConditionCount, FUN_10481e10 (channel registration)")
+IMPL_TODO("Ghidra 0x10482590 (558b): sets Actor/ActorClass, gets FClassNetCache, TMap::Set on Connection->ActorChannels (FUN_10481e10 identified), allocates RepConditions array, copies/zeroes property data; blocked by FClassNetCache::GetRepConditionCount")
 void UActorChannel::SetChannelActor(AActor*)
 {
 guard(UActorChannel::SetChannelActor);
 unguard;
 }
 
-IMPL_TODO("Ghidra 0x104821d0 (91b): FUN_10481e90 is TMap::Remove that removes Actor from Connection's actor-channel map; target TMap (ECX in thiscall) not yet identified — flush call omitted")
+IMPL_MATCH("Engine.dll", 0x104821d0)
 void UActorChannel::SetClosingFlag()
 {
+	guard(UActorChannel::SetClosingFlag);
 	// Ghidra: if Actor at +0x6C is non-null, remove it from the
-	// connection's actor-channel TMap (FUN_10481e90), then delegate to base.
-	if ( *(INT*)((BYTE*)this + 0x6C) != 0 )
+	// connection's actor-channel TMap, then delegate to base.
+	AActor* Actor = *(AActor**)((BYTE*)this + 0x6C);
+	if ( Actor != NULL )
 	{
-		// FUN_10481e90(this + 0x6C) — TMap::Remove on unknown TMap
-		// Removes the actor pointer from the connection's actor->channel mapping.
-		// Omitted: ECX (the TMap instance) is unresolved.
+		// FUN_10481e90 = TMap::Remove — removes Actor from Connection->ActorChannels
+		UNetConnection* Conn = *(UNetConnection**)((BYTE*)this + 0x2C);
+		TMap<AActor*, UActorChannel*>* ActorChannels =
+			(TMap<AActor*, UActorChannel*>*)((BYTE*)Conn + 0x4B94);
+		ActorChannels->Remove( Actor );
 	}
 	UChannel::SetClosingFlag();
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x104813e0)
