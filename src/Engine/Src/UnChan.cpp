@@ -390,27 +390,26 @@ guard(UActorChannel::ReceivedBunch);
 unguard;
 }
 
-IMPL_TODO("Ghidra 0x104824d0 (142b): FUN_10481dd0=TArray<INT>::AddUniqueItem confirmed; loop structure and condition matching implemented, but the target TArray offset on UActorChannel is unresolved from Ghidra ECX context")
+IMPL_MATCH("Engine.dll", 0x104824d0)
 void UActorChannel::ReceivedNak(int NakPacketId)
 {
 guard(UActorChannel::ReceivedNak);
 UChannel::ReceivedNak(NakPacketId);
 
-// If ActorClass (+0x70) is set, scan RepConditions array for entries
-// matching NakPacketId whose dirty flag byte is 0, and schedule them for resend.
+// If Actor (+0x70) is set, scan Retire array for entries matching
+// NakPacketId whose dirty flag is 0, and add their index to the Dirty list.
 if ( *(INT*)((BYTE*)this + 0x70) != 0 )
 {
-	BYTE* RepData = *(BYTE**)((BYTE*)this + 0xB8);   // RepConditions.GetData()
-	INT   Count   = *(INT*)((BYTE*)this + 0xBC);      // RepConditions.Num()
+	TArray<INT>& Dirty = *(TArray<INT>*)((BYTE*)this + 0xC4);
+	INT Count = *(INT*)((BYTE*)this + 0xBC);  // Retire.Num()
 	for ( INT i = Count - 1; i >= 0; i-- )
 	{
-		BYTE* Entry = RepData + i * 0xC;               // stride 12
+		BYTE* Entry = *(BYTE**)((BYTE*)this + 0xB8) + i * 0xC;  // Retire stride=12
 		INT   PacketId  = *(INT*)(Entry + 4);
 		BYTE  DirtyFlag = *(Entry + 8);
 		if ( PacketId == NakPacketId && DirtyFlag == 0 )
 		{
-			// Ghidra: FUN_10481dd0(&i) — adds 'i' to a resend TArray via
-			// TArray<INT>::AddUniqueItem.  Target TArray (passed in ECX) unknown.
+			Dirty.AddUniqueItem(i);
 		}
 	}
 }

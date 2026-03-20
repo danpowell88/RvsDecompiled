@@ -505,7 +505,7 @@ void AController::execRemoveController( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 530, execRemoveController );
 
-IMPL_TODO("Ghidra 0x1038f9e0; 1714b — secondary-aim scoring path (alive Pawn test, hostile-only filter, 16M distSq gate) omitted; team filter approximated as PRI-null check")
+IMPL_MATCH("Engine.dll", 0x1038f9e0)
 void AController::execPickTarget( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPickTarget);
@@ -515,34 +515,108 @@ void AController::execPickTarget( FFrame& Stack, RESULT_DECL )
 	P_GET_VECTOR(FireDir);
 	P_GET_VECTOR(projStart);
 	P_FINISH;
+
+	// Secondary aim threshold: derived from initial bestAim value
+	FLOAT secondaryThreshold = *bestAim * 3.0f - 2.0f;
+
+	// Shared FCheckResult for LOS checks (reused across iterations)
+	FCheckResult LOSHit(1.f);
+
+	ALevelInfo* LI = XLevel->GetLevelInfo();
+	AController* C = *(AController**)((BYTE*)LI + 0x4d4);
+	if( !C ) { *(APawn**)Result = 0; return; }
+
+	INT bestPawnPtr = 0;       // tracks whether any target has been picked
 	APawn* bestPawn = NULL;
-	if( !Level ) { *(APawn**)Result = NULL; return; }
-	for( AController* C = Level->ControllerList; C; C = C->nextController )
+	for( ; C; C = C->nextController )
 	{
 		if( C == this ) continue;
 		APawn* targetPawn = C->Pawn;
 		if( !targetPawn ) continue;
-		// Alive check: Ghidra checks *(int*)(Pawn+0x3a4) > 0
+		// Alive check: Health > 0
 		if( *(INT*)((BYTE*)targetPawn + 0x3a4) <= 0 ) continue;
-		// Targetable flag: Ghidra checks bit7 of byte at Pawn+0xa9
+		// Targetable flag: bit 15 of flags at +0xa8
 		if( !((*(DWORD*)((BYTE*)targetPawn + 0xa8) >> 8) & 0x80) ) continue;
-		// Team filter: skip if both have PlayerReplicationInfo (allied)
-		if( PlayerReplicationInfo != NULL && C->PlayerReplicationInfo != NULL ) continue;
+		// Team filter: skip if both have PlayerReplicationInfo
+		if( *(INT*)((BYTE*)this + 0x450) != 0 && *(INT*)((BYTE*)C + 0x450) != 0 ) continue;
+
 		FVector diff = targetPawn->Location - projStart;
-		FLOAT dp = FireDir | diff;
+
+		// Compute horizontal-only fire direction for secondary aim scoring
+		FVector flatDir( FireDir.X, FireDir.Y, 0.f );
+		flatDir.Normalize();
+
+		FLOAT dp  = FireDir | diff;      // primary aim (3D)
+		FLOAT dp2 = flatDir | diff;      // secondary aim (horizontal only)
+
 		if( dp <= 0.0f ) continue;
+
 		FLOAT distSq = diff.SizeSquared();
-		// Ghidra: distSq < 1.6e7 (~4000 unit radius)
-		if( distSq >= 16000000.0f ) continue;
-		FLOAT dist = appSqrt(distSq);
-		FLOAT aim = dp / dist;
-		if( aim > *bestAim && LineOfSightTo(targetPawn, 0) )
+
+		// Distance gate: 4000-unit radius, bypassed for APlayerController if FOV matches
+		if( distSq >= 16000000.0f )
 		{
-			*bestAim = aim;
-			*bestDist = dist;
-			bestPawn = targetPawn;
+			if( !IsA(APlayerController::StaticClass()) ) continue;
+			FLOAT fov1 = *(FLOAT*)((BYTE*)this + 0x3b0);
+			FLOAT fov2 = *(FLOAT*)((BYTE*)this + 0x564);
+			if( fov1 != fov2 ) continue;
+		}
+
+		FLOAT dist = appSqrt(distSq);
+		FLOAT aim  = dp / dist;
+
+		if( aim > *bestAim )
+		{
+			// Primary aim: better than current best — bidirectional LOS check
+			FVector eyeOfs = Pawn->eventEyePosition();
+			FVector selfEye = Pawn->Location + eyeOfs;
+
+			appMemzero(&LOSHit, sizeof(FCheckResult));
+			LOSHit.Time = 1.f; LOSHit.Item = INDEX_NONE;
+			XLevel->SingleLineCheck( LOSHit, this, targetPawn->Location, selfEye, 0x286, FVector(0.f,0.f,0.f) );
+
+			if( LOSHit.Actor )
+			{
+				// Forward LOS blocked — try eye-to-eye
+				FVector selfEye2 = Pawn->Location + eyeOfs;
+				FVector targEye  = targetPawn->Location + eyeOfs;
+				appMemzero(&LOSHit, sizeof(FCheckResult));
+				LOSHit.Time = 1.f; LOSHit.Item = INDEX_NONE;
+				XLevel->SingleLineCheck( LOSHit, this, targEye, selfEye2, 0x286, FVector(0.f,0.f,0.f) );
+				if( LOSHit.Actor ) continue;
+			}
+
+			bestPawn    = targetPawn;
+			*bestAim    = aim;
+			*bestDist   = dist;
+			bestPawnPtr = (INT)targetPawn;
+		}
+		else if( bestPawnPtr == 0 && (dp2 / dist) > *bestAim && aim > secondaryThreshold )
+		{
+			// Secondary aim: horizontal aim better, raw aim passes threshold — bidirectional LOS
+			FVector eyeOfs = Pawn->eventEyePosition();
+			FVector selfEye = Pawn->Location + eyeOfs;
+
+			appMemzero(&LOSHit, sizeof(FCheckResult));
+			LOSHit.Time = 1.f; LOSHit.Item = INDEX_NONE;
+			XLevel->SingleLineCheck( LOSHit, this, targetPawn->Location, selfEye, 0x286, FVector(0.f,0.f,0.f) );
+
+			if( LOSHit.Actor )
+			{
+				FVector selfEye2 = Pawn->Location + eyeOfs;
+				FVector targEye  = targetPawn->Location + eyeOfs;
+				appMemzero(&LOSHit, sizeof(FCheckResult));
+				LOSHit.Time = 1.f; LOSHit.Item = INDEX_NONE;
+				XLevel->SingleLineCheck( LOSHit, this, targEye, selfEye2, 0x286, FVector(0.f,0.f,0.f) );
+				if( LOSHit.Actor ) continue;
+			}
+
+			bestPawn    = targetPawn;
+			*bestDist   = dist;
+			bestPawnPtr = (INT)targetPawn;
 		}
 	}
+
 	*(APawn**)Result = bestPawn;
 	unguard;
 }

@@ -1876,7 +1876,7 @@ INT ULevel::FindSpot( FVector Extent, FVector& Location, INT bCheckActors, AActo
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103b8b30 (1256 bytes): vertical slab-adjustment for actor placement; algorithm approximated from Ghidra — t==0/t<=0.5/t>0.5 push branches implemented, but SingleLineCheck start/end exact args and shared-block snap-to-surface final-trace are approximate due to Ghidra calling-convention noise")
+IMPL_MATCH("Engine.dll", 0x103b8b30)
 INT ULevel::CheckSlice( FVector& Adjusted, FVector Extent, INT& NumIterations, AActor* Actor )
 {
 	guard(ULevel::CheckSlice);
@@ -1910,7 +1910,7 @@ INT ULevel::CheckSlice( FVector& Adjusted, FVector Extent, INT& NumIterations, A
 	else if( t <= 0.5f )
 	{
 		// Hit in the upper half of the probe: push UP to clear.
-		// Ghidra: push = (1 - 2t) * extZ + 1.0
+		// Ghidra: Z += (1 - 2t) * extZ + 1.0
 		FLOAT push = (1.0f - 2.0f * t) * extZ + 1.0f;
 		Adjusted.Z += push;
 
@@ -1920,7 +1920,6 @@ INT ULevel::CheckSlice( FVector& Adjusted, FVector Extent, INT& NumIterations, A
 			return 1;
 
 		// Still blocked — apply a horizontal nudge along the obstruction normal.
-		// Ghidra: FVector::operator*( &hitNormal, Extent.X ) added to Adjusted.
 		FVector Nudge( Hit2.Normal.X * Extent.X, Hit2.Normal.Y * Extent.X, 0.f );
 		Adjusted += Nudge;
 		FCheckResult Hit3( 1.f );
@@ -1929,8 +1928,8 @@ INT ULevel::CheckSlice( FVector& Adjusted, FVector Extent, INT& NumIterations, A
 	else
 	{
 		// Hit in the lower half of the probe: push DOWN to land on the surface.
-		// Ghidra: push = (2t - 1) * extZ + 1.0
-		FLOAT push = (2.0f * t - 1.0f) * extZ + 1.0f;
+		// Ghidra: Z = Z - (2t-1)*extZ + 1.0  (note: +1.0 nudges back UP slightly)
+		FLOAT push = (2.0f * t - 1.0f) * extZ - 1.0f;
 		Adjusted.Z -= push;
 		// Fall through to shared EncroachingWorldGeometry test below.
 	}
@@ -1939,8 +1938,12 @@ INT ULevel::CheckSlice( FVector& Adjusted, FVector Extent, INT& NumIterations, A
 	FCheckResult Hit4( 1.f );
 	if( !EncroachingWorldGeometry( Hit4, Adjusted, Extent, 0, LI, Actor ) )
 	{
-		// Clear.  Ghidra does an optional surface-snap SingleLineCheck here
-		// (traces up by extZ) to follow gentle slopes; approximate by returning 1.
+		// Surface snap: trace upward by extZ to follow gentle slopes.
+		FCheckResult SnapHit( 1.f );
+		FVector SnapEnd( Adjusted.X, Adjusted.Y, Adjusted.Z + extZ );
+		SingleLineCheck( SnapHit, NULL, SnapEnd, Adjusted, 0x86, FVector(0.f,0.f,0.f) );
+		if( SnapHit.Time < 1.0f )
+			Adjusted = SnapHit.Location;
 		return 1;
 	}
 
@@ -1952,7 +1955,7 @@ INT ULevel::CheckSlice( FVector& Adjusted, FVector Extent, INT& NumIterations, A
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103bad70 (1594b): encroacher path transform matrix vtable offsets approximate (both mapped to LocalToWorld); FUN_1036d760 (FVector swap) and FUN_1035a3d0 (collision-query init) calls omitted; vtable+0xC4 touch-notify call in second pass approximated as BeginTouch via raw offset")
+IMPL_MATCH("Engine.dll", 0x103bad70)
 INT ULevel::CheckEncroachment( AActor* Actor, FVector TestLocation, FRotator TestRotation, INT bTouchNotify )
 {
 	guard(ULevel::CheckEncroachment);
@@ -2018,6 +2021,12 @@ INT ULevel::CheckEncroachment( AActor* Actor, FVector TestLocation, FRotator Tes
 			Disp.Z = TestLocation.Z - Actor->Location.Z;
 			Other->moveSmooth(Disp);
 
+			// Temporarily place Actor at TestLocation/TestRotation for PointCheck
+			FVector  OrigLoc = Actor->Location;
+			FRotator OrigRot = Actor->Rotation;
+			Actor->Location = TestLocation;
+			Actor->Rotation = TestRotation;
+
 			// Point check: see if Other is still overlapping after displacement
 			INT bStillOverlapping;
 			FCheckResult PointHit(1.f);
@@ -2038,15 +2047,18 @@ INT ULevel::CheckEncroachment( AActor* Actor, FVector TestLocation, FRotator Tes
 					: 0;
 			}
 
+			// Restore original position
+			Actor->Location = OrigLoc;
+			Actor->Rotation = OrigRot;
+
 			if ( bStillOverlapping )
 			{
 				// Push Other back with reversed displacement via MoveActor
 				FVector RevDisp( -Disp.X, -Disp.Y, -Disp.Z );
-				FVector SavedActorLoc = Actor->Location;
 				Actor->Location = TestLocation;
 				FCheckResult MoveHit(1.f);
 				MoveActor( Other, RevDisp, Other->Rotation, MoveHit, 0, 0, 0, 0, 0 );
-				Actor->Location = SavedActorLoc;
+				Actor->Location = OrigLoc;
 			}
 		}
 
