@@ -1874,9 +1874,21 @@ INT APawn::IsNetRelevantFor( APlayerController* RealViewer, AActor* Viewer, FVec
 					{
 						return CacheNetRelevancy(1, RealViewer, Viewer);
 					}
-					// Crouching pawn: try forward-facing LOS from ColBox.
-					// (Ghidra: bIsCrouched bit 9 of pawn+0x3e0; FRotator::Vector * radius toward viewer.)
-					// IMPL_TODO: simplified - skip crouched ColBox secondary check
+					// Crouching pawn: try forward-facing LOS from ColBox offset position.
+					// Ghidra: bIsCrouched = bit 9 of pawn+0x3e0; gets forward dir from Rotation,
+					// scales by CollisionRadius, adds to ColBox.Location, FastLineCheck to viewer.
+					if( *(DWORD*)((BYTE*)this + 0x3e0) & 0x200 )
+					{
+						FVector forward = Rotation.Vector();
+						forward *= CollisionRadius;
+						FVector offsetPos(
+							forward.X + cb->Location.X,
+							forward.Y + cb->Location.Y,
+							forward.Z + cb->Location.Z
+						);
+						if( bsp->FastLineCheck(offsetPos, SrcLocation) )
+							return CacheNetRelevancy(1, RealViewer, Viewer);
+					}
 				}
 				else
 				{
