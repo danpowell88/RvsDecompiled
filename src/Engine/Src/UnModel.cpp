@@ -904,16 +904,14 @@ unguard;
 // Phase 2: GUndo->SaveArray for Nodes (LAB_ callbacks skipped — editor machinery).
 // Phase 3: per-node projector FArray::~FArray + FArray::Empty for Nodes.
 // Phase 4: Empty LightMap, VertIdx, and several other BSP arrays.
-// Phase 5: element-destructor loops for arrays at +0xf4 (FUN_10322eb0, FUN_1032e660,
-//          FMatrix::~FMatrix, FArray::~FArray) and +0xe8 (_eh_vector_destructor_iterator_,
-//          FUN_10322eb0) — unnamed helpers, element cleanup skipped.
+// Phase 5: element-destructor loops for +0xf4 and +0xe8 implemented.
 // Phase 6: sections array (FUN_10324a50 per element — unnamed, skipped; just Empty).
-// Phase 7 (EmptySurfs): GUndo skipped; empties Points, Vectors, Surfs.
-//          Per-surf FUN_10322eb0 element cleanup skipped.
-// Phase 8 (EmptyPolys): creates new UPolys + resets zone tables — pending extraction.
-// DIVERGENCE: FUN_103719b0 inlined (FMatrix dtors at +0x24, +0x64); element-destructor
-// loops for +0xf4/+0xe8 arrays skipped (unnamed FUN_ helpers); EmptyPolys branch pending.
-IMPL_TODO("Ghidra 0x103cfd80: element-destructor loops at +0xf4/+0xe8 need FUN_10322eb0/FUN_1032e660 (unnamed); EmptyPolys branch needs UPolys ctor + zone reset; GUndo LAB_ callbacks omitted")
+// Phase 7 (EmptySurfs): GUndo skipped; empties Points, Vectors, Surfs with per-surf cleanup.
+// Phase 8 (EmptyPolys): creates new UPolys via StaticAllocateObject + zone table reset.
+// DIVERGENCE: GUndo callbacks omitted (editor-only, NULL at runtime).
+// DIVERGENCE: +0xe8 TLazyArray dtors approximated as FArray dtors.
+// DIVERGENCE: per-section FUN_10324a50 unnamed, skipped.
+IMPL_TODO("Ghidra 0x103cfd80: per-node projector FArray::~FArray in separate loop vs inline Empty; +0xe8 TLazyArray dtors approximated (no TLazyArray<BYTE>::~TLazyArray available); per-section FUN_10324a50 unnamed; GUndo LAB_ callbacks omitted (editor-only, NULL at runtime)")
 void UModel::EmptyModel( INT EmptySurfs, INT EmptyPolys )
 {
 guard(UModel::EmptyModel);
@@ -957,26 +955,100 @@ MODEL_VERTS(this)->Empty(8, 0);
 ((FArray*)((BYTE*)this + 0xd0))->Empty(4, 0);
 
 // Phase 5: arrays at +0xf4 (elem=0xa4) and +0x100 (elem=4) and +0xe8 (elem=0x6c).
-// Per-element destructors (FUN_10322eb0 / FUN_1032e660 / FMatrix::~FMatrix / ~TLazyArray)
-// are unnamed and skipped; backing storage freed below.
+// Per-element destructors for +0xf4: each element has TArray at base, FMatrix at +0x28,
+// FArray at +0x8c. Ghidra: FUN_10322eb0 (TArray dtor), FUN_1032e660 (sub-array clear),
+// FArray::~FArray, FMatrix::~FMatrix per element.
+{
+	FArray* arr0xf4 = (FArray*)((BYTE*)this + 0xf4);
+	INT num0xf4 = arr0xf4->Num();
+	BYTE* data0xf4 = (BYTE*)arr0xf4->GetData();
+	for (INT j = 0; j < num0xf4; j++)
+	{
+		BYTE* elem = data0xf4 + j * 0xa4;
+		((FArray*)elem)->~FArray();                // TArray at element base (FUN_10322eb0)
+		((FArray*)(elem + 0x8c))->Empty(0, *(INT*)(elem + 0x90)); // FUN_1032e660(0, Num)
+		((FArray*)(elem + 0x8c))->~FArray();       // FArray::~FArray at +0x8c
+		((FMatrix*)(elem + 0x28))->~FMatrix();     // FMatrix::~FMatrix at +0x28
+	}
+}
 ((FArray*)((BYTE*)this + 0xf4))->Empty(0xa4, 0);
 ((FArray*)((BYTE*)this + 0x100))->Empty(4, 0);
+// Per-element destructors for +0xe8 (stride 0x6c): Ghidra shows
+// _eh_vector_destructor_iterator_ for 2 TLazyArray<BYTE> at +0x18, then TArray dtor.
+// DIVERGENCE: TLazyArray<BYTE> template dtor not available; per-element cleanup
+// approximated as FArray destructor calls for the sub-arrays, then element base dtor.
+{
+	FArray* arr0xe8 = (FArray*)((BYTE*)this + 0xe8);
+	INT num0xe8 = arr0xe8->Num();
+	BYTE* data0xe8 = (BYTE*)arr0xe8->GetData();
+	for (INT j = 0; j < num0xe8; j++)
+	{
+		BYTE* elem = data0xe8 + j * 0x6c;
+		// Retail: _eh_vector_destructor_iterator_(elem+0x18, 0x18, 2, TLazyArray<BYTE>::~TLazyArray)
+		// Approximation: destruct the two TLazyArray<BYTE> at +0x18 and +0x30 as FArrays
+		((FArray*)(elem + 0x30))->~FArray();
+		((FArray*)(elem + 0x18))->~FArray();
+		((FArray*)elem)->~FArray();                // TArray dtor at base (FUN_10322eb0)
+	}
+}
 ((FArray*)((BYTE*)this + 0xe8))->Empty(0x6c, 0);
 
-// Phase 6: render sections (FUN_10324a50 per section omitted — unnamed dtor).
+// Phase 6: render sections (FUN_10324a50 per section — unnamed section dtor).
+// DIVERGENCE: per-section cleanup helper FUN_10324a50 not yet identified; skipped.
 MODEL_SECTIONS(this)->Empty(0x2c, 0);
 
 if (EmptySurfs)
 {
-	// GUndo->SaveArray calls omitted (editor machinery).
+	// GUndo->SaveArray calls omitted (editor machinery; GUndo==NULL at runtime).
 	MODEL_POINTS(this)->Empty(0xc, 0);
 	MODEL_VECTORS(this)->Empty(0xc, 0);
-	// Per-surf FUN_10322eb0 element cleanup omitted (unnamed helper).
+	// Per-surf TArray cleanup: Ghidra calls FUN_10322eb0 per surf element.
+	{
+		FArray* surfs = MODEL_SURFS(this);
+		INT numSurfs = surfs->Num();
+		BYTE* surfData = (BYTE*)surfs->GetData();
+		for (INT j = 0; j < numSurfs; j++)
+		{
+			BYTE* surf = surfData + j * SURF_STRIDE;
+			((FArray*)surf)->~FArray();            // TArray dtor per surf (FUN_10322eb0)
+		}
+	}
 	MODEL_SURFS(this)->Empty(SURF_STRIDE, 0);
 }
-// EmptyPolys branch: creates new UPolys via StaticAllocateObject + UPolys ctor,
-// then resets NumSharedSides, NumZones, and zone connectivity tables.
-// Pending: UPolys ctor linkage and zone-table offset verification.
+
+if (EmptyPolys)
+{
+	// Create new UPolys: StaticAllocateObject + placement-new constructor.
+	FName PolyName(NAME_None);
+	UObject* Outer = GetOuter();
+	UObject* NewPolys = UObject::StaticAllocateObject(
+		UPolys::StaticClass(), Outer, PolyName, 1, NULL, GError, NULL);
+	if (NewPolys)
+		NewPolys = (UObject*)new(NewPolys) UPolys();
+	*(UObject**)((BYTE*)this + 0x58) = NewPolys;
+}
+
+// Zone table reset: NumSharedSides=4, NumZones=0, clear zone visibility/connectivity.
+*(INT*)((BYTE*)this + 0x118) = 4;
+*(INT*)((BYTE*)this + 0x11c) = 0;
+for (INT z = 0; z < 256; z++)
+{
+	// Each zone entry is at offset (z*9 + 0x24) * 8 = z*0x48 + 0x120
+	// ZoneActors pointer: *(this + (z*9+0x24)*8) = 0
+	*(INT*)((BYTE*)this + (z * 9 + 0x24) * 8) = 0;
+
+	// Zone visibility bitmask: 8 DWORDs starting at this + z*0x48 + 0x128
+	INT visBase = z * 0x48 + 0x128;
+	for (INT k = 0; k < 8; k++)
+		*(INT*)((BYTE*)this + visBase + k * 4) = 0;
+
+	// Self-visibility: set own bit in the visibility mask
+	*(DWORD*)((BYTE*)this + (z >> 5) * 4 + visBase) |= (1u << (z & 0x1f));
+
+	// Zone rejection bitmask: 8 DWORDs at this + (z*0x12)*4 + 0x148
+	for (INT k = 0; k < 8; k++)
+		*(INT*)((BYTE*)this + (k + z * 0x12) * 4 + 0x148) = (INT)0xffffffff;
+}
 unguard;
 }
 
