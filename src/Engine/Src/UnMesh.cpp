@@ -1038,18 +1038,168 @@ int USkeletalMesh::SetAttachAlias(FName param_2, FName param_3, FCoords& param_4
 	unguard;
 }
 
-IMPL_TODO("FUN_10435460 (bone-tag FName search, tractable: linear scan of TArray<FName> confirmed in _unnamed.cpp) is resolved in analysis but full function requires FCoords math chain, GMath_exref global, and vtable dispatch at param_2+0x328+0xf0 (possibly Karma/physics interface callback); Ghidra 0x10436770 (865b)")
+IMPL_TODO("Ghidra 0x10436770 (865b): implemented from Ghidra; physics interface callbacks at param_3+0x328+0xf0 vtable[2]/[3] are Karma-related — included as raw vtable calls")
 int USkeletalMesh::SetAttachmentLocation(AActor* param_2, AActor* param_3)
 {
 	guard(USkeletalMesh::SetAttachmentLocation);
-	// Ghidra 0x10436770 (865b): FUN_10435460(param_3+0x1B0) = search AttachTag FName in
-	// bone-alias array at this+0x2D0/+0x2DC. If found: use alias mapping via +0x2E8.
-	// If not: linear search this+0x19C (BoneNames, stride 0x40) for matching FName.
-	// Then: MeshGetInstance(param_2) → read bone transforms from instance+0xB8,
-	// apply FCoords::ApplyPivot + FVector::TransformVectorBy,
-	// optionally call param_3+0x328+0xF0 vtable method (physics interface),
-	// write final Location to param_3+0x234 and Rotation via FCoords multiply.
+
+	FCoords BoneCoords;
+	FCoords AdjustCoords;
+
+	// FName at param_3+0x1b0 = AttachTag
+	FName* AttachTag = (FName*)((BYTE*)param_3 + 0x1b0);
+
+	// Search TagAliases (TArray<FName> at this+0x2d0) for AttachTag
+	// FUN_10435460: linear scan of TArray<FName> with stride 4
+	FArray* aliasArr = (FArray*)((BYTE*)this + 0x2d0);
+	INT aliasIdx = -1;
+	for (INT i = 0; i < aliasArr->Num(); i++)
+	{
+		if (*(FName*)((BYTE*)aliasArr->GetData() + i * 4) == *AttachTag)
+		{
+			aliasIdx = i;
+			break;
+		}
+	}
+
+	INT boneIdx;
+	if (aliasIdx == -1)
+	{
+		// No alias — direct bone name search
+		boneIdx = -1;
+		INT numBones = ((FArray*)((BYTE*)this + 0x19c))->Num();
+		for (INT i = 0; i < numBones; i++)
+		{
+			FName* boneName = (FName*)((BYTE*)*(INT*)((BYTE*)this + 0x19c) + i * 0x40);
+			if (*boneName == *AttachTag)
+			{
+				boneIdx = i;
+				break;
+			}
+		}
+		if (boneIdx >= 0)
+		{
+			MeshGetInstance(param_2);
+			BYTE* instance = (BYTE*)*(INT*)((BYTE*)param_2 + 0x324);
+			if (boneIdx < ((FArray*)(instance + 0xb8))->Num())
+			{
+				// Copy bone transform (FCoords, 48 bytes = 12 DWORDs)
+				DWORD* src = (DWORD*)(*(INT*)(instance + 0xb8) + boneIdx * 0x30);
+				DWORD* dst = (DWORD*)&BoneCoords;
+				for (INT j = 0xc; j != 0; j--) { *dst++ = *src++; }
+				// Use identity coords
+				src = (DWORD*)&GMath.UnitCoords;
+				dst = (DWORD*)&AdjustCoords;
+				for (INT j = 0xc; j != 0; j--) { *dst++ = *src++; }
+				goto doTransform;
+			}
+		}
+	}
+	else
+	{
+		// Alias found — get real bone name from TagAliasesRefBone (TArray at this+0x2dc)
+		FName realBoneName = *(FName*)((BYTE*)*(INT*)((BYTE*)this + 0x2dc) + aliasIdx * 4);
+		boneIdx = -1;
+		INT numBones = ((FArray*)((BYTE*)this + 0x19c))->Num();
+		for (INT i = 0; i < numBones; i++)
+		{
+			FName* boneName = (FName*)((BYTE*)*(INT*)((BYTE*)this + 0x19c) + i * 0x40);
+			if (*boneName == realBoneName)
+			{
+				boneIdx = i;
+				break;
+			}
+		}
+		if (boneIdx >= 0)
+		{
+			MeshGetInstance(param_2);
+			BYTE* instance = (BYTE*)*(INT*)((BYTE*)param_2 + 0x324);
+			if (boneIdx < ((FArray*)(instance + 0xb8))->Num())
+			{
+				// Copy bone transform
+				DWORD* src = (DWORD*)(*(INT*)(instance + 0xb8) + boneIdx * 0x30);
+				DWORD* dst = (DWORD*)&BoneCoords;
+				for (INT j = 0xc; j != 0; j--) { *dst++ = *src++; }
+				// Copy alias adjustment coords from TagCoords (TArray at this+0x2e8)
+				src = (DWORD*)(*(INT*)((BYTE*)this + 0x2e8) + aliasIdx * 0x30);
+				dst = (DWORD*)&AdjustCoords;
+				for (INT j = 0xc; j != 0; j--) { *dst++ = *src++; }
+				goto doTransform;
+			}
+		}
+	}
+
+	// Bone not found — log warning if mesh has bones
+	{
+		INT numBones = ((FArray*)((BYTE*)*(INT*)((BYTE*)param_2 + 0x324) + 0xb8))->Num();
+		if (numBones != 0)
+		{
+			GLog->Logf(TEXT("SetAttachmentLocation: Tag '%s' not found on mesh '%s'"),
+				**(FName*)((BYTE*)param_3 + 0x1b0), ((UObject*)param_2)->GetName());
+		}
+	}
 	return 0;
+
+doTransform:
+	{
+		BYTE* instance = (BYTE*)*(INT*)((BYTE*)param_2 + 0x324);
+
+		// Combine bone + adjustment coordinate frames
+		FCoords applied = BoneCoords.ApplyPivot(AdjustCoords);
+
+		// Transform relative location by applied coords
+		FVector transRelLoc = (*(FVector*)((BYTE*)param_3 + 0x264)).TransformVectorBy(applied);
+
+		// Build relative rotation coordinate frame
+		FCoords relRotCoords = GMath.UnitCoords / *(FRotator*)((BYTE*)param_3 + 0x270);
+
+		// Karma physics callback #1: vtable[3] at *(param_3+0x328)+0xf0
+		if ((*(DWORD*)((BYTE*)param_3 + 0xa8) & 0x800) != 0)
+		{
+			INT* physIntf = *(INT**)(*(INT*)((BYTE*)param_3 + 0x328) + 0xf0);
+			if (physIntf != NULL)
+			{
+				typedef void (__thiscall *PhysCB)(INT*, AActor*, void*, FCoords*, FCoords*);
+				PhysCB cb = *(PhysCB*)((BYTE*)(*physIntf) + 0xc);
+				cb(physIntf, param_3, (void*)((BYTE*)param_3 + 0x270), &applied, &BoneCoords);
+			}
+		}
+
+		// Combine applied origin with transformed relative location
+		FCoords* spaceBase = (FCoords*)(instance + 0xc4);
+		applied.Origin += transRelLoc;
+
+		// Transform to world space: applied * SpaceBase (Ghidra: ECX=applied, param=SpaceBase)
+		FCoords worldResult = applied * (*spaceBase);
+
+		// Write Location
+		*(FVector*)((BYTE*)param_3 + 0x234) = worldResult.Origin;
+
+		// Combine rotation into applied coords
+		applied *= relRotCoords;
+
+		// Build world rotation
+		FCoords transposed = applied.Transpose();
+		FCoords worldRotResult = transposed * (*spaceBase);
+		FRotator finalRot = worldRotResult.OrthoRotation();
+
+		// Write Rotation
+		*(FRotator*)((BYTE*)param_3 + 0x240) = finalRot;
+
+		// Karma physics callback #2: vtable[2] at *(param_3+0x328)+0xf0
+		if ((*(DWORD*)((BYTE*)param_3 + 0xa8) & 0x800) != 0)
+		{
+			INT* physIntf = *(INT**)(*(INT*)((BYTE*)param_3 + 0x328) + 0xf0);
+			if (physIntf != NULL)
+			{
+				typedef void (__thiscall *PhysCB2)(INT*, AActor*, FRotator*, FCoords*, FCoords*);
+				PhysCB2 cb = *(PhysCB2*)((BYTE*)(*physIntf) + 8);
+				cb(physIntf, param_3, &finalRot, spaceBase, &worldResult);
+			}
+		}
+
+		return 1;
+	}
 	unguard;
 }
 
