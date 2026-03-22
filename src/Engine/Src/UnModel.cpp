@@ -853,7 +853,7 @@ unguard;
 // If sections non-empty: optionally releases GPU resources via RenDev vtable[0x78/4],
 // clears FirstRenderSection (+0x78) and NumRenderSections (+0x7c) on all nodes to -1,
 // calls FUN_10324a50 (unnamed) per section, then empties the sections array.
-IMPL_DIVERGE("Ghidra 0x103cef10: FUN_10324a50 is inlined at call site (section+0x04 Remove+~FArray); retail emits a separate __thiscall. Behaviour matches, codegen differs permanently.")
+IMPL_DIVERGE("FUN_10324a50 inlined at call site in retail; calling separately produces same result but different codegen")
 void UModel::ClearRenderData( URenderDevice* RenDev )
 {
 guard(UModel::ClearRenderData);
@@ -1096,7 +1096,7 @@ unguard;
 // Phase 7 (EmptySurfs): GUndo skipped; empties Points, Vectors, Surfs with per-surf cleanup.
 // Phase 8 (EmptyPolys): creates new UPolys via StaticAllocateObject + zone table reset.
 // DIVERGENCE: GUndo callbacks omitted (editor-only, NULL at runtime).
-IMPL_DIVERGE("Ghidra 0x103cfd80: GUndo LAB_ callbacks omitted (editor-only undo machinery); GUndo is NULL at runtime so omission has no gameplay effect.")
+IMPL_DIVERGE("GUndo LAB_ callbacks omitted (editor-only, always NULL at runtime; Ghidra 0x103cfd80)")
 void UModel::EmptyModel( INT EmptySurfs, INT EmptyPolys )
 {
 guard(UModel::EmptyModel);
