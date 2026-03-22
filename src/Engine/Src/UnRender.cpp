@@ -1071,7 +1071,14 @@ FWarpZoneSceneNode* FWarpZoneSceneNode::GetWarpZoneSceneNode() { return this; }
 //   Left:   FPlane(eye, C[0], C[1])   Right: FPlane(eye, C[3], C[2])
 //   Bottom: FPlane(eye, C[2], C[0])   Top:   FPlane(eye, C[1], C[3])
 // Mirrored (det < 0): last two corner args swapped on each plane.
-IMPL_TODO("Ghidra 0x10400290 (2966b): 4-corner/8-corner frustum construction implemented; exact retail plane order reconstructed from Ghidra cross-section analysis. Far-clip distance lookup and editor sky-zone 8-corner path not fully implemented.")
+// Ghidra 0x10400290 (2966b): 4-corner/8-corner frustum implemented.
+// Plane ordering reconstructed from Ghidra cross-section analysis.
+// Far-clip now reads LevelInfo zone distance property (Ghidra-verified).
+// Zone lookup bug fixed: Viewport+0x34 is the zone pointer, not vtable+0x34.
+// Remaining uncertainty: 8-corner sky-zone path uses Deproject; retail uses
+//   FMatrix::TransformFPlane(this+0x150, ...) — semantically equivalent for
+//   W=1 inputs but not byte-identical. Plane ordering unconfirmed at byte level.
+IMPL_TODO("Ghidra 0x10400290 (2966b): zone-lookup and far-clip resolved; 8-corner path uses Deproject vs retail FMatrix::TransformFPlane(this+0x150) — likely equivalent; plane ordering unconfirmed at byte level.")
 FConvexVolume FLevelSceneNode::GetViewFrustum()
 {
 	guard(FLevelSceneNode::GetViewFrustum);
@@ -1080,10 +1087,12 @@ FConvexVolume FLevelSceneNode::GetViewFrustum()
 	float det = ((FMatrix*)((BYTE*)this + 0x110))->Determinant();
 	FVector eye = *(FVector*)((BYTE*)this + 0x190);
 
-	// Check for sky/warp zone (LightType 0xd, 0xe, 0xf at this+4 -> level -> zone)
+	// Check for sky/warp zone (ZoneType 0xd/0xe/0xf).
+	// Ghidra: *(int*)(*(int*)(this+4) + 0x34) → Viewport member at offset 0x34 = zone ptr.
+	// Previous bug: read vtable+0x34 instead of Viewport+0x34.
 	UViewport* Viewport = *(UViewport**)((BYTE*)this + 4);
 	INT ZoneType = 0;
-	INT LevelPtr = (Viewport && *(INT*)Viewport) ? *(INT*)(*(INT*)Viewport + 0x34) : 0;
+	INT LevelPtr = Viewport ? *(INT*)((BYTE*)Viewport + 0x34) : 0;
 	if (LevelPtr)
 		ZoneType = *(INT*)(LevelPtr + 0x504);
 
@@ -1112,10 +1121,25 @@ FConvexVolume FLevelSceneNode::GetViewFrustum()
 			Result.Planes[Result.NumPlanes++] = FPlane(eye, C[3], C[1]);
 		}
 
-		// Far plane: added only in non-wireframe, non-editor-flag mode
+		// Far plane: added only in non-wireframe, non-editor-flag mode.
+		// Ghidra: checks LevelInfo+0x398 bDistanceFog flag and zone+0x4f8 flags
+		//   to pick either a zone-specific FarDist (LevelInfo+0x3a0) or 65536.f.
 		if (Viewport && !(*(BYTE*)((BYTE*)Viewport + 0x1f0) & 1) && !Viewport->IsWire())
 		{
 			FLOAT FarDist = 65536.f;
+			// Zone-specific far distance lookup (Ghidra-verified):
+			// Level ptr from this+0x1b8; zone-info array at Level+0x90; zone index at this+0x1c4.
+			ULevel* Level = *(ULevel**)((BYTE*)this + 0x1b8);
+			if (Level)
+			{
+				ALevelInfo* LI = *(ALevelInfo**)(*(DWORD*)((BYTE*)Level + 0x90) +
+				                  (*(INT*)((BYTE*)this + 0x1c4) * 9 + 0x24) * 8);
+				if (!LI)
+					LI = Level->GetLevelInfo();
+				if (LI && (*(BYTE*)((BYTE*)LI + 0x398) & 4) != 0 &&
+				    (*(DWORD*)(LevelPtr + 0x4f8) & 0x80000) != 0)
+					FarDist = *(FLOAT*)((BYTE*)LI + 0x3a0);
+			}
 			FVector fwd = (Deproject(FPlane(0.f, 0.f, 0.f, 1.f)) - eye).SafeNormal();
 			Result.Planes[Result.NumPlanes++] = FPlane(eye + fwd * FarDist, fwd);
 		}
@@ -1171,9 +1195,10 @@ INT FLightMapSceneNode::FilterActor(AActor* Actor)
 
 // FDirectionalLightMapSceneNode
 // Ghidra: Engine.dll 0x103d25d0, 1896 bytes.
-// 8-corner frustum: corners at NDC (±1, ±1, 0 or 1, 1).
-// Plane ordering: left/right/bottom/top from adjacent corner pairs, near/far from Z slices.
-IMPL_TODO("Ghidra 0x103d25d0 (1896b): 8-corner frustum construction implemented; exact retail plane ordering partially reconstructed from Ghidra. Plane winding may diverge from parity for edge cases.")
+// 8 corners: Ghidra uses a nested loop over X∈{−1,+1} × Y∈{−1,+1} × Z∈{0,1} with W=1
+// and Deproject — matching the implementation below. Plane ordering reconstructed from
+// cross-section analysis of the Ghidra det<0/det≥0 branches; not byte-verified.
+IMPL_TODO("Ghidra 0x103d25d0 (1896b): 8-corner frustum loop verified against Ghidra; plane ordering reconstructed from Ghidra det branches, not byte-confirmed.")
 FConvexVolume FDirectionalLightMapSceneNode::GetViewFrustum()
 {
 	guard(FDirectionalLightMapSceneNode::GetViewFrustum);
@@ -1217,11 +1242,10 @@ FConvexVolume FDirectionalLightMapSceneNode::GetViewFrustum()
 
 // FPointLightMapSceneNode
 // Ghidra: Engine.dll 0x103d1740, 1492 bytes.
-// 4-corner frustum using the light's projected Z/W from this+0x1d4 (a FVector
-// that defines the light's clip-space depth range). Ghidra: Project(this+0x1d4)
-// → Z/W used in FPlane(X, Y, Z, W) before each Deproject call.
-// For parity the Z/W from projection is used; approximated here as (0, 1) = near plane.
-IMPL_TODO("Ghidra 0x103d1740 (1492b): 4-corner frustum implemented. Light-specific Z/W from Project(this+0x1d4) is approximated as near-plane (0, 1); exact light depth range pending FSceneNode layout analysis.")
+// 4-corner frustum. Retail reads FVector from this+0x1d4, calls Project() to get
+// the clip-space Z/W for the light position, then uses those Z/W in the 4 Deproject
+// calls. Now fully implemented. Plane ordering mirrors FLevelSceneNode 4-corner case.
+IMPL_TODO("Ghidra 0x103d1740 (1492b): 4-corner frustum with Project(this+0x1d4) Z/W implemented; plane ordering reconstructed from cross-section analysis, not byte-verified.")
 FConvexVolume FPointLightMapSceneNode::GetViewFrustum()
 {
 	guard(FPointLightMapSceneNode::GetViewFrustum);
@@ -1230,9 +1254,12 @@ FConvexVolume FPointLightMapSceneNode::GetViewFrustum()
 	float det = ((FMatrix*)((BYTE*)this + 0x110))->Determinant();
 	FVector eye = *(FVector*)((BYTE*)this + 0x190);
 
-	// Light-space Z/W: in retail, Project(this+0x1d4) provides the Z and W components.
-	// We approximate with Z=0, W=1 (near-plane projection).
-	FLOAT projZ = 0.f, projW = 1.f;
+	// Light-space Z/W: Project() the FVector at this+0x1d4 (Ghidra-verified).
+	// Retail reads the 3 floats from this+0x1d4/1d8/1dc, calls Project(), and
+	// uses the returned FPlane's Z and W as the depth parameters for Deproject.
+	FPlane projected = Project(*(FVector*)((BYTE*)this + 0x1d4));
+	FLOAT projZ = projected.Z;
+	FLOAT projW = projected.W;
 
 	// 4 corners deprojected at the light's clip-space depth
 	FVector C[4];
