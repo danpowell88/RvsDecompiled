@@ -118,12 +118,348 @@ void KME2UTransform(FVector* OutPos, FRotator* OutRot, const FLOAT (* const tm)[
 	*OutRot = Coords.OrthoRotation();
 }
 
+// ========================================================================
+// KModelToHulls internal helpers (unexported, reconstructed from Ghidra)
+// ========================================================================
+
+// FUN_1036b6c0 (193 bytes): adds a vertex to an FVector TArray if no existing
+// vertex is within epsilon (0.0001 dist²).  Retail uses __thiscall with
+// ECX=vertex, EDX=array; here expressed as a plain static helper.
+static void AddUniqueConvexVertex(const FVector& Vert, FArray* VertArray)
+{
+	INT Count = VertArray->Num();
+	for (INT i = 0; i < Count; i++)
+	{
+		FVector* Existing = (FVector*)(*(BYTE**)VertArray + i * sizeof(FVector));
+		FVector Diff;
+		Diff.X = Vert.X - Existing->X;
+		Diff.Y = Vert.Y - Existing->Y;
+		Diff.Z = Vert.Z - Existing->Z;
+		FLOAT DistSq = Diff.X*Diff.X + Diff.Y*Diff.Y + Diff.Z*Diff.Z;
+		if (DistSq < 0.0001f)
+			return;
+	}
+	INT idx = VertArray->Add(1, sizeof(FVector));
+	FVector* Dst = (FVector*)(*(BYTE**)VertArray + idx * sizeof(FVector));
+	*Dst = Vert;
+}
+
+// FUN_1036be00 (1885 bytes): emits one FKConvexElem from a set of half-space
+// planes.  For each plane, builds a large polygon (FPoly), clips it against all
+// other planes, snaps surviving vertices to the nearest BSP vertex, scales by
+// 0.02 (UU→ME), and stores in FKConvexElem+0x40 (TArray<FVector>).  Degenerate
+// hulls (coplanar or < 4 vertices) are removed.
+static void EmitConvexHull(INT AggGeomAddr, FArray* Planes, INT ModelAddr, FVector* Origin)
+{
+	// Allocate a new FKConvexElem (stride 0x58) in ConvexElems at AggGeom+0x24
+	FArray* ConvexElems = (FArray*)((BYTE*)AggGeomAddr + 0x24);
+	INT elemIdx = ConvexElems->AddZeroed(0x58, 1);
+	BYTE* Elem = *(BYTE**)ConvexElems + elemIdx * 0x58;
+
+	// Copy input planes to the element's plane list at Elem+0x4C (TArray<FPlane>)
+	FArray* ElemPlanes = (FArray*)(Elem + 0x4C);
+	FArray* SrcPlanes = Planes;
+	ElemPlanes->Empty(0x10, SrcPlanes->Num());
+	for (INT i = 0; i < SrcPlanes->Num(); i++)
+	{
+		INT addIdx = ElemPlanes->Add(1, 0x10);
+		FPlane* dst = (FPlane*)(*(BYTE**)ElemPlanes + addIdx * 0x10);
+		FPlane* src = (FPlane*)(*(BYTE**)SrcPlanes + i * 0x10);
+		*dst = *src;
+	}
+
+	// Set FMatrix at Elem+0x00 to identity
+	FMatrix* Mat = (FMatrix*)Elem;
+	Mat->SetIdentity();
+
+	// TArray<FVector> for collected vertices at Elem+0x40
+	FArray* VertArray = (FArray*)(Elem + 0x40);
+
+	// Surfs array at Model+0x6C (stride 8), Points at Model+0x8C (stride 0xC)
+	FArray* Surfs  = (FArray*)((BYTE*)ModelAddr + 0x6C);
+	FArray* Points = (FArray*)((BYTE*)ModelAddr + 0x8C);
+
+	INT PlaneCount = Planes->Num();
+	for (INT pi = 0; pi < PlaneCount; pi++)
+	{
+		// Build a large quad polygon on this plane
+		FPoly Poly;
+		FVector PtOnPlane;
+		FVector AxisU, AxisV;
+
+		FPlane* CurPlane = (FPlane*)(*(BYTE**)Planes + pi * 0x10);
+		FVector Normal(CurPlane->X, CurPlane->Y, CurPlane->Z);
+
+		Normal.FindBestAxisVectors(AxisU, AxisV);
+
+		// Compute a point on the plane: Normal * W
+		PtOnPlane = Normal * CurPlane->W;
+
+		// Build 4-vertex polygon: ±AxisU ± AxisV around PtOnPlane, scaled large
+		FVector Scaled;
+		Scaled = AxisU * HALF_WORLD_MAX;  Poly.Vertex[0] = PtOnPlane + Scaled;
+		Scaled = AxisV * HALF_WORLD_MAX;  Poly.Vertex[0] = Poly.Vertex[0] + Scaled;
+		Scaled = AxisU * HALF_WORLD_MAX;  Poly.Vertex[1] = PtOnPlane - Scaled;
+		Scaled = AxisV * HALF_WORLD_MAX;  Poly.Vertex[1] = Poly.Vertex[1] + Scaled;
+		Scaled = AxisU * HALF_WORLD_MAX;  Poly.Vertex[2] = PtOnPlane - Scaled;
+		Scaled = AxisV * HALF_WORLD_MAX;  Poly.Vertex[2] = Poly.Vertex[2] - Scaled;
+		Scaled = AxisU * HALF_WORLD_MAX;  Poly.Vertex[3] = PtOnPlane + Scaled;
+		Scaled = AxisV * HALF_WORLD_MAX;  Poly.Vertex[3] = Poly.Vertex[3] - Scaled;
+		Poly.NumVertices = 4;
+
+		// Clip against every other plane
+		UBOOL Survived = 1;
+		for (INT ci = 0; ci < PlaneCount; ci++)
+		{
+			if (ci == pi) continue;
+			FPlane* ClipPlane = (FPlane*)(*(BYTE**)Planes + ci * 0x10);
+			FVector ClipNormal(-ClipPlane->X, -ClipPlane->Y, -ClipPlane->Z);
+			FVector ClipBase = FVector(ClipPlane->X, ClipPlane->Y, ClipPlane->Z) * ClipPlane->W;
+			if (Poly.Split(ClipNormal, ClipBase, 0) == 0)
+			{
+				Survived = 0;
+				break;
+			}
+		}
+
+		// For each surviving vertex, snap to nearest BSP vertex and add
+		for (INT vi = 0; vi < (Survived ? Poly.NumVertices : 0); vi++)
+		{
+			FVector PolyVert = Poly.Vertex[vi];
+
+			// Find nearest BSP vertex (Surfs→Points lookup)
+			FLOAT BestDistSq = 3.4028235e+38f;
+			FLOAT BestIdx = -1.0f;
+			INT SurfCount = Surfs->Num();
+			for (INT si = 0; si < SurfCount; si++)
+			{
+				INT PointIdx = *(INT*)(*(BYTE**)Surfs + si * 8);
+				if (PointIdx < 0 || PointIdx >= Points->Num())
+					continue;
+				FVector* BSPVert = (FVector*)(*(BYTE**)Points + PointIdx * sizeof(FVector));
+				FVector D;
+				D.X = PolyVert.X - BSPVert->X;
+				D.Y = PolyVert.Y - BSPVert->Y;
+				D.Z = PolyVert.Z - BSPVert->Z;
+				FLOAT DSq = D.X*D.X + D.Y*D.Y + D.Z*D.Z;
+				if (DSq < BestDistSq)
+				{
+					BestIdx = (FLOAT)si;
+					BestDistSq = DSq;
+				}
+			}
+
+			FVector ScaledVert;
+			if (BestIdx < 0.0f || BestDistSq >= 0.01f)
+			{
+				// No close BSP vertex — use polygon vertex directly
+				ScaledVert.X = (PolyVert.X - Origin->X) * 0.02f;
+				ScaledVert.Y = (PolyVert.Y - Origin->Y) * 0.02f;
+				ScaledVert.Z = (PolyVert.Z - Origin->Z) * 0.02f;
+			}
+			else
+			{
+				// Snap to BSP vertex
+				INT PointIdx = *(INT*)(*(BYTE**)Surfs + (INT)BestIdx * 8);
+				FVector* BSPVert = (FVector*)(*(BYTE**)Points + PointIdx * sizeof(FVector));
+				ScaledVert.X = (BSPVert->X - Origin->X) * 0.02f;
+				ScaledVert.Y = (BSPVert->Y - Origin->Y) * 0.02f;
+				ScaledVert.Z = (BSPVert->Z - Origin->Z) * 0.02f;
+			}
+			AddUniqueConvexVertex(ScaledVert, VertArray);
+		}
+	}
+
+	// Validate hull: must have > 3 vertices and not be coplanar
+	INT VertCount = VertArray->Num();
+	if (VertCount > 3)
+	{
+		FVector* Verts = *(FVector**)VertArray;
+		// Check if all vertices are coplanar
+		FVector Edge1;
+		Edge1.X = Verts[1].X - Verts[0].X;
+		Edge1.Y = Verts[1].Y - Verts[0].Y;
+		Edge1.Z = Verts[1].Z - Verts[0].Z;
+		Edge1.Normalize();
+
+		UBOOL bNonColinear = 0;
+		FVector Edge2;
+		for (INT i = 2; i < VertCount; i++)
+		{
+			if (bNonColinear) break;
+			Edge2.X = Verts[i].X - Verts[0].X;
+			Edge2.Y = Verts[i].Y - Verts[0].Y;
+			Edge2.Z = Verts[i].Z - Verts[0].Z;
+			Edge2.Normalize();
+			FLOAT Dot = Edge1.X*Edge2.X + Edge1.Y*Edge2.Y + Edge1.Z*Edge2.Z;
+			if (Dot < 0.99f)
+				bNonColinear = 1;
+		}
+
+		if (bNonColinear)
+		{
+			// Build reference plane from first three non-colinear vertices
+			FVector HullNormal = Edge1 ^ Edge2;
+			HullNormal.Normalize();
+			FPlane RefPlane(Verts[0].X, Verts[0].Y, Verts[0].Z,
+			                HullNormal.X * Verts[0].X + HullNormal.Y * Verts[0].Y + HullNormal.Z * Verts[0].Z);
+
+			// Check all vertices are within tolerance of the plane
+			UBOOL bDegenerate = 0;
+			for (INT i = 2; i < VertCount; i++)
+			{
+				if (bDegenerate) return; // bail — hull is kept
+				FLOAT PlaneDist = RefPlane.PlaneDot(Verts[i]);
+				if (PlaneDist > 0.01f)
+					bDegenerate = 1;
+			}
+			if (bDegenerate)
+				return; // all vertices too close to a single plane
+		}
+	}
+
+	// If we get here with < 4 verts or all coplanar, remove the degenerate hull
+	// Retail: FUN_1032e8c0 removes the last ConvexElem
+	if (VertCount < 4)
+	{
+		// Destruct and remove the last element
+		FKConvexElem* LastElem = (FKConvexElem*)(*(BYTE**)ConvexElems + elemIdx * 0x58);
+		LastElem->~FKConvexElem();
+		ConvexElems->Remove(elemIdx, 1, 0x58);
+	}
+}
+
+// FUN_1036c5a0 (561 bytes): recurses through the BSP tree, collecting half-space
+// planes into a scratch array.  At leaf nodes, calls EmitConvexHull to convert
+// the accumulated plane set into a convex hull.
+// BSP nodes: Model+0x5C, stride 0x90; iFront at +0x38, iBack at +0x3C.
+// Node plane is the first 16 bytes (FPlane).
+static void BSPToConvexRecurse(INT AggGeomAddr, INT ModelAddr, INT NodeIdx,
+                                INT IsFront, FArray* Planes, FVector* Origin)
+{
+	BYTE* NodeBase = *(BYTE**)((BYTE*)ModelAddr + 0x5C);
+	BYTE* Node = NodeBase + NodeIdx * 0x90;
+	FPlane* NodePlane = (FPlane*)Node;
+	INT iFront = *(INT*)(Node + 0x38);
+	INT iBack  = *(INT*)(Node + 0x3C);
+
+	// --- Front half-space ---
+	if (iFront == -1)
+	{
+		// Leaf node: check flags
+		if (IsFront)
+		{
+			BYTE f6E = *(Node + 0x6E);
+			BYTE f6F = *(Node + 0x6F);
+			if (f6E == 0 || (f6F & 0x21) != 0)
+				goto SkipFront;
+		}
+		// Add this plane and emit a hull
+		INT addIdx = Planes->Add(1, 0x10);
+		FPlane* dst = (FPlane*)(*(BYTE**)Planes + addIdx * 0x10);
+		*dst = *NodePlane;
+		EmitConvexHull(AggGeomAddr, Planes, ModelAddr, Origin);
+	}
+	else
+	{
+		// Internal node: add plane, recurse front child
+		INT addIdx = Planes->Add(1, 0x10);
+		FPlane* dst = (FPlane*)(*(BYTE**)Planes + addIdx * 0x10);
+		*dst = *NodePlane;
+
+		INT frontFlag = 0;
+		if (IsFront)
+		{
+			BYTE f6E = *(Node + 0x6E);
+			BYTE f6F = *(Node + 0x6F);
+			if (f6E != 0 && (f6F & 0x21) == 0)
+				frontFlag = 0;
+			else
+				frontFlag = 1;
+		}
+		BSPToConvexRecurse(AggGeomAddr, ModelAddr, iFront, frontFlag, Planes, Origin);
+	}
+	// Pop the last plane
+	Planes->Remove(Planes->Num() - 1, 1, 0x10);
+
+SkipFront:
+	// --- Back half-space (flipped plane) ---
+	if (iBack == -1)
+	{
+		// Leaf node
+		if (IsFront)
+			return;
+		BYTE f6E = *(Node + 0x6E);
+		BYTE f6F = *(Node + 0x6F);
+		if (f6E != 0 && (f6F & 0x21) == 0)
+			return;
+		// Add flipped plane and emit
+		FPlane Flipped = NodePlane->Flip();
+		INT addIdx = Planes->Add(1, 0x10);
+		FPlane* dst = (FPlane*)(*(BYTE**)Planes + addIdx * 0x10);
+		*dst = Flipped;
+		EmitConvexHull(AggGeomAddr, Planes, ModelAddr, Origin);
+	}
+	else
+	{
+		// Internal node: add flipped plane, recurse back child
+		FPlane Flipped = NodePlane->Flip();
+		INT addIdx = Planes->Add(1, 0x10);
+		FPlane* dst = (FPlane*)(*(BYTE**)Planes + addIdx * 0x10);
+		*dst = Flipped;
+
+		INT backFlag;
+		if (!IsFront)
+		{
+			BYTE f6E = *(Node + 0x6E);
+			BYTE f6F = *(Node + 0x6F);
+			if (f6E == 0 || (f6F & 0x21) != 0)
+				backFlag = 0;
+			else
+				backFlag = 1;
+		}
+		else
+		{
+			backFlag = 1;
+		}
+		BSPToConvexRecurse(AggGeomAddr, ModelAddr, iBack, backFlag, Planes, Origin);
+	}
+	// Pop the last plane
+	Planes->Remove(Planes->Num() - 1, 1, 0x10);
+}
+
 // ?KModelToHulls@@YAXPAVFKAggregateGeom@@PAVUModel@@VFVector@@@Z  (Engine.dll 0x1036c810, 143 bytes)
-// Decomposes a BSP UModel into convex hulls stored in FKAggregateGeom. Retail
-// first clears AggGeom->ConvexElems (0x58 stride), then uses a local TArray<FPlane>
-// scratch stack while recursing the BSP and emitting FKConvexElem hulls.
-IMPL_TODO("Ghidra 0x1036c810 (143b): wrapper calls FUN_1036c5a0(AggGeom,Model,0,Model->RootNode,scratchArray,origin) which is the real BSP-to-convex recursion; FUN_1036be00/FUN_1036b6c0 are secondary convex-emission helpers. All three helpers are unexported internals not yet ported. FKConvexElem+0x4C = FPlane array layout required. KModelToHulls body is trivially: FArray scratch; FUN_1036c5a0(AggGeom,Model,0,*(Model+0x10c),scratch,origin).")
-void KModelToHulls(FKAggregateGeom*, UModel*, FVector) {}
+// Decomposes a BSP UModel into convex hulls stored in FKAggregateGeom.
+// Clears ConvexElems, initialises a scratch TArray<FPlane>, and recurses
+// through the BSP tree emitting convex hulls at each leaf.
+IMPL_MATCH("Engine.dll", 0x1036c810)
+void KModelToHulls(FKAggregateGeom* AggGeom, UModel* Model, FVector Origin)
+{
+	guard(KModelToHulls);
+
+	// Clear existing ConvexElems (TArray<FKConvexElem> at AggGeom+0x24, stride 0x58)
+	FArray* ConvexElems = (FArray*)((BYTE*)AggGeom + 0x24);
+	for (INT i = 0; i < ConvexElems->Num(); i++)
+	{
+		FKConvexElem* Elem = (FKConvexElem*)(*(BYTE**)ConvexElems + i * 0x58);
+		Elem->~FKConvexElem();
+	}
+	ConvexElems->Empty(0x58, 0);
+
+	// Scratch plane array for BSP recursion
+	FArray Scratch;
+	appMemzero(&Scratch, sizeof(FArray));
+
+	// Model->RootNode at Model+0x10C
+	INT RootNode = *(INT*)((BYTE*)Model + 0x10C);
+
+	BSPToConvexRecurse((INT)AggGeom, (INT)Model, 0, RootNode, &Scratch, &Origin);
+
+	// Clean up scratch array
+	Scratch.Empty(0x10, 0);
+
+	unguard;
+}
 
 // ?KU2MEMatrixCopy@@YAXQAY03MPAVFMatrix@@@Z  (Engine.dll 0x1036a330, same body as KME2UMatrixCopy)
 IMPL_MATCH("Engine.dll", 0x1036a330)
