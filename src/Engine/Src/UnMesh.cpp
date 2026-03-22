@@ -133,7 +133,7 @@ void CBoneDescData::m_vProcessLbpLine(int param1, int param2, FString& str)
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x1032b030)
 CBoneDescData::CBoneDescData(CBoneDescData const & Other)
 {
 	// Ghidra 0x2b030, 93B. Copy 2 DWORDs, deep-copy TArray<FString>, copy FString, copy DWORD.
@@ -144,7 +144,7 @@ CBoneDescData::CBoneDescData(CBoneDescData const & Other)
 	*(DWORD*)((BYTE*)this + 0x20) = *(const DWORD*)((const BYTE*)&Other + 0x20);
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x10355b30)
 CBoneDescData::CBoneDescData()
 {
 	// Ghidra 0x55b30, 93B. Init TArray<FString> at +0x08, FString at +0x14, zero the rest.
@@ -155,7 +155,7 @@ CBoneDescData::CBoneDescData()
 	*(DWORD*)((BYTE*)this + 0x20) = 0;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x10355b90)
 CBoneDescData::~CBoneDescData()
 {
 	// Ghidra 0x55b90: if +0x20 non-null, free each frame buffer (count=this+4),
@@ -876,7 +876,7 @@ void ULodMesh::Serialize(FArchive& Ar)
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_TODO("Unexported virtual — not in Engine.dll export table; address TBD via vtable analysis")
 int ULodMesh::MemFootprint(int param_1)
 {
 	guard(ULodMesh::MemFootprint);
@@ -884,7 +884,7 @@ int ULodMesh::MemFootprint(int param_1)
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_TODO("Unexported virtual — not in Engine.dll export table")
 UClass * ULodMesh::MeshGetInstanceClass()
 {
 	return ULodMeshInstance::StaticClass();
@@ -946,7 +946,7 @@ UMeshInstance * UMesh::MeshGetInstance(AActor const * Owner)
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_TODO("Unexported virtual — not in Engine.dll export table")
 UClass * UMesh::MeshGetInstanceClass()
 {
 	return NULL;
@@ -1463,7 +1463,7 @@ void UVertMesh::Serialize(FArchive& Ar)
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_TODO("Unexported virtual — not in Engine.dll export table")
 UClass * UVertMesh::MeshGetInstanceClass()
 {
 	return UVertMeshInstance::StaticClass();
@@ -1511,14 +1511,14 @@ void UVertMesh::PostLoad()
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_TODO("Unexported virtual — UVertMesh override not in export table; UVertMeshInstance versions exported at 0x104733e0")
 FBox UVertMesh::GetRenderBoundingBox(AActor const * Owner)
 {
 	// Retail: 33b. MeshGetInstance(Owner) then call GetRenderBoundingBox on the instance.
 	return MeshGetInstance(Owner)->GetRenderBoundingBox(Owner);
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_TODO("Unexported virtual — UVertMesh override not in export table; UVertMeshInstance version exported at 0x10472540")
 FSphere UVertMesh::GetRenderBoundingSphere(AActor const * Owner)
 {
 	// Retail: 33b. MeshGetInstance(Owner) then call GetRenderBoundingSphere on the instance.
@@ -2191,7 +2191,7 @@ int USkeletalMesh::RenderPreProcess()
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_TODO("Unexported virtual — not in Engine.dll export table")
 UClass * USkeletalMesh::MeshGetInstanceClass()
 {
 	return USkeletalMeshInstance::StaticClass();

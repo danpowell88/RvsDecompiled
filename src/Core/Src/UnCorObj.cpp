@@ -12,7 +12,7 @@
 	UPackage.
 -----------------------------------------------------------------------------*/
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Core.dll", 0x1013b0a0)
 UPackage::UPackage()
 :	DllHandle    ( NULL )
 ,	AttemptedBind( 0 )
@@ -90,7 +90,7 @@ IMPLEMENT_CLASS(ULanguage);
 	UTextBuffer.
 -----------------------------------------------------------------------------*/
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Core.dll", 0x1013aee0)
 UTextBuffer::UTextBuffer( const TCHAR* InText )
 :	Pos  ( 0 )
 ,	Top  ( 0 )
@@ -124,7 +124,7 @@ IMPLEMENT_CLASS(UTextBuffer);
 	UCommandlet.
 -----------------------------------------------------------------------------*/
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Core.dll", 0x1013af70)
 UCommandlet::UCommandlet()
 :	LogToStdout   ( 0 )
 ,	IsServer      ( 0 )
@@ -182,7 +182,7 @@ IMPLEMENT_CLASS(UCommandlet);
 	USystem.
 -----------------------------------------------------------------------------*/
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Core.dll", 0x1014ba90)
 USystem::USystem()
 :	LicenseeMode  ( 0 )
 ,	PurgeCacheDays( 30 )
@@ -268,7 +268,7 @@ IMPLEMENT_CLASS(USystem);
 	UConst.
 -----------------------------------------------------------------------------*/
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Core.dll", 0x10116c40)
 UConst::UConst( UConst* InSuperConst, const TCHAR* InValue )
 :	UField( InSuperConst )
 ,	Value( InValue )
