@@ -903,11 +903,12 @@ void APlayerController::execFindStairRotation( FFrame& Stack, RESULT_DECL )
 					Scaled2.Z = ViewDir.Z * HitDist;
 
 					FVector VPTop;
-					VPTop.X = EyeH + Scaled2.X;
-					VPTop.Y = EyePos.X + Scaled2.Y;
-					VPTop.Z = (End.X + Scaled2.Z) - VertProbe;
+					VPTop.X = *(FLOAT*)((BYTE*)Pawn + 0x234) + Scaled2.X;
+					VPTop.Y = *(FLOAT*)((BYTE*)Pawn + 0x238) + Scaled2.Y;
+					VPTop.Z = *(FLOAT*)((BYTE*)Pawn + 0x23c) + Scaled2.Z;
 
 					FVector VPBottom = VPTop;
+					VPBottom.Z -= VertProbe;
 
 					FCheckResult Hit4( 1.0f );
 					Level->SingleLineCheck( Hit4, this, VPTop, VPBottom, TRACE_World, Extent );
@@ -2582,7 +2583,7 @@ void APawn::UpdateMovementAnimation( FLOAT DeltaSeconds )
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103ebfe0; 983b — APawn vtable[0x62] (slot 98, unknown culling virtual) omitted; vtable[26] confirmed as IsA(ANavigationPoint); PhysicsVolume+0x410&0x40 for bWaterVolume used as raw offset")
+IMPL_MATCH("Engine.dll", 0x103ebfe0)
 INT APawn::actorReachable( AActor* Goal, INT bKnowVisible, INT bNoAnchorCheck )
 {
 	guard(APawn::actorReachable);
@@ -2618,7 +2619,10 @@ INT APawn::actorReachable( AActor* Goal, INT bKnowVisible, INT bNoAnchorCheck )
 		if( distSq > 1440000.0f )
 			return 0;
 
-		// IMPL_TODO: APawn vtable[0x62] (slot 98) called with Goal omitted — purpose unknown
+		typedef INT (__thiscall* ReachRejectFn)(APawn*, AActor*);
+		ReachRejectFn RejectFn = (ReachRejectFn)(*(DWORD*)(*(DWORD*)this + 0x188));
+		if( RejectFn(this, Goal) )
+			return 0;
 
 		// Locomotion capability gate.
 		// Ghidra checks Goal->PhysicsVolume byte at +0x410 bit 0x40 (bWaterVolume).
