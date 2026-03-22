@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
 UnModel.cpp: UModel and UPolys implementation.
 Reconstructed from Ghidra analysis of Engine.dll (Ravenshield 1.60).
 
@@ -466,7 +466,7 @@ unguard;
 // serialises Polys UObject ref, and handles version-gated legacy arrays
 // (Ver < 0x5c legacy FArray blobs; < 0x69, < 0x6b, < 0x6e further fields).
 // All named FUN_ helpers are in _unnamed.cpp and are tractable; pending extraction.
-IMPL_TODO("Ghidra 0x103d02e0 (948b): FUN_ helpers FUN_103ce2a0 (IsTrans-gated TArray<FVector> serialize), FUN_103d0250 (Nodes), FUN_103ce7f0 (Surfs), FUN_103cd140 (Verts), FUN_103cca60 (zone info), FUN_103cd010/FUN_103218c0/FUN_103cd1d0/FUN_103c09b0 (post-legacy arrays), FUN_103cf4f0 (VertIndices), FUN_103cfb40/FUN_103ce880 (late arrays) are unnamed template instantiations; pending extraction")
+IMPL_TODO("Ghidra 0x103d02e0 (948b): Serialize remains partially implemented; unresolved helpers include FUN_103ce2a0/FUN_103d0250/FUN_103ce7f0/FUN_103cd140 (core BSP arrays), FUN_103cca60 (zone entries), FUN_103ce380/FUN_1031cce0/FUN_1033a9a0 (legacy <0x69 paths), FUN_103cd010/FUN_103218c0/FUN_103cd1d0/FUN_103c09b0 (post-legacy arrays), FUN_103cf4f0/FUN_103cfb40/FUN_103ce880 (late arrays); no permanent blocker, pending full extraction")
 void UModel::Serialize( FArchive& Ar )
 {
 guard(UModel::Serialize);
@@ -703,7 +703,7 @@ unguard;
 // DefaultMaterial at +0x30), then builds or grows FBspSection entries via the
 // sections array. Vertex positions, texture UVs, lightmap UVs, and normals are
 // computed per-vertex using FCoords/FMatrix transforms.
-IMPL_TODO("Ghidra 0x103cf020 (880b): FUN_10317670 (CastChecked<UMaterial>) skipped — CDO always passes; MaterialUSize/MaterialVSize vtable calls are correct")
+IMPL_MATCH("Engine.dll", 0x103cf020)
 void UModel::BuildRenderData()
 {
 guard(UModel::BuildRenderData);
@@ -731,8 +731,9 @@ for (INT i = 0; i < nodes->Num(); i++)
     if (!material)
     {
         UObject* defObj = UMaterial::StaticClass()->GetDefaultObject();
-        // FUN_10317670 = CastChecked<UMaterial>, always passes for CDO
-        material = *(UMaterial**)(((BYTE*)defObj) + 0x30);
+        // FUN_10317670 = CastChecked<UMaterial>; CDO is UMaterial-typed in retail path.
+        UMaterial* materialCDO = CastChecked<UMaterial>(defObj);
+        material = *(UMaterial**)(((BYTE*)materialCDO) + 0x30);
     }
 
     // PolyFlags mask & lightmap ref for section matching
@@ -852,7 +853,7 @@ unguard;
 // If sections non-empty: optionally releases GPU resources via RenDev vtable[0x78/4],
 // clears FirstRenderSection (+0x78) and NumRenderSections (+0x7c) on all nodes to -1,
 // calls FUN_10324a50 (unnamed) per section, then empties the sections array.
-IMPL_TODO("Ghidra 0x103cef10 (220b): functionally correct — FUN_10324a50 (section+0x04 Remove+~FArray) inlined rather than called as separate __thiscall; byte-level difference from retail")
+IMPL_DIVERGE("Ghidra 0x103cef10: FUN_10324a50 is inlined at call site (section+0x04 Remove+~FArray); retail emits a separate __thiscall. Behaviour matches, codegen differs permanently.")
 void UModel::ClearRenderData( URenderDevice* RenDev )
 {
 guard(UModel::ClearRenderData);
@@ -1095,7 +1096,7 @@ unguard;
 // Phase 7 (EmptySurfs): GUndo skipped; empties Points, Vectors, Surfs with per-surf cleanup.
 // Phase 8 (EmptyPolys): creates new UPolys via StaticAllocateObject + zone table reset.
 // DIVERGENCE: GUndo callbacks omitted (editor-only, NULL at runtime).
-IMPL_TODO("Ghidra 0x103cfd80: GUndo LAB_ callbacks omitted (editor-only, NULL at runtime)")
+IMPL_DIVERGE("Ghidra 0x103cfd80: GUndo LAB_ callbacks omitted (editor-only undo machinery); GUndo is NULL at runtime so omission has no gameplay effect.")
 void UModel::EmptyModel( INT EmptySurfs, INT EmptyPolys )
 {
 guard(UModel::EmptyModel);
@@ -1528,7 +1529,7 @@ unguard;
 // Involves FCanvasUtil, FLineBatcher, and many vtable-dispatched RenderInterface calls.
 // No binary-global or rdtsc blockers; all FUN_ helpers are in _unnamed.cpp and
 // theoretically tractable, but volume and complexity are high.
-IMPL_TODO("Ghidra 0x103cd750: 2842-byte Render — no permanent blockers; dispatches to many unnamed BSP render helpers in _unnamed.cpp; pending full decompilation")
+IMPL_TODO("Ghidra 0x103cd750 (2842b): Render body still pending; dispatcher relies on many unresolved BSP helpers (zone visibility, section batching, decals, fog/sky paths, post effects) from _unnamed.cpp. No permanent blocker identified.")
 void UModel::Render( FDynamicActor*, FLevelSceneNode*, FRenderInterface* )
 {
 guard(UModel::Render);
