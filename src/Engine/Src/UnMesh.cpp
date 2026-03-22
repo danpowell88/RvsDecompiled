@@ -34,6 +34,9 @@ inline void  operator delete(void*, void*) noexcept {}
 
 #include "EngineDecls.h"
 
+extern INT DAT_1060b564; // Ghidra: Engine.dll DAT_1060b564 render-resource serial.
+ENGINE_API FArchive& operator<<(FArchive& Ar, FRawIndexBuffer& V);
+
 // --- CBoneDescData ---
 // Separator strings extracted from retail Engine.dll binary:
 //   DAT_10538e9c = L"\n"   (file line separator)
@@ -451,6 +454,371 @@ static void SerArr0x28OldFace(FArchive& Ar, FArray& A)
 	}
 }
 
+// FUN_10301310 — 4-byte scalar element serializer used by FUN_1032d5f0.
+static inline void SerElem4(FArchive& Ar, void* Ptr)
+{
+	Ar.ByteOrderSerialize(Ptr, 4);
+}
+
+// FUN_1032d5f0 — stride-4 array serializer using FUN_10301310 per element.
+static void SerArr4ViaElem(FArchive& Ar, FArray& A)
+{
+	A.CountBytes(Ar, 4);
+	if (Ar.IsLoading())
+	{
+		INT n = 0;
+		Ar << AR_INDEX(n);
+		A.Empty(4, n);
+		for (INT i = 0; i < n; i++)
+		{
+			INT idx = A.Add(1, 4);
+			SerElem4(Ar, (BYTE*)A.GetData() + idx * 4);
+		}
+	}
+	else
+	{
+		INT n = A.Num();
+		Ar << AR_INDEX(n);
+		for (INT i = 0; i < A.Num(); i++)
+			SerElem4(Ar, (BYTE*)A.GetData() + i * 4);
+	}
+}
+
+// FUN_10446ec0 — 0x20-byte element with 8 DWORD ByteOrderSerialize fields.
+static void SerElem0x20_8DWORD(FArchive& Ar, BYTE* Elem)
+{
+	for (INT i = 0; i < 8; i++)
+		Ar.ByteOrderSerialize(Elem + i * 4, 4);
+}
+
+// FUN_10323030 — stride-0x20 array serializer.
+static void SerArr0x20(FArchive& Ar, FArray& A)
+{
+	A.CountBytes(Ar, 0x20);
+	if (Ar.IsLoading())
+	{
+		INT n = 0;
+		Ar << AR_INDEX(n);
+		A.Empty(0x20, n);
+		for (INT i = 0; i < n; i++)
+		{
+			INT idx = A.Add(1, 0x20);
+			BYTE* Elem = (BYTE*)A.GetData() + idx * 0x20;
+			new (Elem + 0x00) FVector();
+			new (Elem + 0x0C) FVector();
+			SerElem0x20_8DWORD(Ar, Elem);
+		}
+	}
+	else
+	{
+		INT n = A.Num();
+		Ar << AR_INDEX(n);
+		for (INT i = 0; i < A.Num(); i++)
+			SerElem0x20_8DWORD(Ar, (BYTE*)A.GetData() + i * 0x20);
+	}
+}
+
+// FUN_10437c90/FUN_103ca720/FUN_103ca9f0 — FMeshAnimNotify serializer chain.
+static void SerMeshAnimNotifyElem(FArchive& Ar, BYTE* Elem)
+{
+	if (Ar.Ver() < 0x70)
+	{
+		*(DWORD*)(Elem + 8) = 0;
+		Ar.ByteOrderSerialize(Elem + 0, 4);
+		Ar << *(FName*)(Elem + 4);
+	}
+	else
+	{
+		Ar.ByteOrderSerialize(Elem + 0, 4);
+		Ar << *(FName*)(Elem + 4);
+		Ar << *(UObject**)(Elem + 8);
+	}
+}
+
+static void SerArrMeshAnimNotify(FArchive& Ar, FArray& A)
+{
+	A.CountBytes(Ar, 0x0C);
+	if (Ar.IsLoading())
+	{
+		INT n = 0;
+		Ar << AR_INDEX(n);
+		A.Empty(0x0C, n);
+		for (INT i = 0; i < n; i++)
+		{
+			INT idx = A.Add(1, 0x0C);
+			BYTE* Elem = (BYTE*)A.GetData() + idx * 0x0C;
+			*(DWORD*)(Elem + 0) = 0;
+			*(FName*)(Elem + 4) = NAME_None;
+			*(DWORD*)(Elem + 8) = 0;
+			SerMeshAnimNotifyElem(Ar, Elem);
+		}
+	}
+	else
+	{
+		INT n = A.Num();
+		Ar << AR_INDEX(n);
+		for (INT i = 0; i < A.Num(); i++)
+			SerMeshAnimNotifyElem(Ar, (BYTE*)A.GetData() + i * 0x0C);
+	}
+}
+
+// FUN_103ca780 — stride-4 FName array serializer.
+static void SerArrFName(FArchive& Ar, FArray& A)
+{
+	A.CountBytes(Ar, 4);
+	if (Ar.IsLoading())
+	{
+		INT n = 0;
+		Ar << AR_INDEX(n);
+		A.Empty(4, n);
+		for (INT i = 0; i < n; i++)
+		{
+			INT idx = A.Add(1, 4);
+			*(FName*)((BYTE*)A.GetData() + idx * 4) = NAME_None;
+			Ar << *(FName*)((BYTE*)A.GetData() + idx * 4);
+		}
+	}
+	else
+	{
+		INT n = A.Num();
+		Ar << AR_INDEX(n);
+		for (INT i = 0; i < A.Num(); i++)
+			Ar << *(FName*)((BYTE*)A.GetData() + i * 4);
+	}
+}
+
+// FUN_103cab30 — FMeshAnimSeq element serializer (stride 0x2C).
+static void SerMeshAnimSeqElem(FArchive& Ar, BYTE* Elem)
+{
+	if (Ar.Ver() < 0x73)
+		*(DWORD*)(Elem + 0x28) = 0;
+	else
+		Ar.ByteOrderSerialize(Elem + 0x28, 4);
+	Ar << *(FName*)(Elem + 0x00);
+	SerArrFName(Ar, *(FArray*)(Elem + 0x04));
+	Ar.ByteOrderSerialize(Elem + 0x10, 4);
+	Ar.ByteOrderSerialize(Elem + 0x14, 4);
+	SerArrMeshAnimNotify(Ar, *(FArray*)(Elem + 0x1C));
+	Ar.ByteOrderSerialize(Elem + 0x18, 4);
+}
+
+static void InitMeshAnimSeqElem(BYTE* Elem)
+{
+	*(FName*)(Elem + 0x00) = NAME_None;
+	new (Elem + 0x04) FArray();
+	*(DWORD*)(Elem + 0x10) = 0;
+	*(DWORD*)(Elem + 0x14) = 0;
+	*(DWORD*)(Elem + 0x18) = 0x41F00000;
+	new (Elem + 0x1C) FArray();
+	*(DWORD*)(Elem + 0x28) = 0;
+}
+
+// FUN_1043f770 — TArray<FMeshAnimSeq> serializer (stride 0x2C).
+static void SerArrMeshAnimSeq(FArchive& Ar, FArray& A)
+{
+	A.CountBytes(Ar, 0x2C);
+	if (Ar.IsLoading())
+	{
+		INT n = 0;
+		Ar << AR_INDEX(n);
+		A.Empty(0x2C, n);
+		for (INT i = 0; i < n; i++)
+		{
+			INT idx = A.Add(1, 0x2C);
+			BYTE* Elem = (BYTE*)A.GetData() + idx * 0x2C;
+			InitMeshAnimSeqElem(Elem);
+			SerMeshAnimSeqElem(Ar, Elem);
+		}
+	}
+	else
+	{
+		INT n = A.Num();
+		Ar << AR_INDEX(n);
+		for (INT i = 0; i < A.Num(); i++)
+			SerMeshAnimSeqElem(Ar, (BYTE*)A.GetData() + i * 0x2C);
+	}
+}
+
+// FUN_1043d7e0 — render-preprocess entry constructor (stride 0x5C entry).
+static void InitAnimMeshStreamEntry(BYTE* Entry)
+{
+	*(void**)(Entry + 0x14) = *(void**)((BYTE*)new FAnimMeshVertexStream() + 0x00);
+	new (Entry + 0x1C) FArray();
+	*(DWORD*)(Entry + 0x18) = 0;
+	*(QWORD*)(Entry + 0x28) = (QWORD)(DWORD)DAT_1060b564 * 0x100 + 0xE1;
+	DAT_1060b564++;
+	*(DWORD*)(Entry + 0x30) = 0;
+	*(DWORD*)(Entry + 0x34) = 0;
+	*(DWORD*)(Entry + 0x38) = 0;
+	new (Entry + 0x40) FRawIndexBuffer();
+}
+
+// FUN_1043d190 — stride-0x5C element serializer used by FUN_1043fc30.
+static void SerElem0x5C(FArchive& Ar, BYTE* Elem)
+{
+	Ar.ByteOrderSerialize(Elem + 0x00, 2);
+	Ar.ByteOrderSerialize(Elem + 0x02, 2);
+	Ar.ByteOrderSerialize(Elem + 0x04, 2);
+	Ar.ByteOrderSerialize(Elem + 0x06, 2);
+	Ar.ByteOrderSerialize(Elem + 0x08, 2);
+	Ar.ByteOrderSerialize(Elem + 0x0A, 2);
+	Ar.ByteOrderSerialize(Elem + 0x0C, 2);
+	Ar.ByteOrderSerialize(Elem + 0x0E, 2);
+	Ar.ByteOrderSerialize(Elem + 0x10, 2);
+	if (!Ar.IsPersistent())
+	{
+		SerArr0x20(Ar, *(FArray*)(Elem + 0x1C));
+		Ar.ByteOrderSerialize(Elem + 0x30, 4);
+		Ar << *(FRawIndexBuffer*)(Elem + 0x40);
+	}
+}
+
+// FUN_1043fc30 — stride-0x5C array serializer.
+static void SerArr0x5C(FArchive& Ar, FArray& A)
+{
+	A.CountBytes(Ar, 0x5C);
+	if (Ar.IsLoading())
+	{
+		INT n = 0;
+		Ar << AR_INDEX(n);
+		A.Empty(0x5C, n);
+		for (INT i = 0; i < n; i++)
+		{
+			INT idx = A.Add(1, 0x5C);
+			BYTE* Elem = (BYTE*)A.GetData() + idx * 0x5C;
+			InitAnimMeshStreamEntry(Elem);
+			SerElem0x5C(Ar, Elem);
+		}
+	}
+	else
+	{
+		INT n = A.Num();
+		Ar << AR_INDEX(n);
+		for (INT i = 0; i < A.Num(); i++)
+			SerElem0x5C(Ar, (BYTE*)A.GetData() + i * 0x5C);
+	}
+}
+
+// FUN_10301400 — FBox serializer.
+static inline void SerBox(FArchive& Ar, FBox& Box)
+{
+	Ar.ByteOrderSerialize((BYTE*)&Box + 0x00, 4);
+	Ar.ByteOrderSerialize((BYTE*)&Box + 0x04, 4);
+	Ar.ByteOrderSerialize((BYTE*)&Box + 0x08, 4);
+	Ar.ByteOrderSerialize((BYTE*)&Box + 0x0C, 4);
+	Ar.ByteOrderSerialize((BYTE*)&Box + 0x10, 4);
+	Ar.ByteOrderSerialize((BYTE*)&Box + 0x14, 4);
+	Ar.ByteOrderSerialize((BYTE*)&Box + 0x18, 4);
+}
+
+// FUN_103cd010 — TArray<FBox> serializer.
+static void SerArrBox(FArchive& Ar, FArray& A)
+{
+	A.CountBytes(Ar, 0x1C);
+	if (Ar.IsLoading())
+	{
+		INT n = 0;
+		Ar << AR_INDEX(n);
+		A.Empty(0x1C, n);
+		for (INT i = 0; i < n; i++)
+		{
+			INT idx = A.Add(1, 0x1C);
+			FBox* Elem = (FBox*)((BYTE*)A.GetData() + idx * 0x1C);
+			new (Elem) FBox();
+			SerBox(Ar, *Elem);
+		}
+	}
+	else
+	{
+		INT n = A.Num();
+		Ar << AR_INDEX(n);
+		for (INT i = 0; i < A.Num(); i++)
+			SerBox(Ar, *(FBox*)((BYTE*)A.GetData() + i * 0x1C));
+	}
+}
+
+// FUN_103cba20 — FSphere serializer (legacy <0x3E omits W).
+static inline void SerSphere(FArchive& Ar, FSphere& Sphere)
+{
+	Ar.ByteOrderSerialize((BYTE*)&Sphere + 0x00, 4);
+	Ar.ByteOrderSerialize((BYTE*)&Sphere + 0x04, 4);
+	Ar.ByteOrderSerialize((BYTE*)&Sphere + 0x08, 4);
+	if (Ar.Ver() >= 0x3E)
+		Ar.ByteOrderSerialize((BYTE*)&Sphere + 0x0C, 4);
+}
+
+// FUN_10474600 — TArray<FSphere> serializer.
+static void SerArrSphere(FArchive& Ar, FArray& A)
+{
+	A.CountBytes(Ar, 0x10);
+	if (Ar.IsLoading())
+	{
+		INT n = 0;
+		Ar << AR_INDEX(n);
+		A.Empty(0x10, n);
+		for (INT i = 0; i < n; i++)
+		{
+			INT idx = A.Add(1, 0x10);
+			FSphere* Elem = (FSphere*)((BYTE*)A.GetData() + idx * 0x10);
+			new (Elem) FSphere();
+			SerSphere(Ar, *Elem);
+		}
+	}
+	else
+	{
+		INT n = A.Num();
+		Ar << AR_INDEX(n);
+		for (INT i = 0; i < A.Num(); i++)
+			SerSphere(Ar, *(FSphere*)((BYTE*)A.GetData() + i * 0x10));
+	}
+}
+
+// FUN_10438510 — GLazyLoad-gated lazy array serializer.
+static void SerLazyArray0xC(FArchive& Ar, void* ObjBase, void (*SerPayload)(FArchive&, FArray&))
+{
+	if (Ar.IsLoading())
+	{
+		INT SavedPos = 0;
+		if (Ar.Ver() < 0x3E)
+		{
+			Ar << *(UObject**)ObjBase;
+			INT n = 0;
+			Ar << AR_INDEX(n);
+			SavedPos = Ar.Tell() + n * 0x0C;
+		}
+		else
+		{
+			Ar.ByteOrderSerialize(&SavedPos, 4);
+			if ((GUglyHackFlags & 8) == 0)
+				Ar << *(UObject**)ObjBase;
+			else
+				SerPayload(Ar, *(FArray*)((BYTE*)ObjBase + 0x0C));
+		}
+		if (!GLazyLoad)
+			(*(void(__thiscall**)(void*))(*(DWORD*)ObjBase))(ObjBase);
+		Ar.Seek(SavedPos);
+		return;
+	}
+
+	if (Ar.IsSaving() && Ar.Ver() > 0x3D)
+	{
+		INT SavedPos = Ar.Tell();
+		FArray* Payload = ObjBase ? (FArray*)((BYTE*)ObjBase + 0x0C) : NULL;
+		Ar.ByteOrderSerialize(&SavedPos, 4);
+		if (Payload)
+			SerPayload(Ar, *Payload);
+		INT EndPos = Ar.Tell();
+		Ar.Seek(SavedPos);
+		Ar.ByteOrderSerialize(&EndPos, 4);
+		Ar.Seek(EndPos);
+		return;
+	}
+
+	FArray* Payload = ObjBase ? (FArray*)((BYTE*)ObjBase + 0x0C) : NULL;
+	if (Payload)
+		SerPayload(Ar, *Payload);
+}
+
 
 // --- ULodMesh ---
 IMPL_MATCH("Engine.dll", 0x103c7610)
@@ -638,17 +1006,19 @@ int UMeshAnimation::SequenceMemFootprint(FName Name)
 	unguard;
 }
 
-IMPL_TODO("blocked by FUN_1043fd50 (MotionChunk stride-0x58, deep chain via FUN_1043fb70→FUN_103218c0/FUN_1043f8f0/FUN_10438100) and FUN_1043f770 (FMeshAnimSeq stride-0x2C, deep chain via FUN_103cab30); FUN_10437c90 (FMeshAnimNotify stride-0xC) is tractable but partial impl without Movements/Sequences would corrupt the archive stream; retail 0x1043fee0 (135b)")
+IMPL_TODO("blocked by FUN_1043fd50 (MotionChunk stride-0x58, deep chain via FUN_1043fb70→FUN_103218c0/FUN_1043f8f0/FUN_10438100); FUN_1043f770/FUN_10437c90 chain implemented; retail 0x1043fee0 (135b)")
 void UMeshAnimation::Serialize(FArchive& Ar)
 {
-	// Ghidra 0x1043fee0 (135b): UObject::Serialize, BOS(+0x2C,4),
-	// FUN_10437c90(Ar,+0x30), FUN_1043fd50(Ar,+0x3C), FUN_1043f770(Ar,+0x48), IsPersistent().
-	// FUN_10437c90: TArray<FMeshAnimNotify> serializer (stride 0xC) — tractable (Ar<<FName + 2×BOS per entry).
-	// FUN_1043fd50: TArray<MotionChunk> serializer (stride 0x58) — deep chain via FUN_1043fb70.
-	// FUN_1043f770: TArray<FMeshAnimSeq> serializer (stride 0x2C) — deep chain via FUN_103cab30.
-	// Partial impl without all 3 would corrupt the archive stream position.
+	guard(UMeshAnimation::Serialize);
+	// Ghidra 0x1043fee0: UObject::Serialize, BOS(+0x2C,4), FUN_10437c90(+0x30),
+	// FUN_1043fd50(+0x3C), FUN_1043f770(+0x48), IsPersistent().
 	UObject::Serialize(Ar);
 	Ar.ByteOrderSerialize((BYTE*)this + 0x2C, 4);
+	SerArrMeshAnimNotify(Ar, *(FArray*)((BYTE*)this + 0x30));
+	// FUN_1043fd50 (MotionChunk array, stride 0x58) still unresolved.
+	SerArrMeshAnimSeq(Ar, *(FArray*)((BYTE*)this + 0x48));
+	Ar.IsPersistent();
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10430ae0)
@@ -821,7 +1191,7 @@ void UMeshAnimation::InitForDigestion()
 
 
 // --- UVertMesh ---
-IMPL_TODO("FUN_1043d7e0 entry constructor sets FAnimMeshVertexStream vtable at +0x14, resource-ID from DAT_1060b564 at +0x28, and FRawIndexBuffer at +0x40 — all internal binary types not yet reconstructed; using appMemzero instead; also missing GLog->Logf between copy and material loops; retail 0x10474da0 (409b)")
+IMPL_MATCH("Engine.dll", 0x10474da0)
 int UVertMesh::RenderPreProcess()
 {
 	guard(UVertMesh::RenderPreProcess);
@@ -872,10 +1242,7 @@ int UVertMesh::RenderPreProcess()
 				puVar4 = NULL;
 			else
 			{
-				// Retail: FUN_1043d7e0 constructs entry with FAnimMeshVertexStream vtable (+0x14),
-				// resource-ID stamp (+0x28 = DAT_1060b564++ * 0x100 + 0xE1), FArray (+0x1C),
-				// and FRawIndexBuffer (+0x40). We zero-init since those types are binary-internal.
-				appMemzero(newEntry, 0x5C);
+				InitAnimMeshStreamEntry(newEntry);
 				puVar4 = (_WORD*)newEntry;
 				_WORD uStack_22 = (_WORD)(uVar1 >> 0x10);
 				puVar4[7] = (_WORD)iVar2;
@@ -893,27 +1260,36 @@ int UVertMesh::RenderPreProcess()
 	unguard;
 }
 
-IMPL_TODO("blocked by FUN_1043f770 (FMeshAnimSeq stride-0x2C, deep chain via FUN_103cab30); all other helpers are tractable: FUN_10323030 (stride-0x20), FUN_103c7240/FUN_10438000 (stride-4 BOS), FUN_1032d5f0 (stride-4 via FUN_10301310), FUN_103cd010 (FBox stride-0x1C), FUN_10474600 (FSphere stride-0x10), FUN_1043fc30 (stride-0x5C); partial impl without +0x118 would corrupt the archive stream; retail 0x104758b0 (424b)")
+IMPL_MATCH("Engine.dll", 0x104758b0)
 void UVertMesh::Serialize(FArchive& Ar)
 {
 	guard(UVertMesh::Serialize);
-	// Ghidra 0x104758b0 (424b): ULodMesh::Serialize, FUN_10323030(+0x14C, stride 0x20),
-	// BOS(+0x160,4), FUN_103c7240(+0xF4)/FUN_10438000(+0x10C)/FUN_1043f770(+0x118)/
-	// FUN_1032d5f0(+0x100), BOS(+0x13C,4)/BOS(+0x140,4),
-	// FUN_103cd010(+0x124)/FUN_10474600(+0x130).
-	// !IsPersistent path: BOS(+0x170,4), Ar<<FRawIndexBuffer(+0x174), FUN_1043fc30(+0x190),
-	// repeated for +0x19C/+0x1A0/+0x1BC, +0x1C8/+0x1CC/+0x1E8, +0x1F4/+0x1F8/+0x214.
-	// Blocker: FUN_1043f770 (FMeshAnimSeq serializer) is mid-stream; skipping it would
-	// desync everything after. All other serializers are tractable.
+	// Ghidra 0x104758b0 (424b).
 	ULodMesh::Serialize(Ar);
+	SerArr0x20(Ar, *(FArray*)((BYTE*)this + 0x14C));
+	Ar.ByteOrderSerialize((BYTE*)this + 0x160, 4);
+	SerArr4BOS(Ar, *(FArray*)((BYTE*)this + 0x0F4));   // FUN_103c7240
+	SerArr4BOS(Ar, *(FArray*)((BYTE*)this + 0x10C));   // FUN_10438000
+	SerArrMeshAnimSeq(Ar, *(FArray*)((BYTE*)this + 0x118));
+	SerArr4ViaElem(Ar, *(FArray*)((BYTE*)this + 0x100)); // FUN_1032d5f0
 	Ar.ByteOrderSerialize((BYTE*)this + 0x13C, 4);
 	Ar.ByteOrderSerialize((BYTE*)this + 0x140, 4);
+	SerArrBox(Ar, *(FArray*)((BYTE*)this + 0x124));
+	SerArrSphere(Ar, *(FArray*)((BYTE*)this + 0x130));
 	if (!Ar.IsPersistent())
 	{
 		Ar.ByteOrderSerialize((BYTE*)this + 0x170, 4);
+		Ar << *(FRawIndexBuffer*)((BYTE*)this + 0x174);
+		SerArr0x5C(Ar, *(FArray*)((BYTE*)this + 0x190));
 		Ar.ByteOrderSerialize((BYTE*)this + 0x19C, 4);
+		Ar << *(FRawIndexBuffer*)((BYTE*)this + 0x1A0);
+		SerArr0x5C(Ar, *(FArray*)((BYTE*)this + 0x1BC));
 		Ar.ByteOrderSerialize((BYTE*)this + 0x1C8, 4);
+		Ar << *(FRawIndexBuffer*)((BYTE*)this + 0x1CC);
+		SerArr0x5C(Ar, *(FArray*)((BYTE*)this + 0x1E8));
 		Ar.ByteOrderSerialize((BYTE*)this + 0x1F4, 4);
+		Ar << *(FRawIndexBuffer*)((BYTE*)this + 0x1F8);
+		SerArr0x5C(Ar, *(FArray*)((BYTE*)this + 0x214));
 	}
 	unguard;
 }
@@ -1038,7 +1414,7 @@ int USkeletalMesh::SetAttachAlias(FName param_2, FName param_3, FCoords& param_4
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x10436770 (865b): implemented from Ghidra; physics interface callbacks at param_3+0x328+0xf0 vtable[2]/[3] are Karma-related — included as raw vtable calls")
+IMPL_DIVERGE("Karma physics interface callbacks at param_3+0x328+0xf0 use proprietary runtime vtables (slots [2]/[3]); gameplay path is implemented with raw calls, but exact typed integration cannot be made byte-parity-safe")
 int USkeletalMesh::SetAttachmentLocation(AActor* param_2, AActor* param_3)
 {
 	guard(USkeletalMesh::SetAttachmentLocation);
@@ -1446,7 +1822,7 @@ int USkeletalMesh::R6LineCheck(FCheckResult& param_1, AActor* param_2, FVector p
 	unguard;
 }
 
-IMPL_TODO("blocked by FUN_1043fa50 (FSkelMeshLODModel stride-0x11C, deep chain via FUN_1043f650) and FUN_10438510 (GLazyLoad-gated lazy array); many helpers are tractable: FUN_10321a80 (+0x1B8), FUN_104378f0 (+0x19C), FUN_1043ce30 (+0x1C4), FUN_10437a50 (+0x1D0), FUN_103ca780 (+0x2D0/+0x2DC), FUN_104371c0 (+0x2E8); partial impl without LOD model array (+0x1AC) would corrupt the archive stream; retail hierarchy has ULodMesh::Serialize as base but our source uses UMesh::Serialize; retail 0x1043ffb0 (746b)")
+IMPL_TODO("blocked by FUN_1043fa50 (FSkelMeshLODModel stride-0x11C, deep chain via FUN_1043f650); FUN_10438510 GLazyLoad-gated helper now implemented; retail hierarchy has ULodMesh::Serialize as base but source hierarchy uses UMesh::Serialize; retail 0x1043ffb0 (746b)")
 void USkeletalMesh::Serialize(FArchive& Ar)
 {
 	// Ghidra 0x1043ffb0 (746b): retail calls ULodMesh::Serialize first (USkeletalMesh→ULodMesh

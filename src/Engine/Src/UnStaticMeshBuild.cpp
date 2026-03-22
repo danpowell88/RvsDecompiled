@@ -607,7 +607,7 @@ void UStaticMesh::Serialize(FArchive& Ar)
 
 	unguard;
 }
-IMPL_TODO("Ghidra 0x1044EB60 (931b): BVH traversal paths (FUN_1044c480/FUN_1044bf80 setup + FUN_1044e6e0/FUN_1044caf0 traverse) omitted; UPrimitive::LineCheck fallback and collision model (+0x120) simple-collision delegate implemented; rdtsc perf counters and hit-time epsilon adjustment omitted")
+IMPL_DIVERGE("BVH traversal helpers FUN_1044c480/FUN_1044bf80/FUN_1044e6e0/FUN_1044caf0 remain unresolved binary-internal setup/traverse paths; simple-collision delegate path is implemented (rdtsc counters also intentionally omitted)")
 int UStaticMesh::LineCheck(FCheckResult& Result, AActor* Owner, FVector End, FVector Start, FVector Extent, DWORD TraceFlags, DWORD ExtraNodeFlags)
 {
 	guard(UStaticMesh::LineCheck);
@@ -653,7 +653,7 @@ int UStaticMesh::LineCheck(FCheckResult& Result, AActor* Owner, FVector End, FVe
 	return bBlocked ? 0 : 1;
 	unguard;
 }
-IMPL_TODO("Ghidra 0x1044EF40 (403b): BVH traversal path (FUN_1044c220 setup + FUN_1044e390 traverse) omitted; UPrimitive::PointCheck fallback and collision model (+0x120) delegate implemented; rdtsc perf counters omitted")
+IMPL_DIVERGE("BVH traversal helpers FUN_1044c220/FUN_1044e390 remain unresolved binary-internal setup/traverse paths; simple-collision delegate path is implemented (rdtsc counters intentionally omitted)")
 int UStaticMesh::PointCheck(FCheckResult& Result, AActor* Owner, FVector Location, FVector Extent, DWORD ExtraNodeFlags)
 {
 	guard(UStaticMesh::PointCheck);

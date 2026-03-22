@@ -856,7 +856,7 @@ void USpriteEmitter::CleanUp()
 }
 
 // Ghidra: 0x104440b0, 3625 bytes
-IMPL_TODO("Ghidra 0x104440b0 (3625b): camera-facing billboard quad generation per live particle; FSceneNode::Deproject available (IMPL_MATCH); large function with FCoords transforms, rotation/scale/colour/UV per particle — no FUN_ blockers")
+IMPL_TODO("Ghidra 0x104440b0 (3625b): Deproject-driven billboard basis and per-particle quad packing are mapped, but full rotation/atlas/axis-mode parity across all emitter flags is still pending")
 int USpriteEmitter::FillVertexBuffer(FSpriteParticleVertex* param_1, FLevelSceneNode* param_2)
 {
 	guard(USpriteEmitter::FillVertexBuffer);
