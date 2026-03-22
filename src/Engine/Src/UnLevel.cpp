@@ -1,4 +1,4 @@
-/*=============================================================================
+﻿/*=============================================================================
 	UnLevel.cpp: ULevel, ALevelInfo, AGameInfo and related classes.
 	Reconstructed for Ravenshield decompilation project.
 
@@ -588,11 +588,11 @@ INT ULevel::ServerTickClient( UNetConnection* Conn, FLOAT DeltaSeconds )
 	guard(ULevel::ServerTickClient);
 
 	if (!Conn)
-		appFailAssert("Conn", ".\\UnLevTic.cpp", 0);
+		appFailAssert("Connection", ".\\UnLevTic.cpp", 0x3b1);
 
 	INT State = *(INT*)((BYTE*)Conn + 0x80);
 	if (State != 1 && State != 2 && State != 3)
-		appFailAssert("Conn->State invalid", ".\\UnLevTic.cpp", 0);
+		appFailAssert("Connection->State==USOCK_Pending || Connection->State==USOCK_Open || Connection->State==USOCK_Closed", ".\\UnLevTic.cpp", 0x3b2);
 
 	INT local_64 = 0;
 
@@ -602,9 +602,9 @@ INT ULevel::ServerTickClient( UNetConnection* Conn, FLOAT DeltaSeconds )
 	// Gate: PC non-null, connection ready, state==3, not timed out
 	if (PC != NULL && Conn->IsNetReady(0) && State == 3 && ndPtr != NULL)
 	{
-		FLOAT ndTime   = *(FLOAT*)((BYTE*)ndPtr + 0x48);
-		FLOAT lastRecv = *(FLOAT*)((BYTE*)Conn + 0xf4);
-		if (ndTime - lastRecv < 1.5f)
+		double ndTime   = *(double*)((BYTE*)ndPtr + 0x48);
+		double lastRecv = *(double*)((BYTE*)Conn + 0xf4);
+		if (ndTime - lastRecv < 1.5)
 		{
 			FMemMark Mark(GMem);
 
@@ -638,7 +638,7 @@ INT ULevel::ServerTickClient( UNetConnection* Conn, FLOAT DeltaSeconds )
 			PC->eventPlayerCalcView(Viewer, ViewLoc, ViewRot);
 
 			if (Viewer == NULL)
-				appFailAssert("Viewer", ".\\UnLevTic.cpp", 0);
+				appFailAssert("Viewer", ".\\UnLevTic.cpp", 0x3cc);
 
 			FLOAT viewX = ViewLoc.X, viewY = ViewLoc.Y, viewZ = ViewLoc.Z;
 
@@ -1312,210 +1312,313 @@ INT ULevel::IsServer()
 		return 1;
 	return 0;
 }
-IMPL_TODO("Ghidra 0x103b9750 (5565b): standard Unreal collision path implemented (MoveActorFirstBlocking, partial-delta blocking, hash, UnTouch); AR6ColBox/Karma attached-actor matrix transforms and AR6ColBox path omitted (proprietary SDK)")
+// Ghidra 0x103b9750 (5565 bytes).
+// Full collision sweep/response loop.  The attached-actor matrix transforms
+// (GetLocalCoords vtable+0xa8, FUN_10301560, FUN_10370d70) and the
+// AR6ColBox base step-up path are R6-specific and omitted.  Karma updates
+// (FUN_104c3660 / KU2METransform / FUN_104aa490 / FUN_104aa400) are
+// proprietary and permanently omitted.
+// DIVERGENCE: attached actor loop uses UpdateRelativeRotation fallback instead
+//             of Ghidra's full matrix-product propagation.
+// DIVERGENCE: AR6ColBox base step-up retries are not implemented.
+// DIVERGENCE: Karma physics sync calls are omitted (proprietary SDK).
+IMPL_TODO("Ghidra 0x103b9750: sweep collision, touch/bump notifications, and partial-delta blocking implemented; attached-actor matrix propagation and AR6ColBox step-up omitted; Karma omitted (proprietary)")
 INT ULevel::MoveActor( AActor* Actor, FVector Delta, FRotator NewRotation, FCheckResult& Hit, INT bTest, INT bIgnorePawns, INT bIgnoreBases, INT bNoFail, INT bExtra )
 {
-	guard(ULevel::MoveActor);
+guard(ULevel::MoveActor);
+check(Actor != NULL);
 
-	check(Actor != NULL);
+// Initialise Hit result to "no hit" (12 DWORDs = 48 bytes)
+appMemzero(&Hit, sizeof(FCheckResult));
+Hit.Time = 1.f;
+Hit.Item = INDEX_NONE;
 
-	// Init Hit result to empty (12 DWORDs = 48 bytes)
-	appMemzero(&Hit, sizeof(FCheckResult));
-	Hit.Time = 1.f;
-	Hit.Item = INDEX_NONE;
+UBOOL bStatic  = (*(BYTE*)((BYTE*)Actor + 0xA0) & 1) != 0;
+UBOOL bMovable = (*(DWORD*)((BYTE*)Actor + 0xA8) & 0x20) != 0;
 
-	UBOOL bStatic  = (*(BYTE*)((BYTE*)Actor + 0xA0) & 1) != 0;
-	UBOOL bMovable = (*(DWORD*)((BYTE*)Actor + 0xA8) & 0x20) != 0;
+if ( (!bStatic && bMovable) || GIsEditor )
+{
+if ( Delta.IsNearlyZero() )
+{
+if ( NewRotation == Actor->Rotation )
+return 1;
 
-	// Only proceed for movable actors or in editor
-	if ( (!bStatic && bMovable) || GIsEditor )
-	{
-		// Zero-delta + same-rotation → nothing to do
-		if ( Delta.IsNearlyZero() )
-		{
-			if ( NewRotation == Actor->Rotation )
-				return 1;
+// Rotation-only fast path: skip full sweep when no attached actors and
+// the actor is not a non-convex static mesh needing encroachment checks.
+INT   NumAttached = *(INT*)((BYTE*)Actor + 0x1D8);  // Attached.Num()
+DWORD ActorFlagsR = *(DWORD*)((BYTE*)Actor + 0xA8);
+UBOOL bRotationOnly = (NumAttached == 0)
+&& ( (ActorFlagsR & 0x2000) == 0
+|| *(BYTE*)((BYTE*)Actor + 0x2F) != DT_StaticMesh
+|| (ActorFlagsR & 0x400000) != 0 );
 
-			// Rotation-only fast path: no attachments needed
-			INT NumAttached = *(INT*)((BYTE*)Actor + 0x1D4 + 4); // Attached.Num()
-			DWORD ActorFlags = *(DWORD*)((BYTE*)Actor + 0xA8);
+if ( bRotationOnly )
+{
+FCollisionHashBase* Hash = *(FCollisionHashBase**)((BYTE*)this + 0xF0);
+if ( (ActorFlagsR & 0x800) && Hash )
+Hash->RemoveActor(Actor);
 
-			UBOOL bRotationOnly = (NumAttached == 0)
-				&& ( (ActorFlags & 0x2000) == 0
-				  || *(BYTE*)((BYTE*)Actor + 0x2F) != DT_StaticMesh
-				  || (ActorFlags & 0x400000) != 0 );
+*(FRotator*)((BYTE*)Actor + 0x240) = NewRotation;
 
-			if ( bRotationOnly )
-			{
-				// Notify hash of removal before position/rotation change
-				FCollisionHashBase* Hash = *(FCollisionHashBase**)((BYTE*)this + 0xF0);
-				if ( (ActorFlags & 0x800) && Hash )
-					Hash->RemoveActor(Actor);
+if ( !bIgnoreBases )
+Actor->UpdateRelativeRotation();
 
-				// Apply rotation
-				*(FRotator*)((BYTE*)Actor + 0x240) = NewRotation;
+if ( (ActorFlagsR & 0x800) && Hash )
+Hash->AddActor(Actor);
 
-				// Update relative rotation for attached actors
-				if ( !bIgnoreBases )
-					Actor->UpdateRelativeRotation();
+// vtable+0x140: physics/Karma sync check; return value gates Karma calls
+typedef INT (__thiscall* PhysCheckFn)(AActor*);
+((PhysCheckFn)(*(INT*)(*(INT*)Actor + 0x140)))(Actor);
+// Karma sync (FUN_104c3660, KU2METransform etc.) omitted (proprietary SDK)
+return 1;
+}
+// Fall through: rotation changed with attached actors present —
+// main loop applies zero displacement + new rotation + propagates to attached.
+}
+}
+else
+{
+return 0;
+}
 
-				// Re-add to hash
-				if ( (ActorFlags & 0x800) && Hash )
-					Hash->AddActor(Actor);
+// ---- Main collision sweep / response loop ----
+FMemMark Mark(GMem);
 
-				// Update render data (vtable+0x140)
-				typedef INT (__thiscall* UpdateRenderFn)(AActor*);
-				((UpdateRenderFn)(*(INT*)(*(INT*)Actor + 0x140)))(Actor);
+DWORD ActorFlags = *(DWORD*)((BYTE*)Actor + 0xA8);
+FLOAT DeltaSize  = Delta.Size();
+FVector Dir = (DeltaSize > 0.f) ? (Delta / DeltaSize) : FVector(0.f, 0.f, 0.f);
 
-				// Karma physics updates omitted (proprietary SDK)
-				return 1;
-			}
-		}
-	}
-	else
-	{
-		// Actor cannot be moved (static and not in editor)
-		return 0;
-	}
+// Swept end: Actor->Location + Delta + 2*Dir (2-unit lead for accurate sweep margin)
+FVector SweepEnd(
+*(FLOAT*)((BYTE*)Actor + 0x234) + Delta.X + Dir.X + Dir.X,
+*(FLOAT*)((BYTE*)Actor + 0x238) + Delta.Y + Dir.Y + Dir.Y,
+*(FLOAT*)((BYTE*)Actor + 0x23C) + Delta.Z + Dir.Z + Dir.Z
+);
 
-	// Main collision sweep/response loop (Ghidra 0x103b9750)
-	FMemMark Mark(GMem);
+// vtable+0xC8 (= 200 decimal) on Actor:
+//   returns 0  -> normal sweep-collision actor (pawn, projectile, etc.)
+//   returns !=0 -> moving brush / encroacher (uses CheckEncroachment instead)
+// Ghidra: (**(code **)(*(int *)param_1 + 200))()
+typedef INT (__thiscall* IsMovingBrushFn)(AActor*);
+INT bIsMovingBrush = ((IsMovingBrushFn)(*(INT*)(*(INT*)Actor + 0xC8)))(Actor);
 
-	FLOAT DeltaSize = Delta.Size();
-	FVector Dir = (DeltaSize > 0.0f) ? Delta / DeltaSize : Delta;
+// Touch / blocking tracking
+AActor* TouchActor = NULL;  // first blocking/touching actor (from Hit.Actor)
+AActor* BaseActor  = NULL;  // secondary touch (AR6ColBox base path, always NULL here)
+INT     TouchCount = 0;
+AActor* TouchList[256];
+INT     bBlocked   = 0;
 
-	DWORD ActorFlags2 = *(DWORD*)((BYTE*)Actor + 0xa8);
-	typedef INT (__thiscall* VFn200)(void*);
+// Sweep: only for non-mover actors with collision flags and non-zero delta
+if ( (ActorFlags & 0x1800) != 0 && bIsMovingBrush == 0 && DeltaSize > 0.f )
+{
+// Build trace flags from actor collision properties:
+//   bCollideActors (0x800) -> trace actors
+//   bCollideWorld  (0x1000) -> trace world geometry
+//   bInterpolating (0x100000) -> ignore volume triggers
+DWORD TraceFlags = 0;
+if ( (ActorFlags & 0x800) != 0 )    // bCollideActors
+TraceFlags = (bIgnorePawns == 0) ? 0x19u : 0x18u;  // 0x19 includes TRACE_Pawns
+if ( (ActorFlags & 0x1000) != 0 )   // bCollideWorld
+TraceFlags |= 0x86u;            // TRACE_LevelGeometry|TRACE_Level|TRACE_Movers
+if ( (ActorFlags & 0x100000) != 0 ) // bInterpolating
+TraceFlags |= 0x10000u;
 
-	// Build collision TraceFlags from actor flags (Ghidra 0x103b9a60)
-	DWORD TraceFlags = 0;
-	if (ActorFlags2 & 0x800)                    // bCollideWorld
-		TraceFlags = (bIgnorePawns == 0) ? 0x19u : 0x18u;
-	if (ActorFlags2 & 0x1000)                   // bCollideActors
-		TraceFlags |= 0x86u;
-	if (ActorFlags2 & 0x100000)
-		TraceFlags |= 0x10000u;
+// Level for world-geometry checks (only needed when bCollideWorld is set)
+ALevelInfo* CollisionLevel = ((ActorFlags & 0x1000) != 0) ? GetLevelInfo() : NULL;
 
-	AActor* FirstBlocking = NULL;
-	INT     hitFlags      = 0;
+// Actor cylinder extent
+FLOAT ColRadius = *(FLOAT*)((BYTE*)Actor + 0xF8);
+FLOAT ColHeight = *(FLOAT*)((BYTE*)Actor + 0xFC);
+FVector Extent(ColRadius, ColRadius, ColHeight);
 
-	if (bExtra == 0)
-	{
-		// Standard (non-AR6ColBox) movement path.
+// Multi-line sweep: find every actor intersected along the swept path
+FCheckResult* FirstHit = MultiLineCheck(GMem, SweepEnd, Actor->Location,
+                                        Extent, CollisionLevel, TraceFlags, Actor);
 
-		// Perform sweep collision if actor has collision flags and is not a pawn-type
-		// vtable[0xc8/4](Actor)==0 → standard-physics actor; use MultiLineCheck sweep
-		if ((ActorFlags2 & 0x1800) != 0 && ((VFn200)(*(INT*)(*(INT*)Actor + 0xc8)))(Actor) == 0 && DeltaSize != 0.0f)
-		{
-			// Build actor extent (radius, radius, height)
-			FVector Extent(*(FLOAT*)((BYTE*)Actor + 0xf8),
-			               *(FLOAT*)((BYTE*)Actor + 0xf8),
-			               *(FLOAT*)((BYTE*)Actor + 0xfc));
-			// Sweep slightly past the destination to catch thin geometry
-			FVector SweepEnd = Actor->Location + Delta + Dir * 2.f;
-			ALevelInfo* pLvl = ((ActorFlags2 & 0x1000) != 0) ? GetLevelInfo() : NULL;
+// Find the first truly blocking hit (writes into Hit).
+// Note: MoveActorFirstBlocking's 3rd param is bIgnoreBases (named "bTest" in header).
+bBlocked = MoveActorFirstBlocking(Actor, bIgnorePawns, bIgnoreBases, FirstHit, Hit);
 
-			// MultiLineCheck returns linked list of all hits in sweep path
-			FCheckResult* HitList = MultiLineCheck(GMem, SweepEnd, Actor->Location,
-			                                       Extent, pLvl, TraceFlags, Actor);
+if ( Hit.Actor != NULL )
+TouchActor = Hit.Actor;
 
-			hitFlags = MoveActorFirstBlocking(Actor, bIgnorePawns, bTest, HitList, Hit);
-			if (Hit.Actor != NULL)
-				FirstBlocking = Hit.Actor;
+// Collect non-blocking touches: actors whose sweep Time < blocking Hit.Time.
+// (Inlined FUN_103b7390 @ 0x103b7390 -- 63 bytes)
+for ( FCheckResult* Check = FirstHit;
+      Check != NULL && TouchCount < 256;
+      Check = Check->GetNext() )
+{
+if ( Check->Time >= Hit.Time )
+break;
+TouchList[TouchCount++] = Check->Actor;
+}
 
-			// FUN_103b7390: post-blocking cleanup helper (no exported name)
-			typedef void (__cdecl* PostBlockHelperFn)();
-			((PostBlockHelperFn)(0x103b7390))();
+// Clear base actor's "world-bound" flag (bit 3 of offset 0x394)
+// Ghidra: *(uint*)(*(int*)(Actor+0x180) + 0x394) &= ~0x8
+INT pBase = *(INT*)((BYTE*)Actor + 0x180);
+if ( pBase != 0 )
+*(DWORD*)(pBase + 0x394) &= ~0x8u;
 
-			// Clear base AR6ColBox blocking flag if actor has a base
-			INT basePtr = *(INT*)((BYTE*)Actor + 0x180);
-			if (basePtr != 0)
-				*(DWORD*)(basePtr + 0x394) &= ~8u;
-		}
+// TODO: Ghidra 0x103b9750 -- AR6ColBox base step-up:
+// If Actor->Base is an AR6ColBox with bWorldBound set and actor has movement
+// flags (0x7000), call AR6ColBox::GetMaxStepUp and optionally retry
+// MoveActorFirstBlocking with an upward offset for the base actor.
+// Requires proprietary AR6ColBox helpers -- omitted.
+}
 
-		FLOAT moveX = Delta.X, moveY = Delta.Y, moveZ = Delta.Z;
+// ---- Standard movement update path (bExtra == 0) ----
+// When bExtra != 0 the sweep above still runs (for AR6ColBox collision query)
+// but location/rotation are NOT updated -- the caller uses Hit.Time directly.
+if ( bExtra == 0 )
+{
+// Trim delta to the hit point, backing off 2 units from the wall surface.
+// Ghidra: dist = (Size+2)*HitTime; if dist>=2: adj = Dir*(dist-2), HitTime=(dist-2)/Size
+FVector AdjustedDelta = Delta;
+if ( Hit.Time < 1.f && bNoFail == 0 && DeltaSize > 0.f )
+{
+FLOAT dist = (DeltaSize + 2.f) * Hit.Time;
+if ( dist >= 2.f )
+{
+AdjustedDelta = Dir * (dist - 2.f);
+Hit.Time      = (dist - 2.f) / DeltaSize;
+}
+else
+{
+AdjustedDelta = FVector(0.f, 0.f, 0.f);
+Hit.Time      = 0.f;
+}
+}
 
-		// Partial move if blocked before reaching destination
-		if (Hit.Time < 1.0f && bNoFail == 0 && DeltaSize > 0.0f)
-		{
-			FLOAT dist = (DeltaSize + 2.0f) * Hit.Time;
-			if (dist >= 2.0f)
-			{
-				FLOAT t = (dist - 2.0f) / DeltaSize;
-				moveX = Delta.X * t;
-				moveY = Delta.Y * t;
-				moveZ = Delta.Z * t;
-				Hit.Time = t;
-			}
-			else
-			{
-				moveX = moveY = moveZ = 0.0f;
-				Hit.Time = 0.0f;
-			}
-		}
+// Encroachment check for moving brushes (bIsMovingBrush != 0).
+// Ghidra: vtable+0xC0 on ULevel = CheckEncroachment
+if ( bTest == 0 && bNoFail == 0 && bIsMovingBrush != 0 )
+{
+FVector TestLoc(
+*(FLOAT*)((BYTE*)Actor + 0x234) + AdjustedDelta.X,
+*(FLOAT*)((BYTE*)Actor + 0x238) + AdjustedDelta.Y,
+*(FLOAT*)((BYTE*)Actor + 0x23C) + AdjustedDelta.Z
+);
+if ( CheckEncroachment(Actor, TestLoc, NewRotation, 0) )
+{
+Mark.Pop();
+return 0;
+}
+}
 
-		// Encroachment check for encroacher actors when not testing
-		// vtable[0xc8](Actor) != 0 → pawn-type encroacher; query level encroachment
-		if (bTest == 0 && bNoFail == 0 && ((VFn200)(*(INT*)(*(INT*)Actor + 0xc8)))(Actor) != 0)
-		{
-			typedef INT (__thiscall* LevelCheckEncFn)(ULevel*);
-			INT bEncroached = ((LevelCheckEncFn)(*(INT*)(*(INT*)this + 0xc0)))(this);
-			if (bEncroached)
-			{
-				Mark.Pop();
-				return 0;
-			}
-		}
+// Remove from collision hash before repositioning
+FCollisionHashBase* Hash = *(FCollisionHashBase**)((BYTE*)this + 0xF0);
+if ( (ActorFlags & 0x800) && Hash )
+Hash->RemoveActor(Actor);
 
-		// Remove from collision hash before applying new position
-		FCollisionHashBase* Hash = *(FCollisionHashBase**)((BYTE*)this + 0xf0);
-		if ((ActorFlags2 & 0x1800) && Hash)
-			Hash->RemoveActor(Actor);
+// Save old rotation for delta-rotation computation for attached actors
+UINT OldPitch = *(UINT*)((BYTE*)Actor + 0x240);
+UINT OldYaw   = *(UINT*)((BYTE*)Actor + 0x244);
+UINT OldRoll  = *(UINT*)((BYTE*)Actor + 0x248);
 
-		// Apply delta to location
-		*(FLOAT*)((BYTE*)Actor + 0x234) += moveX;
-		*(FLOAT*)((BYTE*)Actor + 0x238) += moveY;
-		*(FLOAT*)((BYTE*)Actor + 0x23c) += moveZ;
+// Apply movement and new rotation
+*(FLOAT*)((BYTE*)Actor + 0x234) += AdjustedDelta.X;
+*(FLOAT*)((BYTE*)Actor + 0x238) += AdjustedDelta.Y;
+*(FLOAT*)((BYTE*)Actor + 0x23C) += AdjustedDelta.Z;
+*(UINT*)((BYTE*)Actor  + 0x240) = (UINT)NewRotation.Pitch;
+*(UINT*)((BYTE*)Actor  + 0x244) = (UINT)NewRotation.Yaw;
+*(UINT*)((BYTE*)Actor  + 0x248) = (UINT)NewRotation.Roll;
 
-		// Apply new rotation
-		*(FRotator*)((BYTE*)Actor + 0x240) = NewRotation;
+// Propagate movement/rotation to attached actors.
+// Ghidra builds a delta-rotation matrix (GetLocalCoords vtable+0xa8,
+// FUN_10301560, FUN_10370d70) and calls MoveActor recursively for each child.
+// TODO: Ghidra 0x103b9750 -- full matrix-based attached propagation loop.
+// Fallback: UpdateRelativeRotation maintains rotation coherency.
+INT numAttached = *(INT*)((BYTE*)Actor + 0x1D8);  // Attached.Num()
+if ( numAttached > 0 && bTest == 0 )
+{
+UBOOL bRotChanged = ( OldPitch != (UINT)NewRotation.Pitch
+                   || OldYaw   != (UINT)NewRotation.Yaw
+                   || OldRoll  != (UINT)NewRotation.Roll );
+if ( bRotChanged )
+Actor->UpdateRelativeRotation();
+}
 
-		// Re-add to collision hash
-		if ((ActorFlags2 & 0x1800) && Hash)
-			Hash->AddActor(Actor);
+// Re-add to collision hash after repositioning
+if ( (*(DWORD*)((BYTE*)Actor + 0xA8) & 0x800) && Hash )
+Hash->AddActor(Actor);
 
-		// UnTouch actors that are no longer overlapping
-		if (bTest == 0)
-		{
-			TArray<AActor*>& Touching = *(TArray<AActor*>*)((BYTE*)Actor + 0x1C8);
-			INT iTouching = 0;
-			while (iTouching < Touching.Num())
-			{
-				AActor* TouchActor = Touching(iTouching);
-				if (!TouchActor || Actor->IsOverlapping(TouchActor, NULL))
-					iTouching++;
-				else
-					Actor->EndTouch(Touching(iTouching), 0);
-			}
-		}
+// vtable+0x140: intermediate physics/Karma sync (return value gates Karma calls)
+typedef INT (__thiscall* PhysCheckFn)(AActor*);
+((PhysCheckFn)(*(INT*)(*(INT*)Actor + 0x140)))(Actor);
+// Karma sync (FUN_104c3660, KU2METransform etc.) omitted (proprietary SDK)
 
-		// Post-move notify (vtable[0x10c] on actor — update render/physics state)
-		typedef void (__thiscall* PostMoveFn)(AActor*);
-		((PostMoveFn)(*(INT*)(*(INT*)Actor + 0x10c)))(Actor);
+if ( bTest == 0 )
+{
+// Notify primary blocking actor -- both parties get vtable+0xcc (NotifyBump)
+// Condition: TouchActor exists, is not world geometry, Actor not based on it
+if ( TouchActor != NULL
+&& (*(DWORD*)((BYTE*)TouchActor + 0xA0) & 0x100000) == 0  // !bWorldGeometry
+&& !Actor->IsBasedOn(TouchActor) )
+{
+typedef void (__thiscall* NotifyBumpFn)(AActor*, AActor*);
+((NotifyBumpFn)(*(INT*)(*(INT*)TouchActor + 0xcc)))(TouchActor, Actor);
+((NotifyBumpFn)(*(INT*)(*(INT*)Actor      + 0xcc)))(Actor, TouchActor);
+}
 
-		Mark.Pop();
+// Notify secondary (base) actor -- only populated by AR6ColBox path (NULL here)
+if ( BaseActor != NULL
+&& (*(DWORD*)((BYTE*)BaseActor + 0xA0) & 0x100000) == 0
+&& !Actor->IsBasedOn(BaseActor) )
+{
+typedef void (__thiscall* NotifyBumpFn)(AActor*, AActor*);
+((NotifyBumpFn)(*(INT*)(*(INT*)BaseActor + 0xcc)))(BaseActor, Actor);
+((NotifyBumpFn)(*(INT*)(*(INT*)Actor     + 0xcc)))(Actor, BaseActor);
+}
 
-		// hitFlags==0 → no blocking hit; bTest!=0 → test-only (no real move)
-		return (hitFlags == 0 || bTest != 0) ? 1 : 0;
-	}
-	else
-	{
-		// AR6ColBox/Karma proprietary path (bExtra != 0):
-		// KU2METransform, FUN_104c3660, FUN_104aa490 etc. — IMPL_DIVERGE
-		Mark.Pop();
-		return 0;
-	}
-	unguard;
+// Process non-blocking touches swept through before the block.
+// Ghidra condition: bBlocked OR !bBlockActors(0x2000) OR !bBlockPlayers(0x4000)
+if ( bBlocked || (ActorFlags & 0x2000) == 0 || (ActorFlags & 0x4000) == 0 )
+{
+for ( INT i = 0; i < TouchCount; i++ )
+{
+AActor* ta = TouchList[i];
+if ( bIgnoreBases == 0 || !Actor->IsJoinedTo(ta) )
+{
+// vtable+0x70: non-zero -> actor blocks/ignores (skip touch)
+typedef INT (__thiscall* IsBlockedFn)(AActor*, AActor*);
+INT isBlk = ((IsBlockedFn)(*(INT*)(*(INT*)Actor + 0x70)))(Actor, ta);
+if ( !isBlk && Actor != ta )
+{
+// vtable+0xc4: touch-notify for non-blocking actor
+typedef void (__thiscall* TouchFn)(AActor*, AActor*);
+((TouchFn)(*(INT*)(*(INT*)Actor + 0xc4)))(Actor, ta);
+}
+}
+}
+}
+
+// EndTouch actors in Touching[] that are no longer spatially overlapping
+TArray<AActor*>& Touching = *(TArray<AActor*>*)((BYTE*)Actor + 0x1C8);
+INT i = 0;
+while ( i < Touching.Num() )
+{
+AActor* ta = Touching(i);
+if ( ta == NULL || Actor->IsOverlapping(ta, NULL) )
+i++;
+else
+Actor->EndTouch(Touching(i), 0);
+}
+}
+
+// Post-move update callback: vtable+0x10c on Actor
+// Ghidra: (**(code **)(*(int *)param_1 + 0x10c))() -- called even in bTest mode
+typedef void (__thiscall* PostMoveFn)(AActor*);
+((PostMoveFn)(*(INT*)(*(INT*)Actor + 0x10C)))(Actor);
+}
+
+Mark.Pop();
+
+if ( bExtra == 0 && bTest == 0 )
+Actor->UpdateRenderData();
+
+return (Hit.Time > 0.f) ? 1 : 0;
+unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x103b93e0)

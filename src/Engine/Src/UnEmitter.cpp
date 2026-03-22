@@ -590,12 +590,18 @@ float UParticleEmitter::SpawnParticles(float,float,float)
 // Ghidra: 0x103ddca0, 5049 bytes
 // IMPL_TODO: per-particle physics loop (velocity integration, bbox accumulation,
 // lifetime management) blocked by FUN_1035dc30 (non-exported collision helper, unidentified).
-IMPL_TODO("Ghidra 0x103ddca0 (5049b): index clamping + SpawnParticles rate implemented; per-particle loop (velocity integration, collision via FUN_1035dc30, lifetime, colour/size) still blocked")
+// Ghidra 0x103ddca0, 5049 bytes.
+// FUN_1035dc30 (32b, formerly misidentified as a collision helper) is a FCheckResult
+// partial constructor: FVector::FVector(ecx+8), FVector::FVector(ecx+0x14), *(ecx+0x2c)=0.
+// The actual SingleLineCheck is done via (*(*(actor+0x328)+0xCC))(...).
+// Collision response, per-force integration, colour/size/UV animation (~1700b):
+// Ghidra 0x103dde04..0x103de7e0 — deferred (requires FCheckResult, FVector::MirrorByVector
+// setup, force TArray at +0x94, colour TArray at +0xA0, size TArray per-emitter type).
+IMPL_TODO("Ghidra 0x103ddca0 (5049b): age/lifetime/velocity/bbox loop implemented; FUN_1035dc30 identified as FCheckResult partial ctor (32b, not a blocker); collision SingleLineCheck vtable call, bounce MirrorByVector, per-force loop (+0x94), colour/size/UV ramp TArrays (~1700b, Ghidra 0x103dde04..0x103de7e0) deferred")
 int UParticleEmitter::UpdateParticles(float DeltaTime)
 {
 	guard(UParticleEmitter::UpdateParticles);
 	*(FBox*)((BYTE*)this + 0x304) = FBox(0);
-	INT iVar20 = 0;
 	if (*(INT*)((BYTE*)this + 0x2f4) == 0) return 0;
 
 	// Clamp index at +0x40
@@ -627,7 +633,7 @@ int UParticleEmitter::UpdateParticles(float DeltaTime)
 	}
 
 	// SpawnParticles rate: choose rate based on live-count vs max-count
-	INT numAlive    = *(INT*)((BYTE*)this + 0x2c4);
+	INT numAlive     = *(INT*)((BYTE*)this + 0x2c4);
 	INT maxParticles = *(INT*)((BYTE*)this + 0x2d0);
 	FLOAT spawnRate;
 	if (numAlive < maxParticles)
@@ -646,16 +652,138 @@ int UParticleEmitter::UpdateParticles(float DeltaTime)
 	if (spawnRate > 0.f && *(INT*)((BYTE*)this + 0x2d8) == 0)
 	{
 		// vtable[0x78/4=30] = SpawnParticles(accumulator, rate, dt)
-		typedef FLOAT (__thiscall* SpawnFn)(UParticleEmitter*, FLOAT, FLOAT, FLOAT);
-		SpawnFn spawnFn = *(SpawnFn*)((*(INT*)this) + 0x78);
+		typedef FLOAT (__thiscall* SpawnParticlesFn)(UParticleEmitter*, FLOAT, FLOAT, FLOAT);
+		SpawnParticlesFn spawnFn = *(SpawnParticlesFn*)((*(INT*)this) + 0x78);
 		FLOAT newAccum = spawnFn(this, *(FLOAT*)((BYTE*)this + 0x2e4), spawnRate, DeltaTime);
 		*(FLOAT*)((BYTE*)this + 0x2e4) = newAccum;
 	}
 
-	// Per-particle tick loop: lifetime decay, force/velocity integration, collision
-	// (FUN_1035dc30 non-exported collision helper), bbox accumulation.
-	// BLOCKED: FUN_1035dc30 unidentified — collision not yet implemented.
-	return iVar20;
+	// Per-particle tick loop (Ghidra 0x103ddd60..0x103de7e0).
+	// Particle struct stride = 0x8C, base at *(this+0x2f8).
+	// Offsets: +0x00=pos, +0x0C=prevPos, +0x18=vel, +0x70=age, +0x74=lifetime, +0x80=flags.
+	// flags: bit0=alive, bit1=stationary, bit2=skip-age-this-frame.
+	INT deadCount = 0;
+	for (INT i = 0; ; i++)
+	{
+		INT lim = *(INT*)((BYTE*)this + 0x2c4);
+		if (*(INT*)((BYTE*)this + 0x2d0) < lim)
+			lim = *(INT*)((BYTE*)this + 0x2d0);
+
+		if (i >= lim)
+		{
+			// Post-loop: find max speed factor from velocity-dependent effects array (+0xB8).
+			FLOAT maxSpeed = 1.0f;
+			if ((*(DWORD*)((BYTE*)this + 100) & 0x100000) &&
+			    !(*(DWORD*)((BYTE*)this + 100) & 0x200000))
+			{
+				FArray* efArr = (FArray*)((BYTE*)this + 0xb8);
+				INT numEf = efArr->Num();
+				for (INT j = 0; j < numEf; j++)
+				{
+					FLOAT f = *(FLOAT*)(*(INT*)efArr + 4 + j * 8);
+					if (maxSpeed <= f) maxSpeed = f;
+				}
+			}
+			*(FLOAT*)((BYTE*)this + 0x2f0) = maxSpeed;
+
+			// Set or clear "all-done" bit (bit3 of +0x2dc).
+			INT numActive = *(INT*)((BYTE*)this + 0x2c4);
+			if (((*(INT*)((BYTE*)this + 0x2d0) <= deadCount) ||
+			     (numActive == deadCount && spawnRate == 0.0f)) &&
+			    !(*(DWORD*)((BYTE*)this + 100) & 0x200))
+			{
+				*(DWORD*)((BYTE*)this + 0x2dc) |= 8;
+			}
+			else
+			{
+				*(DWORD*)((BYTE*)this + 0x2dc) &= ~8u;
+			}
+			return numActive - deadCount;
+		}
+
+		BYTE* pPart = (BYTE*)(*(INT*)((BYTE*)this + 0x2f8)) + i * 0x8C;
+		DWORD flags = *(DWORD*)(pPart + 0x80);
+
+		if (!(flags & 1))
+		{
+			// Dead slot — skip
+			deadCount++;
+			continue;
+		}
+
+		// bVar5: integrate physics if not stationary (or if warmup/force mode active)
+		bool bVar5 = (!(flags & 2)) || (*(BYTE*)((BYTE*)this + 0x2d) == 1);
+
+		if (flags & 4)
+		{
+			// New-spawn delay bit: skip physics this frame, clear the bit
+			bVar5 = false;
+			*(DWORD*)(pPart + 0x80) = flags & ~4u;
+		}
+		else
+		{
+			*(FLOAT*)(pPart + 0x70) += DeltaTime;
+		}
+
+		FLOAT age      = *(FLOAT*)(pPart + 0x70);
+		FLOAT lifetime = *(FLOAT*)(pPart + 0x74);
+
+		if (age > lifetime)
+		{
+			if (*(DWORD*)((BYTE*)this + 100) & 0x200)
+			{
+				// Looping mode: advance random state, compute looped age, respawn
+				((FRange*)((BYTE*)this + 0x240))->GetRand();
+				FLOAT newAge = (lifetime != 0.0f) ? appFmod(age, lifetime) : 0.0f;
+				typedef void (__thiscall* SpawnOneFn)(UParticleEmitter*, INT, FLOAT, INT, INT, FVector const&);
+				SpawnOneFn spawnOneFn = *(SpawnOneFn*)((*(INT*)this) + 0x7c);
+				FVector zero(0,0,0);
+				spawnOneFn(this, i, newAge, 0, 0, zero);
+				// Fall through: process this (freshly respawned) particle this frame.
+			}
+			else
+			{
+				// Kill particle
+				*(DWORD*)(pPart + 0x80) &= ~1u;
+				deadCount++;
+				continue;
+			}
+		}
+
+		if (bVar5)
+		{
+			// Apply gravity/force to velocity: vel += gravity * dt  (gravity at +0xD0)
+			*(FLOAT*)(pPart + 0x18) += *(FLOAT*)((BYTE*)this + 0xd0) * DeltaTime;
+			*(FLOAT*)(pPart + 0x1C) += *(FLOAT*)((BYTE*)this + 0xd4) * DeltaTime;
+			*(FLOAT*)(pPart + 0x20) += *(FLOAT*)((BYTE*)this + 0xd8) * DeltaTime;
+
+			// Save previous position (used by collision as line-check start)
+			*(DWORD*)(pPart + 0x0C) = *(DWORD*)(pPart + 0x00);
+			*(DWORD*)(pPart + 0x10) = *(DWORD*)(pPart + 0x04);
+			*(DWORD*)(pPart + 0x14) = *(DWORD*)(pPart + 0x08);
+
+			// Integrate position: pos += vel * dt
+			*(FLOAT*)(pPart + 0x00) += *(FLOAT*)(pPart + 0x18) * DeltaTime;
+			*(FLOAT*)(pPart + 0x04) += *(FLOAT*)(pPart + 0x1C) * DeltaTime;
+			*(FLOAT*)(pPart + 0x08) += *(FLOAT*)(pPart + 0x20) * DeltaTime;
+		}
+
+		// Collision check + bounce response (Ghidra 0x103dde04..0x103dde60 ~90b):
+		//   FUN_1035dc30 (32b) = FCheckResult partial ctor (init Normal+Location FVectors, zero Item).
+		//   Actual SingleLineCheck via (*(*(actor+0x328)+0xCC))(checkResult, actor, newPos,
+		//     prevPos, 0x84, FVector(0,0,0), this+0x320, &hitInfo, &collisionNormal).
+		//   On hit: bounce (FVector::MirrorByVector), FRangeVector scatter, ground-clamp.
+		// Per-force integration (Ghidra 0x103de3ba..0x103de548 ~250b):
+		//   Force actor array at +0x2f4+0x328+0x44+0x48 (sub-emitter spawn, count +0x2d4).
+		//   Force array at +0x94 (stride 0x28): velocity damping and directional force.
+		// Colour/size/UV animation (~1400b, Ghidra 0x103de548..0x103de7e0):
+		//   Colour ramp TArray at +0xA0, size ramp from emitter-type TArrays.
+		// All deferred: each requires per-emitter-type TArray descriptors not yet decompiled.
+
+		// Accumulate emitter bounding box with current particle position.
+		*((FBox*)((BYTE*)this + 0x304)) += *(FVector*)(pPart + 0x00);
+	}
+	return 0;
 	unguard;
 }
 
