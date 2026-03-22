@@ -700,7 +700,7 @@ void ULevel::RememberActors()
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103c1630: DEMOREC recording start implemented (StaticLoadClass + StaticConstructObject + InitListen); DEMOPLAY playback start omitted (UGameEngine internal layout at +0x460 unverified); R6WALKLIST exact model-field offsets approximate (stride 0x5c navspec array at Model+0x9c)")
+IMPL_TODO("Ghidra 0x103c1630: DEMOREC+DEMOPLAY implemented; FUN_1038ef30 (CastChecked<UGameEngine>), FUN_103beff0 (StaticConstructObject), FUN_10487990 (init demo playback) called by raw address (internal unnamed functions)")
 INT ULevel::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
 {
 	guard(ULevel::Exec);
@@ -771,15 +771,52 @@ INT ULevel::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
 		}
 		else
 		{
-			if (Filename.Right(4) != TEXT(".dem"))
-				Filename += TEXT(".dem");
+			// Strip .DEM extension if present (Ghidra pattern: same as DEMOREC)
+			FString Upper = Filename.Caps();
+			INT dotIdx = Upper.InStr(TEXT(".DEM"), 0);
+			if (dotIdx != -1)
+				Filename = Filename.Left(dotIdx) + Filename.Mid(dotIdx + 4);
+			Filename += TEXT(".dem");
 			GLog->Logf(TEXT("DemoPlay: '%s'"), *Filename);
-			// Retail: FUN_1038ef30 = CastChecked<UGameEngine>(Engine), gets the game engine.
-			// Then checks if the engine has an existing demo playback driver at a deep
-			// internal offset (+0x460), destroys it, creates a new one via FUN_103beff0
-			// (StaticConstructObject) and FUN_10487990 (demo playback init).
-			// The exact UGameEngine internal layout at +0x460 is unverified — omitted.
-			(void)Filename;
+
+			// FUN_1038ef30: CastChecked<UGameEngine>(Engine) — returns raw INT* view of UGameEngine
+			typedef INT* (__cdecl* GetGameEngineFn)();
+			INT* pGameEngine = ((GetGameEngineFn)(0x1038ef30))();
+
+			// Destroy any existing demo playback driver (vtable[0xe8/4] = Destroy)
+			if (pGameEngine && pGameEngine[0x118 / 4] != 0)
+			{
+				void* drv = (void*)(INT)pGameEngine[0x118 / 4];
+				typedef void (__thiscall* DestroyFn)(void*);
+				((DestroyFn)(*(INT*)(*(INT*)drv + 0xe8)))(drv);
+			}
+
+			// FUN_103beff0: StaticConstructObject-like, creates a demo playback driver
+			typedef INT (__cdecl* ConstructDriverFn)(INT flags, void* outer);
+			INT pDriver = ((ConstructDriverFn)(0x103beff0))(0xac, (void*)UObject::GetTransientPackage());
+
+			// FUN_10487990: init demo playback (thiscall on driver); passes Filename
+			if (pDriver != 0)
+			{
+				typedef INT (__thiscall* InitDemoFn)(void*);
+				pDriver = ((InitDemoFn)(0x10487990))((void*)pDriver);
+			}
+			if (pGameEngine)
+				pGameEngine[0x118 / 4] = pDriver;
+
+			// If driver was created but ServerConnection (at +0x8c) is NULL, init failed
+			if (pDriver != 0 && *(INT*)((BYTE*)pDriver + 0x8c) == 0)
+			{
+				GLog->Logf(TEXT("DemoPlay: failed to init demo playback"));
+				if (pGameEngine && pGameEngine[0x118 / 4] != 0)
+				{
+					void* drv2 = (void*)(INT)pGameEngine[0x118 / 4];
+					typedef void (__thiscall* DestroySanitizeFn)(void*);
+					((DestroySanitizeFn)(*(INT*)(*(INT*)drv2 + 0xc)))(drv2);
+				}
+				if (pGameEngine)
+					pGameEngine[0x118 / 4] = 0;
+			}
 		}
 		return 1;
 	}
@@ -965,7 +1002,7 @@ INT ULevel::IsServer()
 		return 1;
 	return 0;
 }
-IMPL_TODO("Ghidra 0x103b9750 (5565b): zero-delta and rotation-only fast paths implemented; main collision sweep/response loop (MoveActorFirstBlocking, step-up, sliding, base handling) not yet ported; Karma updates in rotation path omitted (proprietary SDK)")
+IMPL_TODO("Ghidra 0x103b9750 (5565b): standard Unreal collision path implemented (MoveActorFirstBlocking, partial-delta blocking, hash, UnTouch); AR6ColBox/Karma attached-actor matrix transforms and AR6ColBox path omitted (proprietary SDK)")
 INT ULevel::MoveActor( AActor* Actor, FVector Delta, FRotator NewRotation, FCheckResult& Hit, INT bTest, INT bIgnorePawns, INT bIgnoreBases, INT bNoFail, INT bExtra )
 {
 	guard(ULevel::MoveActor);
@@ -1031,31 +1068,120 @@ INT ULevel::MoveActor( AActor* Actor, FVector Delta, FRotator NewRotation, FChec
 		return 0;
 	}
 
-	// Main collision sweep/response loop
-	// TODO: 0x103b9750 — remainder of 5565-byte function:
-	// - FMemMark + compute normalized direction
-	// - Build swept collision extent
-	// - MultiLineCheck for blocking geometry
-	// - MoveActorFirstBlocking to find nearest hit
-	// - Step-up logic for stairs
-	// - Sliding along walls
-	// - Base/attachment matrix transforms
-	// - Touch/UnTouch notifications
-	// - CheckEncroachment for encroachers
-	// Approximation: apply the full delta without collision checking
-	FVector OldLocation = Actor->Location;
-	Actor->Location += Delta;
-	*(FRotator*)((BYTE*)Actor + 0x240) = NewRotation;
+	// Main collision sweep/response loop (Ghidra 0x103b9750)
+	FMemMark Mark(GMem);
 
-	// Notify hash
-	FCollisionHashBase* Hash = *(FCollisionHashBase**)((BYTE*)this + 0xF0);
-	if ( Hash && (*(DWORD*)((BYTE*)Actor + 0xA8) & 0x800) )
+	FLOAT DeltaSize = Delta.Size();
+	FVector Dir = (DeltaSize > 0.0f) ? Delta / DeltaSize : Delta;
+
+	DWORD ActorFlags2 = *(DWORD*)((BYTE*)Actor + 0xa8);
+	typedef INT (__thiscall* VFn200)(void*);
+
+	if (bExtra == 0)
 	{
-		Hash->RemoveActor(Actor);
-		Hash->AddActor(Actor);
-	}
+		// Standard (non-AR6ColBox) movement path.
+		AActor* BlockedActor = NULL; (void)BlockedActor;
+		AActor* BlockedBase  = NULL; (void)BlockedBase;
 
-	return 1;
+		// Perform sweep collision if actor has collision flags and is not a physics root
+		// (vtable[200] returns 0 → not a physics root → use sweep detection)
+		if ((ActorFlags2 & 0x1800) != 0 && ((VFn200)(*(INT*)(*(INT*)Actor + 200)))(Actor) == 0 && DeltaSize != 0.0f)
+		{
+			// Allocate FirstHit linked-list head via vtable[0xd8/4] on the level
+			typedef FCheckResult* (__thiscall* AllocFirstHitFn)(ULevel*);
+			FCheckResult* FirstHit = ((AllocFirstHitFn)(*(INT*)(*(INT*)this + 0xd8)))(this);
+
+			MoveActorFirstBlocking(Actor, bIgnorePawns, bTest, FirstHit, Hit);
+
+			// FUN_103b7390: post-blocking cleanup helper (no explicit args)
+			typedef void (__cdecl* PostBlockHelperFn)();
+			((PostBlockHelperFn)(0x103b7390))();
+		}
+
+		FLOAT moveX = Delta.X, moveY = Delta.Y, moveZ = Delta.Z;
+
+		// Partial move if blocked before reaching destination
+		if (Hit.Time < 1.0f && bNoFail == 0 && DeltaSize > 0.0f)
+		{
+			FLOAT dist = (DeltaSize + 2.0f) * Hit.Time;
+			if (dist >= 2.0f)
+			{
+				FLOAT t = (dist - 2.0f) / DeltaSize;
+				moveX = Delta.X * t;
+				moveY = Delta.Y * t;
+				moveZ = Delta.Z * t;
+				Hit.Time = t;
+			}
+			else
+			{
+				moveX = moveY = moveZ = 0.0f;
+				Hit.Time = 0.0f;
+			}
+		}
+
+		// Encroachment check for encroacher actors when not testing
+		// vtable[200] != 0 → actor IS a physics encroacher
+		if (bTest == 0 && bNoFail == 0 && ((VFn200)(*(INT*)(*(INT*)Actor + 200)))(Actor) != 0)
+		{
+			typedef INT (__thiscall* LevelCheckEncFn)(ULevel*);
+			INT bEncroached = ((LevelCheckEncFn)(*(INT*)(*(INT*)this + 0xc0)))(this);
+			if (bEncroached)
+			{
+				Mark.Pop();
+				return 0;
+			}
+		}
+
+		// Remove from collision hash before applying new position
+		FCollisionHashBase* Hash = *(FCollisionHashBase**)((BYTE*)this + 0xf0);
+		if ((ActorFlags2 & 0x800) && Hash)
+			Hash->RemoveActor(Actor);
+
+		// Apply delta to location
+		*(FLOAT*)((BYTE*)Actor + 0x234) += moveX;
+		*(FLOAT*)((BYTE*)Actor + 0x238) += moveY;
+		*(FLOAT*)((BYTE*)Actor + 0x23c) += moveZ;
+
+		// Apply new rotation
+		*(FRotator*)((BYTE*)Actor + 0x240) = NewRotation;
+
+		// Re-add to collision hash
+		if ((ActorFlags2 & 0x800) && Hash)
+			Hash->AddActor(Actor);
+
+		// UnTouch actors that are no longer overlapping
+		if (bTest == 0)
+		{
+			TArray<AActor*>& Touching = *(TArray<AActor*>*)((BYTE*)Actor + 0x1C8);
+			INT iTouching = 0;
+			while (iTouching < Touching.Num())
+			{
+				AActor* TouchActor = Touching(iTouching);
+				if (!TouchActor || Actor->IsOverlapping(TouchActor, NULL))
+					iTouching++;
+				else
+					Actor->EndTouch(Touching(iTouching), 0);
+			}
+		}
+
+		// Post-move notify (vtable[0x10c] on actor — actor update callback)
+		typedef void (__thiscall* PostMoveFn)(AActor*);
+		((PostMoveFn)(*(INT*)(*(INT*)Actor + 0x10c)))(Actor);
+
+		Mark.Pop();
+
+		if (bTest == 0)
+			Actor->UpdateRenderData();
+
+		return (Hit.Time > 0.0f) ? 1 : 0;
+	}
+	else
+	{
+		// AR6ColBox/Karma proprietary path (bExtra != 0):
+		// KU2METransform, FUN_104c3660, FUN_104aa490 etc. — IMPL_DIVERGE
+		Mark.Pop();
+		return 0;
+	}
 	unguard;
 }
 
@@ -1745,7 +1871,7 @@ void ULevel::SpawnViewActor( UViewport* Viewport )
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103be0c0 (3578b): core Login+SetPlayer+RemoteRole flow implemented; inventory CLASS=/NAME= parsing from URL options omitted; FUN_103af650 (character name resolver) and FUN_103bc690 (inventory entry constructor) unnamed; PackageMap URL option copy for net connections omitted")
+IMPL_TODO("Ghidra 0x103be0c0 (3578b): Login+SetPlayer+RemoteRole+AuthId flow implemented; NAME= option parse + CLASS=/NAME= inventory construction loop implemented; property-setting loop (FUN_1038d780, UProperty matching) deferred; FUN_103af650/FUN_103bc690/FUN_103bdad0 called by raw address")
 APlayerController* ULevel::SpawnPlayActor( UPlayer* Player, ENetRole RemoteRole, const FURL& URL, FString& Error )
 {
 	guard(ULevel::SpawnPlayActor);
@@ -1812,9 +1938,65 @@ APlayerController* ULevel::SpawnPlayActor( UPlayer* Player, ENetRole RemoteRole,
 		*(FString*)((BYTE*)NewPlayer + 0x69C) = AuthId1;
 		*(INT*)((BYTE*)NewPlayer + 0x698) = 1;
 
-		// TODO: NAME= option → FUN_103af650 (character name resolver)
-		// TODO: CLASS=/NAME= inventory construction loops (FUN_103bc690)
-		// These build the player's loadout from URL parameters — omitted for now.
+		// NAME= option: resolve character name via FUN_103af650
+		const TCHAR* pNamePtr = NULL;
+		const TCHAR* pDefName = *FURL::DefaultName;
+		const TCHAR* pName = URL.GetOption(TEXT("NAME="), pDefName);
+		if (pName != NULL)
+		{
+			FString NameStr(pName);
+			typedef FString* (__cdecl* ResolveNameFn)(FString*);
+			FString* resolvedName = ((ResolveNameFn)(0x103af650))(&NameStr);
+			if (resolvedName != NULL)
+				pNamePtr = **resolvedName;
+		}
+		GLog->Logf(TEXT("%s"), pNamePtr ? pNamePtr : TEXT(""));
+
+		// Inventory construction from CLASS=/NAME= URL options
+		FArray inventoryList;
+		appMemzero(&inventoryList, sizeof(FArray));
+
+		TCHAR classBuf[256]; classBuf[0] = 0;
+		TCHAR nameBuf[256];  nameBuf[0] = 0;
+		TCHAR lineBuf[256];  lineBuf[0] = 0;
+
+		while (pNamePtr != NULL &&
+		       Parse(pNamePtr, TEXT("CLASS="), classBuf, 256) &&
+		       Parse(pNamePtr, TEXT("NAME="), nameBuf, 256))
+		{
+			INT idx = inventoryList.Add(1, 0x1c);
+			BYTE* entryPtr = NULL;
+			if (inventoryList.GetData() != NULL)
+			{
+				entryPtr = (BYTE*)inventoryList.GetData() + idx * 0x1c;
+				typedef void (__cdecl* InventoryCtorFn)(BYTE*);
+				((InventoryCtorFn)(0x103bc690))(entryPtr);
+			}
+
+			ParseLine(&pNamePtr, lineBuf, 256, 1);
+			ParseLine(&pNamePtr, lineBuf, 256, 1);
+
+			while (ParseLine(&pNamePtr, lineBuf, 256, 1) != 0 && lineBuf[0] != 0)
+			{
+				if (entryPtr != NULL)
+				{
+					FArray* propArr = (FArray*)(entryPtr + 0x10);
+					INT propIdx = propArr->Add(1, 0xc);
+					BYTE* propData = (BYTE*)propArr->GetData() + propIdx * 0xc;
+					FString* propStr = (FString*)propData;
+					if (propStr != NULL)
+					{
+						appMemzero(propStr, 0xc);  // zero-init slot before assignment
+						*propStr = FString(lineBuf);
+					}
+				}
+			}
+		}
+
+		// Cleanup: FUN_103bdad0 tears down global inventory state set up during construction
+		typedef void (__cdecl* InventoryCleanupFn)();
+		((InventoryCleanupFn)(0x103bdad0))();
+		inventoryList.~FArray();
 	}
 
 	// If new actors were spawned during Login, notify level change

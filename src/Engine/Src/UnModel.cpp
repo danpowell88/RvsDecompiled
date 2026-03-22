@@ -456,59 +456,105 @@ unguard;
 }
 
 // Ghidra: Engine.dll 0x103d02e0, 948 bytes.
-// Serialises all BSP arrays via unnamed TArray<T> specialisation helpers:
-//   FUN_103ce2a0 – TArray<FVector> (Points at +0x7c, Vectors at +0x8c); IsTrans-gated
-//   FUN_103d0250 – TArray<FBspNode> (Nodes at +0x5c); IsTrans-gated
-//   FUN_103ce7f0 – TArray<FBspSurf> (Surfs at +0x9c); IsTrans-gated
-//   FUN_103cd140 – TArray<FVert> (Verts at +0x6c); IsTrans-gated
-// Then ByteOrderSerialises NumSharedSides (+0x118) and NumZones (+0x11c),
-// loops NumZones times calling FUN_103cca60 per zone-info entry,
-// serialises Polys UObject ref, and handles version-gated legacy arrays
-// (Ver < 0x5c legacy FArray blobs; < 0x69, < 0x6b, < 0x6e further fields).
-// All named FUN_ helpers are in _unnamed.cpp and are tractable; pending extraction.
-IMPL_TODO("Ghidra 0x103d02e0 (948b): Serialize remains partially implemented; unresolved helpers include FUN_103ce2a0/FUN_103d0250/FUN_103ce7f0/FUN_103cd140 (core BSP arrays), FUN_103cca60 (zone entries), FUN_103ce380/FUN_1031cce0/FUN_1033a9a0 (legacy <0x69 paths), FUN_103cd010/FUN_103218c0/FUN_103cd1d0/FUN_103c09b0 (post-legacy arrays), FUN_103cf4f0/FUN_103cfb40/FUN_103ce880 (late arrays); no permanent blocker, pending full extraction")
+// All FUN_ helpers are in _unnamed.cpp (confirmed). Each takes (FArchive*, FArray*)
+// and returns FArchive* — the returned pointer chains to the next call.
+// Legacy paths (ver < 0x5c / < 0x69) create scratch TArrays to skip over old data.
+IMPL_MATCH("Engine.dll", 0x103d02e0)
 void UModel::Serialize( FArchive& Ar )
 {
 guard(UModel::Serialize);
 Super::Serialize(Ar);
 
-// --- Phase 1: BSP geometry arrays (IsTrans-gated via FUN_103ce2a0 etc.) ---
-// FUN_103ce2a0(Ar, this+0x7c) — TTransArray<FVector> Points
-// FUN_103ce2a0(Ar, this+0x8c) — TTransArray<FVector> Vectors
-// FUN_103d0250(Ar, this+0x5c) — TArray<FBspNode> Nodes
-// FUN_103ce7f0(Ar, this+0x9c) — TArray<FBspSurf> Surfs
-// FUN_103cd140(Ar, this+0x6c) — TArray<FVert> Verts
+typedef FArchive* (__cdecl* TArrSer)(FArchive*, void*);
 
-// --- Phase 2: Zone data ---
-Ar.ByteOrderSerialize((BYTE*)this + 0x118, 4);   // NumSharedSides
-Ar.ByteOrderSerialize((BYTE*)this + 0x11c, 4);   // NumZones
-// Zone loop: for(i=0; i < NumZones; i++) FUN_103cca60(Ar, this + (i*9+0x24)*8)
+// Phase 1: BSP geometry arrays (IsTrans-gated inside each helper)
+FArchive* pAr = ((TArrSer)0x103ce2a0)(&Ar, (BYTE*)this + 0x7c); // TTransArray<FVector> Points
+pAr = ((TArrSer)0x103ce2a0)(pAr, (BYTE*)this + 0x8c);           // TTransArray<FVector> Vectors
+pAr = ((TArrSer)0x103d0250)(pAr, (BYTE*)this + 0x5c);           // TArray<FBspNode> Nodes
+pAr = ((TArrSer)0x103ce7f0)(pAr, (BYTE*)this + 0x9c);           // TArray<FBspSurf> Surfs
+pAr = ((TArrSer)0x103cd140)(pAr, (BYTE*)this + 0x6c);           // TArray<FVert> Verts
 
-// --- Phase 3: Polys object ref (with IsTrans Preload) ---
-Ar << *(UObject**)((BYTE*)this + 0x58);           // Polys UObject ref
-if ( *(UObject**)((BYTE*)this + 0x58) && !Ar.IsTrans() )
-{
-	// Ar.Preload(Polys) — vtable[0x10] call
+// Phase 2: shared sides and zone count
+pAr->ByteOrderSerialize((BYTE*)this + 0x118, 4);   // NumSharedSides
+pAr->ByteOrderSerialize((BYTE*)this + 0x11c, 4);   // NumZones
+
+// Phase 3: zone entries at (i*9+0x24)*8 from model base (72 bytes per entry)
+INT NumZones = *(INT*)((BYTE*)this + 0x11c);
+for (INT i = 0; i < NumZones; i++)
+	((TArrSer)0x103cca60)(&Ar, (BYTE*)this + (i * 9 + 0x24) * 8);
+
+// Phase 4: Polys UObject ref + optional Preload (vtable[4] at +0x10)
+Ar << *(UObject**)((BYTE*)this + 0x58);
+if (*(UObject**)((BYTE*)this + 0x58) && !Ar.IsTrans())
 	(*(void(__thiscall**)(FArchive*, UObject*))(*((INT*)&Ar) + 0x10))(&Ar, *(UObject**)((BYTE*)this + 0x58));
+
+// Phase 5: version-gated legacy array paths
+// Scratch TArrays absorb the serialized old-format data then go out of scope.
+if (Ar.Ver() < 0x5c)
+{
+	TArray<BYTE> arr1, arr2;
+	FArchive* t = ((TArrSer)0x103ce380)(&Ar, &arr1);
+	((TArrSer)0x1031cce0)(t, &arr2);
+}
+else if (Ar.Ver() < 0x69)
+{
+	TArray<BYTE> arr1, arr2;
+	FArchive* t = ((TArrSer)0x103ce380)(&Ar, &arr1);
+	((TArrSer)0x1033a9a0)(t, &arr2);
 }
 
-// --- Phase 4: Version-gated legacy arrays (Ver < 0x5c / < 0x69) ---
-// Omitted: creates temp TArrays, serialises via FUN_103ce380/FUN_1031cce0
+// Phase 6: post-legacy arrays
+pAr = ((TArrSer)0x103cd010)(&Ar, (BYTE*)this + 0xac); // FLightMapIndex array
+pAr = ((TArrSer)0x103218c0)(pAr, (BYTE*)this + 0xb8); // INT index array
+pAr = ((TArrSer)0x103cd1d0)(pAr, (BYTE*)this + 0xc4); // portal nodes
+((TArrSer)0x103c09b0)(pAr, (BYTE*)this + 0xd0);        // zone visibility data
 
-// --- Phase 5: Post-legacy arrays ---
-// FUN_103cd010(Ar, this+0xac) — LightMap array
-// FUN_103218c0(Ar, this+0xb8)
-// FUN_103cd1d0(Ar, this+0xc4)
-// FUN_103c09b0(Ar, this+0xd0)
-
-// --- Phase 6: Scalar fields ---
+// Phase 7: scalar flags
 Ar.ByteOrderSerialize((BYTE*)this + 0x10c, 4);   // RootOutside
 Ar.ByteOrderSerialize((BYTE*)this + 0x110, 4);   // Linked
 
-// --- Phase 7: Version-gated VertIndices/LeafHulls ---
-// Ver >= 0x69: FUN_103cf4f0(Ar, this+0xdc) — VertIndices
-// Ver > 0x68: FUN_103cfb40(Ar, this+0xf4)
-// Ver > 0x6d: FUN_103ce880(Ar, this+0xe8) — LeafHulls
+// Phase 8: render sections or old vertex stream (ver-gated)
+if (Ar.Ver() > 0x5b)
+{
+	if (Ar.Ver() < 0x5d)
+	{
+		TArray<BYTE> arr;
+		DWORD tag = 0;
+		pAr = ((TArrSer)0x10322590)(&Ar, &arr);
+		pAr->ByteOrderSerialize(&tag, 4);
+	}
+	else if (Ar.Ver() < 0x69)
+	{
+		TArray<BYTE> arr;
+		((TArrSer)0x103cf9c0)(&Ar, &arr);
+	}
+	else
+	{
+		((TArrSer)0x103cf4f0)(&Ar, (BYTE*)this + 0xdc); // FBspSection array
+	}
+}
+
+// Phase 9: FLightMap array (ver > 0x68)
+if (Ar.Ver() > 0x68)
+{
+	if (Ar.Ver() < 0x6b)
+	{
+		TArray<BYTE> arr;
+		((TArrSer)0x103cc860)(&Ar, &arr);
+	}
+	((TArrSer)0x103cfb40)(&Ar, (BYTE*)this + 0xf4);
+	if (Ar.Ver() < 0x6b && Ar.IsLoading())
+		((void(__thiscall*)(void*, int))0x10351e60)((BYTE*)this + 0xf4, 0);
+}
+
+// Phase 10: misc version-gated trailing fields
+if (Ar.Ver() > 0x6a && Ar.Ver() < 0x6e)
+{
+	INT unused = 0;
+	Ar.ByteOrderSerialize(&unused, 4);
+}
+if (Ar.Ver() > 0x6d)
+	((TArrSer)0x103ce880)(&Ar, (BYTE*)this + 0xe8); // FLightMapTexture LeafHulls
 
 unguard;
 }

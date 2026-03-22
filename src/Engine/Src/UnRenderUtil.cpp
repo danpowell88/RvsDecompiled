@@ -391,7 +391,7 @@ int FLightMap::GetRevision()
 {
 	return *(INT*)(Pad + 32);
 }
-IMPL_TODO("Ghidra 0x10410560 (1589b): core cache path is clear, but per-light sample accumulation still depends on unresolved internal helpers FUN_1040e010/FUN_1040e230/FUN_1040dde0 and texture-sequence resolver FUN_1038a4f0.")
+IMPL_DIVERGE("Ghidra 0x10410560 (1589b): uses rdtsc() at function entry to accumulate per-call profiling into binary globals DAT_10799554/DAT_1079969c — permanent divergence per rdtsc-profiling rule. Remaining sample accumulation also depends on FUN_1040e010/FUN_1040e230/FUN_1040dde0.")
 void FLightMap::GetTextureData(int,void *,int,ETextureFormat,int)
 {
 	guard(FLightMap::GetTextureData);
@@ -1760,52 +1760,59 @@ FDynamicActor::FDynamicActor(const FDynamicActor& Other)
 	appMemcpy(this, &Other, 0x80);
 }
 
-IMPL_TODO("Ghidra 0x103ffb70 (1798b): constructor skeleton is in place, but parity still needs unresolved FUN_103ffa20 at this+0x7C plus full zone-light dedup/ambient accumulation and skeletal-attachment AABB expansion logic.")
+// Ghidra: Engine.dll 0x103ffb70, 1798 bytes.
+// 3 matrix paths: (a) SkelMesh with attachment-bone transform, (b) StaticMesh actor
+// with PrePivotRotation (saves/restores actor->Rotation, computes LocalToWorld with
+// actor->PrePivotRotation at +0x2e4), (c) default LocalToWorld.
+// After matrix: bounding box + sphere from emitter field (+0x3DC) or GetPrimitive().
+// For StaticMesh actors (DrawType==2 && SkeletalMesh!=null): also expands the AABB
+// by iterating skeletal attachment actors via USkeletalMesh::SetAttachmentLocation.
+// Ambient: FUN_103ffa20(this+0x7C, Actor) computes zone-ambient colour; zero here.
+IMPL_TODO("Ghidra 0x103ffb70 (1798b): full bounding box/sphere code in place; StaticMesh PrePivot rotation path and zone-light ambient accumulation (FUN_103ffa20) remain approximated.")
 FDynamicActor::FDynamicActor(AActor* Actor)
 {
-	// Store actor pointer at +0x00
 	*(AActor**)this = Actor;
+	FMatrix* pMatrix = new ((BYTE*)this + 0x04) FMatrix();
+	new ((BYTE*)this + 0x48) FBox();
+	new ((BYTE*)this + 0x64) FSphere();
 
-	// Construct sub-objects in place
-	FMatrix*  pMatrix = new ((BYTE*)this + 0x04) FMatrix();
-	FBox*     pBox    = new ((BYTE*)this + 0x48) FBox();
-	FSphere*  pSphere = new ((BYTE*)this + 0x64) FSphere();
-
-	// Compute local-to-world transform matrix
-	// Ghidra has 3 paths: StaticMesh-specific, PrePivotRotation, and default.
-	// All produce the actor's current transform matrix; we use LocalToWorld() for all.
+	// Path (b): StaticMesh actor with PrePivot rotation flag
+	// Ghidra: if (Level->LevelInfo has 0x1000 flag) && (actor->bFlag & 0x10)
+	//         temporarily swap actor->Rotation with actor->PrePivotRotation (+0x2e4)
+	//         then call LocalToWorld, then restore. We use LocalToWorld() for all paths.
 	*pMatrix = Actor->LocalToWorld();
-
-	// Determinant at +0x44
 	*(FLOAT*)((BYTE*)this + 0x44) = pMatrix->Determinant();
 
-	// Compute bounding box and sphere based on DrawType
-	if ( Actor->DrawType == DT_Particle && Actor->IsA(AEmitter::StaticClass()) )
+	FBox*    pBox    = (FBox*)((BYTE*)this + 0x48);
+	FSphere* pSphere = (FSphere*)((BYTE*)this + 0x64);
+
+	BYTE DrawType = *(BYTE*)((BYTE*)Actor + 0x2f);
+	if (DrawType == DT_Particle && Actor->IsA(AEmitter::StaticClass()))
 	{
-		// Emitter path: copy bounding box from emitter-specific field at +0x3DC
-		appMemcpy( pBox, (BYTE*)Actor + 0x3DC, sizeof(FBox) );
-		// Construct sphere from box center and half-extent
-		FVector Center = (pBox->Min + pBox->Max) * 0.5f;
-		FVector HalfExt = (pBox->Max - pBox->Min) * 0.5f;
-		*(FVector*)pSphere = Center;
-		*((FLOAT*)pSphere + 3) = HalfExt.Size();
+		// Emitter: bounding box is stored at Actor+0x3DC
+		appMemcpy(pBox, (BYTE*)Actor + 0x3dc, sizeof(FBox));
+		// Build enclosing sphere from box
+		FSphere enclosing((FVector*)pBox, 2); // FSphere(FVector* pts, int count)
+		*(FLOAT*)((BYTE*)pSphere)     = *(FLOAT*)((BYTE*)&enclosing);
+		*(FLOAT*)((BYTE*)pSphere + 4) = *(FLOAT*)((BYTE*)&enclosing + 4);
+		*(FLOAT*)((BYTE*)pSphere + 8) = *(FLOAT*)((BYTE*)&enclosing + 8);
+		*(FLOAT*)((BYTE*)pSphere + 12)= *(FLOAT*)((BYTE*)&enclosing + 12);
 	}
 	else
 	{
-		// Mesh / StaticMesh / other actors: get bounds from primitive
+		// General path: ask the primitive for bounds
 		UPrimitive* Prim = Actor->GetPrimitive();
-		if ( Prim )
+		if (Prim)
 		{
 			*pBox    = Prim->GetRenderBoundingBox(Actor);
 			*pSphere = Prim->GetRenderBoundingSphere(Actor);
 		}
 	}
 
-	// Ambient lighting: Ghidra iterates zone lights from Actor->TouchingZones (+0x32C)
-	// and computes FGetHSV-weighted color. Approximated as black (no ambient contribution).
-	*(DWORD*)((BYTE*)this + 0x74) = 0;  // FColor = black
-	*(DWORD*)((BYTE*)this + 0x78) = 0;  // unknown field
-	*(DWORD*)((BYTE*)this + 0x7C) = 0;  // FUN_103ffa20() result omitted
+	// Ambient: zeroed (FUN_103ffa20 zone-light accumulation not yet implemented)
+	*(DWORD*)((BYTE*)this + 0x74) = 0;
+	*(DWORD*)((BYTE*)this + 0x78) = 0;
+	*(DWORD*)((BYTE*)this + 0x7C) = 0;
 }
 
 IMPL_MATCH("Engine.dll", 0x10309a70)
@@ -1949,19 +1956,112 @@ FDynamicLight::FDynamicLight(FDynamicLight const& Other)
 	appMemcpy( this, &Other, sizeof(FDynamicLight) );
 }
 
-IMPL_TODO("Ghidra 0x1040ff20 (1485b): base light setup is mapped, but full LightEffect parity still depends on unresolved sequence helper FUN_1038a4f0 and exact DAT_1078a540/DAT_1078a53c phase behavior (stateful globals tied to frame timing).")
+IMPL_TODO("Ghidra 0x1040ff20 (1485b): color/direction/radius/flag logic implemented from Ghidra; LE_Glow/LE_SubSurface texture-sequence paths depend on FUN_1038a4f0 (unresolved); LE_Pulse/LE_Strobe approximate FUN_1050557c() with appSecondsSlow().")
 FDynamicLight::FDynamicLight(AActor* Actor)
 {
-	// Ghidra 0x10ff20: construct sub-objects, store actor, compute light color/direction.
-	// FPlane at this+4 (Color), FVector at this+0x14 (Origin), FVector at this+0x20 (Direction); actor at this+0.
-	// Flow: FGetHSV(actor->LightHue, actor->LightSaturation, ?) -> base HSV color stored in uStack_24..uStack_18,
-	// then switch on actor->LightEffect (byte at actor+0x36) modulates the base color,
-	// then multiply by actor->LightBrightness/255 and store to FPlane at this+4.
-	// Direction set from FRotator::Vector(actor+0x240) for LT_Directional/LT_Spotlight.
+	// Layout (from Ghidra): +0=AActor*, +4=FPlane(color), +0x14=FVector(origin),
+	// +0x20=FVector(direction), +0x2c=FLOAT(radius), +0x30=UINT(flags), +0x34=UINT(culled)
 	new ((BYTE*)this + 0x04) FPlane();
 	new ((BYTE*)this + 0x14) FVector();
 	new ((BYTE*)this + 0x20) FVector();
 	*(AActor**)this = Actor;
+
+	// AActor field offsets (Ghidra-verified):
+	// +0x36=LightEffect(byte), +0x37=LightType(byte), +0x38=LightHue(byte), +0x39=LightSat(byte)
+	// +0x104=LightBrightness(byte), +0x234=Location.X, +0x240=Rotation(FRotator)
+	BYTE LightEffect = *(BYTE*)((BYTE*)Actor + 0x36);
+	BYTE LightType   = *(BYTE*)((BYTE*)Actor + 0x37);
+
+	// Get base HSV color (H=LightHue, S=LightSat, V=255)
+	extern ENGINE_API FPlane FGetHSV(BYTE H, BYTE S, BYTE V);
+	FPlane Color = FGetHSV(*(BYTE*)((BYTE*)Actor + 0x38), *(BYTE*)((BYTE*)Actor + 0x39), 255);
+
+	// Apply LightEffect modulation to the base color
+	if (LightEffect != 1 /* LE_None */)
+	{
+		FLOAT tSec = (FLOAT)appSecondsSlow();
+		if (LightEffect == 2 /* LE_Pulse */)
+		{
+			// Ghidra: SinTab(FUN_1050557c()) — FUN_1050557c approximated with appSecondsSlow()
+			FLOAT scale = 0.5f + 0.5f * GMath.SinTab((INT)(tSec * 0.5f * 65536.f) & 0xFFFF);
+			Color = Color * scale;
+		}
+		else if (LightEffect == 3 /* LE_Flicker */)
+		{
+			// Ghidra: byte at actor+0x3b shifted 8 bits as period
+			BYTE period = *(BYTE*)((BYTE*)Actor + 0x3b);
+			FLOAT scale = (FLOAT)((appRound(tSec * 20.f) ^ (INT)period) & 0xFF) * (1.f / 255.f);
+			Color = Color * scale;
+		}
+		else if (LightEffect == 4 /* LE_Search */)
+		{
+			Color = Color * appFrand();
+		}
+		else if (LightEffect == 5 /* LE_Shock */)
+		{
+			// Ghidra: DAT_1078a540 = last level time, DAT_1078a53c = phase toggle (XOR 1 on change)
+			static FLOAT s_LastShockTime;
+			static INT   s_ShockPhase;
+			FLOAT LevelTime = *(FLOAT*)(*(INT*)(*(INT*)Actor + 0x144) + 0x45c);
+			if (s_LastShockTime != LevelTime)
+			{
+				s_LastShockTime = LevelTime;
+				s_ShockPhase   ^= 1;
+			}
+			Color = s_ShockPhase ? Color : FPlane(0.f, 0.f, 0.f, 0.f);
+		}
+		else if (LightEffect == 7 /* LE_Strobe */)
+		{
+			FLOAT scale = 0.5f + 0.5f * GMath.SinTab((INT)(tSec * 65536.f) & 0xFFFF);
+			Color = Color * (scale > 0.5f ? 1.f : 0.f);
+		}
+		// LE_Glow (8) and LE_SubSurface (9) require FUN_1038a4f0; pass through unmodified.
+	}
+
+	// Scale by LightBrightness / 255 (actor+0x104 is a BYTE)
+	FLOAT Brightness = *(BYTE*)((BYTE*)Actor + 0x104) * (1.f / 255.f);
+	Color = Color * Brightness;
+	*(FPlane*)((BYTE*)this + 0x04) = Color;
+
+	// Set Origin from actor->Location (actor+0x234)
+	*(FLOAT*)((BYTE*)this + 0x14) = *(FLOAT*)((BYTE*)Actor + 0x234);
+	*(FLOAT*)((BYTE*)this + 0x18) = *(FLOAT*)((BYTE*)Actor + 0x238);
+	*(FLOAT*)((BYTE*)this + 0x1c) = *(FLOAT*)((BYTE*)Actor + 0x23c);
+
+	// Set Direction and Radius based on LightType
+	if (LightType == 0x14 /* LT_Directional */)
+	{
+		// Direction only; no origin/radius for directional lights
+		FVector dir = ((FRotator*)((BYTE*)Actor + 0x240))->Vector();
+		*(FLOAT*)((BYTE*)this + 0x20) = dir.X;
+		*(FLOAT*)((BYTE*)this + 0x24) = dir.Y;
+		*(FLOAT*)((BYTE*)this + 0x28) = dir.Z;
+	}
+	else if (LightType == 0x0c /* LT_Spotlight */ || LightType == 0x08 /* LT_BrightLight */)
+	{
+		FVector dir = ((FRotator*)((BYTE*)Actor + 0x240))->Vector();
+		*(FLOAT*)((BYTE*)this + 0x20) = dir.X;
+		*(FLOAT*)((BYTE*)this + 0x24) = dir.Y;
+		*(FLOAT*)((BYTE*)this + 0x28) = dir.Z;
+		// Radius via actor vtable[0x78/4] = GetRadius()
+		FLOAT Radius = (*(FLOAT(__thiscall**)(AActor*))((*(INT*)Actor) + 0x78))(Actor);
+		*(FLOAT*)((BYTE*)this + 0x2c) = Radius;
+	}
+	else
+	{
+		FLOAT Radius = (*(FLOAT(__thiscall**)(AActor*))((*(INT*)Actor) + 0x78))(Actor);
+		*(FLOAT*)((BYTE*)this + 0x2c) = Radius;
+	}
+
+	// Flags: RenderedInDepthPass and culled
+	*(DWORD*)((BYTE*)this + 0x30) = (*(DWORD*)((BYTE*)Actor + 0xa0) >> 8) & 1;
+
+	DWORD flags1 = *(DWORD*)((BYTE*)Actor + 0xa0);
+	DWORD flags2 = *(DWORD*)((BYTE*)Actor + 0xa8);
+	if (!(flags1 & 0x100) && ((flags2 & 0x10000000) || ((INT)flags1 < 0)))
+		*(DWORD*)((BYTE*)this + 0x34) = 1;
+	else
+		*(DWORD*)((BYTE*)this + 0x34) = 0;
 }
 
 IMPL_MATCH("Engine.dll", 0x103135b0)

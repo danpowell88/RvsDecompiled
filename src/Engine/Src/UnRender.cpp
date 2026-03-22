@@ -1061,8 +1061,101 @@ IMPL_MATCH("Engine.dll", 0x10301a90)
 FWarpZoneSceneNode* FWarpZoneSceneNode::GetWarpZoneSceneNode() { return this; }
 
 // FLevelSceneNode
-IMPL_TODO("Ghidra 0x10400290 (2966b): Deproject corner loop, determinant-sign winding, and editor far-clip augmentation identified; implementation pending full plane-order reconstruction for parity")
-FConvexVolume FLevelSceneNode::GetViewFrustum() { return FConvexVolume(); }
+// Ghidra: Engine.dll 0x10400290, 2966 bytes.
+// Algorithm: deproject 4 NDC corners at (±1, ±1, 0, 1) to world space,
+// compute view matrix determinant to resolve plane winding, build 4 side planes
+// using 3-point FPlane constructor (eye + 2 adjacent corners), then optionally
+// add a far plane from the level's fog/far-clip distance.
+// The sky/warp-zone path (LightType 0xd/0xe/0xf) uses 8 corners instead.
+// Plane winding rules (Ghidra det >= 0 branch):
+//   Left:   FPlane(eye, C[0], C[1])   Right: FPlane(eye, C[3], C[2])
+//   Bottom: FPlane(eye, C[2], C[0])   Top:   FPlane(eye, C[1], C[3])
+// Mirrored (det < 0): last two corner args swapped on each plane.
+IMPL_TODO("Ghidra 0x10400290 (2966b): 4-corner/8-corner frustum construction implemented; exact retail plane order reconstructed from Ghidra cross-section analysis. Far-clip distance lookup and editor sky-zone 8-corner path not fully implemented.")
+FConvexVolume FLevelSceneNode::GetViewFrustum()
+{
+	guard(FLevelSceneNode::GetViewFrustum);
+
+	FConvexVolume Result;
+	float det = ((FMatrix*)((BYTE*)this + 0x110))->Determinant();
+	FVector eye = *(FVector*)((BYTE*)this + 0x190);
+
+	// Check for sky/warp zone (LightType 0xd, 0xe, 0xf at this+4 -> level -> zone)
+	UViewport* Viewport = *(UViewport**)((BYTE*)this + 4);
+	INT ZoneType = 0;
+	INT LevelPtr = (Viewport && *(INT*)Viewport) ? *(INT*)(*(INT*)Viewport + 0x34) : 0;
+	if (LevelPtr)
+		ZoneType = *(INT*)(LevelPtr + 0x504);
+
+	if (ZoneType != 0xd && ZoneType != 0xe && ZoneType != 0xf)
+	{
+		// 4-corner near-plane path
+		// corners: [0]=BL(-1,-1), [1]=TL(-1,+1), [2]=BR(+1,-1), [3]=TR(+1,+1)
+		FVector C[4];
+		C[0] = Deproject(FPlane(-1.f, -1.f, 0.f, 1.f));
+		C[1] = Deproject(FPlane(-1.f,  1.f, 0.f, 1.f));
+		C[2] = Deproject(FPlane( 1.f, -1.f, 0.f, 1.f));
+		C[3] = Deproject(FPlane( 1.f,  1.f, 0.f, 1.f));
+
+		if (det >= 0.f)
+		{
+			Result.Planes[Result.NumPlanes++] = FPlane(eye, C[0], C[1]); // left
+			Result.Planes[Result.NumPlanes++] = FPlane(eye, C[3], C[2]); // right
+			Result.Planes[Result.NumPlanes++] = FPlane(eye, C[2], C[0]); // bottom
+			Result.Planes[Result.NumPlanes++] = FPlane(eye, C[1], C[3]); // top
+		}
+		else
+		{
+			Result.Planes[Result.NumPlanes++] = FPlane(eye, C[1], C[0]);
+			Result.Planes[Result.NumPlanes++] = FPlane(eye, C[2], C[3]);
+			Result.Planes[Result.NumPlanes++] = FPlane(eye, C[0], C[2]);
+			Result.Planes[Result.NumPlanes++] = FPlane(eye, C[3], C[1]);
+		}
+
+		// Far plane: added only in non-wireframe, non-editor-flag mode
+		if (Viewport && !(*(BYTE*)((BYTE*)Viewport + 0x1f0) & 1) && !Viewport->IsWire())
+		{
+			FLOAT FarDist = 65536.f;
+			FVector fwd = (Deproject(FPlane(0.f, 0.f, 0.f, 1.f)) - eye).SafeNormal();
+			Result.Planes[Result.NumPlanes++] = FPlane(eye + fwd * FarDist, fwd);
+		}
+	}
+	else
+	{
+		// 8-corner sky/warp zone path: near (Z=0) and far (Z=1) corners
+		FVector C[8];
+		C[0] = Deproject(FPlane(-1.f, -1.f, 0.f, 1.f)); // BL near
+		C[1] = Deproject(FPlane(-1.f, -1.f, 1.f, 1.f)); // BL far
+		C[2] = Deproject(FPlane(-1.f,  1.f, 0.f, 1.f)); // TL near
+		C[3] = Deproject(FPlane(-1.f,  1.f, 1.f, 1.f)); // TL far
+		C[4] = Deproject(FPlane( 1.f, -1.f, 0.f, 1.f)); // BR near
+		C[5] = Deproject(FPlane( 1.f, -1.f, 1.f, 1.f)); // BR far
+		C[6] = Deproject(FPlane( 1.f,  1.f, 0.f, 1.f)); // TR near
+		C[7] = Deproject(FPlane( 1.f,  1.f, 1.f, 1.f)); // TR far
+
+		if (det >= 0.f)
+		{
+			Result.Planes[Result.NumPlanes++] = FPlane(C[0], C[2], C[1]); // left
+			Result.Planes[Result.NumPlanes++] = FPlane(C[6], C[4], C[7]); // right
+			Result.Planes[Result.NumPlanes++] = FPlane(C[4], C[0], C[5]); // bottom
+			Result.Planes[Result.NumPlanes++] = FPlane(C[2], C[6], C[3]); // top
+			Result.Planes[Result.NumPlanes++] = FPlane(C[0], C[4], C[2]); // near
+			Result.Planes[Result.NumPlanes++] = FPlane(C[5], C[3], C[7]); // far
+		}
+		else
+		{
+			Result.Planes[Result.NumPlanes++] = FPlane(C[2], C[0], C[3]);
+			Result.Planes[Result.NumPlanes++] = FPlane(C[4], C[6], C[5]);
+			Result.Planes[Result.NumPlanes++] = FPlane(C[0], C[4], C[1]);
+			Result.Planes[Result.NumPlanes++] = FPlane(C[6], C[2], C[7]);
+			Result.Planes[Result.NumPlanes++] = FPlane(C[4], C[0], C[6]);
+			Result.Planes[Result.NumPlanes++] = FPlane(C[3], C[5], C[1]);
+		}
+	}
+
+	return Result;
+	unguard;
+}
 
 // FLightMapSceneNode
 extern ENGINE_API FRebuildTools GRebuildTools;
@@ -1077,12 +1170,95 @@ INT FLightMapSceneNode::FilterActor(AActor* Actor)
 }
 
 // FDirectionalLightMapSceneNode
-IMPL_TODO("Ghidra 0x103d25d0 (1896b): 8-corner Deproject path and determinant-dependent winding identified; implementation pending exact retail plane ordering/stack layout reconstruction")
-FConvexVolume FDirectionalLightMapSceneNode::GetViewFrustum() { return FConvexVolume(); }
+// Ghidra: Engine.dll 0x103d25d0, 1896 bytes.
+// 8-corner frustum: corners at NDC (±1, ±1, 0 or 1, 1).
+// Plane ordering: left/right/bottom/top from adjacent corner pairs, near/far from Z slices.
+IMPL_TODO("Ghidra 0x103d25d0 (1896b): 8-corner frustum construction implemented; exact retail plane ordering partially reconstructed from Ghidra. Plane winding may diverge from parity for edge cases.")
+FConvexVolume FDirectionalLightMapSceneNode::GetViewFrustum()
+{
+	guard(FDirectionalLightMapSceneNode::GetViewFrustum);
+
+	FConvexVolume Result;
+	float det = ((FMatrix*)((BYTE*)this + 0x110))->Determinant();
+
+	// 8 corners: near (Z=0) and far (Z=1) for all 4 NDC edges
+	FVector C[8];
+	C[0] = Deproject(FPlane(-1.f, -1.f, 0.f, 1.f));
+	C[1] = Deproject(FPlane(-1.f, -1.f, 1.f, 1.f));
+	C[2] = Deproject(FPlane(-1.f,  1.f, 0.f, 1.f));
+	C[3] = Deproject(FPlane(-1.f,  1.f, 1.f, 1.f));
+	C[4] = Deproject(FPlane( 1.f, -1.f, 0.f, 1.f));
+	C[5] = Deproject(FPlane( 1.f, -1.f, 1.f, 1.f));
+	C[6] = Deproject(FPlane( 1.f,  1.f, 0.f, 1.f));
+	C[7] = Deproject(FPlane( 1.f,  1.f, 1.f, 1.f));
+
+	if (det >= 0.f)
+	{
+		Result.Planes[Result.NumPlanes++] = FPlane(C[0], C[2], C[1]); // left
+		Result.Planes[Result.NumPlanes++] = FPlane(C[6], C[4], C[7]); // right
+		Result.Planes[Result.NumPlanes++] = FPlane(C[4], C[0], C[5]); // bottom
+		Result.Planes[Result.NumPlanes++] = FPlane(C[2], C[6], C[3]); // top
+		Result.Planes[Result.NumPlanes++] = FPlane(C[0], C[4], C[2]); // near
+		Result.Planes[Result.NumPlanes++] = FPlane(C[5], C[3], C[7]); // far
+	}
+	else
+	{
+		Result.Planes[Result.NumPlanes++] = FPlane(C[2], C[0], C[3]);
+		Result.Planes[Result.NumPlanes++] = FPlane(C[4], C[6], C[5]);
+		Result.Planes[Result.NumPlanes++] = FPlane(C[0], C[4], C[1]);
+		Result.Planes[Result.NumPlanes++] = FPlane(C[6], C[2], C[7]);
+		Result.Planes[Result.NumPlanes++] = FPlane(C[4], C[0], C[6]);
+		Result.Planes[Result.NumPlanes++] = FPlane(C[3], C[5], C[1]);
+	}
+
+	return Result;
+	unguard;
+}
 
 // FPointLightMapSceneNode
-IMPL_TODO("Ghidra 0x103d1740 (1492b): 4-corner Deproject frustum path identified with determinant-sign branch; implementation pending exact plane construction order for parity")
-FConvexVolume FPointLightMapSceneNode::GetViewFrustum() { return FConvexVolume(); }
+// Ghidra: Engine.dll 0x103d1740, 1492 bytes.
+// 4-corner frustum using the light's projected Z/W from this+0x1d4 (a FVector
+// that defines the light's clip-space depth range). Ghidra: Project(this+0x1d4)
+// → Z/W used in FPlane(X, Y, Z, W) before each Deproject call.
+// For parity the Z/W from projection is used; approximated here as (0, 1) = near plane.
+IMPL_TODO("Ghidra 0x103d1740 (1492b): 4-corner frustum implemented. Light-specific Z/W from Project(this+0x1d4) is approximated as near-plane (0, 1); exact light depth range pending FSceneNode layout analysis.")
+FConvexVolume FPointLightMapSceneNode::GetViewFrustum()
+{
+	guard(FPointLightMapSceneNode::GetViewFrustum);
+
+	FConvexVolume Result;
+	float det = ((FMatrix*)((BYTE*)this + 0x110))->Determinant();
+	FVector eye = *(FVector*)((BYTE*)this + 0x190);
+
+	// Light-space Z/W: in retail, Project(this+0x1d4) provides the Z and W components.
+	// We approximate with Z=0, W=1 (near-plane projection).
+	FLOAT projZ = 0.f, projW = 1.f;
+
+	// 4 corners deprojected at the light's clip-space depth
+	FVector C[4];
+	C[0] = Deproject(FPlane(-1.f, -1.f, projZ, projW));
+	C[1] = Deproject(FPlane(-1.f,  1.f, projZ, projW));
+	C[2] = Deproject(FPlane( 1.f, -1.f, projZ, projW));
+	C[3] = Deproject(FPlane( 1.f,  1.f, projZ, projW));
+
+	if (det >= 0.f)
+	{
+		Result.Planes[Result.NumPlanes++] = FPlane(eye, C[0], C[1]);
+		Result.Planes[Result.NumPlanes++] = FPlane(eye, C[3], C[2]);
+		Result.Planes[Result.NumPlanes++] = FPlane(eye, C[2], C[0]);
+		Result.Planes[Result.NumPlanes++] = FPlane(eye, C[1], C[3]);
+	}
+	else
+	{
+		Result.Planes[Result.NumPlanes++] = FPlane(eye, C[1], C[0]);
+		Result.Planes[Result.NumPlanes++] = FPlane(eye, C[2], C[3]);
+		Result.Planes[Result.NumPlanes++] = FPlane(eye, C[0], C[2]);
+		Result.Planes[Result.NumPlanes++] = FPlane(eye, C[3], C[1]);
+	}
+
+	return Result;
+	unguard;
+}
 
 // ============================================================================
 // HCoords
