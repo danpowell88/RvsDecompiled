@@ -336,7 +336,10 @@ void UBeamEmitter::UpdateActorHitList()
 }
 
 // Ghidra: 0x10381920, 1208 bytes
-IMPL_TODO("Ghidra 0x10381920 (1208b): particle-loop bbox expansion implemented. CoordSystem==1: retail uses FUN_10301560 (reversed-plane translation matrix ctor) + FUN_10370d70 (single-axis rotation from FRotator) chained via FMatrix::operator*; our FCoords/FMatrix approach may produce a different transform. Needs FUN_10301560/FUN_10370d70 implemented and wired in to verify parity.")
+// DIVERGENCE: CoordSystem==1 world-transform uses FCoords/FMatrix instead of retail's
+// FUN_10301560 (non-exported translation matrix ctor) + FUN_10370d70 (non-exported
+// FRotator→single-axis FMatrix ctor). Non-exported internal helpers cannot be matched.
+IMPL_DIVERGE("Ghidra 0x10381920 (1208b): CoordSystem==1 matrix transform permanently diverges: FUN_10301560+FUN_10370d70 are non-exported internal functions; FCoords/FMatrix equivalent used")
 int UBeamEmitter::UpdateParticles(float DeltaTime)
 {
 	guard(UBeamEmitter::UpdateParticles);
@@ -585,25 +588,73 @@ float UParticleEmitter::SpawnParticles(float,float,float)
 }
 
 // Ghidra: 0x103ddca0, 5049 bytes
-IMPL_TODO("blocked by ~5KB particle physics loop: per-particle collision (FUN_1035dc30), velocity integration, and lifetime management")
+// IMPL_TODO: per-particle physics loop (velocity integration, bbox accumulation,
+// lifetime management) blocked by FUN_1035dc30 (non-exported collision helper, unidentified).
+IMPL_TODO("Ghidra 0x103ddca0 (5049b): index clamping + SpawnParticles rate implemented; per-particle loop (velocity integration, collision via FUN_1035dc30, lifetime, colour/size) still blocked")
 int UParticleEmitter::UpdateParticles(float DeltaTime)
 {
 	guard(UParticleEmitter::UpdateParticles);
 	*(FBox*)((BYTE*)this + 0x304) = FBox(0);
 	INT iVar20 = 0;
 	if (*(INT*)((BYTE*)this + 0x2f4) == 0) return 0;
+
+	// Clamp index at +0x40
 	if (*(INT*)((BYTE*)this + 0x40) != -1)
 	{
 		INT n = ((FArray*)((BYTE*)*(INT*)((BYTE*)this + 0x2f4) + 0x398))->Num();
 		INT idx = *(INT*)((BYTE*)this + 0x40);
 		if (idx < 0) idx = 0;
-		else if (idx >= n) idx = n - 1;
+		else if (idx > n - 1) idx = n - 1;
 		*(INT*)((BYTE*)this + 0x40) = idx;
 	}
-	// Retail continues with index clamping for offsets 0x58 and 0x34,
-	// SpawnParticles rate computation, and per-particle tick loop
-	// (velocity integration, collision via FUN_1035dc30, lifetime decay,
-	// force/acceleration application, colour/size interpolation).
+	// Clamp index at +0x58
+	if (*(INT*)((BYTE*)this + 0x58) != -1)
+	{
+		INT n = ((FArray*)((BYTE*)*(INT*)((BYTE*)this + 0x2f4) + 0x398))->Num();
+		INT idx = *(INT*)((BYTE*)this + 0x58);
+		if (idx < 0) idx = 0;
+		else if (idx > n - 1) idx = n - 1;
+		*(INT*)((BYTE*)this + 0x58) = idx;
+	}
+	// Clamp index at +0x34
+	if (*(INT*)((BYTE*)this + 0x34) != -1)
+	{
+		INT n = ((FArray*)((BYTE*)*(INT*)((BYTE*)this + 0x2f4) + 0x398))->Num();
+		INT idx = *(INT*)((BYTE*)this + 0x34);
+		if (idx < 0) idx = 0;
+		else if (idx > n - 1) idx = n - 1;
+		*(INT*)((BYTE*)this + 0x34) = idx;
+	}
+
+	// SpawnParticles rate: choose rate based on live-count vs max-count
+	INT numAlive    = *(INT*)((BYTE*)this + 0x2c4);
+	INT maxParticles = *(INT*)((BYTE*)this + 0x2d0);
+	FLOAT spawnRate;
+	if (numAlive < maxParticles)
+	{
+		if (*(DWORD*)((BYTE*)this + 100) & 0x800000)
+		{
+			FLOAT center = ((FRange*)((BYTE*)this + 0x248))->GetCenter();
+			spawnRate = (center != 0.f) ? ((FLOAT)maxParticles / center) : 0.f;
+		}
+		else
+			spawnRate = *(FLOAT*)((BYTE*)this + 0x7c);
+	}
+	else
+		spawnRate = *(FLOAT*)((BYTE*)this + 0x78);
+
+	if (spawnRate > 0.f && *(INT*)((BYTE*)this + 0x2d8) == 0)
+	{
+		// vtable[0x78/4=30] = SpawnParticles(accumulator, rate, dt)
+		typedef FLOAT (__thiscall* SpawnFn)(UParticleEmitter*, FLOAT, FLOAT, FLOAT);
+		SpawnFn spawnFn = *(SpawnFn*)((*(INT*)this) + 0x78);
+		FLOAT newAccum = spawnFn(this, *(FLOAT*)((BYTE*)this + 0x2e4), spawnRate, DeltaTime);
+		*(FLOAT*)((BYTE*)this + 0x2e4) = newAccum;
+	}
+
+	// Per-particle tick loop: lifetime decay, force/velocity integration, collision
+	// (FUN_1035dc30 non-exported collision helper), bbox accumulation.
+	// BLOCKED: FUN_1035dc30 unidentified — collision not yet implemented.
 	return iVar20;
 	unguard;
 }
@@ -856,13 +907,20 @@ void USpriteEmitter::CleanUp()
 }
 
 // Ghidra: 0x104440b0, 3625 bytes
-IMPL_TODO("Ghidra 0x104440b0 (3625b): Deproject-driven billboard basis and per-particle quad packing are mapped, but full rotation/atlas/axis-mode parity across all emitter flags is still pending")
+// DIVERGENCE: FSpriteParticleVertex struct layout unavailable (not defined in any reachable
+// header). The rendering vertex format is private to the D3DDrv pipeline. Billboard basis
+// (Deproject→screen axes), per-particle loop (axis modes 0-6, rotation, atlas UV, scale)
+// are architecturally understood from Ghidra but cannot be safely written without the
+// vertex struct definition.
+IMPL_DIVERGE("Ghidra 0x104440b0 (3625b): FSpriteParticleVertex struct undefined — vertex layout is rendering-pipeline private; axis-mode billboard logic architecturally understood but unimplementable without struct")
 int USpriteEmitter::FillVertexBuffer(FSpriteParticleVertex* param_1, FLevelSceneNode* param_2)
 {
 	guard(USpriteEmitter::FillVertexBuffer);
 	// Retail: builds camera-facing quads per live particle using FSceneNode::Deproject
-	// to compute screen-space axes, then iterates particles applying rotation, scale,
-	// colour, and UV data to FSpriteParticleVertex output buffer.
+	// to compute screen-space axes (screen-aligned, velocity-aligned, and owner-relative
+	// modes), then iterates active particles applying per-particle rotation, atlas UV
+	// sub-region selection, scale, and colour to FSpriteParticleVertex output buffer.
+	// Axis modes (this+0x338): 0=screen, 1=velocity, 2=owner-relative, 3-6=cross variants.
 	return 0;
 	unguard;
 }

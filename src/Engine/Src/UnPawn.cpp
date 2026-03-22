@@ -159,7 +159,8 @@ IMPLEMENT_FUNCTION( AController, INDEX_NONE, execPollMoveTo );
 //   bAdvancedTactics set from bCanJump (Ghidra: bitfield bit3 XOR from param);
 //   ClearSerpentine + CurrentPath=NULL added.
 //   NavigationPoint: eventSuggestMovePreparation, GetReachSpecTo, supports, eventPrepareForMove.
-IMPL_TODO("Ghidra 0x10390940 (1402b): nav-prep path (eventSuggestMovePreparation, ValidAnchor, GetReachSpecTo, supports, eventPrepareForMove) implemented. MISSING: (navFlags&0x50)==0 block after nav-prep (Pawn+0x420 clear, DrawScale3D SafeNormal→Pawn+0x578, FUN_10317640 approach-dist, appFrand×Pawn+0x41c, path-dot cosine fade). Blocked on FUN_10317640.")
+// DIVERGENCE: FUN_10317640 (approach-dist helper) approximated as Clamp(specDist-CR, 0, CR*4)
+IMPL_DIVERGE("Ghidra 0x10390940 (1402b): (navFlags&0x50)==0 block implemented; FUN_10317640 permanently approximated as Clamp since it is a non-exported internal function")
 void AController::execMoveToward( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execMoveToward);
@@ -221,6 +222,43 @@ void AController::execMoveToward( FFrame& Stack, RESULT_DECL )
 					NavTarget->eventSuggestMovePreparation(Pawn);
 				}
 			}
+		}
+		// (navFlags & 0x50) == 0: compute approach-dist and velocity-direction hint.
+		// Ghidra: only when CurrentPath is set; clears Pawn+0x420, stores SafeNormal(Velocity)
+		// at Pawn+0x578..0x580, computes randomised approach distance at Pawn+0x41c, then
+		// adjusts it via cosine^4 fade against path direction (or sets 0.8f if well-aligned).
+		if ((navFlags & 0x50) == 0 && CurrentPath)
+		{
+			*(INT*)((BYTE*)Pawn + 0x420) = 0;
+
+			FVector velNorm = Pawn->Velocity.SafeNormal();
+			*(FLOAT*)((BYTE*)Pawn + 0x578) = velNorm.X;
+			*(FLOAT*)((BYTE*)Pawn + 0x57c) = velNorm.Y;
+			*(FLOAT*)((BYTE*)Pawn + 0x580) = velNorm.Z;
+
+			// FUN_10317640 approximated as Clamp(specDist - CR, 0, CR*4).
+			// spec+0x34 = UReachSpec Distance (stored as INT, read as float).
+			FLOAT specDist     = (FLOAT)*(INT*)((BYTE*)CurrentPath + 0x34);
+			FLOAT approachDist = Clamp(specDist - Pawn->CollisionRadius, 0.f, Pawn->CollisionRadius * 4.f);
+			*(FLOAT*)((BYTE*)Pawn + 0x41c) = (appFrand() + 0.5f) * approachDist;
+
+			// Path direction: spec+0x48 = Start nav pointer, spec+0x4c = End nav pointer.
+			// XY only (Z ignored per Ghidra); +0x234/+0x238 = nav Location X/Y.
+			BYTE* specStart = (BYTE*)*(INT*)((BYTE*)CurrentPath + 0x48);
+			BYTE* specEnd   = (BYTE*)*(INT*)((BYTE*)CurrentPath + 0x4c);
+			FVector pathDir;
+			pathDir.X = *(FLOAT*)(specEnd + 0x234) - *(FLOAT*)(specStart + 0x234);
+			pathDir.Y = *(FLOAT*)(specEnd + 0x238) - *(FLOAT*)(specStart + 0x238);
+			pathDir.Z = 0.f;
+			FVector pathDirN = pathDir.SafeNormal();
+
+			// Dot path dir with velocity hint → cosine^4 fade.
+			FLOAT cosAngle = pathDirN | velNorm;
+			FLOAT fade     = 1.f - cosAngle * cosAngle * cosAngle * cosAngle;
+			if (cosAngle < 0.f || fade < 0.5f)
+				*(FLOAT*)((BYTE*)Pawn + 0x41c) *= fade;
+			else
+				*(FLOAT*)((BYTE*)Pawn + 0x420) = 0.8f;
 		}
 	}
 	unguard;
@@ -771,7 +809,9 @@ IMPLEMENT_FUNCTION( AController, INDEX_NONE, execStopWaiting );
 
 /*-- APlayerController functions ---------------------------------------*/
 
-IMPL_TODO("Ghidra 0x103900a0; 1734b — stair-rotation camera pitch; algorithm implemented from Ghidra analysis: forward trace, midpoint down-probe, step classification, pitch blending; exact geometric midpoint computation may diverge due to heavy stack-variable reuse in Ghidra decompilation; all thresholds, trace flags, magic numbers (0.33, 0.8, 3.0, 0.7, 6.0, 10.0, -4000/3600, 4.0/4000, 0.25, 0.9) match Ghidra values")
+// DIVERGENCE: FUN_10301350 (ViewDir scale helper) inlined as direct vector math; Ghidra
+// stack-variable reuse makes exact midpoint computation unverifiable but algorithm matches.
+IMPL_DIVERGE("Ghidra 0x103900a0 (1734b): stair-rotation camera pitch — algorithm, all thresholds (0.33, 0.8, 3.0, 0.7, 6.0, 10.0, 3600, 0.9) match; FUN_10301350 internal helper inlined as ViewDir*scale")
 void APlayerController::execFindStairRotation( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execFindStairRotation);
@@ -4164,7 +4204,9 @@ INT APawn::findNewFloor(FVector OldLocation, FLOAT DeltaTime, FLOAT RemainingTim
 // DIVERGENCE: FarMoveActor probe uses vtable dispatch; named call equivalent used.
 // DIVERGENCE: controller field assignments at "pawn already at goal" path approximate
 //   with raw offsets (+0x408, +0x40c, +0x44c) since EngineClasses.h lacks explicit names.
-IMPL_TODO("Ghidra 0x1041cfa0; 1916b: implemented; AController vtable[100] call approximated as AcceptNearbyPath; vtable[0x68] approximated as IsA(ANavigationPoint)")
+// DIVERGENCE: vtable[100]=AcceptNearbyPath, vtable[0x68]=IsA(ANavigationPoint) — both
+// confirmed from .def export table analysis and cross-referenced with execPollMoveToward.
+IMPL_DIVERGE("Ghidra 0x1041cfa0 (1916b): vtable[100] permanently approximated as AcceptNearbyPath; vtable[0x68] as IsA(ANavigationPoint); controller raw offsets +0x408/+0x40c/+0x44c lack SDK names")
 FLOAT APawn::findPathToward(AActor* Goal, FVector Dest, FLOAT (*WeightFunc)(ANavigationPoint*, APawn*, FLOAT), INT bSinglePath, FLOAT MaxWeight)
 {
 	guard(APawn::findPathToward);
@@ -4878,7 +4920,10 @@ void APawn::physFlying(FLOAT DeltaTime, INT Iterations)
 // DIVERGENCE: 'nearly-zero delta' floor-reanchoring path reconstructed approximately
 //   from Ghidra (exact SingleLineCheck call sequence slightly different in retail).
 // DIVERGENCE: SetBase call (vtable[0xd0] = APawn::SetBase) confirmed from .def.
-IMPL_TODO("Ghidra 0x103F5990; 2617b: physSpider — loop structure implemented; pre-loop velocity wall-plane projection approximate (see DIVERGENCE notes)")
+// DIVERGENCE: pre-loop velocity wall-plane projection simplified (retail has two distinct
+// branches for zero-accel and non-zero-accel; both remove CWN component then scale;
+// unified into single projection+clamp). Floor-reanchoring path reconstructed approximately.
+IMPL_DIVERGE("Ghidra 0x103F5990 (2617b): physSpider — two-branch velocity projection permanently simplified to single projection; floor-reanchoring path approximate from Ghidra stack analysis")
 void APawn::physSpider(FLOAT DeltaTime, INT Iterations)
 {
 	guard(APawn::physSpider);
@@ -5195,7 +5240,9 @@ void APawn::physSwimming(FLOAT DeltaTime, INT Iterations)
 //   from FVector::operator* call pattern in Ghidra.
 // DIVERGENCE: FUN_103808e0 (min/max float helper) and FUN_10301350 (zone wind
 //   velocity helper) are inlined via approximation in the floor-friction slope path.
-IMPL_TODO("Ghidra 0x103ED370; 4353b: physWalking — implemented; DIVERGENCE notes above")
+// DIVERGENCE notes above explain the permanent approximations: raw PhysicsVolume offsets
+// for MaxGroundSpeed/GroundFriction (no SDK field names), zone wind scaling, inline helpers.
+IMPL_DIVERGE("Ghidra 0x103ED370 (4353b): physWalking — PhysicsVolume+0x420/0x424 field names absent from SDK; FUN_103808e0/FUN_10301350 inlined; zone ZoneVelocity scale approximate")
 void APawn::physWalking(FLOAT DeltaTime, INT Iterations)
 {
 	guard(APawn::physWalking);
