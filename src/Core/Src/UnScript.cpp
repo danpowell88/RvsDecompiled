@@ -1102,7 +1102,7 @@ void UObject::execRotatorToString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_RotatorToString, execRotatorToString );
 
-IMPL_TODO("EX_StringToName: opcode 0x5A inferred from position immediately after EX_RotatorToString=0x59 in conversion range 0x49-0x5F; function exists in Core.dll but is unexported — Ghidra Core.dll dispatch table binary verification needed to confirm opcode slot")
+IMPL_TODO("EX_StringToName 0x5A: implementation correct (P_GET_STR → FName(*S)); GNatives dispatch confirmed as indirect table (&GNatives)[opcode] (Ghidra Core _global.cpp shows GNatives[iNative] assertion); opcode 0x5A assigned via IMPLEMENT_FUNCTION, inferred from sequential position after EX_RotatorToString=0x59 in conversion range 0x49-0x5F; cannot verify GNatives[0x5A] entry directly from text exports — GNatives[] init is startup code only")
 void UObject::execStringToName( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execStringToName);
@@ -3710,7 +3710,7 @@ IMPLEMENT_FUNCTION( UObject, 0x46, execPrimitiveCast );
 	Private set handler.
 -----------------------------------------------------------------------------*/
 
-IMPL_TODO("execPrivateSet: opcode unconfirmed; function exists in Core.dll but not a named DLL export; absent from Core.dll export table; implementation inferred from opcode context")
+IMPL_TODO("execPrivateSet: opcode unconfirmed and no IMPLEMENT_FUNCTION registration; function exists in Core.dll but is not a named DLL export and absent from Core.dll export table; implementation inferred from opcode context (step through property reference); without IMPLEMENT_FUNCTION, this handler is never reached from bytecode dispatch")
 void UObject::execPrivateSet( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execPrivateSet);
