@@ -1575,7 +1575,7 @@ unguard;
 // Involves FCanvasUtil, FLineBatcher, and many vtable-dispatched RenderInterface calls.
 // No binary-global or rdtsc blockers; all FUN_ helpers are in _unnamed.cpp and
 // theoretically tractable, but volume and complexity are high.
-IMPL_TODO("Ghidra 0x103cd750 (2842b): Render body still pending; dispatcher relies on many unresolved BSP helpers (zone visibility, section batching, decals, fog/sky paths, post effects) from _unnamed.cpp. No permanent blocker identified.")
+IMPL_TODO("Ghidra 0x103cd750 (2842b): verified in ghidra/exports/Engine/_global.cpp extract. Not a permanent divergence. Function is a large render dispatcher with editor/brush filtering, color selection, transform setup, line-batcher wire pass, hit-proxy push/pop, canvas point/tile overlays, and optional callback path (FUN_1035c050). Significant portions still rely on unresolved helper mappings and missing render helper declarations, so body remains pending until those dependencies are named and callable.")
 void UModel::Render( FDynamicActor*, FLevelSceneNode*, FRenderInterface* )
 {
 guard(UModel::Render);

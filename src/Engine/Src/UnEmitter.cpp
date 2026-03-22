@@ -597,7 +597,7 @@ float UParticleEmitter::SpawnParticles(float,float,float)
 // Collision response, per-force integration, colour/size/UV animation (~1700b):
 // Ghidra 0x103dde04..0x103de7e0 — deferred (requires FCheckResult, FVector::MirrorByVector
 // setup, force TArray at +0x94, colour TArray at +0xA0, size TArray per-emitter type).
-IMPL_TODO("Ghidra 0x103ddca0 (5049b): age/lifetime/velocity/bbox loop implemented; FUN_1035dc30 identified as FCheckResult partial ctor (32b, not a blocker); collision SingleLineCheck vtable call, bounce MirrorByVector, per-force loop (+0x94), colour/size/UV ramp TArrays (~1700b, Ghidra 0x103dde04..0x103de7e0) deferred")
+IMPL_TODO("Ghidra 0x103ddca0 (5049b): age/lifetime/velocity/bbox loop implemented and validated against ghidra/exports/Engine/_global.cpp extract. Not a permanent divergence. Remaining body includes: collision path (ULevel::SingleLineCheck + hit normal setup), bounce path (FVector::MirrorByVector + randomization), scripted force/spawn loop (array at +0x94/+0xA0 interactions), and colour/size/UV ramps (~0x103de548..0x103de7e0) that still depend on unresolved per-emitter ramp layouts in current headers.")
 int UParticleEmitter::UpdateParticles(float DeltaTime)
 {
 	guard(UParticleEmitter::UpdateParticles);

@@ -549,7 +549,7 @@ UChannel::Tick();
 unguard;
 }
 
-IMPL_TODO("Ghidra 0x104827f0 (2931b): complex actor property replication receive. Ghidra export IS present in Engine._global.cpp. FClassNetCache defined in sdk/432Core/Inc/UnCoreNet.h (GetFromField/GetFromIndex/GetMaxIndex/RepProperties). Blocked by: FFieldNetCache struct layout (vtable calls on FFieldNetCache* at +0x8/+0xc/+0x10 not yet mapped to named members); UProperty serialisation helpers FUN_10481010/FUN_1047fa50; FBitReader::GetNumBits bitmask diffing pattern.")
+IMPL_TODO("Ghidra 0x104827f0 (2931b): verified in ghidra/exports/Engine/_global.cpp. Not a permanent divergence. Remaining work is full body lift: actor-open path (new actor/class creation), property loop using UProperty vtable (NetSerializeItem/NetSerializeItemDelta), RPC decode path, and end-of-bunch actor handoff. FFieldNetCache layout is known via sdk/Raven_Shield_C_SDK/432Core/Inc/UnCoreNet.h; blockers are unresolved helper mappings (FUN_10365970/FUN_1039f040/FUN_10481010/FUN_1047fa50/FUN_10481830/FUN_10481e90) and exact call ordering.")
 void UActorChannel::ReceivedBunch(FInBunch&)
 {
 guard(UActorChannel::ReceivedBunch);
@@ -582,7 +582,7 @@ if ( *(INT*)((BYTE*)this + 0x70) != 0 )
 unguard;
 }
 
-IMPL_TODO("Ghidra 0x104834d0 (2840b): full actor property replication send. Ghidra export IS present in Engine._global.cpp. Uses Connection->PackageMap vtable[0x84/4] to obtain FClassNetCache (FClassNetCache defined in sdk/432Core/Inc/UnCoreNet.h). Blocked by: FFieldNetCache struct layout (vtable-dispatched property serialisation); FOutBunch/FBitWriterMark serialization loop per-field; replication condition bitmask (Actor+0xac bits 0x20/0x40); FUN_10481dd0/FUN_10481160 helper chains.")
+IMPL_TODO("Ghidra 0x104834d0 (2840b): verified in ghidra/exports/Engine/_global.cpp. Not a permanent divergence. Remaining work is full send pipeline recreation: initial bunch state bit toggles (Actor+0xA0/0xAC), conditional-role handling, dirty-property gather against recent cache, retire-list merge, per-field serialize with FBitWriterMark rollback, and final retire bookkeeping. FFieldNetCache/FClassNetCache are available in sdk/Raven_Shield_C_SDK/432Core/Inc/UnCoreNet.h; unresolved helpers still to map include FUN_10481dd0/FUN_10481160/FUN_10480fb0 and one demo-driver predicate (FUN_1037a3b0).")
 void UActorChannel::ReplicateActor()
 {
 guard(UActorChannel::ReplicateActor);
