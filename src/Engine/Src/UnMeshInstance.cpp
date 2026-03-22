@@ -1091,7 +1091,7 @@ FCoords USkeletalMeshInstance::GetBoneCoords(DWORD,int)
 	return FCoords();
 }
 
-IMPL_TODO("m_fCylindersRadius is a per-bone radius table stored as binary data in Engine.dll .data section — extract from retail binary to populate cylinder radii")
+IMPL_TODO("Ghidra 0x10433990: global m_fCylindersRadius pointer source/init path still unresolved in our build; keep temporary null guard until data init is reconstructed")
 int USkeletalMeshInstance::GetBoneCylinder(int BoneIndex, FCylinder& Cyl)
 {
 	guard(USkeletalMeshInstance::GetBoneCylinder);
@@ -1100,11 +1100,11 @@ int USkeletalMeshInstance::GetBoneCylinder(int BoneIndex, FCylinder& Cyl)
 	// this+0x19C: parent-bone index array (INT array, stride 4).
 	// m_fCylindersRadius[]: global per-bone radius table (TODO: populate from binary data).
 
-	// m_fCylindersRadius[]: global per-bone radius table in Engine.dll; actual float values
-	// are initialised from the binary and are not yet extracted. Until populated, GetBoneCylinder
-	// always returns radius 0 (effectively disabling per-bone hit detection).
-	// DIVERGENCE: radius data deferred until binary extraction is complete.
-	static FLOAT m_fCylindersRadius[256] = {};
+	// Retail uses the global USkeletalMeshInstance::m_fCylindersRadius pointer.
+	// In our current build this pointer is not yet initialised from retail data,
+	// so keep a temporary null guard and return 0 until initialisation is reconstructed.
+	if (!USkeletalMeshInstance::m_fCylindersRadius)
+		return 0;
 
 	FLOAT* pBone   = (FLOAT*)(*(INT*)((BYTE*)this + 0x190) + BoneIndex * 0x0C);
 	FLOAT boneX = pBone[0];
@@ -1115,7 +1115,8 @@ int USkeletalMeshInstance::GetBoneCylinder(int BoneIndex, FCylinder& Cyl)
 	FLOAT* pParent  = (FLOAT*)(*(INT*)((BYTE*)this + 0x190) + parentIdx * 0x0C);
 
 	// Enter if radius is non-zero and non-NaN, and bone is not index 7
-	if (m_fCylindersRadius[BoneIndex] != 0.0f && BoneIndex != 7)
+	FLOAT Radius = USkeletalMeshInstance::m_fCylindersRadius[BoneIndex];
+	if (Radius != 0.0f && BoneIndex != 7)
 	{
 		FLOAT dX = pParent[0] - boneX;
 		FLOAT dY = pParent[1] - boneY;
@@ -1139,7 +1140,7 @@ int USkeletalMeshInstance::GetBoneCylinder(int BoneIndex, FCylinder& Cyl)
 		*(FLOAT*)((BYTE*)&Cyl + 0x14) = norm.Z;
 
 		// Cylinder radius from global table
-		*(FLOAT*)((BYTE*)&Cyl + 0x1C) = m_fCylindersRadius[BoneIndex];
+		*(FLOAT*)((BYTE*)&Cyl + 0x1C) = Radius;
 
 		return 1;
 	}

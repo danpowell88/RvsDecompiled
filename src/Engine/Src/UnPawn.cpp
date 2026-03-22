@@ -3906,7 +3906,7 @@ void APawn::SpiderstepUp(FVector Delta, FVector HitNormal, FCheckResult& Hit)
 	unguard;
 }
 
-IMPL_TODO("Ghidra confirms no null guard at this point; our null guard improves safety but diverges from retail — remove guard to achieve byte parity")
+IMPL_MATCH("Engine.dll", 0x103e5b60)
 void APawn::StartNewSerpentine(FVector Dir, FVector Start)
 {
 	guard(APawn::StartNewSerpentine);
@@ -3921,14 +3921,6 @@ void APawn::StartNewSerpentine(FVector Dir, FVector Start)
 		perp = -perp;
 
 	SerpentineDir = perp;
-
-	// DIVERGENCE: Ghidra has no null guard; added for safety
-	if (!Controller || !Controller->CurrentPath)
-	{
-		SerpentineTime = 9999.f;
-		SerpentineDist = 0.f;
-		return;
-	}
 
 	if (Controller->bAdvancedTactics)
 	{

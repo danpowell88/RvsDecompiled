@@ -1767,7 +1767,7 @@ INT ULevel::FarMoveActor( AActor* Actor, FVector DestLocation, INT bTest, INT bN
     return result;
     unguard;
 }
-IMPL_TODO("Ghidra 0x103b8200: Touch notification delivery and FUN_103b7b70 network destruction check diverge from retail — verify against Ghidra and fix both paths")
+IMPL_TODO("Ghidra 0x103b8200: FUN_103866c0/FUN_103b6f40 policy gate still unresolved; network channel check + EndTouch delivery now aligned")
 INT ULevel::DestroyActor( AActor* Actor, INT bNetForce )
 {
 	guard(ULevel::DestroyActor);
@@ -1786,16 +1786,16 @@ INT ULevel::DestroyActor( AActor* Actor, INT bNetForce )
 		if ( *(DWORD*)((BYTE*)Actor + 0xa0) & 0x80 )
 			return 1;
 
-		// Network: if client, non-Authority actors normally can't be destroyed
-		// (simplified — full net logic omitted; DIVERGENCE: FUN_103b7b70 = server-driven
-		// network destruction check; unresolved, destruction is permitted unconditionally here)
+		// Network gate on clients with active server connection: retail blocks destroy
+		// when the actor has an open channel on that connection (FUN_103b7b70).
 		ALevelInfo* li = GetLevelInfo();
 		if ( li && *(BYTE*)((BYTE*)li + 0x425) == 3 && // NM_Client
 		     NetDriver && NetDriver->ServerConnection )
 		{
-			// DIVERGENCE: FUN_103b7b70 performs a server-side network role check before
-			// allowing the actor to be destroyed on the client. Unresolved; skipping allows
-			// local actor destruction regardless of network authority.
+			typedef UChannel* (__thiscall* FindActorChannelFn)(void*, AActor**);
+			FindActorChannelFn FindActorChannel = (FindActorChannelFn)0x103b7b70;
+			if ( FindActorChannel((void*)NetDriver->ServerConnection, &Actor) != NULL )
+				return 0;
 		}
 
 		// Role check: if not Authority and no bNetForce/bHiddenEd/bBegunPlay
@@ -1870,9 +1870,18 @@ INT ULevel::DestroyActor( AActor* Actor, INT bNetForce )
 					a->SetOwner(NULL);
 					if ( Actor->bDeleteMe ) return 1;
 				}
-				// DIVERGENCE: FUN_1037a010 = actor-touching check followed by EndTouch events.
-			// Determines if Actor is in the touching list of 'a', calls eventEndTouch.
-			// Unresolved — touch notifications not sent for destroyed actor's touchees.
+				// Retail FUN_1037a010 path: if 'a' is currently touching Actor, deliver EndTouch.
+				TArray<AActor*>& Touching = *(TArray<AActor*>*)((BYTE*)a + 0x1C8);
+				for ( INT t = 0; t < Touching.Num(); t++ )
+				{
+					if ( Touching(t) == Actor )
+					{
+						Actor->EndTouch(a, 1);
+						if ( Actor->bDeleteMe )
+							return 1;
+						break;
+					}
+				}
 			}
 
 			// LostChild notification to base
