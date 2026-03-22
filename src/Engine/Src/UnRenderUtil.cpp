@@ -1949,7 +1949,7 @@ FDynamicLight::FDynamicLight(FDynamicLight const& Other)
 	appMemcpy( this, &Other, sizeof(FDynamicLight) );
 }
 
-IMPL_TODO("Ghidra 0x1040ff20 (1485b): base light setup is mapped, but full LightEffect parity still depends on unresolved sequence helper FUN_1038a4f0 and exact DAT_1078a540/DAT_1078a53c phase behavior.")
+IMPL_TODO("Ghidra 0x1040ff20 (1485b): base light setup is mapped, but full LightEffect parity still depends on unresolved sequence helper FUN_1038a4f0 and exact DAT_1078a540/DAT_1078a53c phase behavior (stateful globals tied to frame timing).")
 FDynamicLight::FDynamicLight(AActor* Actor)
 {
 	// Ghidra 0x10ff20: construct sub-objects, store actor, compute light color/direction.
