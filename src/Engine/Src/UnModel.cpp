@@ -1063,8 +1063,7 @@ unguard;
 // Phase 7 (EmptySurfs): GUndo skipped; empties Points, Vectors, Surfs with per-surf cleanup.
 // Phase 8 (EmptyPolys): creates new UPolys via StaticAllocateObject + zone table reset.
 // DIVERGENCE: GUndo callbacks omitted (editor-only, NULL at runtime).
-// DIVERGENCE: +0xe8 TLazyArray dtors approximated as FArray dtors.
-IMPL_TODO("Ghidra 0x103cfd80: +0xe8 TLazyArray dtors approximated as FArray dtors (no TLazyArray<BYTE>::~TLazyArray available); GUndo LAB_ callbacks omitted (editor-only, NULL at runtime)")
+IMPL_TODO("Ghidra 0x103cfd80: GUndo LAB_ callbacks omitted (editor-only, NULL at runtime)")
 void UModel::EmptyModel( INT EmptySurfs, INT EmptyPolys )
 {
 guard(UModel::EmptyModel);
@@ -1138,8 +1137,9 @@ MODEL_VERTS(this)->Empty(8, 0);
 ((FArray*)((BYTE*)this + 0x100))->Empty(4, 0);
 // Per-element destructors for +0xe8 (stride 0x6c): Ghidra shows
 // _eh_vector_destructor_iterator_ for 2 TLazyArray<BYTE> at +0x18, then TArray dtor.
-// DIVERGENCE: TLazyArray<BYTE> template dtor not available; per-element cleanup
-// approximated as FArray destructor calls for the sub-arrays, then element base dtor.
+// TLazyArray<BYTE> layout: +0x00=FArray(12b), +0x0C=FLazyLoader vtable(4b),
+// +0x10=SavedAr(4b), +0x14=SavedPos(4b) = 0x18 per element.
+// ~TLazyArray: if(SavedAr) SavedAr->DetachLazyLoader(this); then ~FArray.
 {
 	FArray* arr0xe8 = (FArray*)((BYTE*)this + 0xe8);
 	INT num0xe8 = arr0xe8->Num();
@@ -1148,9 +1148,15 @@ MODEL_VERTS(this)->Empty(8, 0);
 	{
 		BYTE* elem = data0xe8 + j * 0x6c;
 		// Retail: _eh_vector_destructor_iterator_(elem+0x18, 0x18, 2, TLazyArray<BYTE>::~TLazyArray)
-		// Approximation: destruct the two TLazyArray<BYTE> at +0x18 and +0x30 as FArrays
-		((FArray*)(elem + 0x30))->~FArray();
-		((FArray*)(elem + 0x18))->~FArray();
+		// Destruct two TLazyArray<BYTE> at +0x30 and +0x18 (reverse order)
+		for (INT k = 1; k >= 0; k--)
+		{
+			BYTE* tla = elem + 0x18 + k * 0x18;
+			FArchive* savedAr = *(FArchive**)(tla + 0x10);
+			if (savedAr)
+				savedAr->DetachLazyLoader((FLazyLoader*)(tla + 0x0C));
+			((FArray*)tla)->~FArray();
+		}
 		((FArray*)elem)->~FArray();                // TArray dtor at base (FUN_10322eb0)
 	}
 }
