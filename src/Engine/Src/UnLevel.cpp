@@ -3043,9 +3043,11 @@ void ULevel::NotifyReceivedText( UNetConnection* Connection, const TCHAR* Text )
 				INT Response = 0;
 				UBOOL bParsed = Parse( Cmd, TEXT("RESPONSE="), Response );
 
-				// IMPL_TODO: retail verifies Response against Engine->GetChallengeResponse()
-				// called via FNetworkNotify->Engine vtable[0xa8/4]. Approximation: accept always.
-				if ( !bParsed )
+				// Retail: verify Response == Engine->GetChallengeResponse(Connection->Challenge)
+				// Engine vtable slot 0xa8/4 = 42 (GetChallengeResponse)
+				typedef INT (__thiscall* GetChallengeResponseFn)(UEngine*);
+				INT Expected = ((GetChallengeResponseFn)(*(void***)GEngine)[0xa8/4])(GEngine);
+				if ( !bParsed || Expected != Response )
 				{
 					debugf( TEXT("") ); // log bad response
 					Connection->InitOut();
