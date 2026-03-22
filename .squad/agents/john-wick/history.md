@@ -17,6 +17,47 @@
 
 <!-- Append new learnings below. -->
 
+### 2026 — Full IMPL_DIVERGE Audit (78 reclassifications)
+
+**Scope:** All 514 IMPL_DIVERGE instances across Engine, Core, R6Engine, Launch, Window.
+
+**Key findings:**
+- 420 unique reason strings total
+- 78 misclassified as IMPL_DIVERGE (should be IMPL_TODO)
+
+**Patterns that signal IMPL_TODO (not IMPL_DIVERGE):**
+
+1. **"not yet reconstructed/implemented/ported"** — explicit "not yet" language always means IMPL_TODO. Found in UnTerrain.cpp (terrain struct layouts), UnActor.cpp (render subsystem), Window.cpp (UWindowManager ctor).
+
+2. **"permanent stub until X is reconstructed"** — "until" is a future condition = IMPL_TODO by definition. Found in UnPawn.cpp (animation blend selection).
+
+3. **"added for safety" / "added null guard"** — we added something retail doesn't have. We CAN remove it to match retail, so IMPL_TODO. Found in UnPawn.cpp.
+
+4. **"also pending"** — "pending" anywhere in a reason implies temporary, so IMPL_TODO. Found in UnModel.cpp (projector clip logic).
+
+5. **"may differ from retail" / "may not match retail"** — uncertainty about divergence = not confirmed permanent = IMPL_TODO. Found in UnLinker.cpp, UnCorObj.cpp.
+
+6. **Small unexported helpers** — "static internal helper; VA cannot be identified in Ghidra" for helpers like `EncodeHexNibble` (1 line!), `FStringToAnsiBytes`, etc. Per audit rules: small+characterizable unexported helper = IMPL_TODO. Found in Core/UnScript.cpp (13 entries).
+
+7. **Launch.cpp "Reconstructed; no Ghidra match found"** — Previous audit noted "no binary verification path possible." This audit overrides: SafeDisc CAN be bypassed via in-memory process dump, and the "err on IMPL_TODO" rule applies. Reclassified 35 entries.
+
+8. **Core/UnScript.cpp Ravenshield exec* additions** — "absent from Core.dll export table; implementation inferred from context." These functions DO exist in Core.dll binary (just unexported), and exec* functions are small+characterizable. Reclassified 49 entries per the "small characterizable unexported helper → IMPL_TODO" rule.
+
+9. **"needs fresh binary re-analysis"** — explicitly says work remains = IMPL_TODO. Found in UnCamera.cpp.
+
+10. **"until binary extraction is complete"** — extraction IS possible (binary data section); IMPL_TODO. Found in UnMeshInstance.cpp (m_fCylindersRadius).
+
+**Confirmed permanent (kept as IMPL_DIVERGE):**
+- rdtsc timing chains
+- Karma/MeSDK proprietary SDK calls
+- GameSpy/CDKey/PunkBuster dead services
+- "permanent header-level binary difference" (PrivateStaticClass vs StaticClass, vtable layouts)
+- "permanently unrecoverable register value" (unaff_EDI, x87 ST0 register artifacts)
+- D3DDrv FRenderInterface private struct fields (>200KB private state)
+- Functions with explicit "permanent:" prefix where reason is concrete
+
+**Rule to remember:** The question is always "Can this function EVER match retail?" — not "Has it been implemented correctly yet?"
+
 ### 2026 — IMPL_TODO vs IMPL_DIVERGE classification decisions
 
 **execPrivateSet (UnScript.cpp):** Opcode value for EX_PrivateSet is unknown from Ghidra text exports — GNatives[] table not reconstructed. Kept as IMPL_TODO (not IMPL_DIVERGE) because the opcode IS in the retail binary, discoverable via binary disassembly of Core.dll init code. "Not done yet" ≠ "permanently impossible".
