@@ -3444,7 +3444,7 @@ INT ULevel::ToFloor( AActor* Actor, INT bTest, AActor* IgnoreActor )
 	return 0;
 	unguard;
 }
-IMPL_TODO("Ghidra 0x103c11a0 (393b): FUN_10481dd0 is a simple add-if-not-present TArray helper (59b, confirmed in _unnamed.cpp) — NOT Karma/MeSDK. Missing: ECX for FUN_10481dd0 = terrain's zone Terrains TArray at zone+0x3c0; zone determination from terrain actor unclear without assembly")
+IMPL_TODO("Ghidra 0x103c11a0 (393b): FUN_10481dd0 add-if-not-present helper inlined; ECX (zone TArray) derived from actor Region.Zone at +0x228 — zone determination needs assembly verification")
 void ULevel::UpdateTerrainArrays()
 {
 	guard(ULevel::UpdateTerrainArrays);
@@ -3452,7 +3452,6 @@ void ULevel::UpdateTerrainArrays()
 	if ( !model ) return;
 
 	// Clear terrain (Terrains TArray at +0x3C0) on all zone actors stored in the Model
-	// Zone data layout in Model: stride = 9 DWORDs, start offset = 0x24*8 = 0x120
 	BYTE* modelBase = (BYTE*)model;
 	for ( INT iZone = 0; iZone < 0x100; iZone++ )
 	{
@@ -3472,9 +3471,36 @@ void ULevel::UpdateTerrainArrays()
 			// SetCollision(1, 0) on terrain actor via vtable slot 0x10c/4=67
 			typedef void (__thiscall* SetCollisionFn)(AActor*, INT, INT);
 			((SetCollisionFn)(*(DWORD*)(*(DWORD*)a + 0x10c)))(a, 1, 0);
-			// FUN_10481dd0: add terrain actor to zone's Terrains TArray (add-if-not-present).
-			// ECX = zone's Terrains array at zone+0x3c0; zone determination from actor unclear.
-			// TODO: implement terrain zone registration (FUN_10481dd0 = add-if-not-present helper)
+
+			// Re-read actor and re-check (SetCollision may modify Actors array)
+			AActor* terrain = Actors(i);
+			if ( !terrain || !terrain->IsA(ATerrainInfo::StaticClass()) )
+				terrain = NULL;
+
+			// FUN_10481dd0: add-if-not-present — add terrain to its zone's Terrains TArray
+			// ECX = zone's Terrains TArray at zone+0x3c0; zone from actor Region.Zone at +0x228
+			INT terrainVal = (INT)terrain;
+			INT zone = *(INT*)((BYTE*)terrain + 0x228);  // Region.Zone
+			if ( zone )
+			{
+				FArray* terrainsArr = (FArray*)(zone + 0x3c0);
+				INT* arrData = *(INT**)terrainsArr;
+				INT arrNum = *(INT*)((BYTE*)terrainsArr + 4);
+				UBOOL found = 0;
+				for ( INT k = 0; k < arrNum; k++ )
+				{
+					if ( arrData[k] == terrainVal )
+					{
+						found = 1;
+						break;
+					}
+				}
+				if ( !found )
+				{
+					INT idx = terrainsArr->Add(1, 4);
+					*(INT*)(*(INT*)terrainsArr + idx * 4) = terrainVal;
+				}
+			}
 		}
 	}
 
