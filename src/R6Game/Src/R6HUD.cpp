@@ -84,7 +84,7 @@ void AR6HUD::UpdateHUDColors(FColor)
 	unguard;
 }
 
-IMPL_TODO("R6Game.dll 0x1000ceb0: 10251-byte function; Ghidra export exists (ghidra/exports/R6Game/_global.cpp) but decompilation FAILED — 'ascii' codec error at positions 6640-6642 in Ghidra's decompiler output (Jython str() on non-ASCII Java string); fix: use unicode() in export_cpp.py decompiler string handling and re-export. Implementation deferred until re-export.")
+IMPL_TODO("R6Game.dll 0x1000ceb0: 10251-byte function. Decompilation now available in ghidra/exports/R6Game/_global.cpp (re-exported 2025 after fixing Jython codecs.open() bug in export_cpp.py; 0 failures). Function draws the full R6 game HUD using UCanvas, FCanvasUtil, AR6Rainbow, AR6RainbowTeam, AR6PlayerController, FRenderInterface. Blockers: many R6Game-specific types not yet declared in R6Game Inc headers. Parameters: P_GET_OBJECT(UCanvas,Canvas) + optional bool skip. Implementation is a multi-session project.")
 void AR6HUD::execDrawNativeHUD(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;

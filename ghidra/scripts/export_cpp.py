@@ -18,6 +18,8 @@
 
 import os
 import re
+import io
+import codecs
 from ghidra.app.decompiler import DecompInterface, DecompileOptions
 from ghidra.program.model.symbol import SymbolTable
 
@@ -89,7 +91,10 @@ def export_program():
     for cls_name, functions in sorted(classes.items()):
         cpp_path = os.path.join(output_dir, cls_name + ".cpp")
         
-        with open(cpp_path, "w", encoding="utf-8") as cpp_file:
+        # codecs.open() works in both Jython 2 and CPython 3: it accepts both
+        # str and unicode writes, encoding to UTF-8 on the way out.  io.open()
+        # in Jython 2 rejects str literals ("can't write str to text stream").
+        with codecs.open(cpp_path, "w", encoding="utf-8") as cpp_file:
             cpp_file.write("// " + "=" * 70 + "\n")
             cpp_file.write("// " + cls_name + " -- Raw Ghidra decompilation\n")
             cpp_file.write("// Source: " + program.getName() + "\n")
@@ -111,7 +116,13 @@ def export_program():
                             continue
                 except Exception as e:
                     cpp_file.write("// DECOMPILATION FAILED: " + func.getName() + "\n")
-                    cpp_file.write("// Error: " + str(e) + "\n\n")
+                    # repr(e) is always ASCII-safe; str(e) can throw if the exception
+                    # message itself contains non-ASCII (e.g. embedded string literals).
+                    try:
+                        err_text = repr(e)
+                    except Exception:
+                        err_text = "(error converting exception to string)"
+                    cpp_file.write("// Error: " + err_text + "\n\n")
                 
                 failed += 1
         
