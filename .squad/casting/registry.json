@@ -1,0 +1,60 @@
+{
+  "agents": {
+    "john-wick": {
+      "persistent_name": "John Wick",
+      "universe": "Multi-franchise action films (post-2010)",
+      "created_at": "2026-03-22T04:33:41Z",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "jack-reacher": {
+      "persistent_name": "Jack Reacher",
+      "universe": "Multi-franchise action films (post-2010)",
+      "created_at": "2026-03-22T04:33:41Z",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "ethan-hunt": {
+      "persistent_name": "Ethan Hunt",
+      "universe": "Multi-franchise action films (post-2010)",
+      "created_at": "2026-03-22T04:33:41Z",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "jason-bourne": {
+      "persistent_name": "Jason Bourne",
+      "universe": "Multi-franchise action films (post-2010)",
+      "created_at": "2026-03-22T04:33:41Z",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "sarah-connor": {
+      "persistent_name": "Sarah Connor",
+      "universe": "Multi-franchise action films (post-2010)",
+      "created_at": "2026-03-22T04:33:41Z",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "wade-wilson": {
+      "persistent_name": "Wade Wilson",
+      "universe": "Multi-franchise action films (post-2010)",
+      "created_at": "2026-03-22T04:33:41Z",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "scribe": {
+      "persistent_name": "Scribe",
+      "universe": "system",
+      "created_at": "2026-03-22T04:33:41Z",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "ralph": {
+      "persistent_name": "Ralph",
+      "universe": "system",
+      "created_at": "2026-03-22T04:33:41Z",
+      "legacy_named": false,
+      "status": "active"
+    }
+  }
+}

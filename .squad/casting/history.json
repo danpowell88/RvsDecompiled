@@ -1,0 +1,24 @@
+{
+  "universe_usage_history": [
+    {
+      "universe": "Multi-franchise action films (post-2010)",
+      "used_at": "2026-03-22T04:33:41Z",
+      "assignment_id": "rvs-initial-2026-03-22"
+    }
+  ],
+  "assignment_cast_snapshots": {
+    "rvs-initial-2026-03-22": {
+      "project": "rvs",
+      "universe": "Multi-franchise action films (post-2010)",
+      "created_at": "2026-03-22T04:33:41Z",
+      "agents": {
+        "john-wick": "Lead Decompiler",
+        "jack-reacher": "Impl Specialist",
+        "ethan-hunt": "Toolsmith",
+        "jason-bourne": "Reference Expert",
+        "sarah-connor": "Verifier/QA",
+        "wade-wilson": "Tech Blogger"
+      }
+    }
+  }
+}
