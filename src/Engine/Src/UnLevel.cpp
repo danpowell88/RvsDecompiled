@@ -2811,7 +2811,7 @@ EAcceptConnection ULevel::NotifyAcceptingConnection()
 	return ACCEPTC_Accept;
 	unguard;
 }
-IMPL_TODO("retail this=FNetworkNotify(ULevel+0x2c); MI thunk adjusts this-0x2c before GetName; log uses EName 0x313=NAME_NetComeGo + appTimestamp (Ghidra 0x103bf2a0, 213b)")
+IMPL_MATCH("Engine.dll", 0x103bf2a0)
 void ULevel::NotifyAcceptedConnection( UNetConnection* Connection )
 {
 	guard(ULevel::NotifyAcceptedConnection);
