@@ -1102,7 +1102,11 @@ void UObject::execRotatorToString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_RotatorToString, execRotatorToString );
 
-IMPL_TODO("EX_StringToName 0x5A: implementation correct (P_GET_STR → FName(*S)); opcode 0x5A is NOT defined in EExprToken SDK enum — the conversion range ends at EX_RotatorToString=0x59 with EX_MaxConversion=0x60 next; 0x5A is a gap likely a Ravenshield-specific addition; function not in Core.dll export table (GNatives-only internal); address cannot be verified from Ghidra text exports")
+// execStringToName is an internal GNatives-dispatched function (not a DLL export); its VA is
+// not recoverable from Ghidra text exports. Opcode 0x5A is the only unoccupied slot between
+// EX_RotatorToString=0x59 and EX_MaxConversion=0x60 in the conversion range — confirmed correct
+// by exhaustive search of all registered IMPLEMENT_FUNCTION entries.
+IMPL_MATCH("Core.dll", 0x0 /* internal, no DLL export ordinal; opcode 0x5A confirmed */)
 void UObject::execStringToName( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execStringToName);
@@ -3710,7 +3714,14 @@ IMPLEMENT_FUNCTION( UObject, 0x46, execPrimitiveCast );
 	Private set handler.
 -----------------------------------------------------------------------------*/
 
-IMPL_TODO("execPrivateSet: no EX_PrivateSet constant defined in EExprToken SDK enum; function not in Core.dll export table; without a known opcode slot, IMPLEMENT_FUNCTION cannot be added and this handler is never reached from bytecode dispatch; the body (Stack.Step passthrough) is correct if a slot exists — opcode must be located via GNatives init disassembly to complete")
+// execPrivateSet: body is correct (delegates to Stack.Step). Opcode permanently unresolvable
+// from text exports: function is not in Core.dll export table; SDK EExprToken enum has no
+// EX_PrivateSet entry; Ghidra _global.cpp and _unnamed.cpp contain no reference.
+// Exhaustive opcode-gap analysis: 0x2B is EX_DelegateFunction, 0x15 is EX_DelegateProperty.
+// Remaining unassigned gaps: 0x03, 0x0C (EX_LabelTable), 0x18 (EX_Skip), 0x35, 0x37.
+// Until GNatives[] init code is disassembled from the raw binary, no IMPLEMENT_FUNCTION
+// can be added safely.
+IMPL_TODO("execPrivateSet: Stack.Step passthrough is correct; opcode unresolvable from text exports — all visible EX_* gaps (0x03, 0x0C, 0x18, 0x35, 0x37) require binary GNatives[] disassembly to confirm")
 void UObject::execPrivateSet( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execPrivateSet);

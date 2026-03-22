@@ -84,7 +84,13 @@ void AR6HUD::UpdateHUDColors(FColor)
 	unguard;
 }
 
-IMPL_TODO("R6Game.dll 0x1000ceb0: 10251-byte function. Decompilation now available in ghidra/exports/R6Game/_global.cpp (re-exported 2025 after fixing Jython codecs.open() bug in export_cpp.py; 0 failures). Function draws the full R6 game HUD using UCanvas, FCanvasUtil, AR6Rainbow, AR6RainbowTeam, AR6PlayerController, FRenderInterface. Blockers: many R6Game-specific types not yet declared in R6Game Inc headers. Parameters: P_GET_OBJECT(UCanvas,Canvas) + optional bool skip. Implementation is a multi-session project.")
+// Ghidra export: ghidra/exports/R6Game/_r6hud_execDrawNativeHUD.cpp (44896 bytes).
+// Structure: P_FINISH → validate PlayerOwner + AR6Rainbow → canvas scale setup →
+// DrawSingleCharacterInfo or DrawCharacterInfo loop (per team member) → team-mode label →
+// compass tile row → DrawRadar → DrawInGameMap.
+// Blockers: ~15 unnamed helpers (FUN_1000b720, FUN_1000ce20, FUN_10013170, FUN_1000b650…)
+// and 30+ raw offsets in AR6HUD / AR6Rainbow / AR6PlayerController not yet declared.
+IMPL_TODO("R6Game.dll 0x1000ceb0 (10251b): Ghidra export present in _r6hud_execDrawNativeHUD.cpp; deferred pending AR6HUD/AR6Rainbow struct layout mapping and helper-function identification")
 void AR6HUD::execDrawNativeHUD(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;

@@ -94,6 +94,10 @@ namespace
 		FString Command;
 	};
 
+	// Re-entrancy guard for alias dispatch (DAT_106717e8 in retail binary).
+	// Prevents infinite loops when an alias command recursively triggers another alias.
+	static UBOOL GInputAliasInExec = 0;
+
 	static FInputPropertyCache* GetInputPropertyCache(UClass* Class, FMemCache::FCacheItem*& Item)
 	{
 		QWORD CacheId = INPUT_PROPERTY_CACHE_TAG;
@@ -147,10 +151,199 @@ namespace
 // UInput
 // =============================================================================
 
-// 1757-byte input command dispatch at 0x103b4bd0.
-// Handles BUTTON/PULSE/TOGGLE/AXIS/COUNT/KEYNAME/KEYBINDING and key-binding execution.
-IMPL_TODO("Ghidra 0x103b4bd0 (1757b): BUTTON/AXIS/TOGGLE/PULSE/COUNT/KEYNAME/KEYBINDING dispatch; blocked by: FUN_103b5740 (property-list cache helper, uses GCache — replicable locally), DAT_106717e8 (unidentified editor-mode global), and alias FName array iteration at this+0x04")
-INT UInput::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
+// Ghidra 0x103b4bd0 (1757 bytes).  Handles BUTTON, PULSE, TOGGLE, AXIS, COUNT,
+// KEYNAME, KEYBINDING, and alias dispatch.
+//
+// Layout notes (confirmed from Ghidra with 0x2C `this` adjustment — Exec is
+// called through a secondary vtable slot at UInput+0x2C):
+//   Viewport  = *(UViewport**)((BYTE*)this + 0xEA4)
+//   Actor     = *(AActor**)  ((BYTE*)Viewport + 0x34)
+//   ParentAct = *(AActor**)  ((BYTE*)Actor    + 0x3D8)
+//   Aliases   = (FInputAlias*)((BYTE*)this + 0x30)  [40 × 16-byte entries]
+//   InputAction: GetInputAction() / GetInputDelta()
+//   DAT_106717e8 = GInputAliasInExec (re-entrancy guard)
+//   Viewport+0xB4 = unknown float guard that blocks AXIS when positive
+IMPL_MATCH("Engine.dll", 0x103b4bd0)
+INT UInput::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
+{
+	guard(UInput::Exec);
+
+	const TCHAR* Str = Cmd;
+	TCHAR Token[256];
+
+	UViewport* Viewport = *(UViewport**)((BYTE*)this + 0xEA4);
+	AActor*    Actor    = (Viewport ? *(AActor**)((BYTE*)Viewport + 0x34) : NULL);
+
+	if( ParseCommand(&Str, TEXT("BUTTON")) )
+	{
+		if( Actor && ParseToken(Str, Token, 256, 0) )
+		{
+			BYTE* Button = FindButtonName(Actor, Token);
+			if( !Button )
+			{
+				AActor* Parent = *(AActor**)((BYTE*)Actor + 0x3D8);
+				if( Parent ) Button = FindButtonName(Parent, Token);
+			}
+			if( Button )
+			{
+				if( GetInputAction() != IST_Press ) return 1;
+				*Button = 1;
+				return 1;
+			}
+		}
+		Ar.Log(TEXT("Bad Button command"));
+		return 1;
+	}
+	else if( ParseCommand(&Str, TEXT("PULSE")) )
+	{
+		if( Actor && ParseToken(Str, Token, 256, 0) )
+		{
+			BYTE* Button = FindButtonName(Actor, Token);
+			if( !Button )
+			{
+				AActor* Parent = *(AActor**)((BYTE*)Actor + 0x3D8);
+				if( Parent ) Button = FindButtonName(Parent, Token);
+			}
+			if( Button )
+			{
+				if( GetInputAction() != IST_Press ) return 1;
+				*Button = 1;
+				return 1;
+			}
+		}
+		Ar.Log(TEXT("Bad Button command"));
+		return 1;
+	}
+	else if( ParseCommand(&Str, TEXT("TOGGLE")) )
+	{
+		if( Actor && ParseToken(Str, Token, 256, 0) )
+		{
+			BYTE* Button = FindButtonName(Actor, Token);
+			if( Button )
+			{
+				if( GetInputAction() != IST_Press ) return 1;
+				*Button ^= 0x80;
+				return 1;
+			}
+		}
+		Ar.Log(TEXT("Bad Toggle command"));
+		return 1;
+	}
+	else if( ParseCommand(&Str, TEXT("AXIS")) )
+	{
+		// Ghidra: skip AXIS processing when Viewport+0xB4 (unknown float) > 0.
+		if( Viewport && *(FLOAT*)((BYTE*)Viewport + 0xB4) > 0.0f )
+			return 1;
+
+		if( Actor && ParseToken(Str, Token, 256, 0) )
+		{
+			FLOAT* Axis = FindAxisName(Actor, Token);
+			if( !Axis )
+			{
+				Ar.Log(TEXT("Bad Axis command"));
+				return 1;
+			}
+
+			FLOAT Speed     = 1.0f;
+			FLOAT SpeedBase = 0.0f;
+			FLOAT DeadZone  = 0.0f;
+			INT   Invert    = 1;
+
+			Parse(Str, TEXT("SPEED="),     Speed);
+			Parse(Str, TEXT("SPEEDBASE="), SpeedBase);
+			Parse(Str, TEXT("INVERT="),    Invert);
+			Parse(Str, TEXT("DEADZONE="),  DeadZone);
+
+			// Detect mouse axes: names starting with "AMOUSEY" or "AMOUSEX".
+			// Ghidra: InStr at pos 0 distinguishes starts-with from substring.
+			FString CapsToken = FString(Token).Caps();
+			UBOOL bIsMouse = (CapsToken.InStr(TEXT("AMOUSEY"), 0) == 0) ||
+			                 (CapsToken.InStr(TEXT("AMOUSEX"), 0) == 0);
+
+			if( bIsMouse )
+			{
+				Invert = Abs(Invert);
+				Speed  = 2.0f;
+			}
+			else if( SpeedBase > 0.0f )
+			{
+				// Deadzone normalisation.  Ghidra uses Speed as the raw input
+				// magnitude here (compiler reuses the stack slot).
+				if( Abs(Speed) <= DeadZone )
+					return 1;
+				FLOAT Norm = (Speed <= 0.0f)
+					? -((-Speed - DeadZone) / (1.0f - DeadZone))
+					:  ( (Speed - DeadZone) / (1.0f - DeadZone));
+				*Axis += (FLOAT)Invert * GetInputDelta() * SpeedBase * Norm;
+				return 1;
+			}
+
+			EInputAction Action = GetInputAction();
+			if( Action == IST_Axis )
+			{
+				*Axis += (FLOAT)Invert * GetInputDelta() * Speed * 0.01f;
+			}
+			else if( Action == IST_Hold )
+			{
+				*Axis += (FLOAT)Invert * GetInputDelta() * Speed;
+			}
+		}
+		return 1;
+	}
+	else if( ParseCommand(&Str, TEXT("COUNT")) )
+	{
+		if( Actor && ParseToken(Str, Token, 256, 0) )
+		{
+			BYTE* Button = FindButtonName(Actor, Token);
+			if( Button )
+			{
+				(*Button)++;
+				return 1;
+			}
+		}
+		Ar.Log(TEXT("Bad Count command"));
+		return 1;
+	}
+	else if( ParseCommand(&Str, TEXT("KEYNAME")) )
+	{
+		INT KeyCode = appAtoi(Str);
+		Ar.Log(GetKeyName((EInputKey)KeyCode));
+		return 1;
+	}
+	else if( ParseCommand(&Str, TEXT("KEYBINDING")) )
+	{
+		EInputKey Key = (EInputKey)0;
+		if( FindKeyName(Str, Key) )
+			Ar.Log(*GetActionKey(Key));
+		return 1;
+	}
+	else
+	{
+		// Alias dispatch.  GInputAliasInExec prevents infinite recursion when
+		// an alias command itself contains an alias (DAT_106717e8 in retail).
+		if( !GInputAliasInExec && ParseToken(Str, Token, 256, 0) )
+		{
+			FName AliasName(Token, FNAME_Find);
+			if( AliasName != NAME_None )
+			{
+				FInputAlias* Aliases = (FInputAlias*)((BYTE*)this + 0x30);
+				for( INT i = 0; i < INPUT_ALIAS_COUNT; i++ )
+				{
+					if( Aliases[i].Alias == AliasName )
+					{
+						GInputAliasInExec = 1;
+						Exec(*Aliases[i].Command, Ar);
+						GInputAliasInExec = 0;
+						return 1;
+					}
+				}
+			}
+		}
+		return 0;
+	}
+
+	unguard;
+}
 IMPL_MATCH("Engine.dll", 0x103b4b40)
 void UInput::Serialize( FArchive& Ar )
 {

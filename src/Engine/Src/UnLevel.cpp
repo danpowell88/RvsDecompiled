@@ -1512,17 +1512,17 @@ if ( (ActorFlags & 0x800) && Hash )
 Hash->RemoveActor(Actor);
 
 // Save old rotation for delta-rotation computation for attached actors
-UINT OldPitch = *(UINT*)((BYTE*)Actor + 0x240);
-UINT OldYaw   = *(UINT*)((BYTE*)Actor + 0x244);
-UINT OldRoll  = *(UINT*)((BYTE*)Actor + 0x248);
+DWORD OldPitch = *(DWORD*)((BYTE*)Actor + 0x240);
+DWORD OldYaw   = *(DWORD*)((BYTE*)Actor + 0x244);
+DWORD OldRoll  = *(DWORD*)((BYTE*)Actor + 0x248);
 
 // Apply movement and new rotation
 *(FLOAT*)((BYTE*)Actor + 0x234) += AdjustedDelta.X;
 *(FLOAT*)((BYTE*)Actor + 0x238) += AdjustedDelta.Y;
 *(FLOAT*)((BYTE*)Actor + 0x23C) += AdjustedDelta.Z;
-*(UINT*)((BYTE*)Actor  + 0x240) = (UINT)NewRotation.Pitch;
-*(UINT*)((BYTE*)Actor  + 0x244) = (UINT)NewRotation.Yaw;
-*(UINT*)((BYTE*)Actor  + 0x248) = (UINT)NewRotation.Roll;
+*(INT*)((BYTE*)Actor  + 0x240) = NewRotation.Pitch;
+*(INT*)((BYTE*)Actor  + 0x244) = NewRotation.Yaw;
+*(INT*)((BYTE*)Actor  + 0x248) = NewRotation.Roll;
 
 // Propagate movement/rotation to attached actors.
 // Ghidra builds a delta-rotation matrix (GetLocalCoords vtable+0xa8,
@@ -1532,9 +1532,9 @@ UINT OldRoll  = *(UINT*)((BYTE*)Actor + 0x248);
 INT numAttached = *(INT*)((BYTE*)Actor + 0x1D8);  // Attached.Num()
 if ( numAttached > 0 && bTest == 0 )
 {
-UBOOL bRotChanged = ( OldPitch != (UINT)NewRotation.Pitch
-                   || OldYaw   != (UINT)NewRotation.Yaw
-                   || OldRoll  != (UINT)NewRotation.Roll );
+UBOOL bRotChanged = ( OldPitch != (DWORD)NewRotation.Pitch
+                   || OldYaw   != (DWORD)NewRotation.Yaw
+                   || OldRoll  != (DWORD)NewRotation.Roll );
 if ( bRotChanged )
 Actor->UpdateRelativeRotation();
 }
