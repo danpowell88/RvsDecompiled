@@ -1061,7 +1061,7 @@ IMPL_MATCH("Engine.dll", 0x10301a90)
 FWarpZoneSceneNode* FWarpZoneSceneNode::GetWarpZoneSceneNode() { return this; }
 
 // FLevelSceneNode
-IMPL_TODO("Ghidra 0x10400290 (2966b): frustum planes built from view-corner Deproject loop; no FUN_ blockers — pending full decompilation")
+IMPL_TODO("Ghidra 0x10400290 (2966b): Deproject corner loop, determinant-sign winding, and editor far-clip augmentation identified; implementation pending full plane-order reconstruction for parity")
 FConvexVolume FLevelSceneNode::GetViewFrustum() { return FConvexVolume(); }
 
 // FLightMapSceneNode
@@ -1077,11 +1077,11 @@ INT FLightMapSceneNode::FilterActor(AActor* Actor)
 }
 
 // FDirectionalLightMapSceneNode
-IMPL_TODO("Ghidra 0x103d25d0 (1896b): frustum planes built from 8 corner Deproject loops; no FUN_ blockers — pending full decompilation")
+IMPL_TODO("Ghidra 0x103d25d0 (1896b): 8-corner Deproject path and determinant-dependent winding identified; implementation pending exact retail plane ordering/stack layout reconstruction")
 FConvexVolume FDirectionalLightMapSceneNode::GetViewFrustum() { return FConvexVolume(); }
 
 // FPointLightMapSceneNode
-IMPL_TODO("Ghidra 0x103d1740 (1492b): frustum planes built from 4 corner Deproject loops; no FUN_ blockers — pending full decompilation")
+IMPL_TODO("Ghidra 0x103d1740 (1492b): 4-corner Deproject frustum path identified with determinant-sign branch; implementation pending exact plane construction order for parity")
 FConvexVolume FPointLightMapSceneNode::GetViewFrustum() { return FConvexVolume(); }
 
 // ============================================================================
