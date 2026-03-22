@@ -95,7 +95,7 @@ void UObject::execDefaultVariable( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_DefaultVariable, execDefaultVariable );
 
 // 0x04 — EX_Return.
-IMPL_TODO("EX_Return (0x04): compiled into Core.dll but not individually exported — verify Stack.Code=NULL body against Core.dll Ghidra unnamed function")
+IMPL_TODO("EX_Return (0x04): unexported in Core.dll; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) — Stack.Code=NULL body appears correct, pending raw-binary mapping")
 void UObject::execReturn( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execReturn);
@@ -2142,7 +2142,7 @@ void UObject::execAsc( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 237, execAsc );
 
-IMPL_TODO("execLocs: Ravenshield addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execLocs: Ravenshield addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execLocs( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execLocs);
@@ -2377,7 +2377,7 @@ void UObject::execSmerp( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 248, execSmerp );
 
-IMPL_TODO("execCeil: Ravenshield addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execCeil: Ravenshield addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execCeil( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execCeil);
@@ -2386,7 +2386,7 @@ void UObject::execCeil( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execRound: Ravenshield addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execRound: Ravenshield addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execRound( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execRound);
@@ -2587,7 +2587,7 @@ void UObject::execVSize( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 225, execVSize );
 
-IMPL_TODO("execVSizeSquared: Ravenshield addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execVSizeSquared: Ravenshield addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execVSizeSquared( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execVSizeSquared);
@@ -2863,7 +2863,7 @@ void UObject::execClockwiseFrom_IntInt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 246+100, execClockwiseFrom_IntInt );
 
-IMPL_TODO("execInitRotRand: Ravenshield addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execInitRotRand: Ravenshield addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execInitRotRand( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execInitRotRand);
@@ -2894,7 +2894,7 @@ IMPLEMENT_FUNCTION( UObject, 320, execRotRand );
 	Quaternion functions.
 -----------------------------------------------------------------------------*/
 
-IMPL_TODO("execQuatProduct: Ravenshield addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execQuatProduct: Ravenshield addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execQuatProduct( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execQuatProduct);
@@ -2904,7 +2904,7 @@ void UObject::execQuatProduct( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execQuatInvert: Ravenshield addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execQuatInvert: Ravenshield addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execQuatInvert( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execQuatInvert);
@@ -2913,7 +2913,7 @@ void UObject::execQuatInvert( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execQuatRotateVector: Ravenshield addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execQuatRotateVector: Ravenshield addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execQuatRotateVector( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execQuatRotateVector);
@@ -2927,7 +2927,7 @@ void UObject::execQuatRotateVector( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execQuatFindBetween: Ravenshield addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execQuatFindBetween: Ravenshield addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execQuatFindBetween( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execQuatFindBetween);
@@ -2950,7 +2950,7 @@ void UObject::execQuatFindBetween( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execQuatFromAxisAndAngle: Ravenshield addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execQuatFromAxisAndAngle: Ravenshield addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execQuatFromAxisAndAngle( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execQuatFromAxisAndAngle);
@@ -2976,7 +2976,7 @@ void UObject::execInterpCurveEval( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 0, execInterpCurveEval );
 
-IMPL_TODO("execInterpCurveGetInputDomain: Ravenshield addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execInterpCurveGetInputDomain: Ravenshield addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execInterpCurveGetInputDomain( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execInterpCurveGetInputDomain);
@@ -2996,7 +2996,7 @@ void UObject::execInterpCurveGetInputDomain( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execInterpCurveGetOutputRange: Ravenshield addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execInterpCurveGetOutputRange: Ravenshield addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execInterpCurveGetOutputRange( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execInterpCurveGetOutputRange);
@@ -3132,7 +3132,7 @@ void UObject::execFindObject( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 0, execFindObject );
 
-IMPL_TODO("execCalcDirection: Ravenshield addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execCalcDirection: Ravenshield addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execCalcDirection( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execCalcDirection);
@@ -3143,7 +3143,7 @@ void UObject::execCalcDirection( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execCalcRotation: Ravenshield addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execCalcRotation: Ravenshield addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execCalcRotation( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execCalcRotation);
@@ -3154,7 +3154,7 @@ void UObject::execCalcRotation( FFrame& Stack, RESULT_DECL )
 
 static const TCHAR* GCompressedStringPrefix = TEXT("R6C1:");
 
-IMPL_TODO("unexported Core.dll internal helper; small and characterizable — verify against Core.dll Ghidra unnamed function matching the signature")
+IMPL_TODO("unexported Core.dll internal helper; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping to confirm signature match")
 static void FStringToAnsiBytes( const FString& In, TArray<BYTE>& OutBytes )
 {
 	const TCHAR* Chars = *In;
@@ -3165,7 +3165,7 @@ static void FStringToAnsiBytes( const FString& In, TArray<BYTE>& OutBytes )
 		OutBytes(i) = ToAnsi( Chars[i] );
 }
 
-IMPL_TODO("unexported Core.dll internal helper; small and characterizable — verify against Core.dll Ghidra unnamed function matching the signature")
+IMPL_TODO("unexported Core.dll internal helper; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping to confirm signature match")
 static FString AnsiBytesToFString( const TArray<BYTE>& InBytes )
 {
 	FString Out;
@@ -3177,7 +3177,7 @@ static FString AnsiBytesToFString( const TArray<BYTE>& InBytes )
 	return Out;
 }
 
-IMPL_TODO("unexported Core.dll internal helper; small and characterizable — verify against Core.dll Ghidra unnamed function matching the signature")
+IMPL_TODO("unexported Core.dll internal helper; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping to confirm signature match")
 static void RunCodecStage( FCodec& Codec, const TArray<BYTE>& InBytes, TArray<BYTE>& OutBytes, UBOOL Encode )
 {
 	FBufferReader Reader( InBytes );
@@ -3188,7 +3188,7 @@ static void RunCodecStage( FCodec& Codec, const TArray<BYTE>& InBytes, TArray<BY
 		Codec.Decode( Reader, Writer );
 }
 
-IMPL_TODO("unexported Core.dll internal helper; small and characterizable — verify against Core.dll Ghidra unnamed function matching the signature")
+IMPL_TODO("unexported Core.dll internal helper; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping to confirm signature match")
 static void CompressStringBytes( const TArray<BYTE>& InBytes, TArray<BYTE>& OutBytes )
 {
 	FCodecRLE Stage1;
@@ -3204,7 +3204,7 @@ static void CompressStringBytes( const TArray<BYTE>& InBytes, TArray<BYTE>& OutB
 	RunCodecStage( Stage5, Buffer4, OutBytes, 1 );
 }
 
-IMPL_TODO("unexported Core.dll internal helper; small and characterizable — verify against Core.dll Ghidra unnamed function matching the signature")
+IMPL_TODO("unexported Core.dll internal helper; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping to confirm signature match")
 static void ExpandStringBytes( const TArray<BYTE>& InBytes, TArray<BYTE>& OutBytes )
 {
 	FCodecHuffman Stage1;
@@ -3220,13 +3220,13 @@ static void ExpandStringBytes( const TArray<BYTE>& InBytes, TArray<BYTE>& OutByt
 	RunCodecStage( Stage5, Buffer4, OutBytes, 0 );
 }
 
-IMPL_TODO("unexported Core.dll internal helper; small and characterizable — verify against Core.dll Ghidra unnamed function matching the signature")
+IMPL_TODO("unexported Core.dll internal helper; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping to confirm signature match")
 static TCHAR EncodeHexNibble( BYTE Value )
 {
 	return Value < 10 ? TEXT('0') + Value : TEXT('A') + (Value - 10);
 }
 
-IMPL_TODO("unexported Core.dll internal helper; small and characterizable — verify against Core.dll Ghidra unnamed function matching the signature")
+IMPL_TODO("unexported Core.dll internal helper; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping to confirm signature match")
 static INT DecodeHexNibble( TCHAR Ch )
 {
 	if( Ch >= TEXT('0') && Ch <= TEXT('9') )
@@ -3238,7 +3238,7 @@ static INT DecodeHexNibble( TCHAR Ch )
 	return INDEX_NONE;
 }
 
-IMPL_TODO("unexported Core.dll internal helper; small and characterizable — verify against Core.dll Ghidra unnamed function matching the signature")
+IMPL_TODO("unexported Core.dll internal helper; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping to confirm signature match")
 static FString EncodeCompressedBytes( const TArray<BYTE>& InBytes )
 {
 	const INT PrefixLen = appStrlen( GCompressedStringPrefix );
@@ -3256,7 +3256,7 @@ static FString EncodeCompressedBytes( const TArray<BYTE>& InBytes )
 	return Out;
 }
 
-IMPL_TODO("unexported Core.dll internal helper; small and characterizable — verify against Core.dll Ghidra unnamed function matching the signature")
+IMPL_TODO("unexported Core.dll internal helper; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping to confirm signature match")
 static UBOOL DecodeCompressedBytes( const FString& In, TArray<BYTE>& OutBytes )
 {
 	const TCHAR* Chars = *In;
@@ -3282,7 +3282,7 @@ static UBOOL DecodeCompressedBytes( const FString& In, TArray<BYTE>& OutBytes )
 	return 1;
 }
 
-IMPL_TODO("execCompress: Ravenshield addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execCompress: Ravenshield addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execCompress( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execCompress);
@@ -3297,7 +3297,7 @@ void UObject::execCompress( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execExpand: Ravenshield addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execExpand: Ravenshield addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execExpand( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execExpand);
@@ -3505,7 +3505,7 @@ IMPLEMENT_FUNCTION( UObject, 0, execGetEnum );
 	Ravenshield INI profile functions.
 -----------------------------------------------------------------------------*/
 
-IMPL_TODO("execGetPrivateProfileInt: Ravenshield R6 addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execGetPrivateProfileInt: Ravenshield R6 addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execGetPrivateProfileInt( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetPrivateProfileInt);
@@ -3517,7 +3517,7 @@ void UObject::execGetPrivateProfileInt( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execGetPrivateProfileString: Ravenshield R6 addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execGetPrivateProfileString: Ravenshield R6 addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execGetPrivateProfileString( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetPrivateProfileString);
@@ -3529,7 +3529,7 @@ void UObject::execGetPrivateProfileString( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execSetPrivateProfileInt: Ravenshield R6 addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execSetPrivateProfileInt: Ravenshield R6 addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execSetPrivateProfileInt( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSetPrivateProfileInt);
@@ -3540,7 +3540,7 @@ void UObject::execSetPrivateProfileInt( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execSetPrivateProfileString: Ravenshield R6 addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execSetPrivateProfileString: Ravenshield R6 addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execSetPrivateProfileString( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSetPrivateProfileString);
@@ -3551,7 +3551,7 @@ void UObject::execSetPrivateProfileString( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execSavePrivateProfile: Ravenshield R6 addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execSavePrivateProfile: Ravenshield R6 addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execSavePrivateProfile( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSavePrivateProfile);
@@ -3563,7 +3563,7 @@ void UObject::execSavePrivateProfile( FFrame& Stack, RESULT_DECL )
 	Ravenshield-specific version/platform/filter functions.
 -----------------------------------------------------------------------------*/
 
-IMPL_TODO("execGetPlatform: Ravenshield R6 addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execGetPlatform: Ravenshield R6 addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execGetPlatform( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetPlatform);
@@ -3571,7 +3571,7 @@ void UObject::execGetPlatform( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execGetVersionWarfareEngine: Ravenshield R6 addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execGetVersionWarfareEngine: Ravenshield R6 addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execGetVersionWarfareEngine( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetVersionWarfareEngine);
@@ -3579,7 +3579,7 @@ void UObject::execGetVersionWarfareEngine( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execGetVersionAGPMajor: Ravenshield R6 addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execGetVersionAGPMajor: Ravenshield R6 addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execGetVersionAGPMajor( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetVersionAGPMajor);
@@ -3587,7 +3587,7 @@ void UObject::execGetVersionAGPMajor( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execGetVersionAGPMinor: Ravenshield R6 addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execGetVersionAGPMinor: Ravenshield R6 addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execGetVersionAGPMinor( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetVersionAGPMinor);
@@ -3595,7 +3595,7 @@ void UObject::execGetVersionAGPMinor( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execGetVersionAGPTiny: Ravenshield R6 addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execGetVersionAGPTiny: Ravenshield R6 addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execGetVersionAGPTiny( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetVersionAGPTiny);
@@ -3603,7 +3603,7 @@ void UObject::execGetVersionAGPTiny( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execIsDebugBuild: Ravenshield R6 addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execIsDebugBuild: Ravenshield R6 addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execIsDebugBuild( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execIsDebugBuild);
@@ -3615,7 +3615,7 @@ void UObject::execIsDebugBuild( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execGetMilesOnly: Ravenshield R6 addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execGetMilesOnly: Ravenshield R6 addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execGetMilesOnly( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetMilesOnly);
@@ -3623,7 +3623,7 @@ void UObject::execGetMilesOnly( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execSetMilesOnly: Ravenshield R6 addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execSetMilesOnly: Ravenshield R6 addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execSetMilesOnly( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSetMilesOnly);
@@ -3631,7 +3631,7 @@ void UObject::execSetMilesOnly( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execGetNoBlood: Ravenshield R6 addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execGetNoBlood: Ravenshield R6 addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execGetNoBlood( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetNoBlood);
@@ -3639,7 +3639,7 @@ void UObject::execGetNoBlood( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execSetNoBlood: Ravenshield R6 addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execSetNoBlood: Ravenshield R6 addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execSetNoBlood( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSetNoBlood);
@@ -3647,7 +3647,7 @@ void UObject::execSetNoBlood( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execGetNoSniper: Ravenshield R6 addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execGetNoSniper: Ravenshield R6 addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execGetNoSniper( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetNoSniper);
@@ -3655,7 +3655,7 @@ void UObject::execGetNoSniper( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execSetNoSniper: Ravenshield R6 addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execSetNoSniper: Ravenshield R6 addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execSetNoSniper( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSetNoSniper);
@@ -3663,7 +3663,7 @@ void UObject::execSetNoSniper( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execGetLanguageFilter: Ravenshield R6 addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execGetLanguageFilter: Ravenshield R6 addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execGetLanguageFilter( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetLanguageFilter);
@@ -3671,7 +3671,7 @@ void UObject::execGetLanguageFilter( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execSetLanguageFilter: Ravenshield R6 addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execSetLanguageFilter: Ravenshield R6 addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execSetLanguageFilter( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSetLanguageFilter);
@@ -3679,7 +3679,7 @@ void UObject::execSetLanguageFilter( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execGetInputKeyString: Ravenshield R6 addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execGetInputKeyString: Ravenshield R6 addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execGetInputKeyString( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetInputKeyString);
@@ -3688,7 +3688,7 @@ void UObject::execGetInputKeyString( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execGetBaseDir: Ravenshield R6 addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execGetBaseDir: Ravenshield R6 addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execGetBaseDir( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetBaseDir);
@@ -3742,7 +3742,7 @@ enum { MAX_SCRIPT_FILE_HANDLES = 64 };
 static FArchive* GScriptFileHandles[MAX_SCRIPT_FILE_HANDLES];
 static UBOOL GScriptFileHandlesInit = 0;
 
-IMPL_TODO("unexported Core.dll internal helper; small and characterizable — verify against Core.dll Ghidra unnamed function matching the signature")
+IMPL_TODO("unexported Core.dll internal helper; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping to confirm signature match")
 static void InitFileHandles()
 {
 	if( !GScriptFileHandlesInit )
@@ -3752,7 +3752,7 @@ static void InitFileHandles()
 	}
 }
 
-IMPL_TODO("unexported Core.dll internal helper; small and characterizable — verify against Core.dll Ghidra unnamed function matching the signature")
+IMPL_TODO("unexported Core.dll internal helper; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping to confirm signature match")
 static INT AllocFileHandle( FArchive* Ar )
 {
 	InitFileHandles();
@@ -3768,7 +3768,7 @@ static INT AllocFileHandle( FArchive* Ar )
 	return -1;
 }
 
-IMPL_TODO("unexported Core.dll internal helper; small and characterizable — verify against Core.dll Ghidra unnamed function matching the signature")
+IMPL_TODO("unexported Core.dll internal helper; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping to confirm signature match")
 static FArchive* GetFileHandle( INT Handle )
 {
 	InitFileHandles();
@@ -3777,7 +3777,7 @@ static FArchive* GetFileHandle( INT Handle )
 	return NULL;
 }
 
-IMPL_TODO("unexported Core.dll internal helper; small and characterizable — verify against Core.dll Ghidra unnamed function matching the signature")
+IMPL_TODO("unexported Core.dll internal helper; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping to confirm signature match")
 static void FreeFileHandle( INT Handle )
 {
 	InitFileHandles();
@@ -3788,7 +3788,7 @@ static void FreeFileHandle( INT Handle )
 	}
 }
 
-IMPL_TODO("execFOpen: Ravenshield R6 addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execFOpen: Ravenshield R6 addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execFOpen( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFOpen);
@@ -3803,7 +3803,7 @@ void UObject::execFOpen( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execFOpenWrite: Ravenshield R6 addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execFOpenWrite: Ravenshield R6 addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execFOpenWrite( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFOpenWrite);
@@ -3813,7 +3813,7 @@ void UObject::execFOpenWrite( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execFClose: Ravenshield R6 addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execFClose: Ravenshield R6 addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execFClose( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFClose);
@@ -3822,7 +3822,7 @@ void UObject::execFClose( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execFReadLine: Ravenshield R6 addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execFReadLine: Ravenshield R6 addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execFReadLine( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFReadLine);
@@ -3848,7 +3848,7 @@ void UObject::execFReadLine( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execFWrite: Ravenshield R6 addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execFWrite: Ravenshield R6 addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execFWrite( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFWrite);
@@ -3866,7 +3866,7 @@ void UObject::execFWrite( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execFWriteLine: Ravenshield R6 addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execFWriteLine: Ravenshield R6 addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execFWriteLine( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFWriteLine);
@@ -3886,7 +3886,7 @@ void UObject::execFWriteLine( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execFLoad: Ravenshield R6 addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execFLoad: Ravenshield R6 addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execFLoad( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFLoad);
@@ -3906,7 +3906,7 @@ void UObject::execFLoad( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execFUnload: Ravenshield R6 addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execFUnload: Ravenshield R6 addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execFUnload( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFUnload);
@@ -3919,7 +3919,7 @@ void UObject::execFUnload( FFrame& Stack, RESULT_DECL )
 	Log file functions — Ravenshield additions.
 -----------------------------------------------------------------------------*/
 
-IMPL_TODO("execLogFileOpen: Ravenshield R6 addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execLogFileOpen: Ravenshield R6 addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execLogFileOpen( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execLogFileOpen);
@@ -3929,7 +3929,7 @@ void UObject::execLogFileOpen( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execLogFileClose: Ravenshield R6 addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execLogFileClose: Ravenshield R6 addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execLogFileClose( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execLogFileClose);
@@ -3938,7 +3938,7 @@ void UObject::execLogFileClose( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_TODO("execLogFileWrite: Ravenshield R6 addition compiled into Core.dll but not exported — verify implementation against Core.dll Ghidra unnamed function")
+IMPL_TODO("execLogFileWrite: Ravenshield R6 addition compiled into Core.dll but not exported; address not located in ghidra/exports/Core (_global.cpp/_unnamed.cpp) by symbol — pending raw-binary mapping for verification")
 void UObject::execLogFileWrite( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execLogFileWrite);
@@ -4242,3 +4242,4 @@ void UObject::execVRand( FFrame& Stack, void* const Result )
 /*-----------------------------------------------------------------------------
 	The End.
 -----------------------------------------------------------------------------*/
+
