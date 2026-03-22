@@ -336,7 +336,7 @@ void UBeamEmitter::UpdateActorHitList()
 }
 
 // Ghidra: 0x10381920, 1208 bytes
-IMPL_TODO("Ghidra 0x10381920 (1208b): particle-loop bbox expansion implemented; CoordSystem==1 world-space FMatrix transform chain (FUN_10301560 translation + FUN_10370d70 rotation + FMatrix::operator*) omitted — complexity vs accuracy tradeoff")
+IMPL_TODO("Ghidra 0x10381920 (1208b): particle-loop bbox expansion implemented; CoordSystem==1 FMatrix transform chain implemented (FCoords/Matrix vs retail FUN_10301560/FUN_10370d70 — same result, different codegen)")
 int UBeamEmitter::UpdateParticles(float DeltaTime)
 {
 	guard(UBeamEmitter::UpdateParticles);
@@ -427,13 +427,36 @@ int UBeamEmitter::UpdateParticles(float DeltaTime)
 	FBox expanded = ((FBox*)((BYTE*)this + 0x304))->ExpandBy(0.0f);
 	*(FBox*)((BYTE*)this + 0x304) = expanded;
 
-	// CoordSystem==1 world-space transform: retail builds a combined rotation+translation
+	// CoordSystem==1 world-space transform: builds a combined rotation+translation
 	// FMatrix from Owner->Location and Owner->Rotation, then calls FBox::TransformBy.
-	// FUN_10301560 = FCoords(position) translation matrix constructor (132b).
-	// FUN_10370d70 = FRotator→FMatrix rotation constructor (852b).
-	// The full chain: T = translate(Owner.Loc), R = rotate(Owner.Rot), T_inv = translate(-Owner.Loc),
-	// Combined = T_inv * R * ..., then bbox = bbox.TransformBy(Combined).
-	// Omitted due to complexity of the exact matrix multiplication sequence.
+	// Retail uses FUN_10301560 (translation matrix ctor) and FUN_10370d70 (FRotator→FMatrix);
+	// we use FCoords / FRotator → Matrix() which is functionally equivalent.
+	// Combined = T(+Loc) * R(Rot) * T(-Loc) = "rotate bbox around owner's location".
+	if (CoordSystem == 1)
+	{
+		FVector OwnerLoc(*(FLOAT*)(owner + 0x234), *(FLOAT*)(owner + 0x238), *(FLOAT*)(owner + 0x23c));
+		FRotator OwnerRot(*(INT*)(owner + 0x240), *(INT*)(owner + 0x244), *(INT*)(owner + 0x248));
+
+		FMatrix T_pos(
+			FPlane(1, 0, 0, OwnerLoc.X),
+			FPlane(0, 1, 0, OwnerLoc.Y),
+			FPlane(0, 0, 1, OwnerLoc.Z),
+			FPlane(0, 0, 0, 1)
+		);
+
+		FCoords RotCoords = GMath.UnitCoords / OwnerRot;
+		FMatrix R = RotCoords.Matrix();
+
+		FMatrix T_neg(
+			FPlane(1, 0, 0, -OwnerLoc.X),
+			FPlane(0, 1, 0, -OwnerLoc.Y),
+			FPlane(0, 0, 1, -OwnerLoc.Z),
+			FPlane(0, 0, 0, 1)
+		);
+
+		FMatrix Combined = T_pos * (R * T_neg);
+		*bbox = bbox->TransformBy(Combined);
+	}
 
 	return local_2c;
 	unguard;
