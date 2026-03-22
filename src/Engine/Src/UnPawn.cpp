@@ -162,12 +162,11 @@ IMPLEMENT_FUNCTION( AController, INDEX_NONE, execPollMoveTo );
 //   (navFlags&0x50)==0 approach-dist block implemented.
 // FUN_10317640 confirmed as Clamp<FLOAT>(val,min,max) at 0x10317640 (45b, Engine._unnamed.cpp).
 // FUN_103808e0 confirmed as Max<FLOAT>(a,b) at 0x103808e0 (25b, Engine._unnamed.cpp).
-// DIVERGENCE: Pawn+0x578/0x41c/0x420/0x414/0x418 are unnamed APawn fields accessed via raw offsets.
-// DIVERGENCE: CurrentPath->field_0x34 is UReachSpec::Distance (INT, matches Ghidra cast to float).
-// MISSING: Pawn+0x414 write (ExtraTarget-or-computed-dist assignment ambiguous due to
-//   Ghidra register reuse); conditional vtable[97](0,MoveTarget) tail omitted — first arg 0
-//   is unclear for moveToward(FVector&,AActor*) calling convention.
-IMPL_TODO("Ghidra 0x10390940 (1402b): approach-dist block implemented; FUN_10317640=Clamp & FUN_103808e0=Max confirmed; MISSING Pawn+0x414 ExtraTarget write and vtable[97] tail (arg semantics ambiguous in Ghidra due to register reuse)")
+// Tail: Pawn+0x414 written unconditionally — ExtraTarget stored directly when non-NULL,
+//   else pFVar16 (computed approach float) written.  if(!bPreparingMove) moveToward kicks off.
+// DIVERGENCE: Pawn+0x578/0x41c/0x420/0x414/0x418 are unnamed APawn fields; raw offsets only.
+// DIVERGENCE: vtable[26] on MoveTarget (IsA(ANavigationPoint)) approximated via named API.
+IMPL_DIVERGE("Ghidra 0x10390940 (1402b): FUN_10317640=Clamp, FUN_103808e0=Max confirmed exact; pFVar16 approach-dist tracking and ExtraTarget tail implemented; raw APawn offsets permanent divergence")
 void AController::execMoveToward( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execMoveToward);
@@ -203,6 +202,10 @@ void AController::execMoveToward( FFrame& Stack, RESULT_DECL )
 	// eventSuggestMovePreparation and check reachability via ReachSpec.
 	// Ghidra: IsA(ANavigationPoint) check; bSuggestPreparation bit (flags+0x3a4 & 0x100);
 	// ValidAnchor → GetReachSpecTo → supports → eventPrepareForMove.
+	//
+	// pFVar16_approach: tracks the running approach-distance value (Ghidra's pFVar16).
+	// Written unconditionally to Pawn+0x414 after the nav block.
+	FLOAT pFVar16_approach = 0.f;
 	if (MoveTarget->IsA(ANavigationPoint::StaticClass()))
 	{
 		ANavigationPoint* NavTarget = (ANavigationPoint*)MoveTarget;
@@ -248,10 +251,11 @@ void AController::execMoveToward( FFrame& Stack, RESULT_DECL )
 				*(FLOAT*)((BYTE*)Pawn + 0x580) = velNorm.Z;
 
 				// approachDist = FUN_10317640(specDist-CR, 0, CR*4)
-				//              = Clamp<FLOAT>(specDist-CR, 0, CR*4).
+				//              = Clamp<FLOAT>(specDist-CR, 0, CR*4) — confirmed exact.
 				// spec+0x34 = UReachSpec::Distance (INT, cast to float in Ghidra).
 				FLOAT specDist     = (FLOAT)*(INT*)((BYTE*)CurrentPath + 0x34);
 				FLOAT approachDist = Clamp(specDist - Pawn->CollisionRadius, 0.f, Pawn->CollisionRadius * 4.f);
+				pFVar16_approach   = approachDist;   // Ghidra: pFVar16 = (float)fVar12
 				*(FLOAT*)((BYTE*)Pawn + 0x41c) = (appFrand() + 0.5f) * approachDist;
 
 				// Path direction: spec+0x48 = Start nav pointer, spec+0x4c = End nav pointer.
@@ -273,19 +277,29 @@ void AController::execMoveToward( FFrame& Stack, RESULT_DECL )
 					*(FLOAT*)((BYTE*)Pawn + 0x420) = 0.8f;  // 0x3f4ccccd
 			}
 
-			// If NavTarget changed from cached (+0x44c): compute floor-based approach dist.
-			// FUN_103808e0(0, Pawn+0x418 - CR) = Max(0, Pawn+0x418 - CR).
+			// If NavTarget changed from cached (+0x44c): recompute floor-based approach dist.
+			// FUN_103808e0(0, Pawn+0x418-CR) = Max(0, Pawn+0x418-CR) — confirmed exact.
+			// Ghidra: updates pFVar16 here (does NOT write Pawn+0x414 yet).
 			if (NavTarget != *(ANavigationPoint**)((BYTE*)this + 0x44c))
 			{
-				FLOAT floorDist = Max(0.f, *(FLOAT*)((BYTE*)Pawn + 0x418) - Pawn->CollisionRadius);
-				*(FLOAT*)((BYTE*)Pawn + 0x414) = (appFrand() * 0.3f + 0.7f) * floorDist;
+				FLOAT floorDist  = Max(0.f, *(FLOAT*)((BYTE*)Pawn + 0x418) - Pawn->CollisionRadius);
+				pFVar16_approach = (appFrand() * 0.3f + 0.7f) * floorDist;
 			}
 		}
 	}
-	// Ghidra tail: clear floor-distance cache.
-	*(DWORD*)((BYTE*)Pawn + 0x418) = 0;
-	// MISSING: Pawn+0x414 = ExtraTarget-or-computed-dist (param_1 ambiguous in Ghidra).
-	// MISSING: if (byte@Controller+0x3a8 >= 0) vtable[97](0,MoveTarget) — arg 0 unclear.
+	// Ghidra tail (outside navPoint if-block):
+	// if (ExtraTarget == NULL) → Pawn+0x414 = pFVar16_approach (computed float)
+	// if (ExtraTarget != NULL) → Pawn+0x414 = ExtraTarget (actor pointer stored as 4 bytes)
+	// Ghidra: if(NAN((float)param_1)!=(param_1==0.0)) param_1=pFVar16; Pawn+0x414=param_1
+	if (ExtraTarget == NULL)
+		*(FLOAT*)((BYTE*)Pawn + 0x414) = pFVar16_approach;
+	else
+		*(AActor**)((BYTE*)Pawn + 0x414) = ExtraTarget;
+	*(DWORD*)((BYTE*)Pawn + 0x418) = 0;   // clear floor-distance cache
+	// Ghidra: if (-1 < (char)this[0x3a8]) = if(!bPreparingMove): kick off initial moveToward.
+	// uVar17 arg overlaps pFStack_58 = AdjustLoc ptr (this+0x480); vtable[97] = moveToward.
+	if (!bPreparingMove)
+		Pawn->moveToward(AdjustLoc, MoveTarget);
 	unguard;
 }
 IMPLEMENT_FUNCTION( AController, 502, execMoveToward );

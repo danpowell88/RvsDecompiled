@@ -1544,10 +1544,13 @@ public:
 	virtual FArchive& operator<<(FName&);
 };
 
-class ENGINE_API FOutBunch
+// Retail FOutBunch inherits FBitWriter (Ghidra Engine.dll: FOutBunch vtable contains
+// FBitWriter/FArchive virtuals at the same slots). FOutBunch's own extra fields start
+// after FBitWriter's base layout (at offset ~0x54). Pad[128] covers those extra fields.
+class ENGINE_API FOutBunch : public FBitWriter
 {
 public:
-	BYTE Pad[256];
+	BYTE Pad[128];
 	FOutBunch();
 	FOutBunch(const FOutBunch&);
 	FOutBunch(UChannel*, INT);

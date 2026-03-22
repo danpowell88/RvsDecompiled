@@ -1307,17 +1307,23 @@ FArchive& FInBunch::operator<<(FName& N) { return *this; }
 // ============================================================================
 // FOutBunch
 // ============================================================================
-// DIVERGENCE: retail calls FBitWriter(0) + sets vtable.  We zero the whole object.
+// Retail FOutBunch::FOutBunch() calls FBitWriter(0) then sets vtable (auto in C++).
+// We call FBitWriter(0) as base initializer and then zero only the FOutBunch-specific
+// extra fields (Pad[128]).  Do NOT appMemzero(this) — that would destroy the vtable
+// and the TArray buffer state set by the FBitWriter base ctor.
 IMPL_MATCH("Engine.dll", 0x1036f960)
-FOutBunch::FOutBunch() { appMemzero(this, sizeof(*this)); }
+FOutBunch::FOutBunch() : FBitWriter(0) { appMemzero(Pad, sizeof(Pad)); }
 // DIVERGENCE: retail calls FBitWriter copy-ctor then sets vtable + individual fields
-//             (offsets 0x54-0x7a).  We memcpy; same aliasing caveat as FInBunch above.
+//             (offsets 0x54-0x7a).  FBitWriter(0) initialises base; appMemcpy copies
+//             the entire Other over this (including vtable = same FOutBunch vftable).
+//             aliasing of TArray::Data is accepted (same caveat as FInBunch above).
 IMPL_MATCH("Engine.dll", 0x1047f800)
-FOutBunch::FOutBunch(const FOutBunch& Other) { appMemcpy(this, &Other, sizeof(*this)); }
+FOutBunch::FOutBunch(const FOutBunch& Other) : FBitWriter(0) { appMemcpy(this, &Other, sizeof(*this)); }
 // DIVERGENCE: retail calls FBitWriter(connection->MaxPacket*8-81), sets Channel (0x58),
 //             ChIndex (0x68), ChSequence (0x6c), flags (0x78-0x7a), validates assertions.
+//             We call FBitWriter(0) and zero only the extra Pad fields.
 IMPL_MATCH("Engine.dll", 0x1047f820)
-FOutBunch::FOutBunch(UChannel*, INT) { appMemzero(this, sizeof(*this)); }
+FOutBunch::FOutBunch(UChannel*, INT) : FBitWriter(0) { appMemzero(Pad, sizeof(Pad)); }
 // Ghidra 0x1036f9c0 (88b): calls FBitWriter::operator= for base, then copies
 // fields 0x54-0x7a individually. We use appMemcpy which covers everything; the
 // vtable pointer at offset 0 is identical between source and dest (both FOutBunch).
