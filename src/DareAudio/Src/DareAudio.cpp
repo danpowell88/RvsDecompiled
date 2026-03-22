@@ -128,11 +128,58 @@ UDareAudioSubsystem::UDareAudioSubsystem(const UDareAudioSubsystem& Other)
 {
 }
 
-IMPL_TODO("Ghidra 0x100017f0 (650 bytes): calls UObject::operator=, copies 0x30-0x234 via FUN_10001550/FUN_10001660 + loop memcpy; blocked by internal helpers")
+IMPL_DIVERGE("Ghidra 0x100017f0: FUN_10001300 hash index rebuild depends on unexported DareAudio helper FUN_10001020; performs full field/deep copies but does not rebuild +0x40 hash buckets")
 UDareAudioSubsystem& UDareAudioSubsystem::operator=(const UDareAudioSubsystem& Other)
 {
-UAudioSubsystem::operator=(Other);
-return *this;
+	guard(UDareAudioSubsystem::operator=);
+
+	UAudioSubsystem::operator=(Other);
+
+	// +0x30 scalar.
+	F_INT(this, 0x30) = F_INT(&Other, 0x30);
+
+	// +0x34 FArray of 4-byte elements.
+	{
+		FArray& Dst = *(FArray*)((BYTE*)this + 0x34);
+		const FArray& Src = *(const FArray*)((const BYTE*)&Other + 0x34);
+		if (&Dst != &Src)
+		{
+			const INT Count = Src.Num();
+			Dst.Empty(sizeof(DWORD), Count);
+			if (Count > 0)
+			{
+				Dst.Add(Count, sizeof(DWORD));
+				appMemcpy(Dst.GetData(), Src.GetData(), Count * sizeof(DWORD));
+			}
+		}
+	}
+
+	// +0x40 FArray of 0x14-byte entries; retail rebuilds hash buckets via FUN_10001300.
+	{
+		FArray& Dst = *(FArray*)((BYTE*)this + 0x40);
+		const FArray& Src = *(const FArray*)((const BYTE*)&Other + 0x40);
+		if (&Dst != &Src)
+		{
+			const INT Count = Src.Num();
+			Dst.Empty(0x14, Count);
+			if (Count > 0)
+			{
+				Dst.Add(Count, 0x14);
+				appMemcpy(Dst.GetData(), Src.GetData(), Count * 0x14);
+			}
+		}
+	}
+
+	// +0x50..+0x58 scalars.
+	F_INT(this, 0x50) = F_INT(&Other, 0x50);
+	F_INT(this, 0x54) = F_INT(&Other, 0x54);
+	F_INT(this, 0x58) = F_INT(&Other, 0x58);
+
+	// +0x5C..+0x234 contiguous state block (retail emits unrolled loops + scalar tail copies).
+	appMemcpy((BYTE*)this + 0x5c, (const BYTE*)&Other + 0x5c, (0x234 - 0x5c) + sizeof(DWORD));
+
+	return *this;
+	unguard;
 }
 
 /*-----------------------------------------------------------------------------
