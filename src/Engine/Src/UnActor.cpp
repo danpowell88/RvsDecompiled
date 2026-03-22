@@ -3798,7 +3798,7 @@ void AActor::SetCollisionSize( FLOAT NewRadius, FLOAT NewHeight )
 	unguard;
 }
 
-IMPL_DIVERGE("retail 0x1042dfa0: rebuilds static mesh batches + cached lightmaps via render subsystem vtable calls at unmapped offsets; render subsystem not yet implemented")
+IMPL_TODO("Ghidra 0x1042dfa0: static mesh batch rebuild + cached lightmap update via render subsystem vtable slots not yet mapped — implement after render subsystem vtable reconstruction")
 void AActor::UpdateRenderData()
 {
 	guard(AActor::UpdateRenderData);

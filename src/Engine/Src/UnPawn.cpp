@@ -2652,7 +2652,7 @@ void APawn::TickSpecial( FLOAT DeltaTime )
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103E9FF0 — animation blend-weight selection requires full UAnimNotify system decompilation; permanent stub until animation system is reconstructed")
+IMPL_TODO("Ghidra 0x103E9FF0: animation blend-weight selection blocked by UAnimNotify system — implement after animation notify dispatch is reconstructed")
 void APawn::UpdateMovementAnimation( FLOAT DeltaSeconds )
 {
 	guard(APawn::UpdateMovementAnimation);
@@ -3906,7 +3906,7 @@ void APawn::SpiderstepUp(FVector Delta, FVector HitNormal, FCheckResult& Hit)
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra has no null guard; added for safety")
+IMPL_TODO("Ghidra confirms no null guard at this point; our null guard improves safety but diverges from retail — remove guard to achieve byte parity")
 void APawn::StartNewSerpentine(FVector Dir, FVector Start)
 {
 	guard(APawn::StartNewSerpentine);

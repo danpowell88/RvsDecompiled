@@ -216,7 +216,7 @@ FDelegate::FDelegate(const FDelegate& Other)
 	Global functions.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("retail 0x110229c0 creates UWindowManager via StaticAllocateObject+constructor (FUN_11021c40, 2456 bytes, ~30 RegisterWindowClass calls); UWindowManager constructor not yet ported — all surrounding brush/font/HINSTANCE init is complete, only GWindowManager creation is missing")
+IMPL_TODO("Ghidra Window.dll 0x110229c0: GWindowManager creation via UWindowManager constructor (FUN_11021c40, ~30 RegisterWindowClass calls); surrounding HINSTANCE/brush/font init complete — implement UWindowManager constructor to unblock")
 WINDOW_API void InitWindowing()
 {
 	guard(InitWindowing);

@@ -788,7 +788,7 @@ IMPLEMENT_CLASS(ULinkerLoad);
 // 0xe0076 directly but FPackageFileSummary::FileVersion is protected; our code relies on
 // the default ctor (PACKAGE_FILE_VERSION from SDK = 69, not the retail value of 118).
 // IsA codegen differs (raw class-walk vs IsA() call) — codegen-only.
-IMPL_DIVERGE("FName::Names is private; uses GetMaxNames() proxy. SetFileVersions uses GSys->LicenseeMode which may differ from retail. Ghidra 0x1012ad40")
+IMPL_TODO("Ghidra 0x1012ad40: FName::Names access via GetMaxNames() proxy; SetFileVersions LicenseeMode path unverified against retail — audit against Ghidra 0x1012ad40")
 ULinkerSave::ULinkerSave( UObject* InParent, const TCHAR* InFilename )
 :	ULinker    ( InParent, InFilename )
 ,	Saver      ( NULL )

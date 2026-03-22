@@ -979,7 +979,7 @@ void USkeletalMeshInstance::CopyAnimation(INT Src, INT Dst)
 	*(INT*)(dst + 0x2C) = *(INT*)(src + 0x2C); // loop flag 1
 }
 
-IMPL_DIVERGE("retail 0x10436390 (933b): depends on GetBoneCylinder which requires m_fCylindersRadius — a per-bone radius table that is a binary data constant in Engine.dll's data section and cannot be reconstructed from source")
+IMPL_TODO("Ghidra 0x10436390 (933b): DrawCollisionCylinders blocked by m_fCylindersRadius binary data — implement after m_fCylindersRadius is extracted from Engine.dll data section (see GetBoneCylinder below)")
 void USkeletalMeshInstance::DrawCollisionCylinders(FSceneNode *)
 {
 	guard(USkeletalMeshInstance::DrawCollisionCylinders);
@@ -1091,7 +1091,7 @@ FCoords USkeletalMeshInstance::GetBoneCoords(DWORD,int)
 	return FCoords();
 }
 
-IMPL_DIVERGE("m_fCylindersRadius per-bone radius table is a binary data constant in Engine.dll data section — cannot be extracted from source; cylinder radii will always be zero until binary extraction is complete")
+IMPL_TODO("m_fCylindersRadius is a per-bone radius table stored as binary data in Engine.dll .data section — extract from retail binary to populate cylinder radii")
 int USkeletalMeshInstance::GetBoneCylinder(int BoneIndex, FCylinder& Cyl)
 {
 	guard(USkeletalMeshInstance::GetBoneCylinder);

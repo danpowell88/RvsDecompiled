@@ -62,7 +62,7 @@ extern "C" { TCHAR GPackage[64] = TEXT("Launch"); }
 
 // Memory allocator.
 #include "FMallocWindows.h"
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+IMPL_TODO("Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 static FMallocWindows& GetLaunchMalloc()
 {
 	static FMallocWindows Malloc;
@@ -71,7 +71,7 @@ static FMallocWindows& GetLaunchMalloc()
 
 // Log file.
 #include "FOutputDeviceFile.h"
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+IMPL_TODO("Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 static FOutputDeviceFile& GetLaunchLog()
 {
 	static FOutputDeviceFile Log;
@@ -85,7 +85,7 @@ static FOutputDeviceFile& GetLaunchLog()
 class FOutputDeviceWindowsErrorUnattended : public FOutputDeviceWindowsError
 {
 public:
-	IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+	IMPL_TODO("Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 	void HandleError()
 	{
 		if( ParseParam(GetCommandLine(), TEXT("UNATTENDED")) )
@@ -116,7 +116,7 @@ public:
 		}
 	}
 };
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+IMPL_TODO("Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 static FOutputDeviceWindowsErrorUnattended& GetLaunchError()
 {
 	static FOutputDeviceWindowsErrorUnattended Error;
@@ -125,7 +125,7 @@ static FOutputDeviceWindowsErrorUnattended& GetLaunchError()
 
 // Feedback.
 #include "FFeedbackContextWindows.h"
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+IMPL_TODO("Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 static FFeedbackContextWindows& GetLaunchWarn()
 {
 	static FFeedbackContextWindows Warn;
@@ -134,7 +134,7 @@ static FFeedbackContextWindows& GetLaunchWarn()
 
 // File manager.
 #include "FFileManagerWindows.h"
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+IMPL_TODO("Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 static FFileManagerWindows& GetLaunchFileManager()
 {
 	static FFileManagerWindows FileManager;
@@ -154,14 +154,14 @@ public:
 	FString ServerIni;
 
 	// R6-specific virtual methods (slots 16-19 in FConfigCache vtable)
-	IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+	IMPL_TODO("Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 	void InitUser( const TCHAR* InProfilesPath, const TCHAR* InUserIni )
 	{
 		UserIni = InProfilesPath;
 		UserIni += InUserIni;
 		Find( *UserIni, 1 );
 	}
-	IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+	IMPL_TODO("Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 	void InitServer( const TCHAR* InServerIni )
 	{
 		if( InServerIni && *InServerIni )
@@ -170,7 +170,7 @@ public:
 			Find( InServerIni, 1 );
 		}
 	}
-	IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+	IMPL_TODO("Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 	FString& GetUserIni( FString& OutIni )
 	{
 		// OutIni is a hidden return-value pointer from the caller (MSVC struct return convention).
@@ -181,7 +181,7 @@ public:
 		OutIni = UserIni;
 		return OutIni;
 	}
-	IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+	IMPL_TODO("Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 	FString& GetServerIni( FString& OutIni )
 	{
 		appMemzero(&OutIni, sizeof(FString));
@@ -189,29 +189,29 @@ public:
 		return OutIni;
 	}
 	// R6Reserved slots 23-33: unknown purpose, padding for vtable compatibility.
-	IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+	IMPL_TODO("Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 	void* R6Reserved1(void* arg) { static BYTE _buf[64] = {}; return _buf; }
-	IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+	IMPL_TODO("Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 	void R6Reserved2() {}
-	IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+	IMPL_TODO("Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 	void R6Reserved3() {}
-	IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+	IMPL_TODO("Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 	void R6Reserved4() {}
-	IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+	IMPL_TODO("Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 	void R6Reserved5() {}
-	IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+	IMPL_TODO("Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 	void* R6Reserved6(void* arg) { static BYTE _buf[64] = {}; return _buf; }
-	IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+	IMPL_TODO("Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 	void R6Reserved7() {}
-	IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+	IMPL_TODO("Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 	void R6Reserved8() {}
-	IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+	IMPL_TODO("Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 	void R6Reserved9() {}
-	IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+	IMPL_TODO("Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 	void R6Reserved10() {}
-	IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+	IMPL_TODO("Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 	void R6Reserved11() {}
-	IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+	IMPL_TODO("Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 	static FConfigCache* Factory()
 	{
 		return new FConfigCacheIniR6();
@@ -236,7 +236,7 @@ ENGINE_API extern UEngine* g_pEngine;
 	fully reconstructed in the local WinDrv module.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+IMPL_TODO("Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 static void EnsureLaunchWindowClassesRegistered()
 {
 	static UBOOL Registered = 0;
@@ -262,14 +262,14 @@ class FExecHook : public FExec, public FNotifyHook
 private:
 	WConfigProperties* Preferences;
 
-	IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+	IMPL_TODO("Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 	void NotifyDestroy( void* Src )
 	{
 		if( Src == Preferences )
 			Preferences = NULL;
 	}
 
-	IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+	IMPL_TODO("Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 	UBOOL Exec( const TCHAR* Cmd, FOutputDevice& Ar )
 	{
 		guard(FExecHook::Exec);
@@ -367,7 +367,7 @@ private:
 	}
 
 public:
-	IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+	IMPL_TODO("Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 	FExecHook()
 	: Preferences( NULL )
 	{}
@@ -377,7 +377,7 @@ public:
 	Splash screen — old-style Win32 dialog for fast startup display.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+IMPL_TODO("Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 BOOL CALLBACK SplashDialogProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 {
 	return uMsg == WM_INITDIALOG;
@@ -385,7 +385,7 @@ BOOL CALLBACK SplashDialogProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 
 static HWND hWndSplash = NULL;
 
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+IMPL_TODO("Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 static void InitSplash( HINSTANCE hInst, UBOOL Show, const TCHAR* Filename )
 {
 	if( Show )
@@ -413,7 +413,7 @@ static void InitSplash( HINSTANCE hInst, UBOOL Show, const TCHAR* Filename )
 	}
 }
 
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+IMPL_TODO("Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 static void ExitSplash()
 {
 	if( hWndSplash )
@@ -421,7 +421,7 @@ static void ExitSplash()
 	hWndSplash = NULL;
 }
 
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+IMPL_TODO("Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 // GetModuleHandleExA is an XP SP1+ API. Declare manually for MSVC 7.1 SDK
 // which may lack the definition, but the symbol is in kernel32.lib.
 #ifndef GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS
@@ -481,7 +481,7 @@ static LONG WINAPI CrashExceptionFilter(EXCEPTION_POINTERS* ep)
 	return EXCEPTION_CONTINUE_SEARCH;
 }
 
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+IMPL_TODO("Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 static void WriteLaunchDiag( const char* Text )
 {
 	HANDLE h = CreateFileA( "launch_diag.txt", FILE_APPEND_DATA, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL );
@@ -494,7 +494,7 @@ static void WriteLaunchDiag( const char* Text )
 	}
 }
 
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+IMPL_TODO("Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 static void WriteLaunchDiagT( const TCHAR* Text )
 {
 #if UNICODE
@@ -510,7 +510,7 @@ static void WriteLaunchDiagT( const TCHAR* Text )
 	Engine initialization — create the game engine object.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("InitEngine: create engine from ini class, call Init(), enter main loop")
+IMPL_TODO("InitEngine: Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 static UEngine* InitEngine()
 {
 	guard(InitEngine);
@@ -650,7 +650,7 @@ static UEngine* InitEngine()
 	Main loop — engine tick + Windows message pump.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+IMPL_TODO("Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 static void MainLoop( UEngine* Engine )
 {
 	guard(MainLoop);
@@ -725,7 +725,7 @@ static void MainLoop( UEngine* Engine )
 	WinMain — entry point.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+IMPL_TODO("Reconstructed from UT99 reference and import table analysis; RavenShield.exe wrapped in SafeDisc — verify by dumping decrypted in-memory image")
 INT WINAPI WinMain( HINSTANCE hInInstance, HINSTANCE hPrevInstance, char*, INT nCmdShow )
 {
 	WriteLaunchDiag("WinMain: enter");

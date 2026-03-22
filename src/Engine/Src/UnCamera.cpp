@@ -1626,7 +1626,7 @@ FRebuildTools::~FRebuildTools() {}
 // Engine.def exports ?Exec@UViewport@@UAEHPBGAAVFOutputDevice@@@Z @2782, but the current
 // Ghidra Engine export set only surfaces the unwind catch string ("UViewport::Exec"),
 // not the function body/RVA needed to reconstruct retail command dispatch.
-IMPL_DIVERGE("UViewport::Exec body/RVA not recovered by Ghidra export_cpp.py; needs fresh binary re-analysis to reconstruct retail command dispatch")
+IMPL_TODO("Ghidra 0x???? UViewport::Exec: function body/RVA not recovered by Ghidra export_cpp.py — needs fresh binary re-analysis of Engine.dll to reconstruct retail command dispatch")
 INT UViewport::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
 IMPL_EMPTY("body unanalyzed; no output device dispatch implemented")
 void UViewport::Serialize( const TCHAR* Data, EName Event ) {}

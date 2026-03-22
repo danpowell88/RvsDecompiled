@@ -190,7 +190,7 @@ USystem::USystem()
 	// TArrays (offsets +0x5C, +0x60, +0x64 zeroed directly in compiled output).
 }
 
-IMPL_DIVERGE("field layout diverges from binary; Paths/Suppress offsets may not match retail")
+IMPL_TODO("USystem StaticConstructor: FObjectExport Paths/Suppress field offsets unverified against retail binary layout — verify struct offsets against Ghidra analysis of Core.dll")
 void USystem::StaticConstructor()
 {
 	guard(USystem::StaticConstructor);

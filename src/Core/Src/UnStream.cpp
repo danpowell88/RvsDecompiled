@@ -294,7 +294,7 @@ INT FFileStream::QueryStream( INT StreamId, INT& OutStatus )
 	unguard;
 }
 
-IMPL_DIVERGE("Ogg Vorbis paths not available without vorbisfile SDK; Win32 path reconstructed")
+IMPL_TODO("Ogg Vorbis streaming path not linked; vorbisfile.dll/lib required — link vorbisfile SDK to enable cross-platform audio streaming")
 INT FFileStream::Read( INT StreamId, INT NumBytes )
 {
 	guard(FFileStream::Read);

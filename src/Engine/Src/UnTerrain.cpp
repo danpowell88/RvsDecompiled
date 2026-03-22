@@ -1294,7 +1294,7 @@ IMPL_MATCH("Engine.dll", 0x103153a0)
 INT UTerrainSector::GetLocalVertex(INT X, INT Y) {
 	return (SectorSizeX + 1) * Y + X;
 }
-IMPL_DIVERGE("Ghidra 0x104590F0: complex per-triangle LOD/culling test; terrain sector mesh data unresolved — retail terrain sector struct layout not yet reconstructed")
+IMPL_TODO("Ghidra 0x104590F0: per-triangle LOD/culling test blocked by terrain sector struct layout not yet reconstructed")
 INT UTerrainSector::PassShouldRenderTriangle(INT, INT, INT, INT, INT) { return 1; }
 // ?IsSectorAll@UTerrainSector@@QAEHHE@Z  Ghidra at ~0x107bae30 (336 bytes).
 // Gets the alpha texture for the layer, computes texel range for this sector,
@@ -1328,7 +1328,7 @@ INT UTerrainSector::IsSectorAll(INT layerIdx, BYTE value)
 
 	return 1;
 }
-IMPL_DIVERGE("Ghidra 0x10458D70: checks texel alpha values in triangle; retail terrain sector texel/alpha buffer layout not yet reconstructed")
+IMPL_TODO("Ghidra 0x10458D70: terrain texel alpha triangle check blocked by terrain sector texel/alpha buffer layout not yet reconstructed")
 INT UTerrainSector::IsTriangleAll(INT, INT, INT, INT, INT, BYTE) { return 0; }
 IMPL_EMPTY("virtual base no-op — subclass overrides")
 void UTerrainSector::AttachProjector(AProjector*, FProjectorRenderInfo*) {}

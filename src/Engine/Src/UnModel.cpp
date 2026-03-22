@@ -1591,7 +1591,7 @@ unguard;
 // Phase 3: if clip planes given, projects them into node space via FVector/FPlane math.
 // Blocked by FUN_103ccb10 (unnamed expiry helper; uses rdtsc+GSecondsPerCycle timing;
 // rdtsc-based timing helpers are a confirmed permanent IMPL_DIVERGE category per AGENTS.md).
-IMPL_DIVERGE("Ghidra 0x103cea90 (1025b): FUN_103ccb10 is called to check/expire stale projector render-info entries using rdtsc+GSecondsPerCycle timing. rdtsc-based timing is a permanent binary-only divergence; remaining projection/clipping logic in _unnamed.cpp also pending.")
+IMPL_TODO("Ghidra 0x103cea90 (1025b): projector render-info expiry and projection/clipping logic pending; FUN_103ccb10 rdtsc timing will remain a permanent binary-only divergence but the rest is implementable")
 void UModel::AttachProjector( int iNode, FProjectorRenderInfo* ProjInfo, FPlane* Planes )
 {
 guard(UModel::AttachProjector);

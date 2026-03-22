@@ -583,7 +583,7 @@ FLineBatcher& FLineBatcher::operator=(const FLineBatcher& Other)
 	return *this;
 }
 
-IMPL_DIVERGE("FPoly is forward-declared only and not defined anywhere in the project (not in Core, Engine, or SDK headers). DrawConvexVolume builds FPoly instances per frustum plane using FindBestAxisVectors for quad corners — permanently blocked until FPoly struct is fully declared.")
+IMPL_TODO("FLineBatcher::DrawConvexVolume: FPoly only forward-declared; define FPoly struct in Engine headers to unblock (Ghidra: FindBestAxisVectors for quad corners, frustum plane iteration)")
 void FLineBatcher::DrawConvexVolume(FConvexVolume Volume, FColor Color)
 {
 	// Ghidra 0x115560: iterates FConvexVolume planes, builds FPoly per plane,

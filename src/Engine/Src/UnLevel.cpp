@@ -211,7 +211,7 @@ ULevel::ULevel( UEngine* InEngine, INT InRootOutside )
 	unguard;
 }
 
-IMPL_DIVERGE("TravelInfo TMap serialization unresolved (FUN_103c0ce0); modern path partially missing; retail at Ghidra 0x103c3070")
+IMPL_TODO("Ghidra 0x103c3070: TravelInfo TMap serialization and modern path partially implemented — complete FUN_103c0ce0 TMap serialization and remaining modern-path")
 void ULevel::Serialize( FArchive& Ar )
 {
 	guard(ULevel::Serialize);
@@ -1767,7 +1767,7 @@ INT ULevel::FarMoveActor( AActor* Actor, FVector DestLocation, INT bTest, INT bN
     return result;
     unguard;
 }
-IMPL_DIVERGE("Touch notifications and network destruction check (FUN_103b7b70) diverge from retail. Ghidra 0x103b8200")
+IMPL_TODO("Ghidra 0x103b8200: Touch notification delivery and FUN_103b7b70 network destruction check diverge from retail — verify against Ghidra and fix both paths")
 INT ULevel::DestroyActor( AActor* Actor, INT bNetForce )
 {
 	guard(ULevel::DestroyActor);
