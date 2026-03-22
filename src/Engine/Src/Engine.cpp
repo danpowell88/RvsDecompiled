@@ -198,7 +198,7 @@ static void CloseNetLevel( BYTE* level )
     ((tClose)(*(void***)conn)[0x80/4])((void*)conn);
 }
 
-IMPL_MATCH("Engine.dll", 0x103a3f00)
+IMPL_TODO("Engine.dll 0x103a3f00 (3692b): TESTPATCH path has two confirmed deviations from retail — (1) SpawnActor args ABI: Ghidra shows FRotator(0,0,0) and FName(0) constructed on stack before vtable[0xa8/4] call but decompiler does not show explicit arg passing; (2) FindFunctionChecked call is present in retail before vtable[0x10/4] but omitted here due to unknown FName arg")
 INT UGameEngine::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
 {
     guard(UGameEngine::Exec);
@@ -222,18 +222,20 @@ INT UGameEngine::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
     {
         if ( !GEvilTest )
         {
-            // Retail: spawn AR6eviLTesting in GLevel via ULevel vtable slot 42 (SpawnActor).
-            // ZeroRot and NAME_None are passed as implicit stack args in the retail ABI;
-            // exact multi-arg SpawnActor signature not reconstructed — IMPL_TODO for spawn path.
-            // IMPL_TODO: FUN_103a3f00-local spawn — ULevel::SpawnActor arg ABI unconfirmed
+            // NOTE: Ghidra 0x103a3fa5-0x103a3fb8 confirms FRotator(0,0,0) and FName(0) are
+            // constructed on the stack immediately before the SpawnActor vtable dispatch.
+            // vtable slot 0xa8/4 = 42 confirmed. Args not explicitly visible in Ghidra output
+            // (MSVC ABI stack-push not reconstructed by decompiler); current call passes no args.
             typedef AActor* (__thiscall *tSpawnActor)(ULevel*);
             tSpawnActor pfSpawn = (tSpawnActor)(*(void***)pLevel)[0xa8/4];
             GEvilTest = (AR6eviLTesting*)pfSpawn(pLevel);
         }
         if ( GEvilTest )
         {
-            // IMPL_TODO: FindFunctionChecked FName arg unconfirmed; ProcessEvent ABI unconfirmed
-            // Retail: FindFunctionChecked(some_event_name) → then call UObject vtable slot 4
+            // NOTE: Ghidra confirms retail calls UObject::FindFunctionChecked() before the
+            // vtable[0x10/4] dispatch on GEvilTest. FName arg not reconstructed by Ghidra.
+            // FindFunctionChecked call is omitted here — known deviation from retail TESTPATCH path.
+            // vtable slot 0x10/4 = 4 confirmed from Ghidra. ProcessEvent ABI confirmed via context.
             ((tVoidV)(*(void***)GEvilTest)[0x10/4])(GEvilTest);
         }
         return 1;

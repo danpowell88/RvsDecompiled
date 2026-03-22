@@ -3714,14 +3714,17 @@ IMPLEMENT_FUNCTION( UObject, 0x46, execPrimitiveCast );
 	Private set handler.
 -----------------------------------------------------------------------------*/
 
-// execPrivateSet: body is correct (delegates to Stack.Step). Opcode permanently unresolvable
+// execPrivateSet: body is correct (delegates to Stack.Step). Opcode is CURRENTLY unresolvable
 // from text exports: function is not in Core.dll export table; SDK EExprToken enum has no
-// EX_PrivateSet entry; Ghidra _global.cpp and _unnamed.cpp contain no reference.
+// EX_PrivateSet entry; Ghidra _global.cpp and _unnamed.cpp contain no reference to the symbol.
 // Exhaustive opcode-gap analysis: 0x2B is EX_DelegateFunction, 0x15 is EX_DelegateProperty.
 // Remaining unassigned gaps: 0x03, 0x0C (EX_LabelTable), 0x18 (EX_Skip), 0x35, 0x37.
 // Until GNatives[] init code is disassembled from the raw binary, no IMPLEMENT_FUNCTION
 // can be added safely.
-IMPL_TODO("execPrivateSet: Stack.Step passthrough is correct; opcode unresolvable from text exports — all visible EX_* gaps (0x03, 0x0C, 0x18, 0x35, 0x37) require binary GNatives[] disassembly to confirm")
+// NOTE: This is IMPL_TODO (not IMPL_DIVERGE) because the opcode IS present in the retail
+// binary's GNatives[] table — it is discoverable via binary disassembly of Core.dll's
+// initialisation code. Blocked by missing binary analysis, not a permanent constraint.
+IMPL_TODO("execPrivateSet: Stack.Step passthrough is correct; opcode requires binary GNatives[] disassembly to determine — gaps 0x03, 0x0C, 0x18, 0x35, 0x37; IMPL_TODO not IMPL_DIVERGE because opcode exists in retail binary")
 void UObject::execPrivateSet( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execPrivateSet);

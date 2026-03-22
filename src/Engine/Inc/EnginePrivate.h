@@ -14,6 +14,14 @@
 
 #pragma pack(push, 4)
 
+// World bounds constants (from UT99 UnEngine.h).
+// Verified: HALF_WORLD_MAX is used as the large-polygon scale in Karma BSP helpers.
+#ifndef WORLD_MAX
+#  define WORLD_MAX       524288.0f
+#  define HALF_WORLD_MAX  262144.0f
+#  define HALF_WORLD_MAX1 262143.0f
+#endif
+
 // We are building (exporting) Engine.dll — override the DLL_IMPORT in SDK headers.
 #undef  ENGINE_API
 #define ENGINE_API DLL_EXPORT

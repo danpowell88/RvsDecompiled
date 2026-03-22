@@ -88,9 +88,14 @@ void AR6HUD::UpdateHUDColors(FColor)
 // Structure: P_FINISH → validate PlayerOwner + AR6Rainbow → canvas scale setup →
 // DrawSingleCharacterInfo or DrawCharacterInfo loop (per team member) → team-mode label →
 // compass tile row → DrawRadar → DrawInGameMap.
-// Blockers: ~15 unnamed helpers (FUN_1000b720, FUN_1000ce20, FUN_10013170, FUN_1000b650…)
-// and 30+ raw offsets in AR6HUD / AR6Rainbow / AR6PlayerController not yet declared.
-IMPL_TODO("R6Game.dll 0x1000ceb0 (10251b): Ghidra export present in _r6hud_execDrawNativeHUD.cpp; deferred pending AR6HUD/AR6Rainbow struct layout mapping and helper-function identification")
+// Blockers:
+//   (1) 7 unresolved FUN_ helpers: FUN_10001830, FUN_1000b650, FUN_1000b6c0, FUN_1000b6f0,
+//       FUN_1000b720, FUN_1000ce20, FUN_10013170 — names and signatures unknown.
+//   (2) 106 unique raw struct offsets in AR6HUD / AR6Rainbow / AR6PlayerController not yet
+//       declared as named fields. Until those offsets are mapped into header structs, the
+//       Ghidra decompilation cannot be translated to valid C++.
+// Implementation is feasible once struct layout mapping is complete (IMPL_TODO, not DIVERGE).
+IMPL_TODO("R6Game.dll 0x1000ceb0 (10251b): blocked by 7 unnamed FUN_ helpers and 106 raw struct offsets in AR6HUD/AR6Rainbow/AR6PlayerController; implement after struct layout mapping is complete")
 void AR6HUD::execDrawNativeHUD(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
