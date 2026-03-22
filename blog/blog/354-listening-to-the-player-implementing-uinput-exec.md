@@ -115,12 +115,12 @@ While working in `UnScript.cpp` (the bytecode interpreter for UnrealScript), we 
 ## How Much Is Left?
 
 ```
-IMPL_MATCH:   4185   (exact retail parity)
+IMPL_MATCH:   4182   (exact retail parity)
 IMPL_EMPTY:    482   (confirmed empty in retail)
-IMPL_DIVERGE:  519   (permanent divergences — GameSpy, Karma, etc.)
-IMPL_TODO:      33   (still to do)
+IMPL_DIVERGE:  514   (permanent divergences — GameSpy, Karma, etc.)
+IMPL_TODO:      26   (still to do)
 ─────────────────────────────────────────────────────
-Total:        5219   →  89.4% done (MATCH + EMPTY)
+Total:        5204   →  89.6% done (MATCH + EMPTY)
 ```
 
-Thirty-three TODOs remain. Several are blocked on external factors (proprietary SDKs, GameSpy backends, binary-only middleware), while others like `execPrivateSet` just need more targeted binary analysis. The finish line is very much in sight.
+Twenty-six TODOs remain. Several are blocked on external factors (proprietary SDKs, GameSpy backends, binary-only middleware), while others like `execPrivateSet` just need more targeted binary analysis. The finish line is very much in sight.
