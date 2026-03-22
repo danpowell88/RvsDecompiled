@@ -1796,7 +1796,7 @@ FDynamicLight::FDynamicLight(FDynamicLight const& Other)
 	appMemcpy( this, &Other, sizeof(FDynamicLight) );
 }
 
-IMPL_DIVERGE("FGetHSV is not declared in any project header; it is an internal Engine.dll HSV-to-RGB helper (confirmed absent from all project .h files). LightEffect color modulation permanently blocked.")
+IMPL_TODO("Ghidra 0x1040ff20 (1485b): FGetHSV IS available (defined in UnCamera.cpp, exported via Engine.def); LightEffect switch has 6+ cases with globals DAT_1078a540/DAT_1078a53c; pending implementation")
 FDynamicLight::FDynamicLight(AActor* Actor)
 {
 	// Ghidra 0x10ff20: construct sub-objects, store actor, compute light color/direction.

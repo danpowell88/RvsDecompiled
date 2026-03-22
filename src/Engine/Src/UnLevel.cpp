@@ -3446,7 +3446,7 @@ INT ULevel::ToFloor( AActor* Actor, INT bTest, AActor* IgnoreActor )
 	return 0;
 	unguard;
 }
-IMPL_TODO("Ghidra 0x103c11a0 (393b): FUN_10481dd0 add-if-not-present helper inlined; ECX (zone TArray) derived from actor Region.Zone at +0x228 — zone determination needs assembly verification")
+IMPL_TODO("Ghidra 0x103c11a0 (393b): zone clearing + terrain SetCollision + add-if-not-present logic fully implemented; LevelInfo Terrains clear at end implemented — needs byte-level verification for IMPL_MATCH promotion")
 void ULevel::UpdateTerrainArrays()
 {
 	guard(ULevel::UpdateTerrainArrays);

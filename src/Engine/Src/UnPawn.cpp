@@ -233,7 +233,7 @@ IMPLEMENT_FUNCTION( AController, 502, execMoveToward );
 // Trailing: refresh Destination, vtable[26] guard, MoveTimer=-1.0f nav-node path.
 // vtable[26] confirmed as IsA(ANavigationPoint) — no longer a divergence.
 // DIVERGENCE: trailing Pawn+0x3f4 write from unaff_EDI (caller-saved register) unrecoverable.
-IMPL_TODO("Ghidra 0x1038d110 (534b): mostly implemented; trailing Pawn+0x3f4 write from unaff_EDI is unrecoverable register value — permanent minor gap")
+IMPL_DIVERGE("Ghidra 0x1038d110 (534b): mostly implemented; Pawn+0x3f4 write from unaff_EDI is permanently unrecoverable register value")
 void AController::execPollMoveToward( FFrame& Stack, RESULT_DECL )
 {
 	if( !MoveTarget || !Pawn || MoveTimer < 0.0f )
