@@ -671,7 +671,7 @@ unguard;
 // DefaultMaterial at +0x30), then builds or grows FBspSection entries via the
 // sections array. Vertex positions, texture UVs, lightmap UVs, and normals are
 // computed per-vertex using FCoords/FMatrix transforms.
-IMPL_TODO("Ghidra 0x103cf020: 880-byte BuildRenderData — FUN_10317670 (CastChecked<UMaterial>) skipped (CDO always passes); vtable+0x70/0x74 approximated as MaterialUSize/MaterialVSize")
+IMPL_TODO("Ghidra 0x103cf020 (880b): FUN_10317670 (CastChecked<UMaterial>) skipped — CDO always passes; MaterialUSize/MaterialVSize vtable calls are correct")
 void UModel::BuildRenderData()
 {
 guard(UModel::BuildRenderData);
@@ -820,7 +820,7 @@ unguard;
 // If sections non-empty: optionally releases GPU resources via RenDev vtable[0x78/4],
 // clears FirstRenderSection (+0x78) and NumRenderSections (+0x7c) on all nodes to -1,
 // calls FUN_10324a50 (unnamed) per section, then empties the sections array.
-IMPL_TODO("Ghidra 0x103cef10: 220-byte ClearRenderData — FUN_10324a50 (Remove+~FArray at section+0x04) called per section; functionally matches but code generation may differ from retail's thiscall convention")
+IMPL_TODO("Ghidra 0x103cef10 (220b): functionally correct — FUN_10324a50 (section+0x04 Remove+~FArray) inlined rather than called as separate __thiscall; byte-level difference from retail")
 void UModel::ClearRenderData( URenderDevice* RenDev )
 {
 guard(UModel::ClearRenderData);

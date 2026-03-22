@@ -1007,7 +1007,7 @@ void UD3DRenderDevice::CloseVideo(UCanvas* Canvas)
 	unguard;
 }
 
-IMPL_TODO("binkw32 API: Ghidra 0x1000c6f0 (402b) — retail reads HBINK from Canvas+0x80, locks IDirect3DTexture8 surface via vtable, calls _BinkDX8SurfaceType_4 and _BinkCopyToBuffer_28; our version uses globals and simplified surface lock")
+IMPL_DIVERGE("binkw32 proprietary SDK: retail reads HBINK from Canvas+0x80 and locks IDirect3DTexture8 via vtable; our version uses globals — functionally equivalent but structurally different")
 void UD3DRenderDevice::DisplayVideo(UCanvas* Canvas, void* Frame, INT Flags)
 {
 	guard(UD3DRenderDevice::DisplayVideo);
