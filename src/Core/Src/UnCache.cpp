@@ -12,7 +12,7 @@
 	FMemCache implementation.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x10114C60)
+IMPL_TODO("Byte-parity unverified")
 void FMemCache::Init( INT BytesToAllocate, INT MaxItems, void* Start, INT SegSize )
 {
 	guard(FMemCache::Init);
@@ -55,7 +55,7 @@ void FMemCache::Init( INT BytesToAllocate, INT MaxItems, void* Start, INT SegSiz
 	unguard;
 }
 
-IMPL_MATCH("Core.dll", 0x10114E00)
+IMPL_TODO("Byte-parity unverified")
 void FMemCache::Exit( INT FreeMemory )
 {
 	guard(FMemCache::Exit);
@@ -76,7 +76,7 @@ void FMemCache::Exit( INT FreeMemory )
 	unguard;
 }
 
-IMPL_MATCH("Core.dll", 0x101146B0)
+IMPL_TODO("Byte-parity unverified")
 void FMemCache::Flush( QWORD Id, DWORD Mask, UBOOL IgnoreLocked )
 {
 	guard(FMemCache::Flush);
@@ -93,7 +93,7 @@ void FMemCache::Flush( QWORD Id, DWORD Mask, UBOOL IgnoreLocked )
 	unguard;
 }
 
-IMPL_MATCH("Core.dll", 0x10114880)
+IMPL_TODO("Byte-parity unverified")
 BYTE* FMemCache::Create( QWORD Id, FCacheItem*& Item, INT CreateSize, INT Alignment, INT SafetyPad )
 {
 	guard(FMemCache::Create);
@@ -142,7 +142,7 @@ BYTE* FMemCache::Create( QWORD Id, FCacheItem*& Item, INT CreateSize, INT Alignm
 	unguard;
 }
 
-IMPL_MATCH("Core.dll", 0x10114BD0)
+IMPL_TODO("Byte-parity unverified")
 void FMemCache::Tick()
 {
 	guard(FMemCache::Tick);
@@ -176,7 +176,7 @@ void FMemCache::Tick()
 	unguard;
 }
 
-IMPL_MATCH("Core.dll", 0x101142D0)
+IMPL_TODO("Byte-parity unverified")
 void FMemCache::CheckState()
 {
 	guard(FMemCache::CheckState);
@@ -193,7 +193,7 @@ void FMemCache::CheckState()
 	unguard;
 }
 
-IMPL_MATCH("Core.dll", 0x101140F0)
+IMPL_TODO("Byte-parity unverified")
 UBOOL FMemCache::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
 {
 	guard(FMemCache::Exec);
@@ -207,7 +207,7 @@ UBOOL FMemCache::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
 	unguard;
 }
 
-IMPL_MATCH("Core.dll", 0x10114200)
+IMPL_TODO("Byte-parity unverified")
 void FMemCache::Status( TCHAR* Msg )
 {
 	guard(FMemCache::Status);
@@ -215,7 +215,7 @@ void FMemCache::Status( TCHAR* Msg )
 	unguard;
 }
 
-IMPL_MATCH("Core.dll", 0x10113FE0)
+IMPL_TODO("Byte-parity unverified")
 void FMemCache::CreateNewFreeSpace( BYTE* Start, BYTE* End, FCacheItem* Prev, FCacheItem* Next, INT Segment )
 {
 	guard(FMemCache::CreateNewFreeSpace);
@@ -247,7 +247,7 @@ void FMemCache::CreateNewFreeSpace( BYTE* Start, BYTE* End, FCacheItem* Prev, FC
 	unguard;
 }
 
-IMPL_MATCH("Core.dll", 0x10113EC0)
+IMPL_TODO("Byte-parity unverified")
 FMemCache::FCacheItem* FMemCache::MergeWithNext( FCacheItem* First )
 {
 	guard(FMemCache::MergeWithNext);
@@ -273,7 +273,7 @@ FMemCache::FCacheItem* FMemCache::MergeWithNext( FCacheItem* First )
 	unguard;
 }
 
-IMPL_MATCH("Core.dll", 0x10113EE0)
+IMPL_TODO("Byte-parity unverified")
 FMemCache::FCacheItem* FMemCache::FlushItem( FCacheItem* Item, UBOOL IgnoreLocked )
 {
 	guard(FMemCache::FlushItem);
@@ -302,11 +302,19 @@ FMemCache::FCacheItem* FMemCache::FlushItem( FCacheItem* Item, UBOOL IgnoreLocke
 	FMemCache hash Ravenshield-specific formula.
 -----------------------------------------------------------------------------*/
 
-// GHash: Ghidra 0x10102df0 — Ravenshield uses a different hash formula than UT99
+// GHash(DWORD): Ghidra 0x10102df0 — Ravenshield uses a different hash formula than UT99
 IMPL_MATCH("Core.dll", 0x10102df0)
 DWORD FMemCache::GHash( DWORD Val )
 {
 	return ((Val >> 0xc ^ Val) >> 0xc ^ Val) & (HASH_COUNT-1);
+}
+
+// GHash(QWORD): Truncates to DWORD then applies Ravenshield hash formula.
+IMPL_TODO("Byte-parity unverified — QWORD overload, same hash formula as DWORD version")
+DWORD FMemCache::GHash( QWORD Val )
+{
+	DWORD D = (DWORD)Val;
+	return ((D >> 0xc ^ D) >> 0xc ^ D) & (HASH_COUNT-1);
 }
 
 /*-----------------------------------------------------------------------------

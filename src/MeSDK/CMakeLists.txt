@@ -22,10 +22,9 @@ target_include_directories(MeSDK
     PRIVATE ${CMAKE_SOURCE_DIR}/src/Engine/Inc
 )
 
-# Core/Inc for ImplSource.h; SDK engine headers for Unreal types used by callers.
+# Core/Inc for ImplSource.h.
 target_include_directories(MeSDK PUBLIC
     ${CMAKE_SOURCE_DIR}/src/Core/Inc
-    ${CMAKE_SOURCE_DIR}/sdk/engine/Inc
 )
 
 add_impl_verification(MeSDK ${MESDK_SRC_DIR}/Src)

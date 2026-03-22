@@ -883,6 +883,8 @@ public:
 	FPlane operator/=( FLOAT Scale );
 	FPlane TransformBy( const FCoords& Coords ) const;
 	FPlane TransformBy( const FMatrix& M ) const;
+	FPlane TransformByUsingAdjointT( const FMatrix& M, const FMatrix& TA ) const;
+	FPlane TransformPlaneByOrtho( const FMatrix& M ) const;
 
 	UBOOL operator==( const FPlane& V ) const
 	{
@@ -917,6 +919,7 @@ public:
 	:	FPlane( V, W )
 	{}
 	FSphere( const FVector* Pts, INT Count );
+	FSphere TransformBy( const FMatrix& M ) const;
 	friend FArchive& operator<<( FArchive& Ar, FSphere& S )
 	{
 		guardSlow(FSphere<<);
@@ -1168,6 +1171,8 @@ public:
 		);
 	}
 	FVector Vector();
+	FRotator Clamp();
+	FRotator ClampPos();
 };
 
 /*-----------------------------------------------------------------------------

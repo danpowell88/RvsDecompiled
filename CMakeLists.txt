@@ -40,13 +40,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${OUTPUT_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${OUTPUT_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${OUTPUT_DIR})
 
-# --- SDK Paths ---
-set(SDK_DIR ${PROJECT_SOURCE_DIR}/sdk)
-set(CSDK_INC ${SDK_DIR}/Raven_Shield_C_SDK/inc)
-set(CSDK_CORE_INC ${SDK_DIR}/Raven_Shield_C_SDK/432Core/Inc)
-set(CSDK_LIB ${SDK_DIR}/Raven_Shield_C_SDK/lib)
-set(UT99_CORE_INC ${SDK_DIR}/Ut99PubSrc/Core/Inc)
-set(UT99_ENGINE_INC ${SDK_DIR}/Ut99PubSrc/Engine/Inc)
+# --- SDK Paths (REMOVED) ---
+# The community SDK (sdk/) is reference-only — NOT included in the build.
+# All needed headers live under src/Core/Inc, src/Engine/Inc, etc.
+# See AGENTS.md § Ground Truth Priority for rationale.
 
 # --- Platform SDK Paths ---
 set(TOOLCHAIN_DIR ${PROJECT_SOURCE_DIR}/tools/toolchain)
@@ -111,20 +108,12 @@ endif()
 add_definitions(-D_UNICODE -DUNICODE -D_CRT_SECURE_NO_WARNINGS -D_CRT_NON_CONFORMING_SWPRINTFS)
 
 # --- Global include directories ---
-# Available to all modules: core Unreal headers + R6 SDK headers + era-correct platform headers.
-# NOTE: src/Core/Inc is included globally so ImplSource.h (and other
-# hand-crafted shim headers) are available to all modules without duplication.
-# It is listed AFTER the SDK paths so per-module BEFORE overrides still win.
-#
-# WINSDK_INC and DXSDK_INC come from the toolchain file (msvc71.cmake) when
-# building with MSVC 7.1, or from the cache when building with VS 2019.
-# They default to the bundled era-correct SDKs under tools/toolchain/.
+# Available to all modules: reconstructed Unreal headers + era-correct platform SDKs.
+# All game headers are local (src/Core/Inc, src/Engine/Inc, etc.).
+# The community SDK (sdk/) is reference-only and NOT on the include path.
 include_directories(
-    ${CSDK_CORE_INC}
-    ${UT99_CORE_INC}
-    ${UT99_ENGINE_INC}
-    ${CSDK_INC}
     ${PROJECT_SOURCE_DIR}/src/Core/Inc
+    ${PROJECT_SOURCE_DIR}/src/Engine/Inc
     ${WINSDK_INC}
     ${DXSDK_INC}
 )
@@ -139,7 +128,7 @@ include_directories(
 
 # --- Core (rebuilt from source) ---
 add_library(Core_Dep INTERFACE)
-target_include_directories(Core_Dep INTERFACE ${CSDK_CORE_INC} ${UT99_CORE_INC})
+target_include_directories(Core_Dep INTERFACE ${PROJECT_SOURCE_DIR}/src/Core/Inc)
 target_link_libraries(Core_Dep INTERFACE
     $<TARGET_LINKER_FILE:Core>)
 
@@ -147,7 +136,6 @@ target_link_libraries(Core_Dep INTERFACE
 add_library(Engine_Dep INTERFACE)
 target_include_directories(Engine_Dep INTERFACE
     ${PROJECT_SOURCE_DIR}/src/Engine/Inc
-    ${UT99_ENGINE_INC}
 )
 target_link_libraries(Engine_Dep INTERFACE
     $<TARGET_LINKER_FILE:Engine>)

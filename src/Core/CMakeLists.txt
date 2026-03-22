@@ -19,11 +19,9 @@ if(SOURCE_COUNT GREATER 0)
         CORE_API=__declspec\(dllexport\)
         ThisPackage=Core
     )
-    # BEFORE ensures src/Core/Inc/ local header overrides take priority over SDK.
+    # All Core headers are now local — no SDK include paths needed.
     target_include_directories(Core BEFORE PRIVATE
         ${CORE_SRC_DIR}/Inc
-        ${CSDK_CORE_INC}
-        ${UT99_CORE_INC}
     )
     # Core links only against Windows system libraries
     target_link_libraries(Core

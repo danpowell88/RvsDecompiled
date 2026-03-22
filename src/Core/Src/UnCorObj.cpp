@@ -12,7 +12,7 @@
 	UPackage.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x1013b0a0)
+IMPL_TODO("Byte-parity unverified")
 UPackage::UPackage()
 :	DllHandle    ( NULL )
 ,	AttemptedBind( 0 )
@@ -26,7 +26,7 @@ UPackage::UPackage()
 	unguard;
 }
 
-IMPL_MATCH("Core.dll", 0x1013B240)
+IMPL_TODO("Byte-parity unverified")
 void UPackage::Destroy()
 {
 	guard(UPackage::Destroy);
@@ -39,7 +39,7 @@ void UPackage::Destroy()
 	unguard;
 }
 
-IMPL_MATCH("Core.dll", 0x1013A2A0)
+IMPL_TODO("Byte-parity unverified")
 void UPackage::Serialize( FArchive& Ar )
 {
 	guard(UPackage::Serialize);
@@ -48,7 +48,7 @@ void UPackage::Serialize( FArchive& Ar )
 	unguard;
 }
 
-IMPL_MATCH("Core.dll", 0x10137880)
+IMPL_TODO("Byte-parity unverified")
 void* UPackage::GetDllExport( const TCHAR* ExportName, UBOOL Checked )
 {
 	guard(UPackage::GetDllExport);
@@ -90,7 +90,7 @@ IMPLEMENT_CLASS(ULanguage);
 	UTextBuffer.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x1013aee0)
+IMPL_TODO("Byte-parity unverified")
 UTextBuffer::UTextBuffer( const TCHAR* InText )
 :	Pos  ( 0 )
 ,	Top  ( 0 )
@@ -101,7 +101,7 @@ UTextBuffer::UTextBuffer( const TCHAR* InText )
 	unguard;
 }
 
-IMPL_MATCH("Core.dll", 0x10139FD0)
+IMPL_TODO("Byte-parity unverified")
 void UTextBuffer::Serialize( FArchive& Ar )
 {
 	guard(UTextBuffer::Serialize);
@@ -110,7 +110,7 @@ void UTextBuffer::Serialize( FArchive& Ar )
 	unguard;
 }
 
-IMPL_MATCH("Core.dll", 0x1013A070)
+IMPL_TODO("Byte-parity unverified")
 void UTextBuffer::Serialize( const TCHAR* Data, EName Event )
 {
 	guard(UTextBuffer::Serialize_OutputDevice);
@@ -124,7 +124,7 @@ IMPLEMENT_CLASS(UTextBuffer);
 	UCommandlet.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x1013af70)
+IMPL_TODO("Byte-parity unverified")
 UCommandlet::UCommandlet()
 :	LogToStdout   ( 0 )
 ,	IsServer      ( 0 )
@@ -142,8 +142,12 @@ UCommandlet::UCommandlet()
 
 // UCommandlet::~UCommandlet (Ghidra 0x1010bf20): calls ConditionalDestroy() then
 // compiler-emitted member/base destructors.  Provided inline by DECLARE_CLASS.
+IMPL_TODO("Byte-parity unverified — destructor body is compiler-generated member cleanup")
+UCommandlet::~UCommandlet()
+{
+}
 
-IMPL_MATCH("Core.dll", 0x1013AFF0)
+IMPL_TODO("Byte-parity unverified")
 INT UCommandlet::Main( const TCHAR* Parms )
 {
 	guard(UCommandlet::Main);
@@ -151,7 +155,7 @@ INT UCommandlet::Main( const TCHAR* Parms )
 	unguard;
 }
 
-IMPL_MATCH("Core.dll", 0x1013A1D0)
+IMPL_TODO("Byte-parity unverified")
 void UCommandlet::execMain( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCommandlet::execMain);
@@ -162,7 +166,7 @@ void UCommandlet::execMain( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCommandlet, 0, execMain );
 
-IMPL_MATCH("Core.dll", 0x1010F360)
+IMPL_TODO("Byte-parity unverified")
 INT UCommandlet::eventMain( const FString& InParms )
 {
 	UCommandlet_eventMain_Parms Parms;
@@ -178,7 +182,7 @@ IMPLEMENT_CLASS(UCommandlet);
 	USystem.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x1014ba90)
+IMPL_TODO("Byte-parity unverified")
 USystem::USystem()
 :	LicenseeMode  ( 0 )
 ,	PurgeCacheDays( 30 )
@@ -217,7 +221,7 @@ void USystem::StaticConstructor()
 	unguard;
 }
 
-IMPL_MATCH("Core.dll", 0x1014BAC0)
+IMPL_TODO("Byte-parity unverified")
 UBOOL USystem::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
 {
 	guard(USystem::Exec);
@@ -264,7 +268,7 @@ IMPLEMENT_CLASS(USystem);
 	UConst.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x10116c40)
+IMPL_TODO("Byte-parity unverified")
 UConst::UConst( UConst* InSuperConst, const TCHAR* InValue )
 :	UField( InSuperConst )
 ,	Value( InValue )
@@ -274,7 +278,7 @@ UConst::UConst( UConst* InSuperConst, const TCHAR* InValue )
 	unguard;
 }
 
-IMPL_MATCH("Core.dll", 0x101161B0)
+IMPL_TODO("Byte-parity unverified")
 void UConst::Serialize( FArchive& Ar )
 {
 	guard(UConst::Serialize);
