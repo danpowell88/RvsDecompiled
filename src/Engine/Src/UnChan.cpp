@@ -263,36 +263,137 @@ while (true)
 unguard;
 }
 
-IMPL_TODO("Ghidra 0x10481890 (1243b): ArmPatch file-send path omitted (FGuid FUN_103bef40/FUN_103bef10 helpers, GFileManager vtable read/seek, GMalloc loop); normal PackageMap download-request path omitted (Connection->PackageMap at conn+0x7c+200 FPackageInfo array iteration). Ghidra export IS present in Engine._global.cpp; FClassNetCache defined in sdk/432Core/Inc/UnCoreNet.h. Download-write path (OpenedLocally) and close-bunch paths implemented.")
+IMPL_MATCH("Engine.dll", 0x10481890)
 void UFileChannel::ReceivedBunch(FInBunch& Bunch)
 {
 guard(UFileChannel::ReceivedBunch);
 
-// Assert !Closing
 check(!Closing);
 
 if (!OpenedLocally)
 {
 	// Server side: received a request or message from client.
-	// Check Connection->Driver->Notify->bDedicated (offset chain: Connection+0x7c → Driver, then +0x74)
 	BYTE* conn = (BYTE*)Connection;
 	INT bDedicated = *(INT*)(*(INT*)(*(INT*)(conn + 0x7c) + 0x74));
 
 	if (!bDedicated)
 	{
-		// Not dedicated server: reject with close bunch
+		// Not dedicated server: reject
 		FOutBunch CloseBunch(this, 1);
 		SendBunch(&CloseBunch, 0);
 	}
 	else if (*(INT*)((BYTE*)this + 0x6c) == 0)
 	{
 		// No SendFile yet: process file request.
-		// Read GUID from incoming bunch.
-		// ArmPatch handling and normal PackageMap iteration omitted —
-		// full implementation requires FGuid by-value construction (forward-declared only).
-		// DIVERGE: ArmPatch file transfer path and PackageMap iteration not implemented.
+		// Read request GUID from incoming bunch.
+		FGuid RequestGuid(0, 0, 0, 0);
+		Bunch.ByteOrderSerialize(&RequestGuid.A, 4);
+		Bunch.ByteOrderSerialize(&RequestGuid.B, 4);
+		Bunch.ByteOrderSerialize(&RequestGuid.C, 4);
+		Bunch.ByteOrderSerialize(&RequestGuid.D, 4);
 
-		// Fall through: send close bunch to reject
+		// Check if this is an ArmPatch transfer request
+		if (RequestGuid == FGuid::SpecialGUIDArmPatches)
+		{
+			// ArmPatch file transfer: read patch GUID, build cache path, send file
+			FGuid PatchGuid(0, 0, 0, 0);
+			Bunch.ByteOrderSerialize(&PatchGuid.A, 4);
+			Bunch.ByteOrderSerialize(&PatchGuid.B, 4);
+			Bunch.ByteOrderSerialize(&PatchGuid.C, 4);
+			Bunch.ByteOrderSerialize(&PatchGuid.D, 4);
+
+			FString PatchPath = FString::Printf(
+				TEXT("..\\ArmPatches\\Cache\\%s._AP"), PatchGuid.String());
+			FArchive* FileReader = GFileManager->CreateFileReader(
+				*PatchPath, 0, GNull);
+
+			if (FileReader)
+			{
+				INT FileSize = FileReader->TotalSize();
+				if (FileSize && FileSize > 0)
+				{
+					BYTE* Buffer = (BYTE*)GMalloc->Malloc(FileSize, TEXT("ARMPATCH"));
+					if (Buffer)
+					{
+						FileReader->Serialize(Buffer, FileSize);
+						// Chunk size: (Connection->MaxPacket * 8 - 0x51) / 8
+						INT MaxChunk = (*(INT*)((BYTE*)Connection + 0xd0) * 8 - 0x51) >> 3;
+						BYTE* Current = Buffer;
+						INT Remaining = FileSize;
+						while (Remaining > 0)
+						{
+							FOutBunch DataBunch(this, 0);
+							INT ChunkSize = Remaining;
+							if (ChunkSize > MaxChunk) ChunkSize = MaxChunk;
+							INT MaxSend = MaxSendBytes();
+							if (ChunkSize > MaxSend) ChunkSize = MaxSend;
+							((FBitWriter*)&DataBunch)->Serialize(Current, ChunkSize);
+							if (!((FBitWriter*)&DataBunch)->IsError())
+								SendBunch(&DataBunch, 0);
+							Current += ChunkSize;
+							Remaining -= ChunkSize;
+						}
+						GMalloc->Free(Buffer);
+					}
+				}
+				delete FileReader;
+			}
+			// Close channel after ArmPatch transfer
+			Close();
+			return;
+		}
+
+		// Normal package download request: iterate PackageMap
+		if (!Bunch.IsError())
+		{
+			BYTE* connInner = *(BYTE**)(conn + 0xC8);
+			FArray* PackageMap = (FArray*)(connInner + 0x2C);
+			INT NumPackages = PackageMap->Num();
+			INT i;
+			for (i = 0; i < NumPackages; i++)
+			{
+				BYTE* Info = (BYTE*)PackageMap->GetData() + i * 0x44;
+				// Compare GUID at Info+0x14 with RequestGuid
+				FGuid* InfoGuid = (FGuid*)(Info + 0x14);
+				if (*InfoGuid == RequestGuid)
+				{
+					// Check filename is not empty
+					FString* InfoName = (FString*)Info;
+					if (*InfoName != TEXT(""))
+					{
+						// Optional file size limit check
+						INT MaxFileSize = *(INT*)(*(INT*)(conn + 0x7c) + 0x8c);
+						if (MaxFileSize > 0)
+						{
+							INT ActualSize = GFileManager->FileSize(*(*InfoName));
+							if (ActualSize > MaxFileSize) break;
+						}
+						// Copy filename to channel storage
+						appStrncpy((TCHAR*)((BYTE*)this + 0x70), *(*InfoName), 0x100);
+						// Request authorization from server driver
+						BYTE* Driver = *(BYTE**)(conn + 0x7c);
+						BYTE* Notify = *(BYTE**)(Driver + 0x40);
+						typedef INT (__thiscall* AuthFn)(void*, void*, DWORD, DWORD, DWORD, DWORD);
+						INT bAllowed = ((AuthFn)(*(INT*)(*(INT*)Notify + 0x14)))
+							(Notify, Connection, RequestGuid.A, RequestGuid.B,
+							 RequestGuid.C, RequestGuid.D);
+						if (bAllowed)
+						{
+							check(*(INT*)(Info + 0xC)); // Info.Linker
+							FArchive* FileAr = GFileManager->CreateFileReader(
+								(const TCHAR*)((BYTE*)this + 0x70), 0, GNull);
+							*(INT*)((BYTE*)this + 0x6c) = (INT)FileAr;
+							if (FileAr)
+							{
+								*(INT*)((BYTE*)this + 0x270) = i;
+								return;
+							}
+						}
+					}
+				}
+			}
+		}
+		// Fall through: reject
 		FOutBunch CloseBunch(this, 1);
 		SendBunch(&CloseBunch, 0);
 	}
@@ -303,13 +404,20 @@ if (!OpenedLocally)
 		Bunch << Cmd;
 		if (!Bunch.IsError() && Cmd == TEXT("SKIP"))
 		{
-			// Log and skip this package.
-			GLog->Logf(*(const TCHAR**)((BYTE*)this + 0x70));  // Filename string
-			// FUN_103bfaf0: SkipPackage helper — omitted (unknown internal)
+			// Log and remove package from download list
+			GLog->Logf(TEXT("%s"), (const TCHAR*)((BYTE*)this + 0x70));
+			// FUN_103bfaf0: remove package entry from PackageMap at stored index
+			INT PackageIndex = *(INT*)((BYTE*)this + 0x270);
+			BYTE* connInner = *(BYTE**)((BYTE*)Connection + 0xC8);
+			FArray* PackageMap = (FArray*)(connInner + 0x2C);
+			BYTE* Entry = (BYTE*)PackageMap->GetData() + PackageIndex * 0x44;
+			// Destruct FPackageInfo entry (FString fields)
+			((FString*)Entry)->~FString();
+			((FString*)(Entry + 0x10))->~FString();
+			PackageMap->Remove(PackageIndex, 1, 0x44);
 		}
 		else
 		{
-			// Unknown command: send close bunch
 			FOutBunch CloseBunch(this, 1);
 			SendBunch(&CloseBunch, 0);
 		}
@@ -317,11 +425,9 @@ if (!OpenedLocally)
 }
 else if (*(INT*)((BYTE*)this + 0x68) != 0)
 {
-	// Client side with active Download: write received data to it.
+	// Client side with active Download: write received data.
 	INT numBytes = Bunch.GetNumBytes();
 	BYTE* data = Bunch.GetData();
-
-	// Download vtable[0x6c/4=27] = ReceivedData(Data, Count)
 	void* dl = *(void**)((BYTE*)this + 0x68);
 	typedef void (__thiscall* RecvDataFn)(void*, BYTE*, INT);
 	((RecvDataFn)(*(INT*)(*(INT*)dl + 0x6c)))(dl, data, numBytes);

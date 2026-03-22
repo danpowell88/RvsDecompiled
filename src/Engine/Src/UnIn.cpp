@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
 	UnIn.cpp: Input subsystem (UInputPlanning)
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
@@ -22,10 +22,52 @@ const TCHAR* UInputPlanning::StaticConfigName()
 	return TEXT("User");
 }
 
-IMPL_TODO("Ghidra 0x103b44a0 (591b): builds Alias UStruct with FName+FString properties, registers Aliases array on UInputPlanning, populates EInputKey FName table; blocked by: UStruct/UNameProperty/UStrProperty construction APIs and CPP_PROPERTY macro support for Alias struct layout")
+IMPL_MATCH("Engine.dll", 0x103b44a0)
 void UInputPlanning::StaticInitInput()
 {
 	guard(UInputPlanning::StaticInitInput);
+	// Ghidra 0x103b44a0 (591b): builds Alias UStruct with FName+FString properties,
+	// registers Aliases TArray<> on UInputPlanning, populates per-key UStrProperty
+	// from EInputKey enum entries.
+	FArchive DummyAr;
+
+	// Build Alias struct: { FName Alias; FString Command; } = 0x10 bytes
+	UStruct* AliasStruct = new(NULL, TEXT("Alias"), RF_Public) UStruct((UStruct*)NULL);
+	AliasStruct->SetPropertiesSize(0x10);
+	new(AliasStruct, TEXT("Alias"), RF_Public)
+		UNameProperty(EC_CppProperty, 0, TEXT(""), CPF_Config);
+	new(AliasStruct, TEXT("Command"), RF_Public)
+		UStrProperty(EC_CppProperty, 4, TEXT(""), CPF_Config);
+	AliasStruct->Link(DummyAr, 1);
+
+	// Register Aliases array (40 entries at class offset 0x30, stride 0x10)
+	UStructProperty* AliasProp = new(StaticClass(), TEXT("Aliases"), RF_Public)
+		UStructProperty(EC_CppProperty, 0x30, TEXT("Aliases"), CPF_Config, AliasStruct);
+	*(INT*)((BYTE*)AliasProp + 0x38) = 0x28; // ArrayDim = 40
+
+	// Find EInputKey enum in UInteractions class
+	UEnum* InputKeyEnum = (UEnum*)UObject::StaticFindObjectChecked(
+		UEnum::StaticClass(),
+		UInteractions::StaticClass(),
+		TEXT("EInputKey"), 0);
+
+	// For each valid key (0..254), register a UStrProperty named after the key
+	// at offset key*0xC + 0x2B0 (per-key binding string)
+	FName* EnumNames = *(FName**)((BYTE*)InputKeyEnum + 0x38);
+	for (INT i = 0; i <= 0xFE; i++)
+	{
+		if (EnumNames[i] != NAME_None)
+		{
+			const TCHAR* KeyStr = *EnumNames[i];
+			new(StaticClass(), KeyStr + 3, RF_Public) // skip "IK_" prefix
+				UStrProperty(EC_CppProperty, i * 0xC + 0x2B0, TEXT("RawKeys"), CPF_Config);
+		}
+	}
+
+	// Link and load config
+	StaticClass()->Link(DummyAr, 1);
+	UObject* DefaultObj = StaticClass()->GetDefaultObject();
+	DefaultObj->LoadConfig(0, NULL, NULL);
 	unguard;
 }
 
@@ -558,5 +600,43 @@ FLOAT UInput::GetInputDelta()
 }
 IMPL_MATCH("Engine.dll", 0x103116d0)
 const TCHAR* UInput::StaticConfigName() { return TEXT("User"); }
-IMPL_TODO("Ghidra 0x103b47c0 (591b): identical to UInputPlanning::StaticInitInput — builds Alias UStruct, registers Aliases array property, populates EInputKey FName table from EInputKey enum; blocked by: UStruct/UNameProperty/UStrProperty construction APIs and CPP_PROPERTY macro support")
-void UInput::StaticInitInput() {}
+IMPL_MATCH("Engine.dll", 0x103b47c0)
+void UInput::StaticInitInput()
+{
+	guard(UInput::StaticInitInput);
+	// Ghidra 0x103b47c0 (591b): identical to UInputPlanning::StaticInitInput.
+	FArchive DummyAr;
+
+	UStruct* AliasStruct = new(NULL, TEXT("Alias"), RF_Public) UStruct((UStruct*)NULL);
+	AliasStruct->SetPropertiesSize(0x10);
+	new(AliasStruct, TEXT("Alias"), RF_Public)
+		UNameProperty(EC_CppProperty, 0, TEXT(""), CPF_Config);
+	new(AliasStruct, TEXT("Command"), RF_Public)
+		UStrProperty(EC_CppProperty, 4, TEXT(""), CPF_Config);
+	AliasStruct->Link(DummyAr, 1);
+
+	UStructProperty* AliasProp = new(StaticClass(), TEXT("Aliases"), RF_Public)
+		UStructProperty(EC_CppProperty, 0x30, TEXT("Aliases"), CPF_Config, AliasStruct);
+	*(INT*)((BYTE*)AliasProp + 0x38) = 0x28;
+
+	UEnum* InputKeyEnum = (UEnum*)UObject::StaticFindObjectChecked(
+		UEnum::StaticClass(),
+		UInteractions::StaticClass(),
+		TEXT("EInputKey"), 0);
+
+	FName* EnumNames = *(FName**)((BYTE*)InputKeyEnum + 0x38);
+	for (INT i = 0; i <= 0xFE; i++)
+	{
+		if (EnumNames[i] != NAME_None)
+		{
+			const TCHAR* KeyStr = *EnumNames[i];
+			new(StaticClass(), KeyStr + 3, RF_Public)
+				UStrProperty(EC_CppProperty, i * 0xC + 0x2B0, TEXT("RawKeys"), CPF_Config);
+		}
+	}
+
+	StaticClass()->Link(DummyAr, 1);
+	UObject* DefaultObj = StaticClass()->GetDefaultObject();
+	DefaultObj->LoadConfig(0, NULL, NULL);
+	unguard;
+}

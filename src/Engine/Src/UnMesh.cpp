@@ -1,4 +1,4 @@
-/*=============================================================================
+﻿/*=============================================================================
 	UnMesh.cpp: UMesh, ULodMesh, USkeletalMesh, UStaticMesh registration.
 	Reconstructed for Ravenshield decompilation project.
 
@@ -1007,16 +1007,184 @@ int UMeshAnimation::SequenceMemFootprint(FName Name)
 	unguard;
 }
 
-IMPL_TODO("blocked by FUN_1043fd50 (MotionChunk stride-0x58, deep chain via FUN_1043fb70→FUN_103218c0/FUN_1043f8f0/FUN_10438100); FUN_1043f770/FUN_10437c90 chain implemented; retail 0x1043fee0 (135b)")
+// === MotionChunk / AnalogTrack serialization chain ===
+// Implements FUN_1043fd50 and its dependency chain:
+// FUN_1043fd50 -> FUN_1043fb70 -> {FUN_103218c0, FUN_1043f8f0, FUN_10438100, FUN_10321a80, FUN_10438000}
+
+// FUN_10438100 — stride-0x10 TArray<FQuat> serializer. 4x BOS 4b per element.
+static void SerArr0x10_FQuat(FArchive& Ar, FArray& A)
+{
+	A.CountBytes(Ar, 0x10);
+	if (Ar.IsLoading())
+	{
+		INT n = 0;
+		Ar << AR_INDEX(n);
+		for (INT i = 0; i < A.Num(); i++) {} // trivial dtor loop (FQuat)
+		A.Empty(0x10, n);
+		for (INT i = 0; i < n; i++)
+		{
+			INT idx = A.Add(1, 0x10);
+			BYTE* E = (BYTE*)A.GetData() + idx * 0x10;
+			new ((FQuat*)E) FQuat();
+			Ar.ByteOrderSerialize(E + 0x0, 4);
+			Ar.ByteOrderSerialize(E + 0x4, 4);
+			Ar.ByteOrderSerialize(E + 0x8, 4);
+			Ar.ByteOrderSerialize(E + 0xC, 4);
+		}
+	}
+	else
+	{
+		Ar << *(FCompactIndex*)((BYTE*)&A + 4);
+		for (INT i = 0; i < A.Num(); i++)
+		{
+			BYTE* E = (BYTE*)A.GetData() + i * 0x10;
+			Ar.ByteOrderSerialize(E + 0x0, 4);
+			Ar.ByteOrderSerialize(E + 0x4, 4);
+			Ar.ByteOrderSerialize(E + 0x8, 4);
+			Ar.ByteOrderSerialize(E + 0xC, 4);
+		}
+	}
+}
+
+// FUN_10321a80 — stride-0xC TArray<FVector> serializer. 3x BOS 4b per element.
+static void SerArr0xC_FVector(FArchive& Ar, FArray& A)
+{
+	A.CountBytes(Ar, 0xC);
+	if (Ar.IsLoading())
+	{
+		INT n = 0;
+		Ar << AR_INDEX(n);
+		for (INT i = 0; i < A.Num(); i++) {} // trivial dtor loop (FVector)
+		A.Empty(0xC, n);
+		for (INT i = 0; i < n; i++)
+		{
+			INT idx = A.Add(1, 0xC);
+			BYTE* E = (BYTE*)A.GetData() + idx * 0xC;
+			new ((FVector*)E) FVector();
+			Ar.ByteOrderSerialize(E + 0x0, 4);
+			Ar.ByteOrderSerialize(E + 0x4, 4);
+			Ar.ByteOrderSerialize(E + 0x8, 4);
+		}
+	}
+	else
+	{
+		Ar << *(FCompactIndex*)((BYTE*)&A + 4);
+		for (INT i = 0; i < A.Num(); i++)
+		{
+			BYTE* E = (BYTE*)A.GetData() + i * 0xC;
+			Ar.ByteOrderSerialize(E + 0x0, 4);
+			Ar.ByteOrderSerialize(E + 0x4, 4);
+			Ar.ByteOrderSerialize(E + 0x8, 4);
+		}
+	}
+}
+
+// FUN_104386f0 — AnalogTrack default-constructor (stride 0x28).
+// Layout: DWORD(+0), TArray<FQuat>(+4), TArray<FVector>(+0x10), TArray<FLOAT>(+0x1C).
+static void InitAnalogTrack(BYTE* AT)
+{
+	new (AT + 0x04) FArray();
+	new (AT + 0x10) FArray();
+	new (AT + 0x1C) FArray();
+}
+
+// FUN_1043f8f0 — stride-0x28 TArray<AnalogTrack> serializer.
+// Each element: BOS(+0,4) + TArray<FQuat>(+4) + TArray<FVector>(+0x10) + TArray<INT>(+0x1C).
+static void SerArr0x28_AnalogTrack(FArchive& Ar, FArray& A)
+{
+	A.CountBytes(Ar, 0x28);
+	if (Ar.IsLoading())
+	{
+		INT n = 0;
+		Ar << AR_INDEX(n);
+		for (INT i = 0; i < n; i++)
+		{
+			INT idx = A.Add(1, 0x28);
+			BYTE* E = (BYTE*)A.GetData() + idx * 0x28;
+			if (E) InitAnalogTrack(E);
+			Ar.ByteOrderSerialize(E, 4);
+			SerArr0x10_FQuat(Ar, *(FArray*)(E + 0x04));
+			SerArr0xC_FVector(Ar, *(FArray*)(E + 0x10));
+			SerArr4BOS(Ar, *(FArray*)(E + 0x1C));
+		}
+	}
+	else
+	{
+		Ar << *(FCompactIndex*)((BYTE*)&A + 4);
+		for (INT i = 0; i < A.Num(); i++)
+		{
+			BYTE* E = (BYTE*)A.GetData() + i * 0x28;
+			Ar.ByteOrderSerialize(E, 4);
+			SerArr0x10_FQuat(Ar, *(FArray*)(E + 0x04));
+			SerArr0xC_FVector(Ar, *(FArray*)(E + 0x10));
+			SerArr4BOS(Ar, *(FArray*)(E + 0x1C));
+		}
+	}
+}
+
+// FUN_1043fb70 — MotionChunk element serializer (stride 0x58).
+// Layout: 6x DWORD(+0..+0x14), FArray<INT>(+0x18), FArray<AnalogTrack>(+0x24),
+//         DWORD(+0x30), FArray<FQuat>(+0x34), FArray<FVector>(+0x40), FArray<INT>(+0x4C).
+static void SerElem0x58_MotionChunk(FArchive& Ar, BYTE* MC)
+{
+	Ar.ByteOrderSerialize(MC + 0x00, 4);
+	Ar.ByteOrderSerialize(MC + 0x04, 4);
+	Ar.ByteOrderSerialize(MC + 0x08, 4);
+	Ar.ByteOrderSerialize(MC + 0x0C, 4);
+	Ar.ByteOrderSerialize(MC + 0x10, 4);
+	Ar.ByteOrderSerialize(MC + 0x14, 4);
+	SerArr4BOS(Ar, *(FArray*)(MC + 0x18));
+	SerArr0x28_AnalogTrack(Ar, *(FArray*)(MC + 0x24));
+	Ar.ByteOrderSerialize(MC + 0x30, 4);
+	SerArr0x10_FQuat(Ar, *(FArray*)(MC + 0x34));
+	SerArr0xC_FVector(Ar, *(FArray*)(MC + 0x40));
+	SerArr4BOS(Ar, *(FArray*)(MC + 0x4C));
+}
+
+// FUN_1043f890 — MotionChunk default-constructor (stride 0x58).
+static void InitMotionChunk(BYTE* MC)
+{
+	new ((FVector*)MC) FVector();
+	new (MC + 0x18) FArray();
+	new (MC + 0x24) FArray();
+	InitAnalogTrack(MC + 0x30);
+}
+
+// FUN_1043fd50 — stride-0x58 TArray<MotionChunk> serializer.
+static void SerArr0x58_MotionChunk(FArchive& Ar, FArray& A)
+{
+	A.CountBytes(Ar, 0x58);
+	if (Ar.IsLoading())
+	{
+		INT n = 0;
+		Ar << AR_INDEX(n);
+		for (INT i = 0; i < n; i++)
+		{
+			INT idx = A.Add(1, 0x58);
+			BYTE* E = (BYTE*)A.GetData() + idx * 0x58;
+			if (E) InitMotionChunk(E);
+			SerElem0x58_MotionChunk(Ar, E);
+		}
+	}
+	else
+	{
+		Ar << *(FCompactIndex*)((BYTE*)&A + 4);
+		for (INT i = 0; i < A.Num(); i++)
+			SerElem0x58_MotionChunk(Ar, (BYTE*)A.GetData() + i * 0x58);
+	}
+}
+
+IMPL_MATCH("Engine.dll", 0x1043fee0)
 void UMeshAnimation::Serialize(FArchive& Ar)
 {
 	guard(UMeshAnimation::Serialize);
-	// Ghidra 0x1043fee0: UObject::Serialize, BOS(+0x2C,4), FUN_10437c90(+0x30),
-	// FUN_1043fd50(+0x3C), FUN_1043f770(+0x48), IsPersistent().
+	// Ghidra 0x1043fee0 (135b): UObject::Serialize, BOS(+0x2C,4),
+	// SerArrMeshAnimNotify(+0x30), SerArr0x58_MotionChunk(+0x3C),
+	// SerArrMeshAnimSeq(+0x48), IsPersistent().
 	UObject::Serialize(Ar);
 	Ar.ByteOrderSerialize((BYTE*)this + 0x2C, 4);
 	SerArrMeshAnimNotify(Ar, *(FArray*)((BYTE*)this + 0x30));
-	// FUN_1043fd50 (MotionChunk array, stride 0x58) still unresolved.
+	SerArr0x58_MotionChunk(Ar, *(FArray*)((BYTE*)this + 0x3C));
 	SerArrMeshAnimSeq(Ar, *(FArray*)((BYTE*)this + 0x48));
 	Ar.IsPersistent();
 	unguard;
