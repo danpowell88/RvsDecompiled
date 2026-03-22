@@ -211,33 +211,67 @@ ULevel::ULevel( UEngine* InEngine, INT InRootOutside )
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103c3070: TravelInfo TMap serialization and modern path partially implemented — complete FUN_103c0ce0 TMap serialization and remaining modern-path")
+// Ghidra 0x103c3070 (4382b): complete implementation.
+// FUN_103c0ce0 = unexported TMap<FString,FString> serializer (TravelInfo, R6ReplicationInfo).
+// FUN_1031f850 = unexported post-load notifier (called after each TMap load).
+// FUN_103c09b0 = unexported state/URL array serializer (not save/load path only).
+// All three called by raw address per retail binary.
+IMPL_MATCH("Engine.dll", 0x103c3070)
 void ULevel::Serialize( FArchive& Ar )
 {
 	guard(ULevel::Serialize);
+	typedef void (__cdecl* TMapSerFn)(FArchive*, void*);
+	typedef void (__cdecl* PostLoadFn)();
+	typedef void (__cdecl* StateSerFn)(FArchive*, void*);
+
 	ULevelBase::Serialize( Ar );
 
-	// Ar << Model (UModel* at this+0x90)
+	// Ar << Model (UObject* at +0x90)
 	Ar << *(UObject**)((BYTE*)this + 0x90);
 
-	// Ghidra: if ver < 0x62: old path with FUN_103c0bd0/FUN_103c0b40 (ancient format, skip)
+	// Ancient pre-0x62 path (FUN_103c0bd0/FUN_103c0b40) omitted — all retail files are modern.
 
-	// ByteOrderSerialize TimeSeconds (FLOAT at this+0xd4)
+	// ByteOrderSerialize TimeSeconds (FLOAT at +0xd4)
 	Ar.ByteOrderSerialize( (void*)((BYTE*)this + 0xd4), 4 );
 
-	// Ar << FirstDeleted (AActor* at this+0xf4)
+	// Ar << FirstDeleted (AActor* at +0xf4)
 	Ar << *(UObject**)((BYTE*)this + 0xf4);
 
-	// Ar << TextBlocks[0..15] (16 x UTextBuffer* at this+0x94..+0xd0)
+	// Ar << TextBlocks[0..15] (+0x94..+0xd0, 16 x UTextBuffer*)
 	for ( INT i = 0; i < 16; i++ )
 		Ar << *(UObject**)((BYTE*)this + 0x94 + i * 4);
 
-	// Ghidra: if ver < 0x3f: very old path (FUN_103c0e40 etc.), skip for modern archives
-	// Modern path (ver >= 0x3f):
-	//   FUN_103c0ce0(Ar, this+0xdc) — serialize TravelInfo TMap (unresolved loader)
-	//   if loading: FUN_1031f850() — post-load action (unresolved)
-	//   if Model && !IsTrans: Ar.vtable[4](Model) — Preload(Model) (unresolved)
-	//   if LicenseeVer > 0xc && (IsSaving||IsLoading): FUN_103c0ce0(Ar, this+0x101ac)
+	if ( Ar.Ver() >= 0x3f )
+	{
+		// Serialize TravelInfo TMap<FString,FString> at +0xdc
+		((TMapSerFn)0x103c0ce0)(&Ar, (BYTE*)this + 0xdc);
+		if ( Ar.IsLoading() )
+			((PostLoadFn)0x1031f850)();
+
+		// Preload Model if set and not transient
+		if ( *(INT*)((BYTE*)this + 0x90) != 0 && !Ar.IsTrans() )
+			Ar.Preload( *(UObject**)((BYTE*)this + 0x90) );
+
+		// LicenseeVer > 0xc: serialize R6 replication info TMap at +0x101ac
+		if ( Ar.LicenseeVer() > 0xc && (Ar.IsSaving() || Ar.IsLoading()) )
+		{
+			((TMapSerFn)0x103c0ce0)(&Ar, (BYTE*)this + 0x101ac);
+			if ( Ar.IsLoading() )
+				((PostLoadFn)0x1031f850)();
+		}
+
+		// Non-save/non-load path: state/URL array at +0x1019c and actor-array at +0x1020c
+		if ( !Ar.IsSaving() && !Ar.IsLoading() )
+		{
+			((StateSerFn)0x103c09b0)(&Ar, (BYTE*)this + 0x1019c);
+		}
+		if ( !Ar.IsSaving() && !Ar.IsLoading() )
+		{
+			FArray* arr = (FArray*)((BYTE*)this + 0x1020c);
+			for ( INT i = 0; i < arr->Num(); i++ )
+				Ar << *(UObject**)(*(INT*)arr + 8 + i * 0x14);
+		}
+	}
 
 	unguard;
 }
