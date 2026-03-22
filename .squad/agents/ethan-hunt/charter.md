@@ -37,8 +37,8 @@
 
 ## Model
 
-- **Preferred:** auto
-- **Rationale:** Building tools involves code — standard tier. Config changes → fast tier.
+- **Preferred:** `claude-sonnet-4.5`
+- **Rationale:** Writes Python/PowerShell tools and fixes build scripts — code output, standard tier. Downgrade to `claude-haiku-4.5` for pure mechanical tasks (checking a mangled name, grepping a .def file).
 
 ## Collaboration
 

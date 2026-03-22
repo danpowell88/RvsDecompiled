@@ -36,8 +36,8 @@
 
 ## Model
 
-- **Preferred:** auto
-- **Rationale:** Writing code — standard tier (claude-sonnet-4.5 or equivalent)
+- **Preferred:** `claude-sonnet-4.5`
+- **Rationale:** Writes C++ code — quality matters. Switch to `gpt-5.2-codex` for large multi-file implementation batches (500+ lines) where a code specialist has an edge.
 
 ## Collaboration
 

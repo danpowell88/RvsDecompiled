@@ -38,8 +38,8 @@
 
 ## Model
 
-- **Preferred:** auto
-- **Rationale:** Writing prose and MDX — fast tier (claude-haiku-4.5). When complex technical explanation needed → standard.
+- **Preferred:** `claude-haiku-4.5`
+- **Rationale:** Writes blog prose and MDX — not code. Fast tier. Bump to `claude-sonnet-4.5` only for posts requiring deep technical accuracy (e.g., explaining vtable layouts or calling conventions where getting it wrong would mislead readers).
 
 ## Collaboration
 

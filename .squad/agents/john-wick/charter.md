@@ -37,8 +37,9 @@
 
 ## Model
 
-- **Preferred:** auto
-- **Rationale:** Code review and Ghidra analysis → standard tier. Architecture proposals → premium if needed.
+- **Preferred:** `claude-sonnet-4.5`
+- **Rationale:** Code review and Ghidra analysis require quality reasoning — standard tier. Bump to `claude-opus-4.6` for major architecture proposals or cross-cutting decisions that affect multiple modules.
+- **Fallback:** `gpt-5.2-codex` → `claude-sonnet-4` → omit model param
 
 ## Collaboration
 

@@ -37,8 +37,8 @@
 
 ## Model
 
-- **Preferred:** auto
-- **Rationale:** Research and analysis — fast tier often sufficient; code comparisons → standard tier
+- **Preferred:** `claude-haiku-4.5`
+- **Rationale:** Research, cross-referencing, and lookup — no code produced. Fast tier is sufficient. Bump to `claude-sonnet-4.5` only when deep structural analysis of C++ headers or complex Unreal Engine type hierarchies is required.
 
 ## Collaboration
 
