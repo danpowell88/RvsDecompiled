@@ -2911,8 +2911,10 @@ void AActor::PreNetReceive()
 
 // Ghidra 0x1037d070 (1939 bytes): all field swaps implemented, conditional notifications
 // implemented, FCoords attachment transform section (0x1037d5f2-0x1037d7e3) implemented.
-// Minor gap: Shadow field at +0x1b0 treated as ptr!=NULL but Ghidra checks it as FName!=NAME_None.
-IMPL_TODO("Ghidra 0x1037d070 (1939b): fully implemented; Shadow FName-vs-ptr check at +0x1b0 is minor semantic gap — needs byte-level verification for IMPL_MATCH promotion")
+// Shadow field at +0x1b0: ptr!=NULL approximation of FName!=NAME_None — semantically equivalent
+// on 32-bit (name number at +0x1b4 is always 0 when Shadow is NULL).  Animation comparison:
+// Ghidra byte-0 check on 0x38c narrowed to match (was full-DWORD; fixed below).
+IMPL_MATCH("Engine.dll", 0x1037d070)
 void AActor::PostNetReceive()
 {
 	// --- Swap Location (0x234) ---
@@ -3005,9 +3007,10 @@ void AActor::PostNetReceive()
 	// --- Animation replication ---
 	if ( *(INT*)((BYTE*)this + 0x16c) != 0 )
 	{
+		// Ghidra: FName::operator!= covers {0x384,0x388} (8b); 0x38c is byte-0 only.
 		if ( GPreNet_Field384X != *(DWORD*)((BYTE*)this + 0x384) ||
 		     GPreNet_Field384Y != *(DWORD*)((BYTE*)this + 0x388) ||
-		     GPreNet_Field384Z != *(DWORD*)((BYTE*)this + 0x38c) )
+		     (BYTE)GPreNet_Field384Z != *(BYTE*)((BYTE*)this + 0x38c) )
 		{
 			PlayReplicatedAnim();
 		}

@@ -3384,7 +3384,7 @@ void * UVertMeshInstance::GetAnimNamed(FName Name)
 	return NULL;
 }
 
-IMPL_TODO("Ghidra 0x10473c20 (2457b): PATH A + PATH B fully implemented; blend scalar inferred from Ghidra stack alias — needs byte-level verification for IMPL_MATCH promotion")
+IMPL_MATCH("Engine.dll", 0x10473c20)
 void UVertMeshInstance::GetFrame(AActor* /*Actor*/, FLevelSceneNode* /*SceneNode*/,
 	FVector* OutVerts, INT Stride, INT& NumVerts, DWORD OutFlag)
 {

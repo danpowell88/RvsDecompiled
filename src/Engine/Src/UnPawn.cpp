@@ -159,7 +159,7 @@ IMPLEMENT_FUNCTION( AController, INDEX_NONE, execPollMoveTo );
 //   bAdvancedTactics set from bCanJump (Ghidra: bitfield bit3 XOR from param);
 //   ClearSerpentine + CurrentPath=NULL added.
 //   NavigationPoint: eventSuggestMovePreparation, GetReachSpecTo, supports, eventPrepareForMove.
-IMPL_TODO("Ghidra 0x10390940 (1402b): fully implemented; supports() parameter order and nav-point preparation path complete — needs byte-level verification for IMPL_MATCH promotion")
+IMPL_TODO("Ghidra 0x10390940 (1402b): nav-prep path (eventSuggestMovePreparation, ValidAnchor, GetReachSpecTo, supports, eventPrepareForMove) implemented. MISSING: (navFlags&0x50)==0 block after nav-prep (Pawn+0x420 clear, DrawScale3D SafeNormal→Pawn+0x578, FUN_10317640 approach-dist, appFrand×Pawn+0x41c, path-dot cosine fade). Blocked on FUN_10317640.")
 void AController::execMoveToward( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execMoveToward);

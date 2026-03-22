@@ -336,7 +336,7 @@ void UBeamEmitter::UpdateActorHitList()
 }
 
 // Ghidra: 0x10381920, 1208 bytes
-IMPL_TODO("Ghidra 0x10381920 (1208b): particle-loop bbox expansion implemented; CoordSystem==1 FMatrix transform chain implemented (FCoords/Matrix vs retail FUN_10301560/FUN_10370d70 — same result, different codegen)")
+IMPL_TODO("Ghidra 0x10381920 (1208b): particle-loop bbox expansion implemented. CoordSystem==1: retail uses FUN_10301560 (reversed-plane translation matrix ctor) + FUN_10370d70 (single-axis rotation from FRotator) chained via FMatrix::operator*; our FCoords/FMatrix approach may produce a different transform. Needs FUN_10301560/FUN_10370d70 implemented and wired in to verify parity.")
 int UBeamEmitter::UpdateParticles(float DeltaTime)
 {
 	guard(UBeamEmitter::UpdateParticles);
