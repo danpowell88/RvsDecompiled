@@ -159,7 +159,7 @@ IMPLEMENT_FUNCTION( AController, INDEX_NONE, execPollMoveTo );
 //   bAdvancedTactics set from bCanJump (Ghidra: bitfield bit3 XOR from param);
 //   ClearSerpentine + CurrentPath=NULL added.
 //   NavigationPoint: eventSuggestMovePreparation, GetReachSpecTo, supports, eventPrepareForMove.
-IMPL_TODO("Ghidra 0x10390940; 1402b — vtable[26] confirmed as IsA(ANavigationPoint); __ftol2 parameter order for supports() matches natural right-to-left evaluation (CollisionRadius, CollisionHeight, calcMoveFlags, MaxFallSpeed)")
+IMPL_TODO("Ghidra 0x10390940 (1402b): fully implemented; supports() parameter order and nav-point preparation path complete — needs byte-level verification for IMPL_MATCH promotion")
 void AController::execMoveToward( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execMoveToward);
@@ -233,7 +233,7 @@ IMPLEMENT_FUNCTION( AController, 502, execMoveToward );
 // Trailing: refresh Destination, vtable[26] guard, MoveTimer=-1.0f nav-node path.
 // vtable[26] confirmed as IsA(ANavigationPoint) — no longer a divergence.
 // DIVERGENCE: trailing Pawn+0x3f4 write from unaff_EDI (caller-saved register) unrecoverable.
-IMPL_TODO("Ghidra 0x1038d110: vtable[26] confirmed as IsA(ANavigationPoint); trailing Pawn+0x3f4 write from unaff_EDI unrecoverable; Pawn+0x3e2 bit0 and MoveTarget+0x164+0x410 bit6 flag fields unidentified")
+IMPL_TODO("Ghidra 0x1038d110 (534b): mostly implemented; trailing Pawn+0x3f4 write from unaff_EDI is unrecoverable register value — permanent minor gap")
 void AController::execPollMoveToward( FFrame& Stack, RESULT_DECL )
 {
 	if( !MoveTarget || !Pawn || MoveTimer < 0.0f )

@@ -3384,7 +3384,7 @@ void * UVertMeshInstance::GetAnimNamed(FName Name)
 	return NULL;
 }
 
-IMPL_TODO("Ghidra 0x10473c20 (2457b): PATH A (CurrentFrame>=0) and PATH B (blend cross-fade) implemented; blend scalar (local_a8/local_c4) inferred as Local24 due to Ghidra stack-alias ambiguity.")
+IMPL_TODO("Ghidra 0x10473c20 (2457b): PATH A + PATH B fully implemented; blend scalar inferred from Ghidra stack alias — needs byte-level verification for IMPL_MATCH promotion")
 void UVertMeshInstance::GetFrame(AActor* /*Actor*/, FLevelSceneNode* /*SceneNode*/,
 	FVector* OutVerts, INT Stride, INT& NumVerts, DWORD OutFlag)
 {

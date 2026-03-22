@@ -2811,7 +2811,7 @@ EAcceptConnection ULevel::NotifyAcceptingConnection()
 	return ACCEPTC_Accept;
 	unguard;
 }
-IMPL_TODO("retail this=FNetworkNotify(ULevel+0x2c); field offsets differ; DevNet log format approximated (Ghidra 0x103bf2a0)")
+IMPL_TODO("retail this=FNetworkNotify(ULevel+0x2c); MI thunk adjusts this-0x2c before GetName; log uses EName 0x313=NAME_NetComeGo + appTimestamp (Ghidra 0x103bf2a0, 213b)")
 void ULevel::NotifyAcceptedConnection( UNetConnection* Connection )
 {
 	guard(ULevel::NotifyAcceptedConnection);
@@ -2819,13 +2819,13 @@ void ULevel::NotifyAcceptedConnection( UNetConnection* Connection )
 		appFailAssert("NetDriver!=NULL",".\\UnLevel.cpp",0x348);
 	if( *(UNetConnection**)((BYTE*)NetDriver + 0x3c) != NULL )
 		appFailAssert("NetDriver->ServerConnection==NULL",".\\UnLevel.cpp",0x349);
-	// Ghidra 0xbf2a0: calls Connection->LowLevelDescribe() via vtable[0x1a] (offset 0x68)
-	// then logs "[timestamp] level accepted [description]" to GLog at DevNet verbosity.
-	// Retail format string is at 0x313 offset; approximated here with debugf.
+	// Connection->LowLevelDescribe() via vtable[0x1a] (offset 0x68)
 	typedef FString* (__thiscall* DescribeFn)(UNetConnection*, FString*);
 	FString desc;
 	((DescribeFn)(*(DWORD*)(*(DWORD*)Connection + 0x68)))(Connection, &desc);
-	debugf( NAME_DevNet, TEXT("%s accepted connection %s"), GetName(), *desc );
+	// Retail: Logf(NAME_NetComeGo, format, *desc, appTimestamp(), GetName())
+	// EName 0x313 = NAME_NetComeGo; retail format includes timestamp + level name
+	GLog->Logf(NAME_NetComeGo, TEXT("%s %s accepted connection %s"), appTimestamp(), GetName(), *desc);
 	unguard;
 }
 IMPL_DIVERGE("retail this=FNetworkNotify(ULevel+0x2c); field offsets differ from our ULevel* this (Ghidra 0x103bf3b0)")

@@ -466,18 +466,50 @@ unguard;
 // serialises Polys UObject ref, and handles version-gated legacy arrays
 // (Ver < 0x5c legacy FArray blobs; < 0x69, < 0x6b, < 0x6e further fields).
 // All named FUN_ helpers are in _unnamed.cpp and are tractable; pending extraction.
-IMPL_TODO("Ghidra 0x103d02e0: TArray<T> BSP-array serialize helpers FUN_103ce2a0/FUN_103d0250/FUN_103ce7f0/FUN_103cd140 and zone helper FUN_103cca60 are unnamed; pending extraction from _unnamed.cpp")
+IMPL_TODO("Ghidra 0x103d02e0 (948b): FUN_ helpers FUN_103ce2a0 (IsTrans-gated TArray<FVector> serialize), FUN_103d0250 (Nodes), FUN_103ce7f0 (Surfs), FUN_103cd140 (Verts), FUN_103cca60 (zone info), FUN_103cd010/FUN_103218c0/FUN_103cd1d0/FUN_103c09b0 (post-legacy arrays), FUN_103cf4f0 (VertIndices), FUN_103cfb40/FUN_103ce880 (late arrays) are unnamed template instantiations; pending extraction")
 void UModel::Serialize( FArchive& Ar )
 {
 guard(UModel::Serialize);
 Super::Serialize(Ar);
-Ar << *(UObject**)((BYTE*)this + 0x58);          // Polys UObject ref
-Ar.ByteOrderSerialize((BYTE*)this + 0x10c, 4);   // RootOutside
-Ar.ByteOrderSerialize((BYTE*)this + 0x110, 4);   // Linked
+
+// --- Phase 1: BSP geometry arrays (IsTrans-gated via FUN_103ce2a0 etc.) ---
+// FUN_103ce2a0(Ar, this+0x7c) — TTransArray<FVector> Points
+// FUN_103ce2a0(Ar, this+0x8c) — TTransArray<FVector> Vectors
+// FUN_103d0250(Ar, this+0x5c) — TArray<FBspNode> Nodes
+// FUN_103ce7f0(Ar, this+0x9c) — TArray<FBspSurf> Surfs
+// FUN_103cd140(Ar, this+0x6c) — TArray<FVert> Verts
+
+// --- Phase 2: Zone data ---
 Ar.ByteOrderSerialize((BYTE*)this + 0x118, 4);   // NumSharedSides
 Ar.ByteOrderSerialize((BYTE*)this + 0x11c, 4);   // NumZones
-// Full BSP array serialisation (Nodes, Verts, Points, Vectors, Surfs, LightMap,
-// VertIndices) via unnamed FUN_ helpers -- pending extraction.
+// Zone loop: for(i=0; i < NumZones; i++) FUN_103cca60(Ar, this + (i*9+0x24)*8)
+
+// --- Phase 3: Polys object ref (with IsTrans Preload) ---
+Ar << *(UObject**)((BYTE*)this + 0x58);           // Polys UObject ref
+if ( *(UObject**)((BYTE*)this + 0x58) && !Ar.IsTrans() )
+{
+	// Ar.Preload(Polys) — vtable[0x10] call
+	(*(void(__thiscall**)(FArchive*, UObject*))(*((INT*)&Ar) + 0x10))(&Ar, *(UObject**)((BYTE*)this + 0x58));
+}
+
+// --- Phase 4: Version-gated legacy arrays (Ver < 0x5c / < 0x69) ---
+// Omitted: creates temp TArrays, serialises via FUN_103ce380/FUN_1031cce0
+
+// --- Phase 5: Post-legacy arrays ---
+// FUN_103cd010(Ar, this+0xac) — LightMap array
+// FUN_103218c0(Ar, this+0xb8)
+// FUN_103cd1d0(Ar, this+0xc4)
+// FUN_103c09b0(Ar, this+0xd0)
+
+// --- Phase 6: Scalar fields ---
+Ar.ByteOrderSerialize((BYTE*)this + 0x10c, 4);   // RootOutside
+Ar.ByteOrderSerialize((BYTE*)this + 0x110, 4);   // Linked
+
+// --- Phase 7: Version-gated VertIndices/LeafHulls ---
+// Ver >= 0x69: FUN_103cf4f0(Ar, this+0xdc) — VertIndices
+// Ver > 0x68: FUN_103cfb40(Ar, this+0xf4)
+// Ver > 0x6d: FUN_103ce880(Ar, this+0xe8) — LeafHulls
+
 unguard;
 }
 
