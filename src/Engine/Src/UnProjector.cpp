@@ -145,17 +145,15 @@ void AProjector::Abandon()
 	}
 }
 
-IMPL_TODO("Ghidra 0x103FB160: RenderInfo alloc section done; missing terrain loop (bit 1 of +0x3A0 — needs UTerrainSector::AttachProjector), BSP loop (bit 0 — needs UModel::ConvexVolumeMultiCheck + UModel::AttachProjector + FUN_10322eb0 cleanup), actor loop (bit 2 — needs AActor::AttachProjector + FMemMark). FUN_103f82f0 is a __thiscall FProjectorRenderInfo ctor (ECX=allocated mem, param1=AProjector*, param2=float); currently called via hardcoded address.")
+IMPL_TODO("Ghidra 0x103FB160 (1291b): FUN_103f82f0 is __thiscall FProjectorRenderInfo ctor (ECX=allocated mem, param1=AProjector*, param2=float); currently called via hardcoded address.")
 void AProjector::Attach()
 {
-	// Ghidra 0xfb160 (1291b): CalcMatrix(), editor snapshot, allocate FProjectorRenderInfo,
-	// copy colour tints, then iterate terrain sectors (bit 1 of +0x3A0), BSP surfaces
-	// (bit 0 of +0x3A0), and actors (bit 2 of +0x3A0).
+	guard(AProjector::Attach);
 
 	// Recalculate projection matrix
 	CalcMatrix();
 
-	// In editor: snapshot this frame's direction vectors for preview display
+	// In editor: snapshot this frame's Location for preview display
 	if (GIsEditor)
 	{
 		*(DWORD*)((BYTE*)this + 0x510) = *(DWORD*)((BYTE*)this + 0x234);
@@ -181,10 +179,9 @@ void AProjector::Attach()
 			piVar5 = ((InitFn)0x103f82f0)(this, 0);
 		}
 		*(INT**)((BYTE*)this + 0x48c) = piVar5;
-		// Retail: no null-check — if Malloc succeeded, FUN_103f82f0 always returns non-NULL.
 		*piVar5 += 1;
 
-		// Copy base colour tint vectors (retail: unconditional, no null-check on ri)
+		// Copy Rotation and Location vectors into RenderInfo
 		INT ri = *(INT*)((BYTE*)this + 0x48c);
 		*(DWORD*)(ri + 0xb0) = *(DWORD*)((BYTE*)this + 0x240);
 		*(DWORD*)(ri + 0xb4) = *(DWORD*)((BYTE*)this + 0x244);
@@ -195,19 +192,183 @@ void AProjector::Attach()
 		*(DWORD*)(ri + 0xc4) = *(DWORD*)((BYTE*)this + 0x23c);
 	}
 
-	// TODO: terrain attachment loop (bit 1 of this+0x3A0)
-	// Iterates level terrain sectors, calls FBox::Intersect on sector bounding box
-	// vs projector box at this+0x470, then UTerrainSector::AttachProjector for hits.
+	// --- Terrain attachment loop (bit 1 = bProjectTerrain) ---
+	if (*(BYTE*)((BYTE*)this + 0x3A0) & 2)
+	{
+		INT XLevel = *(INT*)((BYTE*)*(INT*)((BYTE*)this + 0x144) + 0x328);
+		// TerrainArray at XLevel+0x101d8
+		INT terrainData = *(INT*)(XLevel + 0x101d8);
+		INT terrainNum  = *(INT*)(XLevel + 0x101d8 + 4);
+		for (INT i = 0; i < terrainNum; i++)
+		{
+			INT terrain = *(INT*)(terrainData + i * 4);
+			// Sector groups at terrain+0x3c0
+			INT sectorData = *(INT*)(terrain + 0x3c0);
+			INT sectorNum  = *(INT*)(terrain + 0x3c0 + 4);
+			for (INT j = 0; j < sectorNum; j++)
+			{
+				INT sectorGroup = *(INT*)(sectorData + j * 4);
+				// Sub-sectors at sectorGroup+0x12c8
+				INT subData = *(INT*)(sectorGroup + 0x12c8);
+				INT subNum  = *(INT*)(sectorGroup + 0x12c8 + 4);
+				for (INT k = 0; k < subNum; k++)
+				{
+					INT subSector = *(INT*)(subData + k * 4);
+					if (((FBox*)(subSector + 0x48))->Intersect(*(FBox*)((BYTE*)this + 0x470)))
+					{
+						INT* pRI = *(INT**)((BYTE*)this + 0x48c);
+						*pRI += 1;
+						((UTerrainSector*)subSector)->AttachProjector(
+							this, (FProjectorRenderInfo*)pRI);
+					}
+				}
+			}
+		}
+	}
 
-	// TODO: BSP attachment loop (bit 0 of this+0x3A0)
-	// Builds FArray of candidate surfaces via UModel::ConvexVolumeMultiCheck,
-	// filters by material flags (0x800/0x1000 bits), then UModel::AttachProjector.
-	// Cleanup via FUN_10322eb0 (FArray destructor helper).
+	// --- BSP attachment loop (bit 0 = bProjectBSP) ---
+	if (*(BYTE*)((BYTE*)this + 0x3A0) & 1)
+	{
+		TArray<INT> OverlapSurfs;
+		// VisRadius = sin(FOV * 0.5 * PI/180)
+		FLOAT VisRadius = appSin((FLOAT)(*(INT*)((BYTE*)this + 0x398)) * 0.5f * 0.017453292f);
+		FVector Dir = (*(FRotator*)((BYTE*)this + 0x240)).Vector();
+		UModel* Model = *(UModel**)((BYTE*)*(INT*)((BYTE*)*(INT*)((BYTE*)this + 0x144) + 0x328) + 0x90);
+		Model->ConvexVolumeMultiCheck(
+			*(FBox*)((BYTE*)this + 0x470),
+			(FPlane*)((BYTE*)this + 0x3b0),
+			6, Dir, OverlapSurfs, VisRadius);
 
-	// TODO: actor attachment loop (bit 2 of this+0x3A0)
-	// Uses FMemMark + hash query to find overlapping actors,
-	// two modes: closest-only (flag 0x20000) vs all-matching.
-	// Calls AActor::AttachProjector for each qualifying actor.
+		for (INT i = 0; i < OverlapSurfs.Num(); i++)
+		{
+			// Check surface material for transparency skip (flag 0x800 = m_bProjectTransparent)
+			UBOOL bSkipTransparent = 0;
+			if ((*(DWORD*)((BYTE*)this + 0x3A0) & 0x800) == 0)
+			{
+				// Look up the surface's material via BSP node chain:
+				// surfIdx * 0x90 + Model->Surfs.Data + 0x34 = material/texture index
+				// that * 0x5c + Model->TextureInfo.Data = material pointer
+				INT surfIdx = OverlapSurfs(i);
+				INT matIdx = *(INT*)(surfIdx * 0x90 + *(INT*)((BYTE*)Model + 0x5c) + 0x34);
+				INT* pMat = *(INT**)(matIdx * 0x5c + *(INT*)((BYTE*)Model + 0x9c));
+				if (pMat != NULL)
+				{
+					// vtable[0x7c/4] = IsTransparent() or similar virtual on UMaterial
+					typedef INT (__thiscall* IsTransFn)(INT*);
+					if (((IsTransFn)(*(void***)pMat)[0x7c/4])(pMat))
+						bSkipTransparent = 1;
+				}
+			}
+
+			// Check floor-only projection (flag 0x1000 = m_bProjectOnlyOnFloor)
+			UBOOL bPassFloorCheck = 1;
+			if (*(DWORD*)((BYTE*)this + 0x3A0) & 0x1000)
+			{
+				// Surface normal Z component at surfIdx * 0x90 + Surfs.Data + 0x08
+				FLOAT NormalZ = *(FLOAT*)(OverlapSurfs(i) * 0x90 +
+					*(INT*)((BYTE*)*(UModel**)((BYTE*)*(INT*)((BYTE*)*(INT*)((BYTE*)this + 0x144) + 0x328) + 0x90) + 0x5c) + 8);
+				if (NormalZ < 0.5f)
+					bPassFloorCheck = 0;
+			}
+
+			if (bPassFloorCheck && !bSkipTransparent)
+			{
+				// Clip planes: if bClipBSP (bit 7 = 0x80), pass FrustumPlanes; else NULL
+				FPlane* ClipPlanes = NULL;
+				if ((BYTE)*(DWORD*)((BYTE*)this + 0x3A0) & 0x80)
+					ClipPlanes = (FPlane*)((BYTE*)this + 0x3b0);
+
+				INT* pRI = *(INT**)((BYTE*)this + 0x48c);
+				*pRI += 1;
+				Model->AttachProjector(OverlapSurfs(i), (FProjectorRenderInfo*)pRI, (FPlane*)ClipPlanes);
+			}
+		}
+		// TArray<INT> destructor runs automatically (replaces FUN_10322eb0 cleanup)
+	}
+
+	// --- Actor attachment loop (bit 2 = bProjectStaticMesh) ---
+	if (*(BYTE*)((BYTE*)this + 0x3A0) & 4)
+	{
+		FCollisionHashBase* Hash = *(FCollisionHashBase**)((BYTE*)*(INT*)((BYTE*)*(INT*)((BYTE*)this + 0x144) + 0x328) + 0xf0);
+		if (Hash)
+		{
+			FMemMark Mark(GMem);
+			FCheckResult* Results = Hash->ActorEncroachmentCheck(
+				GMem, this,
+				*(FVector*)((BYTE*)this + 0x234),
+				*(FRotator*)((BYTE*)this + 0x240),
+				0x8002, 0);
+
+			if ((*(DWORD*)((BYTE*)this + 0x3A0) & 0x20000) == 0)
+			{
+				// All-matching mode: attach every qualifying actor
+				for (FCheckResult* Link = Results; Link; Link = Link->GetNext())
+				{
+					if ((*(DWORD*)((BYTE*)Link->Actor + 0xa0) & 0x200000) == 0)
+						continue;
+
+					// Check tag: ProjectTag == NAME_None OR Actor->Tag == ProjectTag
+					FName None(NAME_None);
+					FName ProjectTag = *(FName*)((BYTE*)this + 0x3ac);
+					if (ProjectTag != None)
+					{
+						FName ActorTag = *(FName*)((BYTE*)Link->Actor + 0x19c);
+						if (ActorTag != ProjectTag)
+							continue;
+					}
+
+					// Must have bProjectStaticMesh set and actor has a StaticMesh
+					if ((*(BYTE*)((BYTE*)this + 0x3A0) & 4) == 0)
+						continue;
+					if (*(INT*)((BYTE*)Link->Actor + 0x170) == 0)
+						continue;
+
+					Link->Actor->AttachProjector(this);
+				}
+			}
+			else
+			{
+				// Closest-only mode (bProjectOnlyFirst): find nearest qualifying actor
+				FVector BoxCenter = ((FBox*)((BYTE*)this + 0x470))->GetCenter();
+				FLOAT ClosestDist = 1e+06f;
+				FCheckResult* Closest = NULL;
+
+				for (FCheckResult* Link = Results; Link; Link = Link->GetNext())
+				{
+					if ((*(DWORD*)((BYTE*)Link->Actor + 0xa0) & 0x200000) == 0)
+						continue;
+
+					FName None(NAME_None);
+					FName ProjectTag = *(FName*)((BYTE*)this + 0x3ac);
+					if (ProjectTag != None)
+					{
+						FName ActorTag = *(FName*)((BYTE*)Link->Actor + 0x19c);
+						if (ActorTag != ProjectTag)
+							continue;
+					}
+
+					if ((*(BYTE*)((BYTE*)this + 0x3A0) & 4) == 0)
+						continue;
+					if (*(INT*)((BYTE*)Link->Actor + 0x170) == 0)
+						continue;
+
+					FLOAT Dist = appSqrt(Square(BoxCenter.X - Link->Location.X) + Square(BoxCenter.Y - Link->Location.Y) + Square(BoxCenter.Z - Link->Location.Z));
+					if (Dist < ClosestDist)
+					{
+						ClosestDist = Dist;
+						Closest = Link;
+					}
+				}
+
+				if (Closest)
+					Closest->Actor->AttachProjector(this);
+			}
+
+			Mark.Pop();
+		}
+	}
+
+	unguard;
 }
 
 // Local 4x4 matrix multiply helper (FUN_103f86b0, 169b, internal to Engine.dll).
