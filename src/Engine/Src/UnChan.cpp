@@ -483,10 +483,70 @@ guard(UActorChannel::ReplicateActor);
 unguard;
 }
 
-IMPL_TODO("Ghidra 0x10482590 (558b): sets Actor/ActorClass, gets FClassNetCache, TMap::Set on Connection->ActorChannels (FUN_10481e10 identified), allocates RepConditions array, copies/zeroes property data; blocked by FClassNetCache::GetRepConditionCount")
-void UActorChannel::SetChannelActor(AActor*)
+IMPL_MATCH("Engine.dll", 0x10482590)
+void UActorChannel::SetChannelActor(AActor* InActor)
 {
 guard(UActorChannel::SetChannelActor);
+	if ( *(INT*)((BYTE*)this + 0x34) != 0 )
+		appFailAssert("!Closing", ".\\UnChan.cpp", 0x2ef);
+	if ( *(INT*)((BYTE*)this + 0x6c) != 0 )
+		appFailAssert("Actor==NULL", ".\\UnChan.cpp", 0x2f0);
+
+	*(AActor**)((BYTE*)this + 0x6c) = InActor;
+	UClass* ActorClass = InActor->GetClass();
+	*(UClass**)((BYTE*)this + 0x70) = ActorClass;
+
+	FClassNetCache* ClassCache =
+		((UPackageMap*)(*(INT*)((BYTE*)*(UNetConnection**)((BYTE*)this + 0x2c) + 0xc8)))->GetClassNetCache(ActorClass);
+
+	UActorChannel* ThisChan = this;
+	TMap<AActor*, UActorChannel*>* ActorChannels =
+		(TMap<AActor*, UActorChannel*>*)((BYTE*)(*(UNetConnection**)((BYTE*)this + 0x2c)) + 0x4B94);
+	ActorChannels->Set( *(AActor**)((BYTE*)this + 0x6c), ThisChan );
+
+	((FArray*)((BYTE*)this + 0xa0))->AddZeroed( 1, ClassCache->GetRepConditionCount() );
+
+	if ( ( *(DWORD*)((BYTE*)InActor + 0xa0) & 0x10000000 ) == 0 )
+	{
+		const INT PropSize = ((FArray*)((BYTE*)ActorClass + 0x4dc))->Num();
+		((FArray*)((BYTE*)this + 0x94))->Add( PropSize, 1 );
+		UObject::InitProperties( *(BYTE**)((BYTE*)this + 0x94), PropSize, ActorClass, NULL, 0, NULL, 0 );
+
+		for ( UObject* Property = *(UObject**)((BYTE*)ActorClass + 0x6c); Property; Property = *(UObject**)((BYTE*)Property + 0x54) )
+		{
+			if ( (*(DWORD*)((BYTE*)Property + 0x40) & 0x400000) != 0 )
+			{
+				((void(__thiscall*)(UObject*, BYTE*))(*(DWORD*)(*(DWORD*)Property + 0xa4)))
+					(Property, *(BYTE**)((BYTE*)this + 0x94) + *(INT*)((BYTE*)Property + 0x4c));
+			}
+
+			if ( !Property->IsA( UBoolProperty::StaticClass() ) )
+			{
+				appMemzero(
+					*(BYTE**)((BYTE*)this + 0x94) + *(INT*)((BYTE*)Property + 0x4c),
+					((UProperty*)Property)->GetSize()
+				);
+			}
+			else
+			{
+				*(DWORD*)(*(BYTE**)((BYTE*)this + 0x94) + *(INT*)((BYTE*)Property + 0x4c)) &=
+					~(*(DWORD*)((BYTE*)Property + 0x70));
+			}
+		}
+	}
+
+	const INT RetireCount = ((FArray*)((BYTE*)ActorClass + 0x4ac))->Num();
+	((FArray*)((BYTE*)this + 0xb8))->Empty( 0xc, RetireCount );
+	while( ((FArray*)((BYTE*)this + 0xb8))->Num() < ((FArray*)((BYTE*)ActorClass + 0x4ac))->Num() )
+	{
+		const INT NewIndex = ((FArray*)((BYTE*)this + 0xb8))->Add( 1, 0xc );
+		DWORD* Entry = (DWORD*)(*(INT*)((BYTE*)this + 0xb8) + NewIndex * 0xc);
+		if( Entry )
+		{
+			Entry[0] = 0xFFFFFFFF;
+			Entry[1] = 0xFFFFFFFF;
+		}
+	}
 unguard;
 }
 
