@@ -26,7 +26,7 @@ UPackage::UPackage()
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Core.dll", 0x1013b240)
 void UPackage::Destroy()
 {
 	guard(UPackage::Destroy);
@@ -39,7 +39,7 @@ void UPackage::Destroy()
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Core.dll", 0x1013a2a0)
 void UPackage::Serialize( FArchive& Ar )
 {
 	guard(UPackage::Serialize);
@@ -48,7 +48,7 @@ void UPackage::Serialize( FArchive& Ar )
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Core.dll", 0x10137880)
 void* UPackage::GetDllExport( const TCHAR* ExportName, UBOOL Checked )
 {
 	guard(UPackage::GetDllExport);
@@ -101,7 +101,7 @@ UTextBuffer::UTextBuffer( const TCHAR* InText )
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Core.dll", 0x1013a070)
 void UTextBuffer::Serialize( FArchive& Ar )
 {
 	guard(UTextBuffer::Serialize);
@@ -110,7 +110,7 @@ void UTextBuffer::Serialize( FArchive& Ar )
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Core.dll", 0x1013a070)
 void UTextBuffer::Serialize( const TCHAR* Data, EName Event )
 {
 	guard(UTextBuffer::Serialize_OutputDevice);
@@ -147,7 +147,7 @@ UCommandlet::~UCommandlet()
 {
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Core.dll", 0x1013aff0)
 INT UCommandlet::Main( const TCHAR* Parms )
 {
 	guard(UCommandlet::Main);
@@ -155,7 +155,7 @@ INT UCommandlet::Main( const TCHAR* Parms )
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Core.dll", 0x1013a1d0)
 void UCommandlet::execMain( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCommandlet::execMain);
@@ -166,7 +166,7 @@ void UCommandlet::execMain( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCommandlet, 0, execMain );
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Core.dll", 0x1010f360)
 INT UCommandlet::eventMain( const FString& InParms )
 {
 	UCommandlet_eventMain_Parms Parms;
@@ -221,7 +221,7 @@ void USystem::StaticConstructor()
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Core.dll", 0x1014bac0)
 UBOOL USystem::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
 {
 	guard(USystem::Exec);
@@ -278,7 +278,7 @@ UConst::UConst( UConst* InSuperConst, const TCHAR* InValue )
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Core.dll", 0x101161b0)
 void UConst::Serialize( FArchive& Ar )
 {
 	guard(UConst::Serialize);

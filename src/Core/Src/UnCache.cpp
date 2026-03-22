@@ -12,7 +12,7 @@
 	FMemCache implementation.
 -----------------------------------------------------------------------------*/
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Core.dll", 0x10114c60)
 void FMemCache::Init( INT BytesToAllocate, INT MaxItems, void* Start, INT SegSize )
 {
 	guard(FMemCache::Init);
@@ -55,7 +55,7 @@ void FMemCache::Init( INT BytesToAllocate, INT MaxItems, void* Start, INT SegSiz
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Core.dll", 0x10114e00)
 void FMemCache::Exit( INT FreeMemory )
 {
 	guard(FMemCache::Exit);
@@ -76,7 +76,7 @@ void FMemCache::Exit( INT FreeMemory )
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Core.dll", 0x101146b0)
 void FMemCache::Flush( QWORD Id, DWORD Mask, UBOOL IgnoreLocked )
 {
 	guard(FMemCache::Flush);
@@ -93,7 +93,7 @@ void FMemCache::Flush( QWORD Id, DWORD Mask, UBOOL IgnoreLocked )
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Core.dll", 0x10114880)
 BYTE* FMemCache::Create( QWORD Id, FCacheItem*& Item, INT CreateSize, INT Alignment, INT SafetyPad )
 {
 	guard(FMemCache::Create);
@@ -142,7 +142,7 @@ BYTE* FMemCache::Create( QWORD Id, FCacheItem*& Item, INT CreateSize, INT Alignm
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Core.dll", 0x10114bd0)
 void FMemCache::Tick()
 {
 	guard(FMemCache::Tick);
@@ -176,7 +176,7 @@ void FMemCache::Tick()
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Core.dll", 0x101142d0)
 void FMemCache::CheckState()
 {
 	guard(FMemCache::CheckState);
@@ -193,7 +193,7 @@ void FMemCache::CheckState()
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Core.dll", 0x101140f0)
 UBOOL FMemCache::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
 {
 	guard(FMemCache::Exec);
@@ -207,7 +207,7 @@ UBOOL FMemCache::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Core.dll", 0x10114200)
 void FMemCache::Status( TCHAR* Msg )
 {
 	guard(FMemCache::Status);
@@ -215,7 +215,7 @@ void FMemCache::Status( TCHAR* Msg )
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Core.dll", 0x10113fe0)
 void FMemCache::CreateNewFreeSpace( BYTE* Start, BYTE* End, FCacheItem* Prev, FCacheItem* Next, INT Segment )
 {
 	guard(FMemCache::CreateNewFreeSpace);
@@ -247,7 +247,7 @@ void FMemCache::CreateNewFreeSpace( BYTE* Start, BYTE* End, FCacheItem* Prev, FC
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Core.dll", 0x10113ec0)
 FMemCache::FCacheItem* FMemCache::MergeWithNext( FCacheItem* First )
 {
 	guard(FMemCache::MergeWithNext);
@@ -273,7 +273,7 @@ FMemCache::FCacheItem* FMemCache::MergeWithNext( FCacheItem* First )
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Core.dll", 0x10113ee0)
 FMemCache::FCacheItem* FMemCache::FlushItem( FCacheItem* Item, UBOOL IgnoreLocked )
 {
 	guard(FMemCache::FlushItem);

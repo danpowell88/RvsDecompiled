@@ -44,7 +44,7 @@ ENGINE_API FArchive& operator<<(FArchive& Ar, FRawIndexBuffer& V);
 //   DAT_1052ec38 = L" "    (LBP value-field separator)
 // FUN_1031f060/FUN_1031efc0 are TArray<FString> helpers (Empty/Remove) fully
 // covered by our TArray<FString> API.
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x10355fa0)
 int CBoneDescData::fn_bInitFromLbpFile(const TCHAR* param_1)
 {
         guard(CBoneDescData::fn_bInitFromLbpFile);
@@ -105,7 +105,7 @@ int CBoneDescData::fn_bInitFromLbpFile(const TCHAR* param_1)
 }
 
 // DAT_1052ec38 = L" " (space), confirmed from retail Engine.dll binary.
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x10355c60)
 void CBoneDescData::m_vProcessLbpLine(int param1, int param2, FString& str)
 {
 	guard(CBoneDescData::m_vProcessLbpLine);
@@ -176,7 +176,7 @@ CBoneDescData::~CBoneDescData()
 	((TFStringArray*)((BYTE*)this + 0x08))->~TFStringArray();
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x1032b0a0)
 CBoneDescData& CBoneDescData::operator=(const CBoneDescData& Other)
 {
 	// Ghidra 0x2b0a0: +0,+4=DWORD; +8=TArray<FString> (FUN_10321830); +0x14=FString; +0x20=DWORD
@@ -190,7 +190,7 @@ CBoneDescData& CBoneDescData::operator=(const CBoneDescData& Other)
 
 
 // --- CCompressedLipDescData ---
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x10355070)
 int CCompressedLipDescData::fn_bInitFromMemory(BYTE* param_1)
 {
 	// Ghidra 0x55070 (209b): NULL guard → rdtsc (perf timing, no side-effects) →
@@ -202,7 +202,7 @@ int CCompressedLipDescData::fn_bInitFromMemory(BYTE* param_1)
 	return iVar1;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x10354f00)
 int CCompressedLipDescData::m_bReadCompressedFileFromMemory(BYTE* param_1)
 {
 	guard(CCompressedLipDescData::m_bReadCompressedFileFromMemory);
@@ -241,7 +241,7 @@ int CCompressedLipDescData::m_bReadCompressedFileFromMemory(BYTE* param_1)
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x10314390)
 CCompressedLipDescData& CCompressedLipDescData::operator=(const CCompressedLipDescData& Other)
 {
 	// Ghidra 0x14390: 9 DWORDs, no vtable. Shares address with FDXTCompressionOptions.
@@ -822,7 +822,7 @@ static void SerLazyArray0xC(FArchive& Ar, void* ObjBase, void (*SerPayload)(FArc
 
 
 // --- ULodMesh ---
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x103c7610)
 void ULodMesh::Serialize(FArchive& Ar)
 {
 	guard(ULodMesh::Serialize);
@@ -892,7 +892,7 @@ UClass * ULodMesh::MeshGetInstanceClass()
 
 
 // --- UMesh ---
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x103ca570)
 void UMesh::Serialize(FArchive& Ar)
 {
 	// Retail: 0xca570, 60b. Calls UPrimitive::Serialize, then if archive is not
@@ -906,7 +906,7 @@ void UMesh::Serialize(FArchive& Ar)
 // If (status & 1) == 0: vtable+0x0C (UObject slot 3, likely Destroy/Close).
 // If (status & 1) == 1: vtable+0x94 (slot 37, mesh-instance cleanup).
 // Both are called through raw vtable dereference (same as retail indirect call).
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x103ca620)
 UMeshInstance * UMesh::MeshGetInstance(AActor const * Owner)
 {
 	guard(UMesh::MeshGetInstance);
@@ -954,7 +954,7 @@ UClass * UMesh::MeshGetInstanceClass()
 
 
 // --- UMeshAnimation ---
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x10430b80)
 int UMeshAnimation::SequenceMemFootprint(FName Name)
 {
 	// Ghidra 0x130b80, 159b. Searches Sequences TArray (this+0x48, stride 0x2C)
@@ -1174,7 +1174,7 @@ static void SerArr0x58_MotionChunk(FArchive& Ar, FArray& A)
 	}
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x1043fee0)
 void UMeshAnimation::Serialize(FArchive& Ar)
 {
 	guard(UMeshAnimation::Serialize);
@@ -1190,7 +1190,7 @@ void UMeshAnimation::Serialize(FArchive& Ar)
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x10430ae0)
 int UMeshAnimation::MemFootprint()
 {
 	// Ghidra 0x130ae0, 103b. Iterates Movements TArray (this+0x3C) and sums memory
@@ -1235,7 +1235,7 @@ int UMeshAnimation::MemFootprint()
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x10430a30)
 void UMeshAnimation::PostLoad()
 {
 	// Ghidra 0x130a30, 119b. Calls UObject::PostLoad then, for each FMeshAnimSeq in
@@ -1279,7 +1279,7 @@ void UMeshAnimation::PostLoad()
 	}
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x10320f50)
 void UMeshAnimation::ClearAnimNotifys()
 {
 	// Ghidra 0x20f50: iterate Sequences TArray at +0x48 (stride 0x2C per FMeshAnimSeq).
@@ -1297,7 +1297,7 @@ void UMeshAnimation::ClearAnimNotifys()
 	}
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x1031c650)
 FMeshAnimSeq * UMeshAnimation::GetAnimSeq(FName Name)
 {
 	// Ghidra 0x1c650 (80b): linear search through Sequences TArray (this+0x48, stride 0x2C).
@@ -1319,7 +1319,7 @@ FMeshAnimSeq * UMeshAnimation::GetAnimSeq(FName Name)
 	return NULL;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x1031c6a0)
 MotionChunk * UMeshAnimation::GetMovement(FName Name)
 {
 	// Ghidra 0x1c6a0 (93b): searches Sequences (this+0x48, stride 0x2C) for FName match.
@@ -1341,7 +1341,7 @@ MotionChunk * UMeshAnimation::GetMovement(FName Name)
 	return NULL;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x1033a490)
 void UMeshAnimation::InitForDigestion()
 {
 	guard(UMeshAnimation::InitForDigestion);
@@ -1360,7 +1360,7 @@ void UMeshAnimation::InitForDigestion()
 
 
 // --- UVertMesh ---
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x10474da0)
 int UVertMesh::RenderPreProcess()
 {
 	guard(UVertMesh::RenderPreProcess);
@@ -1429,7 +1429,7 @@ int UVertMesh::RenderPreProcess()
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x104758b0)
 void UVertMesh::Serialize(FArchive& Ar)
 {
 	guard(UVertMesh::Serialize);
@@ -1469,7 +1469,7 @@ UClass * UVertMesh::MeshGetInstanceClass()
 	return UVertMeshInstance::StaticClass();
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x10472830)
 void UVertMesh::PostLoad()
 {
 	guard(UVertMesh::PostLoad);
@@ -1527,7 +1527,7 @@ FSphere UVertMesh::GetRenderBoundingSphere(AActor const * Owner)
 
 
 // --- USkeletalMesh ---
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x1042f410)
 void USkeletalMesh::m_bLoadLbpFile(FString FileName)
 {
 	// Retail: 0x12f410. Extracts raw TCHAR* from FString and initialises
@@ -1536,7 +1536,7 @@ void USkeletalMesh::m_bLoadLbpFile(FString FileName)
 	boneDesc->fn_bInitFromLbpFile(*FileName);
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x10438890)
 int USkeletalMesh::SetAttachAlias(FName param_2, FName param_3, FCoords& param_4)
 {
 	guard(USkeletalMesh::SetAttachAlias);
@@ -1748,7 +1748,7 @@ doTransform:
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x10440640)
 int USkeletalMesh::LODFootprint(int param_1, int param_2)
 {
 	// Retail: 0x140640. Returns memory footprint in bytes for the given LOD model.
@@ -1786,7 +1786,7 @@ void USkeletalMesh::NormalizeInfluences(int)
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x10441560)
 void USkeletalMesh::CalculateNormals(TArray<FVector>& Normals, int param2)
 {
 	guard(USkeletalMesh::CalculateNormals);
@@ -1867,7 +1867,7 @@ void USkeletalMesh::CalculateNormals(TArray<FVector>& Normals, int param2)
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x10435bb0)
 void USkeletalMesh::ClearAttachAliases()
 {
 	// Retail: 0x135bb0. Empties the three attach alias arrays.
@@ -1878,7 +1878,7 @@ void USkeletalMesh::ClearAttachAliases()
 	((TArray<INT>*)((BYTE*)this + 0x2E8))->Empty();
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x10440780)
 void USkeletalMesh::FlipFaces()
 {
 	guard(USkeletalMesh::FlipFaces);
@@ -1942,7 +1942,7 @@ void USkeletalMesh::InsertLodModel(int param1, USkeletalMesh* param2, float para
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x1042f6c0)
 int USkeletalMesh::UseCylinderCollision(const AActor* Actor)
 {
 	// Retail (18b, RVA 0x12F6C0): returns 0 only for ragdoll actors (Physics byte at Actor+0x2C == 0x0E = PHYS_KarmaRagDoll).
@@ -1953,7 +1953,7 @@ int USkeletalMesh::UseCylinderCollision(const AActor* Actor)
 // Ghidra 0x1043c980 (537b): flags check → BuildPivotsList on inst → copy 7-float FBox
 // from inst+0x380 → AABB segment test → if hit: call inst->vtable[0x68/4] (per-instance check).
 // Note: vtable+0x88 on USkeletalMesh = MeshGetInstance(actor).
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x1043c980)
 int USkeletalMesh::R6LineCheck(FCheckResult& param_1, AActor* param_2, FVector param_3, FVector param_4, FVector param_5, DWORD param_6, DWORD param_7)
 {
 	guard(USkeletalMesh::R6LineCheck);
@@ -1993,7 +1993,7 @@ int USkeletalMesh::R6LineCheck(FCheckResult& param_1, AActor* param_2, FVector p
 
 // DIVERGENCE: retail calls ULodMesh::Serialize as base; our source has USkeletalMesh:UMesh
 // (no ULodMesh in hierarchy), so UMesh::Serialize replaces it.  Logic is otherwise identical.
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x1043ffb0)
 void USkeletalMesh::Serialize(FArchive& Ar)
 {
 	guard(USkeletalMesh::Serialize);
@@ -2087,7 +2087,7 @@ int USkeletalMesh::LineCheck(FCheckResult& param_1, AActor* param_2, FVector par
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x10440350)
 int USkeletalMesh::MemFootprint(int param_1)
 {
 	// Retail: 0x140350. Sum memory of all mesh data arrays.
@@ -2139,28 +2139,28 @@ int USkeletalMesh::MemFootprint(int param_1)
 	return total + (a3 + 3) * 0x30 + a0 * 0x30 + a1 * 4 + a2 * 4;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x1042f5d0)
 void USkeletalMesh::Destroy()
 {
 	// Retail: 0x1042f5d0. Just calls UObject::Destroy (no custom cleanup beyond base class).
 	UObject::Destroy();
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x1042f6e0)
 FBox USkeletalMesh::GetCollisionBoundingBox(const AActor* Owner) const
 {
 	// Retail: 0x12f6e0. Delegates to UPrimitive::GetCollisionBoundingBox.
 	return UPrimitive::GetCollisionBoundingBox(Owner);
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x1042f800)
 FBox USkeletalMesh::GetRenderBoundingBox(const AActor* Owner)
 {
 	// Retail: 33b. MeshGetInstance(Owner) then call GetRenderBoundingBox on the instance.
 	return MeshGetInstance(Owner)->GetRenderBoundingBox(Owner);
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x1042f830)
 FSphere USkeletalMesh::GetRenderBoundingSphere(const AActor* Owner)
 {
 	// Retail: 33b. MeshGetInstance(Owner) then call GetRenderBoundingSphere on the instance.
@@ -2183,7 +2183,7 @@ void USkeletalMesh::ReconstructRawMesh()
 	unguard;
 }
 
-IMPL_TODO("Byte-parity unverified")
+IMPL_MATCH("Engine.dll", 0x104436b0)
 int USkeletalMesh::RenderPreProcess()
 {
 	guard(USkeletalMesh::RenderPreProcess);
