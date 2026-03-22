@@ -1102,7 +1102,7 @@ void UObject::execRotatorToString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_RotatorToString, execRotatorToString );
 
-IMPL_DIVERGE("EX_StringToName: opcode ~0x5A unconfirmed; function exists in Core.dll but absent from Core.dll export table; implementation inferred from context")
+IMPL_TODO("EX_StringToName: opcode ~0x5A unconfirmed; function exists in Core.dll but absent from Core.dll export table; implementation inferred from context")
 void UObject::execStringToName( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execStringToName);
@@ -3709,7 +3709,7 @@ IMPLEMENT_FUNCTION( UObject, 0x46, execPrimitiveCast );
 	Private set handler.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("execPrivateSet: opcode unconfirmed; function exists in Core.dll but not a named DLL export; absent from Core.dll export table; implementation inferred from opcode context")
+IMPL_TODO("execPrivateSet: opcode unconfirmed; function exists in Core.dll but not a named DLL export; absent from Core.dll export table; implementation inferred from opcode context")
 void UObject::execPrivateSet( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execPrivateSet);

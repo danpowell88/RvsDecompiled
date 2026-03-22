@@ -2912,7 +2912,7 @@ void AActor::PreNetReceive()
 // Ghidra 0x1037d070 (1939 bytes): swaps all snapshotted fields back, then sends change
 // notifications. Field swap is fully implemented; the FCoords attachment-transform section
 // at 0x1037d5f2-0x1037d7e3 requires FCoords/TransformVectorBy integration.
-IMPL_DIVERGE("delta-rotation formula uses Ghidra type-inference; Shadow FName check approximated as ptr != NULL; Ghidra 0x1037d5f2")
+IMPL_TODO("delta-rotation formula uses Ghidra type-inference; Shadow FName check approximated as ptr != NULL; Ghidra 0x1037d5f2")
 void AActor::PostNetReceive()
 {
 	// --- Swap Location (0x234) ---

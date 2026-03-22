@@ -2811,7 +2811,7 @@ EAcceptConnection ULevel::NotifyAcceptingConnection()
 	return ACCEPTC_Accept;
 	unguard;
 }
-IMPL_DIVERGE("retail this=FNetworkNotify(ULevel+0x2c); field offsets differ; DevNet log format approximated (Ghidra 0x103bf2a0)")
+IMPL_TODO("retail this=FNetworkNotify(ULevel+0x2c); field offsets differ; DevNet log format approximated (Ghidra 0x103bf2a0)")
 void ULevel::NotifyAcceptedConnection( UNetConnection* Connection )
 {
 	guard(ULevel::NotifyAcceptedConnection);
