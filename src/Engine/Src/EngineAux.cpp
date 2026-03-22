@@ -122,7 +122,7 @@ void KME2UTransform(FVector* OutPos, FRotator* OutRot, const FLOAT (* const tm)[
 // Decomposes a BSP UModel into convex hulls stored in FKAggregateGeom. Retail
 // first clears AggGeom->ConvexElems (0x58 stride), then uses a local TArray<FPlane>
 // scratch stack while recursing the BSP and emitting FKConvexElem hulls.
-IMPL_TODO("Ghidra 0x1036c810: wrapper is known, but the BSP-to-convex helper chain FUN_1036c5a0/FUN_1036be00/FUN_1036b6c0 is not yet ported and FKConvexElem's +0x4C FPlane array layout must be used")
+IMPL_TODO("Ghidra 0x1036c810 (143b): wrapper calls FUN_1036c5a0(AggGeom,Model,0,Model->RootNode,scratchArray,origin) which is the real BSP-to-convex recursion; FUN_1036be00/FUN_1036b6c0 are secondary convex-emission helpers. All three helpers are unexported internals not yet ported. FKConvexElem+0x4C = FPlane array layout required. KModelToHulls body is trivially: FArray scratch; FUN_1036c5a0(AggGeom,Model,0,*(Model+0x10c),scratch,origin).")
 void KModelToHulls(FKAggregateGeom*, UModel*, FVector) {}
 
 // ?KU2MEMatrixCopy@@YAXQAY03MPAVFMatrix@@@Z  (Engine.dll 0x1036a330, same body as KME2UMatrixCopy)

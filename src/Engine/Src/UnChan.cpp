@@ -263,7 +263,7 @@ while (true)
 unguard;
 }
 
-IMPL_TODO("Ghidra 0x10481890 (1243b): ArmPatch file-send path and normal package download-request path omitted; download-write path (OpenedLocally) and close-bunch paths implemented")
+IMPL_TODO("Ghidra 0x10481890 (1243b): ArmPatch file-send path omitted (FGuid FUN_103bef40/FUN_103bef10 helpers, GFileManager vtable read/seek, GMalloc loop); normal PackageMap download-request path omitted (Connection->PackageMap at conn+0x7c+200 FPackageInfo array iteration). Ghidra export IS present in Engine._global.cpp; FClassNetCache defined in sdk/432Core/Inc/UnCoreNet.h. Download-write path (OpenedLocally) and close-bunch paths implemented.")
 void UFileChannel::ReceivedBunch(FInBunch& Bunch)
 {
 guard(UFileChannel::ReceivedBunch);
@@ -443,7 +443,7 @@ UChannel::Tick();
 unguard;
 }
 
-IMPL_TODO("Ghidra 0x104827f0 (2931b): complex actor property replication receive with ClassNetCache iteration, UProperty serialization, bitmask diffing; blocked by FClassNetCache internals, UProperty replication helpers")
+IMPL_TODO("Ghidra 0x104827f0 (2931b): complex actor property replication receive. Ghidra export IS present in Engine._global.cpp. FClassNetCache defined in sdk/432Core/Inc/UnCoreNet.h (GetFromField/GetFromIndex/GetMaxIndex/RepProperties). Blocked by: FFieldNetCache struct layout (vtable calls on FFieldNetCache* at +0x8/+0xc/+0x10 not yet mapped to named members); UProperty serialisation helpers FUN_10481010/FUN_1047fa50; FBitReader::GetNumBits bitmask diffing pattern.")
 void UActorChannel::ReceivedBunch(FInBunch&)
 {
 guard(UActorChannel::ReceivedBunch);
@@ -476,7 +476,7 @@ if ( *(INT*)((BYTE*)this + 0x70) != 0 )
 unguard;
 }
 
-IMPL_TODO("Ghidra 0x104834d0 (2840b): full actor property replication send with ClassNetCache, UProperty iteration, FOutBunch serialization, condition bitmask comparison; blocked by FClassNetCache, replication condition helpers")
+IMPL_TODO("Ghidra 0x104834d0 (2840b): full actor property replication send. Ghidra export IS present in Engine._global.cpp. Uses Connection->PackageMap vtable[0x84/4] to obtain FClassNetCache (FClassNetCache defined in sdk/432Core/Inc/UnCoreNet.h). Blocked by: FFieldNetCache struct layout (vtable-dispatched property serialisation); FOutBunch/FBitWriterMark serialization loop per-field; replication condition bitmask (Actor+0xac bits 0x20/0x40); FUN_10481dd0/FUN_10481160 helper chains.")
 void UActorChannel::ReplicateActor()
 {
 guard(UActorChannel::ReplicateActor);

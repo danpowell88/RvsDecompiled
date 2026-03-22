@@ -84,7 +84,7 @@ void AR6HUD::UpdateHUDColors(FColor)
 	unguard;
 }
 
-IMPL_TODO("R6Game.dll 0x1000ceb0: 10251-byte function; blocked — Ghidra export_cpp.py ascii codec error, re-export with UTF-8 to obtain decompilation")
+IMPL_TODO("R6Game.dll 0x1000ceb0: 10251-byte function; Ghidra export exists (ghidra/exports/R6Game/_global.cpp) but decompilation FAILED — 'ascii' codec error at positions 6640-6642 in Ghidra's decompiler output (Jython str() on non-ASCII Java string); fix: use unicode() in export_cpp.py decompiler string handling and re-export. Implementation deferred until re-export.")
 void AR6HUD::execDrawNativeHUD(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
