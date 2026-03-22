@@ -1623,10 +1623,12 @@ FRebuildTools::~FRebuildTools() {}
 // UViewport
 // =============================================================================
 
-// Engine.def exports ?Exec@UViewport@@UAEHPBGAAVFOutputDevice@@@Z @2782, but the current
-// Ghidra Engine export set only surfaces the unwind catch string ("UViewport::Exec"),
-// not the function body/RVA needed to reconstruct retail command dispatch.
-IMPL_TODO("Ghidra 0x???? UViewport::Exec: function body/RVA not recovered by Ghidra export_cpp.py — needs fresh binary re-analysis of Engine.dll to reconstruct retail command dispatch")
+// Engine.def exports ?Exec@UViewport@@UAEHPBGAAVFOutputDevice@@@Z @2782.
+// Ghidra catch block at 0x103854DD confirms function name. Export table parsing of the
+// SDK DLL gives a candidate address (~0x10385B90) but retail binary is unavailable for
+// direct verification. Ghidra export_cpp.py did not capture the function body.
+// Function body requires fresh Ghidra analysis or retail binary access to reconstruct.
+IMPL_TODO("Ghidra 0x10385B90 (approx, from export table): UViewport::Exec body not recovered by Ghidra export_cpp.py — catch block confirmed at 0x103854DD; needs fresh binary analysis to reconstruct command dispatch")
 INT UViewport::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
 IMPL_EMPTY("body unanalyzed; no output device dispatch implemented")
 void UViewport::Serialize( const TCHAR* Data, EName Event ) {}
