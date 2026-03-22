@@ -145,7 +145,7 @@ void AProjector::Abandon()
 	}
 }
 
-IMPL_TODO("Ghidra 0x103FB160 (1291b): FUN_103f82f0 is __thiscall FProjectorRenderInfo ctor (ECX=allocated mem, param1=AProjector*, param2=float); currently called via hardcoded address.")
+IMPL_TODO("Ghidra 0x103FB160 (1291b): Attach logic implemented; render-info ctor is internal helper FUN_103f82f0 (0x103f82f0) with unresolved concrete C++ type/layout, currently invoked by address.")
 void AProjector::Attach()
 {
 	guard(AProjector::Attach);
@@ -386,7 +386,7 @@ static void CalcMatrixMul4x4(FLOAT* dest, const FLOAT* A, const FLOAT* B)
 		}
 }
 
-IMPL_TODO("Ghidra 0x103F8F90 (4699b): orthographic projection-matrix scale divisors approximated as Width and Height; perspective scale and animated-texture section (flags & 0x4000) match Ghidra constants. All corner/plane math exact.")
+IMPL_TODO("Ghidra 0x103F8F90 (4699b): functional path implemented; orthographic scale divisors still approximated as Width/Height and animated-texture branch is only partially reconstructed, so parity status remains TODO.")
 void AProjector::CalcMatrix()
 {
 	guard(AProjector::CalcMatrix);
