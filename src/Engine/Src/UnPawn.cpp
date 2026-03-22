@@ -850,7 +850,7 @@ IMPLEMENT_FUNCTION( AController, INDEX_NONE, execStopWaiting );
 
 // DIVERGENCE: FUN_10301350 (ViewDir scale helper) inlined as direct vector math; Ghidra
 // stack-variable reuse makes exact midpoint computation unverifiable but algorithm matches.
-IMPL_DIVERGE("Ghidra 0x103900a0 (1734b): stair-rotation camera pitch — algorithm, all thresholds (0.33, 0.8, 3.0, 0.7, 6.0, 10.0, 3600, 0.9) match; FUN_10301350 internal helper inlined as ViewDir*scale")
+IMPL_TODO("Ghidra 0x103900a0 (1734b): stair-rotation camera pitch — algorithm and all thresholds match; FUN_10301350 confirmed as FVector*scalar (operator*(float)); only remaining uncertainty is exact midpoint from Ghidra heavy stack-variable reuse")
 void APlayerController::execFindStairRotation( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execFindStairRotation);
@@ -4245,7 +4245,7 @@ INT APawn::findNewFloor(FVector OldLocation, FLOAT DeltaTime, FLOAT RemainingTim
 //   with raw offsets (+0x408, +0x40c, +0x44c) since EngineClasses.h lacks explicit names.
 // DIVERGENCE: vtable[100]=AcceptNearbyPath, vtable[0x68]=IsA(ANavigationPoint) — both
 // confirmed from .def export table analysis and cross-referenced with execPollMoveToward.
-IMPL_DIVERGE("Ghidra 0x1041cfa0 (1916b): vtable[100] permanently approximated as AcceptNearbyPath; vtable[0x68] as IsA(ANavigationPoint); controller raw offsets +0x408/+0x40c/+0x44c lack SDK names")
+IMPL_TODO("Ghidra 0x1041cfa0 (1916b): findPathToward — vtable[100]=AcceptNearbyPath and vtable[0x68]=IsA(ANavigationPoint) confirmed from .def export analysis; controller raw offsets +0x408/+0x40c/+0x44c compile to same bytes as named access; no permanent external blocker")
 FLOAT APawn::findPathToward(AActor* Goal, FVector Dest, FLOAT (*WeightFunc)(ANavigationPoint*, APawn*, FLOAT), INT bSinglePath, FLOAT MaxWeight)
 {
 	guard(APawn::findPathToward);
@@ -4962,7 +4962,7 @@ void APawn::physFlying(FLOAT DeltaTime, INT Iterations)
 // DIVERGENCE: pre-loop velocity wall-plane projection simplified (retail has two distinct
 // branches for zero-accel and non-zero-accel; both remove CWN component then scale;
 // unified into single projection+clamp). Floor-reanchoring path reconstructed approximately.
-IMPL_DIVERGE("Ghidra 0x103F5990 (2617b): physSpider — two-branch velocity projection permanently simplified to single projection; floor-reanchoring path approximate from Ghidra stack analysis")
+IMPL_TODO("Ghidra 0x103F5990 (2617b): physSpider — pre-loop velocity projection simplified from Ghidra two-branch flow (zero-accel vs non-zero-accel) into single projection; floor-reanchoring path reconstructed from stack analysis; no permanent external blocker — pending precision verification")
 void APawn::physSpider(FLOAT DeltaTime, INT Iterations)
 {
 	guard(APawn::physSpider);
@@ -5281,7 +5281,7 @@ void APawn::physSwimming(FLOAT DeltaTime, INT Iterations)
 //   velocity helper) are inlined via approximation in the floor-friction slope path.
 // DIVERGENCE notes above explain the permanent approximations: raw PhysicsVolume offsets
 // for MaxGroundSpeed/GroundFriction (no SDK field names), zone wind scaling, inline helpers.
-IMPL_DIVERGE("Ghidra 0x103ED370 (4353b): physWalking — PhysicsVolume+0x420/0x424 field names absent from SDK; FUN_103808e0/FUN_10301350 inlined; zone ZoneVelocity scale approximate")
+IMPL_TODO("Ghidra 0x103ED370 (4353b): physWalking — raw offsets PhysicsVolume+0x420/+0x424 compile to same bytes as named access; FUN_103808e0=Max<float> and FUN_10301350=FVector*scalar both confirmed; zone ZoneVelocity scale factor still approximate from Ghidra stack analysis")
 void APawn::physWalking(FLOAT DeltaTime, INT Iterations)
 {
 	guard(APawn::physWalking);
