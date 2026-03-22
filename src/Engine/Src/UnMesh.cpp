@@ -642,7 +642,8 @@ static void SerArrMeshAnimSeq(FArchive& Ar, FArray& A)
 // FUN_1043d7e0 — render-preprocess entry constructor (stride 0x5C entry).
 static void InitAnimMeshStreamEntry(BYTE* Entry)
 {
-	*(void**)(Entry + 0x14) = *(void**)((BYTE*)new FAnimMeshVertexStream() + 0x00);
+	FAnimMeshVertexStream Temp;
+	*(void**)(Entry + 0x14) = *(void**)&Temp;
 	new (Entry + 0x1C) FArray();
 	*(DWORD*)(Entry + 0x18) = 0;
 	*(QWORD*)(Entry + 0x28) = (QWORD)(DWORD)DAT_1060b564 * 0x100 + 0xE1;
