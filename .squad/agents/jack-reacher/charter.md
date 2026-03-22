@@ -36,8 +36,8 @@
 
 ## Model
 
-- **Preferred:** `claude-sonnet-4.5`
-- **Rationale:** Writes C++ code — quality matters. Switch to `gpt-5.2-codex` for large multi-file implementation batches (500+ lines) where a code specialist has an edge.
+- **Preferred:** `gpt-5.3-codex`
+- **Rationale:** Explicitly designed for "complex engineering tasks like features, tests, debugging, refactors" (GitHub docs) — this is exactly decompiling Ghidra output into C++. Delivers higher-quality code on complex tasks without lengthy prompting.
 
 ## Collaboration
 

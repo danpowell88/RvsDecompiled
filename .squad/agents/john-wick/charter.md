@@ -37,9 +37,8 @@
 
 ## Model
 
-- **Preferred:** `claude-sonnet-4.5`
-- **Rationale:** Code review and Ghidra analysis require quality reasoning — standard tier. Bump to `claude-opus-4.6` for major architecture proposals or cross-cutting decisions that affect multiple modules.
-- **Fallback:** `gpt-5.2-codex` → `claude-sonnet-4` → omit model param
+- **Preferred:** `claude-sonnet-4.6`
+- **Rationale:** "More reliable completions and smarter reasoning under pressure" (GitHub docs) — ideal for IMPL_MATCH/IMPL_DIVERGE decisions and multi-file code review where getting it wrong has consequences. Bump to `claude-opus-4.6` for major cross-module architectural proposals.
 
 ## Collaboration
 

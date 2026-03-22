@@ -37,7 +37,7 @@
 ## Model
 
 - **Preferred:** `claude-haiku-4.5`
-- **Rationale:** Analysis, binary diffs, and build validation — output is reports and verdicts, not code. Fast tier is sufficient. Bump to `claude-sonnet-4.5` when writing new comparison scripts or interpreting complex Ghidra disassembly output.
+- **Rationale:** Analysis, binary diffs, and build validation — output is reports and verdicts, not code. Fast tier is sufficient. Bump to `claude-sonnet-4.6` when writing new comparison scripts or interpreting complex Ghidra disassembly output.
 
 ## Collaboration
 

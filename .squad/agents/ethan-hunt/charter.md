@@ -37,8 +37,8 @@
 
 ## Model
 
-- **Preferred:** `claude-sonnet-4.5`
-- **Rationale:** Writes Python/PowerShell tools and fixes build scripts — code output, standard tier. Downgrade to `claude-haiku-4.5` for pure mechanical tasks (checking a mangled name, grepping a .def file).
+- **Preferred:** `claude-sonnet-4.6`
+- **Rationale:** Mixed build debugging and tool writing — Sonnet 4.6's reliability under pressure suits linker archaeology and iterative toolchain fixes. Downgrade to `claude-haiku-4.5` for pure mechanical tasks (grepping a .def file, checking a mangled name suffix).
 
 ## Collaboration
 
