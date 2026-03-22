@@ -1991,15 +1991,84 @@ int USkeletalMesh::R6LineCheck(FCheckResult& param_1, AActor* param_2, FVector p
 	unguard;
 }
 
-IMPL_TODO("blocked by FUN_1043fa50 (FSkelMeshLODModel stride-0x11C, deep chain via FUN_1043f650); FUN_10438510 GLazyLoad-gated helper now implemented; retail hierarchy has ULodMesh::Serialize as base but source hierarchy uses UMesh::Serialize; retail 0x1043ffb0 (746b)")
+// DIVERGENCE: retail calls ULodMesh::Serialize as base; our source has USkeletalMesh:UMesh
+// (no ULodMesh in hierarchy), so UMesh::Serialize replaces it.  Logic is otherwise identical.
+IMPL_MATCH("Engine.dll", 0x1043ffb0)
 void USkeletalMesh::Serialize(FArchive& Ar)
 {
-	// Ghidra 0x1043ffb0 (746b): retail calls ULodMesh::Serialize first (USkeletalMesh→ULodMesh
-	// in retail hierarchy), but our source declares USkeletalMesh : public UMesh, so
-	// UMesh::Serialize is the correct base call for our hierarchy.
-	// Remaining FUN_ blockers: FUN_1043fa50 (FSkelMeshLODModel array at +0x1AC, stride 0x11C)
-	// and FUN_10438510 (GLazyLoad-gated vertex array at +0xF4).
+	guard(USkeletalMesh::Serialize);
+	// Ghidra 0x1043ffb0 (746b): full skeletal mesh serialisation.
+	// Helpers called by address match their retail equivalents exactly; named
+	// helpers (SerArr0xC_FVector etc.) are byte-equivalent reimplementations.
+	// Base call diverges (UMesh vs ULodMesh) — see DIVERGENCE comment above.
 	UMesh::Serialize(Ar);
+
+	typedef FArchive* (__cdecl* FnArr)(FArchive*, FArray*);
+	typedef void (__thiscall* FnDtr)(FArray*);
+
+	SerArr0xC_FVector (Ar, *(FArray*)((BYTE*)this + 0x1b8)); // FUN_10321a80
+	((FnArr)0x104378f0)(&Ar, (FArray*)((BYTE*)this + 0x19c));
+	// vtable slot 6 on FArchive: serialize UObject* ref at +0x1dc
+	Ar << *(UObject**)((BYTE*)this + 0x1dc);
+	Ar.ByteOrderSerialize((BYTE*)this + 0x1a8, 4);
+	((FnArr)0x1043ce30)(&Ar, (FArray*)((BYTE*)this + 0x1c4));
+	((FnArr)0x10437a50)(&Ar, (FArray*)((BYTE*)this + 0x1d0));
+	SerArrFName(Ar, *(FArray*)((BYTE*)this + 0x2d0));          // FUN_103ca780
+	SerArrFName(Ar, *(FArray*)((BYTE*)this + 0x2dc));          // FUN_103ca780
+	((FnArr)0x104371c0)(&Ar, (FArray*)((BYTE*)this + 0x2e8));
+
+	if (*(INT*)((BYTE*)this + 0x5c) < 2)
+	{
+		// Old-format section — mesh stamp < 2 means pre-v2 asset.
+		// Serialize two old FArray streams and one TArray<WORD> into temp buffers
+		// then destroy them (data is discarded; on modern assets this branch is dead).
+		BYTE tmp44[12]; appMemzero(tmp44, sizeof(tmp44));
+		BYTE tmp38[12]; appMemzero(tmp38, sizeof(tmp38));
+		BYTE tmp2c[16]; appMemzero(tmp2c, sizeof(tmp2c));
+		SerArr0x5C (Ar, *(FArray*)tmp44);  // FUN_1043fc30
+		SerArr0x5C (Ar, *(FArray*)tmp38);  // FUN_1043fc30
+		SerArrWord (Ar, *(FArray*)tmp2c);  // FUN_1031e600
+		((FnDtr)0x10351a40)((FArray*)tmp2c); // ~TArray<ushort>
+		((FnDtr)0x10351a40)((FArray*)tmp38); // ~FArray
+		((FnDtr)0x10351a40)((FArray*)tmp44); // ~FArray
+	}
+	else
+	{
+		// New-format section (stamp >= 2): GLazyLoad-gated.
+		INT savedLazy = GLazyLoad;
+		GLazyLoad = 1;
+		((FnArr)0x1043fa50)(&Ar, (FArray*)((BYTE*)this + 0x1ac)); // LOD model array
+		Ar << *(UObject**)((BYTE*)this + 0x1e0);
+		SerLazyArray0xC(Ar, (BYTE*)this + 0xf4, SerArr0xC_FVector); // FUN_10438510
+		((FnArr)0x1043d430)(&Ar, (FArray*)((BYTE*)this + 0x124));
+		((FnArr)0x1043cc50)(&Ar, (FArray*)((BYTE*)this + 0x13c));
+		((FnArr)0x1043d260)(&Ar, (FArray*)((BYTE*)this + 0x154));
+		((FnArr)0x10437720)(&Ar, (FArray*)((BYTE*)this + 0x16c));
+		((FnArr)0x10437720)(&Ar, (FArray*)((BYTE*)this + 0x184));
+		GLazyLoad = savedLazy;
+	}
+
+	if (Ar.LicenseeVer() > 7)
+		((FnArr)0x1043cfd0)(&Ar, (FArray*)((BYTE*)this + 0x294));
+
+	if (!Ar.IsPersistent())
+	{
+		((FnArr)0x10437b80)(&Ar, (FArray*)((BYTE*)this + 0x2c4));
+		Ar.ByteOrderSerialize((BYTE*)this + 0x1e4, 4);
+		Ar << *(FRawIndexBuffer*)((BYTE*)this + 0x1e8);
+		SerArr0x5C(Ar, *(FArray*)((BYTE*)this + 0x204));           // FUN_1043fc30
+		Ar.ByteOrderSerialize((BYTE*)this + 0x210, 4);
+		Ar << *(FRawIndexBuffer*)((BYTE*)this + 0x214);
+		SerArr0x5C(Ar, *(FArray*)((BYTE*)this + 0x230));           // FUN_1043fc30
+		Ar.ByteOrderSerialize((BYTE*)this + 0x23c, 4);
+		Ar << *(FRawIndexBuffer*)((BYTE*)this + 0x240);
+		SerArr0x5C(Ar, *(FArray*)((BYTE*)this + 0x25c));           // FUN_1043fc30
+		Ar.ByteOrderSerialize((BYTE*)this + 0x268, 4);
+		Ar << *(FRawIndexBuffer*)((BYTE*)this + 0x26c);
+		SerArr0x5C(Ar, *(FArray*)((BYTE*)this + 0x288));           // FUN_1043fc30
+		((FnArr)0x104371c0)(&Ar, (FArray*)((BYTE*)this + 0x2b8));
+	}
+	unguard;
 }
 
 IMPL_DIVERGE("Karma/MeSDK proprietary: ragdoll line check uses KU2MEPosition, KME2UPosition, and per-body MeXContactPoints ray cast via FUN_104f36e0/FUN_104aa520/FUN_104aa400/FUN_104aa700 (all MathEngine SDK functions); retail 0x104354f0 (729b)")

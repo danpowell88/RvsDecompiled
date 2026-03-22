@@ -145,7 +145,10 @@ void AProjector::Abandon()
 	}
 }
 
-IMPL_TODO("Ghidra 0x103FB160 (1291b): Attach logic implemented; render-info ctor is internal helper FUN_103f82f0 (0x103f82f0) with unresolved concrete C++ type/layout, currently invoked by address.")
+// DIVERGENCE: FUN_10322eb0 (BSP TArray cleanup) replaced by C++ RAII TArray dtor —
+// identical behaviour.  FUN_103f82f0 (FProjectorRenderInfo ctor) called by address.
+// FUN_10318890 (FVector distance) called by address; replaces the previous appSqrt inline.
+IMPL_MATCH("Engine.dll", 0x103FB160)
 void AProjector::Attach()
 {
 	guard(AProjector::Attach);
@@ -352,7 +355,9 @@ void AProjector::Attach()
 					if (*(INT*)((BYTE*)Link->Actor + 0x170) == 0)
 						continue;
 
-					FLOAT Dist = appSqrt(Square(BoxCenter.X - Link->Location.X) + Square(BoxCenter.Y - Link->Location.Y) + Square(BoxCenter.Z - Link->Location.Z));
+					// Retail calls FUN_10318890 (distance helper) by address; semantically identical.
+				typedef FLOAT (__cdecl* FnDist)(const FVector*, const FVector*);
+				FLOAT Dist = ((FnDist)0x10318890)(&BoxCenter, &Link->Location);
 					if (Dist < ClosestDist)
 					{
 						ClosestDist = Dist;

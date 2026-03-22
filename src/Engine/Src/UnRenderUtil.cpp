@@ -1767,8 +1767,7 @@ FDynamicActor::FDynamicActor(const FDynamicActor& Other)
 // After matrix: bounding box + sphere from emitter field (+0x3DC) or GetPrimitive().
 // For StaticMesh actors (DrawType==2 && SkeletalMesh!=null): also expands the AABB
 // by iterating skeletal attachment actors via USkeletalMesh::SetAttachmentLocation.
-// Ambient: FUN_103ffa20(this+0x7C, Actor) computes zone-ambient colour; zero here.
-IMPL_TODO("Ghidra 0x103ffb70 (1798b): full bounding box/sphere code in place; StaticMesh PrePivot rotation path and zone-light ambient accumulation (FUN_103ffa20) remain approximated.")
+IMPL_TODO("Ghidra 0x103ffb70 (1798b): PrePivot rotation path now added; FUN_103ffa20 zone-ambient initialiser called by address; ambient accumulation loop (zone-light iteration + FGetHSV) still approximated.")
 FDynamicActor::FDynamicActor(AActor* Actor)
 {
 	*(AActor**)this = Actor;
@@ -1776,11 +1775,30 @@ FDynamicActor::FDynamicActor(AActor* Actor)
 	new ((BYTE*)this + 0x48) FBox();
 	new ((BYTE*)this + 0x64) FSphere();
 
-	// Path (b): StaticMesh actor with PrePivot rotation flag
-	// Ghidra: if (Level->LevelInfo has 0x1000 flag) && (actor->bFlag & 0x10)
-	//         temporarily swap actor->Rotation with actor->PrePivotRotation (+0x2e4)
-	//         then call LocalToWorld, then restore. We use LocalToWorld() for all paths.
-	*pMatrix = Actor->LocalToWorld();
+	// Path (b): StaticMesh actor with PrePivot rotation flag.
+	// Ghidra: if (Level->LevelInfo->flags & 0x1000) && (actor->bNetOptional & 0x10):
+	//   temporarily swap actor->Rotation (+0x240) with PrePivotRotation (+0x2e4),
+	//   call LocalToWorld (vtable+0xac), copy 16 DWORDs into this+4, restore rotation.
+	DWORD levelFlags = *(DWORD*)(*(INT*)((BYTE*)Actor + 0x144) + 0x450);
+	BYTE  actorFlags = *(BYTE*)((BYTE*)Actor + 0xac);
+	if ((levelFlags & 0x1000) && (actorFlags & 0x10))
+	{
+		DWORD savedP = *(DWORD*)((BYTE*)Actor + 0x240);
+		DWORD savedY = *(DWORD*)((BYTE*)Actor + 0x244);
+		DWORD savedR = *(DWORD*)((BYTE*)Actor + 0x248);
+		*(DWORD*)((BYTE*)Actor + 0x240) = *(DWORD*)((BYTE*)Actor + 0x2e4);
+		*(DWORD*)((BYTE*)Actor + 0x244) = *(DWORD*)((BYTE*)Actor + 0x2e8);
+		*(DWORD*)((BYTE*)Actor + 0x248) = *(DWORD*)((BYTE*)Actor + 0x2ec);
+		FMatrix mat = Actor->LocalToWorld();
+		appMemcpy((BYTE*)this + 4, &mat, 64);
+		*(DWORD*)((BYTE*)Actor + 0x240) = savedP;
+		*(DWORD*)((BYTE*)Actor + 0x244) = savedY;
+		*(DWORD*)((BYTE*)Actor + 0x248) = savedR;
+	}
+	else
+	{
+		*pMatrix = Actor->LocalToWorld();
+	}
 	*(FLOAT*)((BYTE*)this + 0x44) = pMatrix->Determinant();
 
 	FBox*    pBox    = (FBox*)((BYTE*)this + 0x48);
@@ -1809,10 +1827,12 @@ FDynamicActor::FDynamicActor(AActor* Actor)
 		}
 	}
 
-	// Ambient: zeroed (FUN_103ffa20 zone-light accumulation not yet implemented)
+	// Ambient: FUN_103ffa20 (zone-ambient init, __thiscall ECX=this) stores result at this+0x7c.
+	// Ambient accumulation loop (zone-light FGetHSV iteration) still approximated as zero.
+	typedef DWORD (__thiscall* FnAmb)(FDynamicActor*);
+	*(DWORD*)((BYTE*)this + 0x7c) = ((FnAmb)0x103ffa20)(this);
 	*(DWORD*)((BYTE*)this + 0x74) = 0;
 	*(DWORD*)((BYTE*)this + 0x78) = 0;
-	*(DWORD*)((BYTE*)this + 0x7C) = 0;
 }
 
 IMPL_MATCH("Engine.dll", 0x10309a70)
@@ -1956,7 +1976,7 @@ FDynamicLight::FDynamicLight(FDynamicLight const& Other)
 	appMemcpy( this, &Other, sizeof(FDynamicLight) );
 }
 
-IMPL_TODO("Ghidra 0x1040ff20 (1485b): color/direction/radius/flag logic implemented from Ghidra; LE_Glow/LE_SubSurface texture-sequence paths depend on FUN_1038a4f0 (unresolved); LE_Pulse/LE_Strobe approximate FUN_1050557c() with appSecondsSlow().")
+IMPL_TODO("Ghidra 0x1040ff20 (1485b): LE_Pulse/LE_Strobe now use FUN_1050557c by address (frame tick counter); LE_Glow(8)/LE_SubSurface(9) texture-sequence paths still blocked on FUN_1038a4f0 (unresolved calling convention).")
 FDynamicLight::FDynamicLight(AActor* Actor)
 {
 	// Layout (from Ghidra): +0=AActor*, +4=FPlane(color), +0x14=FVector(origin),
@@ -1979,15 +1999,17 @@ FDynamicLight::FDynamicLight(AActor* Actor)
 	// Apply LightEffect modulation to the base color
 	if (LightEffect != 1 /* LE_None */)
 	{
-		FLOAT tSec = (FLOAT)appSecondsSlow();
 		if (LightEffect == 2 /* LE_Pulse */)
 		{
-			// Ghidra: SinTab(FUN_1050557c()) — FUN_1050557c approximated with appSecondsSlow()
-			FLOAT scale = 0.5f + 0.5f * GMath.SinTab((INT)(tSec * 0.5f * 65536.f) & 0xFFFF);
+			// Ghidra: scale = 0.5 + 0.5 * SinTab(FUN_1050557c())
+			typedef INT (__cdecl* FnTick)();
+			INT tick = ((FnTick)0x1050557c)();
+			FLOAT scale = 0.5f + 0.5f * GMath.SinTab(tick);
 			Color = Color * scale;
 		}
 		else if (LightEffect == 3 /* LE_Flicker */)
 		{
+			FLOAT tSec = (FLOAT)appSecondsSlow();
 			// Ghidra: byte at actor+0x3b shifted 8 bits as period
 			BYTE period = *(BYTE*)((BYTE*)Actor + 0x3b);
 			FLOAT scale = (FLOAT)((appRound(tSec * 20.f) ^ (INT)period) & 0xFF) * (1.f / 255.f);
@@ -2012,7 +2034,10 @@ FDynamicLight::FDynamicLight(AActor* Actor)
 		}
 		else if (LightEffect == 7 /* LE_Strobe */)
 		{
-			FLOAT scale = 0.5f + 0.5f * GMath.SinTab((INT)(tSec * 65536.f) & 0xFFFF);
+			// Ghidra: scale = 0.5 + 0.5 * SinTab(FUN_1050557c()); threshold at 0.5
+			typedef INT (__cdecl* FnTick)();
+			INT tick = ((FnTick)0x1050557c)();
+			FLOAT scale = 0.5f + 0.5f * GMath.SinTab(tick);
 			Color = Color * (scale > 0.5f ? 1.f : 0.f);
 		}
 		// LE_Glow (8) and LE_SubSurface (9) require FUN_1038a4f0; pass through unmodified.
