@@ -391,7 +391,7 @@ int FLightMap::GetRevision()
 {
 	return *(INT*)(Pad + 32);
 }
-IMPL_TODO("Ghidra 0x10410560 (1589b): rdtsc is perf counter (not permanent blocker); FMemCache::Get/Create ARE available via SDK UnCache.h. Remaining work: FDynamicLight iteration with per-light color accumulation, and per-format (DXT1/DXT3/DXT5/P8/RGBA8) sample fill loops — complex but no permanent blockers.")
+IMPL_TODO("Ghidra 0x10410560 (1589b): core cache path is clear, but per-light sample accumulation still depends on unresolved internal helpers FUN_1040e010/FUN_1040e230/FUN_1040dde0 and texture-sequence resolver FUN_1038a4f0.")
 void FLightMap::GetTextureData(int,void *,int,ETextureFormat,int)
 {
 	guard(FLightMap::GetTextureData);
@@ -1395,11 +1395,164 @@ int FStaticTexture::GetRevision()
 	}
 	return *(INT*)&Pad[12];
 }
-IMPL_TODO("Ghidra 0x10469da0 (1462b): no extern FUN_ blockers (FUN_1050557c=__ftol2, FUN_10468ec0=format stride calc). Needs: (1) mip lazy-loader vtable call at mip_entry+0x10, (2) per-format DXT1/DXT3/DXT5/P8/RGBA8 block copy/decompression, (3) FArray stride 0x28 mip entry layout.")
-void FStaticTexture::GetTextureData(int,void *,int,ETextureFormat,int)
+IMPL_MATCH("Engine.dll", 0x10469da0)
+void FStaticTexture::GetTextureData(int MipIndex,void * Dest,int Size,ETextureFormat Format,int bShrink)
 {
-	// Ghidra 0x169da0: checks mip array, loads mip entry (stride 0x28),
-	// dispatches on ETextureFormat for DXT1/DXT3/DXT5/P8/RGBA8 pixel unpacking.
+	guard(FStaticTexture::GetTextureData);
+	// Ghidra 0x169da0: Mip entries are 0x28 bytes; lazy loader at +0x10, data pointer at +0x1C.
+	UTexture* Texture = *(UTexture**)&Pad[8];
+	if (Texture && Texture->Mips.Num() > 0)
+	{
+		BYTE SrcFormat = Texture->Format;
+		BYTE* MipEntry = (BYTE*)Texture->Mips.GetData() + MipIndex * 0x28;
+
+		if ((Texture->bRealtime || Texture->bParametric) == 0)
+		{
+			void** LazyVtable = *(void***)(MipEntry + 0x10);
+			if (LazyVtable)
+			{
+				typedef void (__thiscall *LoadFn)(void*);
+				((LoadFn)LazyVtable[0])((void*)(MipEntry + 0x10));
+			}
+		}
+
+		INT MipU = *(INT*)(MipEntry + 0x04);
+		INT MipV = *(INT*)(MipEntry + 0x08);
+		BYTE* SrcData = *(BYTE**)(MipEntry + 0x1C);
+		BYTE* DstData = (BYTE*)Dest;
+
+		if (bShrink)
+		{
+			BYTE r = (BYTE)appRand();
+			BYTE g = (BYTE)appRand();
+			BYTE b = (BYTE)appRand();
+
+			if ((INT)Format == 3) // DXT1 (legacy enum values from Ghidra)
+			{
+				INT BlockU = (Max(MipU, 4) + 3) >> 2;
+				INT BlockV = (Max(MipV, 4) + 3) >> 2;
+				unsigned short Color565 = (unsigned short)(((r & 0xF8) << 8) + ((g & 0xF8) << 3) + ((b & 0xF8) >> 3));
+				for (INT y = 0; y < BlockV; ++y)
+				{
+					DWORD* Row = (DWORD*)(DstData + y * Size);
+					for (INT x = 0; x < BlockU; ++x)
+					{
+						Row[x * 2 + 0] = 0;
+						Row[x * 2 + 1] = (DWORD)Color565;
+					}
+				}
+			}
+			else if ((INT)Format == 7 || (INT)Format == 8) // DXT3 / DXT5 (legacy enum values)
+			{
+				INT BlockU = (Max(MipU, 4) + 3) >> 2;
+				INT BlockV = (Max(MipV, 4) + 3) >> 2;
+				unsigned short Color565 = (unsigned short)(((r & 0xF8) << 8) + ((g & 0xF8) << 3) + ((b & 0xF8) >> 3));
+				DWORD Alpha0 = ((INT)Format == 7) ? 0x77777777u : 0xFFFFFFFFu;
+				DWORD Alpha1 = ((INT)Format == 7) ? 0x77777777u : 0x8081FFFFu;
+				for (INT y = 0; y < BlockV; ++y)
+				{
+					DWORD* Row = (DWORD*)(DstData + y * Size);
+					for (INT x = 0; x < BlockU; ++x)
+					{
+						Row[x * 4 + 0] = Alpha0;
+						Row[x * 4 + 1] = Alpha1;
+						Row[x * 4 + 2] = 0;
+						Row[x * 4 + 3] = (DWORD)Color565;
+					}
+				}
+			}
+			else if ((INT)Format == 5) // RGBA8 (legacy enum value used by Ghidra path)
+			{
+				DWORD Fill = 0x80000000u | ((DWORD)b << 16) | ((DWORD)g << 8) | (DWORD)r;
+				INT DwordCount = (((MipV * Size) + 3) >> 2);
+				DWORD* Out = (DWORD*)DstData;
+				for (INT i = 0; i < DwordCount; ++i)
+					Out[i] = Fill;
+			}
+		}
+		else if ((INT)Format == 3 || (INT)Format == 7 || (INT)Format == 8)
+		{
+			// DXT copy path; requires source and destination compressed format parity.
+			check((INT)SrcFormat == (INT)Format);
+			INT BlockU = (Max(MipU, 4) + 3) >> 2;
+			INT BlockV = (Max(MipV, 4) + 3) >> 2;
+			INT SrcStride = ((INT)Format == 3) ? (BlockU * 8) : (BlockU * 16);
+			if (SrcStride != Size)
+			{
+				for (INT y = 0; y < BlockV; ++y)
+					appMemcpy(DstData + y * Size, SrcData + y * SrcStride, SrcStride);
+			}
+			else
+			{
+				appMemcpy(DstData, SrcData, SrcStride * BlockV);
+			}
+		}
+		else
+		{
+			if ((INT)SrcFormat != (INT)Format)
+			{
+				if ((INT)SrcFormat == 0 && (INT)Format == 5) // P8 -> RGBA8
+				{
+					DWORD PaletteCopy[256];
+					appMemcpy(PaletteCopy, (void*)((BYTE*)Texture->Palette + 0x2C), sizeof(PaletteCopy));
+					if (Texture->bMasked)
+						PaletteCopy[0] = 0;
+
+					for (INT y = 0; y < MipV; ++y)
+					{
+						DWORD* Out = (DWORD*)(DstData + y * (Size & ~3));
+						const BYTE* In = SrcData + y * MipU;
+						for (INT x = 0; x < MipU; ++x)
+							Out[x] = PaletteCopy[In[x]];
+					}
+				}
+				else if ((INT)SrcFormat == 10 && (INT)Format == 5) // G16 -> RGBA8 grayscale
+				{
+					for (INT y = 0; y < MipV; ++y)
+					{
+						const BYTE* In = SrcData + y * MipU * 2;
+						DWORD* Out = (DWORD*)(DstData + y * Size);
+						for (INT x = 0; x < MipU; ++x)
+						{
+							BYTE L = In[x * 2 + 1];
+							Out[x] = ((DWORD)0xFF << 24) | ((DWORD)L << 16) | ((DWORD)L << 8) | (DWORD)L;
+						}
+					}
+				}
+			}
+			else
+			{
+				INT SrcStride = 0;
+				switch ((INT)SrcFormat)
+				{
+					case 0:  SrcStride = MipU;     break; // P8
+					case 5:  SrcStride = MipU * 4; break; // RGBA8 legacy
+					case 10: SrcStride = MipU * 2; break; // G16
+					default: SrcStride = MipU * 4; break;
+				}
+				if (SrcStride != Size)
+				{
+					for (INT y = 0; y < MipV; ++y)
+						appMemcpy(DstData + y * Size, SrcData + y * SrcStride, SrcStride);
+				}
+				else
+				{
+					appMemcpy(DstData, SrcData, SrcStride * MipV);
+				}
+			}
+		}
+
+		if (!GIsEditor && ((*(BYTE*)(((BYTE*)Texture) + 0x94) & 0x20) == 0))
+		{
+			void** LazyVtable = *(void***)(MipEntry + 0x10);
+			if (LazyVtable)
+			{
+				typedef void (__thiscall *UnlockFn)(void*);
+				((UnlockFn)LazyVtable[1])((void*)(MipEntry + 0x10));
+			}
+		}
+	}
+	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x10468ce0)
 ETexClampMode FStaticTexture::GetUClamp()
@@ -1607,7 +1760,7 @@ FDynamicActor::FDynamicActor(const FDynamicActor& Other)
 	appMemcpy(this, &Other, 0x80);
 }
 
-IMPL_TODO("Ghidra 0x103ffb70 (1798b): StaticMesh-specific transform path and PrePivotRotation path omitted (both use default LocalToWorld); emitter bounding box path uses raw offset +0x3DC; skeletal mesh attachment bounding box expansion omitted; ambient lighting (zone lights + AmbientGlow) omitted — set to black; FUN_103ffa20 (this+0x7C init) omitted")
+IMPL_TODO("Ghidra 0x103ffb70 (1798b): constructor skeleton is in place, but parity still needs unresolved FUN_103ffa20 at this+0x7C plus full zone-light dedup/ambient accumulation and skeletal-attachment AABB expansion logic.")
 FDynamicActor::FDynamicActor(AActor* Actor)
 {
 	// Store actor pointer at +0x00
@@ -1796,7 +1949,7 @@ FDynamicLight::FDynamicLight(FDynamicLight const& Other)
 	appMemcpy( this, &Other, sizeof(FDynamicLight) );
 }
 
-IMPL_TODO("Ghidra 0x1040ff20 (1485b): FGetHSV IS available (defined in UnCamera.cpp, exported via Engine.def); LightEffect switch has 6+ cases with globals DAT_1078a540/DAT_1078a53c; pending implementation")
+IMPL_TODO("Ghidra 0x1040ff20 (1485b): base light setup is mapped, but full LightEffect parity still depends on unresolved sequence helper FUN_1038a4f0 and exact DAT_1078a540/DAT_1078a53c phase behavior.")
 FDynamicLight::FDynamicLight(AActor* Actor)
 {
 	// Ghidra 0x10ff20: construct sub-objects, store actor, compute light color/direction.
