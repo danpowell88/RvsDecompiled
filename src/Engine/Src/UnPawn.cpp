@@ -159,8 +159,15 @@ IMPLEMENT_FUNCTION( AController, INDEX_NONE, execPollMoveTo );
 //   bAdvancedTactics set from bCanJump (Ghidra: bitfield bit3 XOR from param);
 //   ClearSerpentine + CurrentPath=NULL added.
 //   NavigationPoint: eventSuggestMovePreparation, GetReachSpecTo, supports, eventPrepareForMove.
-// DIVERGENCE: FUN_10317640 (approach-dist helper) approximated as Clamp(specDist-CR, 0, CR*4)
-IMPL_DIVERGE("Ghidra 0x10390940 (1402b): (navFlags&0x50)==0 block implemented; FUN_10317640 permanently approximated as Clamp since it is a non-exported internal function")
+//   (navFlags&0x50)==0 approach-dist block implemented.
+// FUN_10317640 confirmed as Clamp<FLOAT>(val,min,max) at 0x10317640 (45b, Engine._unnamed.cpp).
+// FUN_103808e0 confirmed as Max<FLOAT>(a,b) at 0x103808e0 (25b, Engine._unnamed.cpp).
+// DIVERGENCE: Pawn+0x578/0x41c/0x420/0x414/0x418 are unnamed APawn fields accessed via raw offsets.
+// DIVERGENCE: CurrentPath->field_0x34 is UReachSpec::Distance (INT, matches Ghidra cast to float).
+// MISSING: Pawn+0x414 write (ExtraTarget-or-computed-dist assignment ambiguous due to
+//   Ghidra register reuse); conditional vtable[97](0,MoveTarget) tail omitted — first arg 0
+//   is unclear for moveToward(FVector&,AActor*) calling convention.
+IMPL_TODO("Ghidra 0x10390940 (1402b): approach-dist block implemented; FUN_10317640=Clamp & FUN_103808e0=Max confirmed; MISSING Pawn+0x414 ExtraTarget write and vtable[97] tail (arg semantics ambiguous in Ghidra due to register reuse)")
 void AController::execMoveToward( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execMoveToward);
@@ -223,44 +230,62 @@ void AController::execMoveToward( FFrame& Stack, RESULT_DECL )
 				}
 			}
 		}
-		// (navFlags & 0x50) == 0: compute approach-dist and velocity-direction hint.
-		// Ghidra: only when CurrentPath is set; clears Pawn+0x420, stores SafeNormal(Velocity)
-		// at Pawn+0x578..0x580, computes randomised approach distance at Pawn+0x41c, then
-		// adjusts it via cosine^4 fade against path direction (or sets 0.8f if well-aligned).
-		if ((navFlags & 0x50) == 0 && CurrentPath)
+		// (navFlags & 0x50) == 0: bits 1 and 6 clear → compute approach-dist hints.
+		// Ghidra: outer check on navFlags; inner check on CurrentPath for approach-dist;
+		//         separate inner check (NavTarget != cached) for floor-based dist.
+		if ((navFlags & 0x50) == 0)
 		{
-			*(INT*)((BYTE*)Pawn + 0x420) = 0;
+			if (CurrentPath)
+			{
+				// Clear approach-override flag (Pawn+0x420 = 0).
+				*(INT*)((BYTE*)Pawn + 0x420) = 0;
 
-			FVector velNorm = Pawn->Velocity.SafeNormal();
-			*(FLOAT*)((BYTE*)Pawn + 0x578) = velNorm.X;
-			*(FLOAT*)((BYTE*)Pawn + 0x57c) = velNorm.Y;
-			*(FLOAT*)((BYTE*)Pawn + 0x580) = velNorm.Z;
+				// Cache SafeNormal(Velocity) as approach direction at Pawn+0x578.
+				// Ghidra: FVector::SafeNormal((FVector*)(Pawn+0x24c)); Pawn+0x24c == Velocity.
+				FVector velNorm = Pawn->Velocity.SafeNormal();
+				*(FLOAT*)((BYTE*)Pawn + 0x578) = velNorm.X;
+				*(FLOAT*)((BYTE*)Pawn + 0x57c) = velNorm.Y;
+				*(FLOAT*)((BYTE*)Pawn + 0x580) = velNorm.Z;
 
-			// FUN_10317640 approximated as Clamp(specDist - CR, 0, CR*4).
-			// spec+0x34 = UReachSpec Distance (stored as INT, read as float).
-			FLOAT specDist     = (FLOAT)*(INT*)((BYTE*)CurrentPath + 0x34);
-			FLOAT approachDist = Clamp(specDist - Pawn->CollisionRadius, 0.f, Pawn->CollisionRadius * 4.f);
-			*(FLOAT*)((BYTE*)Pawn + 0x41c) = (appFrand() + 0.5f) * approachDist;
+				// approachDist = FUN_10317640(specDist-CR, 0, CR*4)
+				//              = Clamp<FLOAT>(specDist-CR, 0, CR*4).
+				// spec+0x34 = UReachSpec::Distance (INT, cast to float in Ghidra).
+				FLOAT specDist     = (FLOAT)*(INT*)((BYTE*)CurrentPath + 0x34);
+				FLOAT approachDist = Clamp(specDist - Pawn->CollisionRadius, 0.f, Pawn->CollisionRadius * 4.f);
+				*(FLOAT*)((BYTE*)Pawn + 0x41c) = (appFrand() + 0.5f) * approachDist;
 
-			// Path direction: spec+0x48 = Start nav pointer, spec+0x4c = End nav pointer.
-			// XY only (Z ignored per Ghidra); +0x234/+0x238 = nav Location X/Y.
-			BYTE* specStart = (BYTE*)*(INT*)((BYTE*)CurrentPath + 0x48);
-			BYTE* specEnd   = (BYTE*)*(INT*)((BYTE*)CurrentPath + 0x4c);
-			FVector pathDir;
-			pathDir.X = *(FLOAT*)(specEnd + 0x234) - *(FLOAT*)(specStart + 0x234);
-			pathDir.Y = *(FLOAT*)(specEnd + 0x238) - *(FLOAT*)(specStart + 0x238);
-			pathDir.Z = 0.f;
-			FVector pathDirN = pathDir.SafeNormal();
+				// Path direction: spec+0x48 = Start nav pointer, spec+0x4c = End nav pointer.
+				// Ghidra: only XY used (Z set to 0 in local construction before SafeNormal).
+				BYTE* specStart = (BYTE*)*(INT*)((BYTE*)CurrentPath + 0x48);
+				BYTE* specEnd   = (BYTE*)*(INT*)((BYTE*)CurrentPath + 0x4c);
+				FVector pathDir(
+					*(FLOAT*)(specEnd + 0x234) - *(FLOAT*)(specStart + 0x234),
+					*(FLOAT*)(specEnd + 0x238) - *(FLOAT*)(specStart + 0x238),
+					0.f);
+				FVector pathDirN = pathDir.SafeNormal();
 
-			// Dot path dir with velocity hint → cosine^4 fade.
-			FLOAT cosAngle = pathDirN | velNorm;
-			FLOAT fade     = 1.f - cosAngle * cosAngle * cosAngle * cosAngle;
-			if (cosAngle < 0.f || fade < 0.5f)
-				*(FLOAT*)((BYTE*)Pawn + 0x41c) *= fade;
-			else
-				*(FLOAT*)((BYTE*)Pawn + 0x420) = 0.8f;
+				// Cosine^4 fade: dot(pathDirN, velNorm); fade = 1 - cos^4.
+				FLOAT cosAngle = pathDirN | velNorm;
+				FLOAT fade     = 1.f - cosAngle * cosAngle * cosAngle * cosAngle;
+				if (cosAngle < 0.f || fade < 0.5f)
+					*(FLOAT*)((BYTE*)Pawn + 0x41c) *= fade;
+				else
+					*(FLOAT*)((BYTE*)Pawn + 0x420) = 0.8f;  // 0x3f4ccccd
+			}
+
+			// If NavTarget changed from cached (+0x44c): compute floor-based approach dist.
+			// FUN_103808e0(0, Pawn+0x418 - CR) = Max(0, Pawn+0x418 - CR).
+			if (NavTarget != *(ANavigationPoint**)((BYTE*)this + 0x44c))
+			{
+				FLOAT floorDist = Max(0.f, *(FLOAT*)((BYTE*)Pawn + 0x418) - Pawn->CollisionRadius);
+				*(FLOAT*)((BYTE*)Pawn + 0x414) = (appFrand() * 0.3f + 0.7f) * floorDist;
+			}
 		}
 	}
+	// Ghidra tail: clear floor-distance cache.
+	*(DWORD*)((BYTE*)Pawn + 0x418) = 0;
+	// MISSING: Pawn+0x414 = ExtraTarget-or-computed-dist (param_1 ambiguous in Ghidra).
+	// MISSING: if (byte@Controller+0x3a8 >= 0) vtable[97](0,MoveTarget) — arg 0 unclear.
 	unguard;
 }
 IMPLEMENT_FUNCTION( AController, 502, execMoveToward );
