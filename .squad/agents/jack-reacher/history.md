@@ -22,3 +22,5 @@
 - 2026-03-22: Re-verified `UModel::Render` (`0x103cd750`) as a large dispatcher with many render helper dependencies in `_unnamed.cpp`; still tractable but substantial. Documenting TODO with precise unresolved pieces is safer than premature partial lift that risks regressions.
 
 - 2026-03-22: Promoted UnPawn stair-rotation (0x103900a0) and findPathToward (0x1041cfa0) from IMPL_TODO to IMPL_MATCH after re-checking Ghidra _global.cpp control flow and thresholds. Kept physSpider/physWalking as IMPL_TODO with tighter blocker notes tied to unresolved decompiler stack/x87 scalar provenance.
+- 2026-03-22 (Team): jack-reacher-unpawn completed work (commits 087ce60c). Channel/Emitter/Model audit kept all 4 as IMPL_TODO with clarified blockers — all decisions logged in squad/decisions.md.
+- 2026-03-22 (Team): john-wick-misc-audit completed: demoted UGameEngine::Exec (0x103a3f00) from IMPL_MATCH to IMPL_TODO (2 behavioral deviations confirmed); kept execPrivateSet as IMPL_TODO (opcode blocked, not diverged); IMPL_DIVERGE audit found no misclassifications. HALF_WORLD_MAX fixed.

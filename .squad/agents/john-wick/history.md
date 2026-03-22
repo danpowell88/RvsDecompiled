@@ -16,3 +16,55 @@
 ## Learnings
 
 <!-- Append new learnings below. -->
+
+### 2026 — IMPL_TODO vs IMPL_DIVERGE classification decisions
+
+**execPrivateSet (UnScript.cpp):** Opcode value for EX_PrivateSet is unknown from Ghidra text exports — GNatives[] table not reconstructed. Kept as IMPL_TODO (not IMPL_DIVERGE) because the opcode IS in the retail binary, discoverable via binary disassembly of Core.dll init code. "Not done yet" ≠ "permanently impossible".
+
+**execDrawNativeHUD (R6HUD.cpp):** 44896-byte Ghidra export exists at `ghidra/exports/R6Game/_r6hud_execDrawNativeHUD.cpp`. Blocked by 7 unresolved FUN_ helpers and 106 raw struct offsets across AR6HUD / AR6Rainbow / AR6PlayerController. Implement only after struct layout mapping is complete.
+
+**UGameEngine::Exec (Engine.cpp, 0x103a3f00):** Demoted from IMPL_MATCH to IMPL_TODO. Ghidra confirms two deviations in TESTPATCH path: (1) SpawnActor at vtable[0xa8/4] — retail constructs FRotator(0,0,0) and FName(0) on stack as args, current code passes zero args beyond `this`; (2) retail calls FindFunctionChecked() before vtable[0x10/4], current code skips it. vtable slots 0xa8/4 and 0x10/4 are confirmed.
+
+**IMPL_DIVERGE audit (UnPawn, UnActor, UnScript, Launch):** All sampled entries correctly classified. Notable patterns confirmed correct: rdtsc/Karma = IMPL_DIVERGE (permanent), "absent from export table" = IMPL_DIVERGE, Launch.cpp "Reconstructed; no Ghidra match found" for static helpers = IMPL_DIVERGE (no binary verification path possible for non-exported static functions).
+
+### 2026-03-22 (Team) — External Blockers & UnMesh FUN_ Helper Analysis
+
+**External Blockers Summary (jason-bourne work):**
+- R6HUD.cpp:87: UTF-8 Ghidra export issue (actionable fix: add `encoding="utf-8"` to export_cpp.py)
+- DareAudio.cpp:131: FUN helpers fully characterized, directly implementable (~100 LOC)
+- UnScript opcodes (Tasks 3–4): Deferred pending script engine decompilation
+
+**UnMesh FUN_ Helpers (Group D items):** All 4 blocked items are unlockable. No permanent divergences. Recommended implementation order:
+1. Declare `FRawIndexBuffer` (5 min) — unlocks FUN_1043d7e0
+2. Implement FUN_1043f770 (FMeshAnimSeq TArray, 0.5 day) — unlocks items #6 & #8
+3. Implement FUN_1043fd50 (MotionChunk TArray, 0.5 day) — fully unlocks #6
+4. Implement FUN_1043d7e0 (FAnimMeshVertexStream ctor, 1 hour) — unlocks #7
+5. Implement FUN_10438510 (GLazyLoad serializer, 0.5 day) — partial unlock of #9
+6. Reconstruct FSkelMeshLODModel + FUN_1043fa50 (2–3 days) — fully unlocks #9
+
+Estimated total effort: 3–5 days to unlock all 4 items.
+
+### WORLD_MAX / HALF_WORLD_MAX (2026-03-22 fix)
+
+Standard UT99/UE1 values: `WORLD_MAX = 524288.0f`, `HALF_WORLD_MAX = 262144.0f`, `HALF_WORLD_MAX1 = 262143.0f`. Added to `EnginePrivate.h` under `#ifndef WORLD_MAX` guard. Used by Karma BSP helpers in EngineAux.cpp.
+
+### UnRender.cpp frustum function analysis (2026)
+
+**FLevelSceneNode::GetViewFrustum (0x10400290):**
+- Zone-type lookup bug: `*(INT*)Viewport` reads vtable; retail uses `*(INT*)((BYTE*)Viewport + 0x34)` (object member). Fixed.
+- Far-clip distance: Ghidra shows conditional LevelInfo+0x398 flag check → reads custom FarDist from LevelInfo+0x3a0, else 65536.f. Zone array accessed via `*(DWORD*)(Level+0x90) + (zoneIndex*9+0x24)*8`. Implemented.
+- 8-corner sky-zone path: retail uses `FMatrix::TransformFPlane(this+0x150, plane)`, not `Deproject`. Left as Deproject (functionally equivalent for W=1 inputs).
+
+**FPointLightMapSceneNode::GetViewFrustum (0x103d1740):**
+- Retail: reads FVector at `this+0x1d4`, calls `FSceneNode::Project()`, uses returned `FPlane.Z/.W` as clip-space depth for the 4 Deproject corners. Implemented as `Project(*(FVector*)(this+0x1d4))`.
+
+**FDirectionalLightMapSceneNode::GetViewFrustum (0x103d25d0):**
+- Ghidra confirms 8-corner loop over X∈{−1,+1}×Y∈{−1,+1}×Z∈{0,1}. Plane ordering unconfirmed.
+
+**FSceneNode::Project** returns `FPlane` (inherits FVector, adds W). Z and W members are accessible directly.
+
+**UnLevel.cpp IMPL_TODO macros:** All accurately describe remaining blockers (FUN_ internal helpers called by raw retail address, Karma proprietary). No changes warranted — these require identifying and implementing the unnamed helpers from `ghidra/exports/Engine/_unnamed.cpp`.
+
+### Ghidra decompiler limitations with MSVC ABI
+
+Ghidra often fails to show stack-passed args for MSVC `__thiscall` functions when the callee constructs local objects (FRotator, FName, etc.) immediately before a call. The decompiler shows the call as having fewer args than it actually takes. Always cross-check with context (local variable constructions just before a call indicate args).
