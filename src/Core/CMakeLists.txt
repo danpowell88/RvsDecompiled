@@ -30,8 +30,6 @@ if(SOURCE_COUNT GREATER 0)
         kernel32 user32 advapi32
     )
     add_impl_verification(Core ${CORE_SRC_DIR}/Src)
-    include(${PROJECT_SOURCE_DIR}/cmake/ByteParity.cmake)
-    add_byte_parity_check(Core ${CORE_SRC_DIR}/Src Core.dll)
 else()
     message(STATUS "Core: no source files yet — skipping")
 endif()

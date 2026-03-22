@@ -225,3 +225,11 @@ add_subdirectory(src/DareAudio)
 
 # --- Phase 8: Main executable ---
 add_subdirectory(src/Launch)
+
+# =============================================================================
+# Byte-parity verification target
+# =============================================================================
+# Run "nmake verify" after building to compare rebuilt DLLs against retail.
+# Exits non-zero if any IMPL_MATCH function doesn't match the retail binary.
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/ByteParity.cmake)
+add_byte_parity_target()

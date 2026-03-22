@@ -455,6 +455,8 @@ def main():
     parser.add_argument("--build-dir", metavar="DIR",
                         help="Path to bin directory containing built DLLs "
                              "(default: auto-detect build-71/bin or build/bin)")
+    parser.add_argument("--report", metavar="FILE",
+                        help="Write results to this file (in addition to stdout)")
     args = parser.parse_args()
 
     # Override BUILD_BIN if requested
@@ -611,8 +613,26 @@ def main():
     print(f"  TOTAL:   {total}")
     print(f"{'='*60}")
 
+    # Write report file if requested
+    if args.report:
+        report_path = Path(args.report)
+        report_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(report_path, "w", encoding="utf-8") as f:
+            f.write("IMPL_MATCH byte-parity report\n")
+            f.write(f"{'='*60}\n")
+            f.write(f"PASS:    {passes}\n")
+            f.write(f"FAIL:    {fails}\n")
+            f.write(f"SKIPPED: {skipped}\n")
+            f.write(f"TOTAL:   {total}\n")
+            f.write(f"{'='*60}\n\n")
+            if fail_msgs:
+                f.write("FAILURES:\n")
+                for msg in fail_msgs:
+                    f.write(msg + "\n")
+        print(f"\nReport written to: {report_path}")
+
     if fails and not args.warn_only:
-        print("\nBuild FAILED: IMPL_MATCH byte-parity violations detected.")
+        print(f"\nerror: {fails} IMPL_MATCH byte-parity violation(s) detected.")
         print("Either fix the implementation or change IMPL_MATCH → IMPL_DIVERGE.")
         sys.exit(1)
     elif fails:

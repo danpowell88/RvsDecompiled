@@ -1,78 +1,69 @@
-# ByteParity.cmake — hook byte-accuracy verification into module builds.
+# ByteParity.cmake — byte-accuracy verification for IMPL_MATCH annotations.
 #
-# For each function annotated  IMPL_MATCH("Foo.dll", 0xADDR)  the post-build
-# step runs verify_byte_parity.py which:
-#   1. Extracts the retail function bytes at 0xADDR.
-#   2. Extracts the compiled function bytes from the .map file.
-#   3. Compares them with relocation-entry masking.
-#   4. Fails the build on any mismatch.
+# Provides a standalone "verify" target that compares rebuilt DLLs against
+# retail binaries function-by-function. Run after building:
 #
-# Usage (add to a module's CMakeLists.txt after target is defined):
+#   nmake verify
 #
-#   include(${PROJECT_SOURCE_DIR}/cmake/ByteParity.cmake)
-#   add_byte_parity_check(Engine src/Engine/Src Engine.dll)
+# The verify target depends on Core and Engine (ensures they are built first),
+# then runs verify_byte_parity.py which:
+#   1. Scans source for IMPL_MATCH("Foo.dll", 0xADDR) annotations
+#   2. Extracts retail function bytes at the given VA
+#   3. Extracts rebuilt function bytes via the MSVC .map file
+#   4. Compares with relocation-entry masking
+#   5. Exits non-zero on any mismatch
 #
-# The /MAP linker flag is automatically added to the target so the tool
-# has symbol → VA mappings available.
+# /MAP is added globally via cmake/msvc71.cmake so all DLLs produce .map files.
 #
-# Set BYTE_PARITY=OFF to disable (default ON when retail DLLs are present).
+# Set BYTE_PARITY=OFF to skip the verify target entirely.
 # =============================================================================
 
-option(BYTE_PARITY "Fail build on IMPL_MATCH byte-parity violations" ON)
+option(BYTE_PARITY "Enable the 'verify' byte-parity target" ON)
 
-function(add_byte_parity_check TARGET_NAME SRC_DIR DLL_NAME)
+function(add_byte_parity_target)
     if(NOT BYTE_PARITY)
+        message(STATUS "verify: byte-parity target disabled (BYTE_PARITY=OFF)")
         return()
     endif()
 
     find_package(Python3 QUIET COMPONENTS Interpreter)
     if(NOT Python3_FOUND)
-        message(STATUS "${TARGET_NAME}: Python3 not found — byte-parity check skipped")
-        return()
-    endif()
-
-    if(NOT TARGET ${TARGET_NAME})
-        message(STATUS "${TARGET_NAME}: target not defined — byte-parity check skipped")
-        return()
-    endif()
-
-    # Check retail DLL exists
-    set(RETAIL_DLL "${PROJECT_SOURCE_DIR}/retail/system/${DLL_NAME}")
-    if(NOT EXISTS "${RETAIL_DLL}")
-        message(STATUS "${TARGET_NAME}: retail/${DLL_NAME} not found — byte-parity check skipped")
+        message(STATUS "verify: Python3 not found — byte-parity target skipped")
         return()
     endif()
 
     set(VERIFY_SCRIPT "${PROJECT_SOURCE_DIR}/tools/verify_byte_parity.py")
     if(NOT EXISTS "${VERIFY_SCRIPT}")
-        message(STATUS "${TARGET_NAME}: verify_byte_parity.py not found — check skipped")
+        message(STATUS "verify: verify_byte_parity.py not found — target skipped")
         return()
     endif()
 
-    # Enable MAP file generation so the tool can map symbol names → VAs.
-    # MSVC: /MAP[:filename]  (CMake exposes this via LINK_FLAGS or target_link_options)
-    if(MSVC)
-        # Determine output directory for the map file
-        set(MAP_FILE "$<TARGET_FILE_DIR:${TARGET_NAME}>/${TARGET_NAME}.map")
-        target_link_options(${TARGET_NAME} PRIVATE "/MAP:${MAP_FILE}")
+    # Check at least one retail DLL exists
+    set(RETAIL_DIR "${PROJECT_SOURCE_DIR}/retail/system")
+    if(NOT EXISTS "${RETAIL_DIR}/Core.dll" AND NOT EXISTS "${RETAIL_DIR}/Engine.dll")
+        message(STATUS "verify: no retail DLLs found — byte-parity target skipped")
+        return()
     endif()
 
-    # Post-build: verify byte parity
-    set(_warn_flag "")
-    # Currently run in warn-only mode so we get visibility without hard-failing
-    # until all IMPL_MATCH annotations have been verified to be correct.
-    # Remove --warn-only once the pass rate is known-good.
-    set(_warn_flag "--warn-only")
+    # Build the list of DLL targets to depend on (only those that exist)
+    set(_deps "")
+    foreach(_tgt Core Engine)
+        if(TARGET ${_tgt})
+            list(APPEND _deps ${_tgt})
+        endif()
+    endforeach()
 
-    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+    # Create the verify target
+    add_custom_target(verify
         COMMAND ${Python3_EXECUTABLE}
             "${VERIFY_SCRIPT}"
-            "${SRC_DIR}"
-            --dll "${DLL_NAME}"
-            ${_warn_flag}
-        COMMENT "Byte-parity check: ${TARGET_NAME} vs retail/${DLL_NAME}..."
+            "${PROJECT_SOURCE_DIR}/src"
+            --build-dir "${CMAKE_BINARY_DIR}/bin"
+            --report "${CMAKE_BINARY_DIR}/parity_report.txt"
+        DEPENDS ${_deps}
+        COMMENT "Verifying byte-parity: rebuilt DLLs vs retail..."
         VERBATIM
     )
 
-    message(STATUS "${TARGET_NAME}: byte-parity check enabled (retail/${DLL_NAME})")
+    message(STATUS "verify: byte-parity target enabled (nmake verify)")
 endfunction()

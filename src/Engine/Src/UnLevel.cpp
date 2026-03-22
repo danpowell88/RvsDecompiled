@@ -1295,7 +1295,7 @@ INT ULevel::Listen( FString& Error )
 	}
 
 	// Instantiate and assign the net driver.
-	NetDriver = (UNetDriver*)UObject::StaticConstructObject( DriverClass, UObject::GetTransientPackage(), NAME_None );
+	NetDriver = (UNetDriver*)UObject::StaticConstructObject( DriverClass, UObject::GetTransientPackage(), NAME_None, 0, NULL, GError, NULL );
 	if ( !NetDriver )
 	{
 		Error = LocalizeError(TEXT("NetListen"), TEXT("Engine"), NULL);

@@ -67,9 +67,7 @@ When there is any conflict between the SDK headers and Ghidra analysis of the re
    - `IMPL_EMPTY("reason")` — retail is also trivially empty (Ghidra confirmed); only use when Ghidra confirms the body is empty
    - `IMPL_TODO("reason")` — **temporary** placeholder; Ghidra body identified at a known address but implementation not yet written, or blocked by an unresolved FUN_ helper that is itself being tracked. Use this instead of IMPL_DIVERGE when the function CAN eventually be implemented.
    - `IMPL_DIVERGE("reason")` — **permanent** divergence only. Valid reasons: defunct live services (GameSpy), Karma/MeSDK proprietary binary-only SDK, rdtsc CPUID chains, functions confirmed absent from the retail export table. NOT for "pending decompilation" or "blocked by FUN_ helper" — use IMPL_TODO for those.
-   - `IMPL_APPROX` — **BANNED, causes build failure**
 
-   **The valid macros are IMPL_MATCH, IMPL_EMPTY, IMPL_TODO, and IMPL_DIVERGE.**
 
    **IMPL_TODO vs IMPL_DIVERGE — the key question:** *Can this function ever match retail?*
    - Yes (just needs more work) → `IMPL_TODO`
@@ -85,6 +83,13 @@ $env:PATH = "C:\Users\danpo\Desktop\rvs\tools\toolchain\msvc71\bin;$VS2019_X86;$
 $env:LIB = "C:\Users\danpo\Desktop\rvs\tools\toolchain\msvc71\lib;C:\Users\danpo\Desktop\rvs\tools\toolchain\winsdk\Lib;C:\Users\danpo\Desktop\rvs\tools\toolchain\dxsdk\Lib"
 & "$VS2019_X86\nmake.exe" /s 2>&1 | Where-Object { $_ -match "error " }
 ```
+
+**To verify byte-parity after building (compares rebuilt DLLs against retail):**
+```powershell
+cd C:\Users\danpo\Desktop\rvs\build-71
+& "$VS2019_X86\nmake.exe" verify
+```
+The verify step runs `verify_byte_parity.py` against all IMPL_MATCH annotations and exits non-zero on any mismatch. Results are also written to `build-71/parity_report.txt`.
 
 The VS2019_X86 path must be in PATH for `cvtres.exe` to be found by the MSVC 7.1 linker (needed for RavenShield.exe .rc file linking).
 

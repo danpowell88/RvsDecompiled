@@ -88,8 +88,11 @@ set(CMAKE_EXE_LINKER_FLAGS_INIT    "/MACHINE:X86 /SUBSYSTEM:WINDOWS /NOLOGO")
 # statics. MSVC 7.1 emits them with "Static" storage class in the .obj; the
 # linker cannot export Static-class symbols via .def, so it reports LNK2001.
 # No retail DLL imports these symbols; null export addresses are safe.
-set(CMAKE_MODULE_LINKER_FLAGS_INIT "/MACHINE:X86 /NOLOGO /FORCE:UNRESOLVED")
-set(CMAKE_SHARED_LINKER_FLAGS_INIT "/MACHINE:X86 /NOLOGO /FORCE:UNRESOLVED")
+# /FORCE:MULTIPLE — Header-defined virtual stubs (FMalloc, FFeedbackContext etc.)
+# are compiled into multiple .obj files; MSVC 7.1 COMDAT folding doesn't always
+# deduplicate them, so we suppress LNK2005 as the retail DLLs have the same layout.
+set(CMAKE_MODULE_LINKER_FLAGS_INIT "/MACHINE:X86 /NOLOGO /FORCE:UNRESOLVED /FORCE:MULTIPLE /MAP")
+set(CMAKE_SHARED_LINKER_FLAGS_INIT "/MACHINE:X86 /NOLOGO /FORCE:UNRESOLVED /FORCE:MULTIPLE /MAP")
 
 # --- PATH: cl.exe depends on c1.dll, c2.dll, mspdb71.dll, msobj71.dll ---
 # These DLLs are in MSVC71_BIN. CMake's configure phase inherits PATH from
