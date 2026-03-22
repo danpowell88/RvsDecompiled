@@ -582,12 +582,322 @@ void ULevel::TickNetServer( FLOAT DeltaSeconds )
 	unguard;
 }
 
-IMPL_TODO("2336-byte per-connection channel processing; no permanent blockers (no Karma/rdtsc); complex but tractable. Ghidra 0x103c53b0")
+IMPL_TODO("Ghidra 0x103c53b0 (2336b): implemented; FUN_103c4470/FUN_103c4300 called by raw address; DAT_10799554/DAT_107997cc stats omitted (binary globals)")
 INT ULevel::ServerTickClient( UNetConnection* Conn, FLOAT DeltaSeconds )
 {
 	guard(ULevel::ServerTickClient);
-	// TODO: implement ULevel::ServerTickClient (per-connection channel processing)
-	return 0;
+
+	if (!Conn)
+		appFailAssert("Conn", ".\\UnLevTic.cpp", 0);
+
+	INT State = *(INT*)((BYTE*)Conn + 0x80);
+	if (State != 1 && State != 2 && State != 3)
+		appFailAssert("Conn->State invalid", ".\\UnLevTic.cpp", 0);
+
+	INT local_64 = 0;
+
+	APlayerController* PC = *(APlayerController**)((BYTE*)Conn + 0x34);
+	void* ndPtr = (void*)*(INT*)((BYTE*)Conn + 0x7c);  // NetDriver
+
+	// Gate: PC non-null, connection ready, state==3, not timed out
+	if (PC != NULL && Conn->IsNetReady(0) && State == 3 && ndPtr != NULL)
+	{
+		FLOAT ndTime   = *(FLOAT*)((BYTE*)ndPtr + 0x48);
+		FLOAT lastRecv = *(FLOAT*)((BYTE*)Conn + 0xf4);
+		if (ndTime - lastRecv < 1.5f)
+		{
+			FMemMark Mark(GMem);
+
+			// Increment per-frame counter and connection send counter
+			INT FrameCounter = ++*(INT*)((BYTE*)this + 0x10c);
+			++*(INT*)((BYTE*)Conn + 0x118);
+
+			// Stamp all open channels with the current frame counter
+			INT  nChan = *(INT*)((BYTE*)Conn + 0x4b8c);
+			INT* cList = *(INT**)((BYTE*)Conn + 0x4b88);
+			for (INT ci = 0; ci < nChan; ci++)
+			{
+				INT ch = cList[ci];
+				if (ch) *(INT*)(ch + 0x318) = FrameCounter;
+			}
+
+			// Get view target via eventGetViewTarget (vtable[0x18c/4] on PC, thiscall)
+			typedef AActor* (__thiscall* GetViewTargetFn)(APlayerController*);
+			AActor* Viewer = ((GetViewTargetFn)(*(INT*)(*(INT*)PC + 0x18c)))(PC);
+
+			FVector ViewLoc(
+				*(FLOAT*)((BYTE*)Viewer + 0x234),
+				*(FLOAT*)((BYTE*)Viewer + 0x238),
+				*(FLOAT*)((BYTE*)Viewer + 0x23c)
+			);
+			FRotator ViewRot(
+				*(INT*)((BYTE*)PC + 0x240),
+				*(INT*)((BYTE*)PC + 0x244),
+				*(INT*)((BYTE*)PC + 0x248)
+			);
+			PC->eventPlayerCalcView(Viewer, ViewLoc, ViewRot);
+
+			if (Viewer == NULL)
+				appFailAssert("Viewer", ".\\UnLevTic.cpp", 0);
+
+			FLOAT viewX = ViewLoc.X, viewY = ViewLoc.Y, viewZ = ViewLoc.Z;
+
+			// LOD adjustment every other frame using a model line check
+			INT connCounter = *(INT*)((BYTE*)Conn + 0x118);
+			if (connCounter & 1)
+			{
+				FLOAT fVar3 = (connCounter & 2) == 0 ? 0.9f : 0.4f;
+				FLOAT extX = fVar3 * *(FLOAT*)((BYTE*)Viewer + 0x24c);
+				FLOAT extY = fVar3 * *(FLOAT*)((BYTE*)Viewer + 0x250);
+				FLOAT extZ = fVar3 * *(FLOAT*)((BYTE*)Viewer + 0x254);
+				INT basePtr = *(INT*)((BYTE*)Viewer + 0x15c);
+				if (basePtr)
+				{
+					extX += fVar3 * *(FLOAT*)(basePtr + 0x24c);
+					extY += fVar3 * *(FLOAT*)(basePtr + 0x250);
+					extZ += fVar3 * *(FLOAT*)(basePtr + 0x254);
+				}
+				FLOAT checkX = viewX + extX, checkY = viewY + extY, checkZ = viewZ + extZ;
+				INT xLevelPtr = *(INT*)((BYTE*)Viewer + 0x328);
+				if (xLevelPtr)
+				{
+					INT modelPtr = *(INT*)(xLevelPtr + 0x90);
+					if (modelPtr)
+					{
+						typedef void (__thiscall* ModelMultiCheckFn)(void*, void*, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, INT, INT);
+						INT vtblFn = *(INT*)(*(INT*)modelPtr + 0x68);
+						((ModelMultiCheckFn)vtblFn)((void*)modelPtr, NULL, checkX, checkY, checkZ, viewX, viewY, viewZ, 0.0f, 0.0f, 0.0f, 4, 0);
+					}
+				}
+				viewX = checkX; viewY = checkY; viewZ = checkZ;
+			}
+
+			INT nActors = Actors.Num();
+			// Sort pointer buffer; FUN_103c4470 allocates 12-byte entries from GMem internally
+			BYTE** sortPtrs = (BYTE**)GMem.PushBytes(nActors * 4, 8);
+			INT iVar4 = 0;
+
+			// Viewer location for priority distance calculations
+			FVector ViewerLoc(
+				*(FLOAT*)((BYTE*)Viewer + 0x234),
+				*(FLOAT*)((BYTE*)Viewer + 0x238),
+				*(FLOAT*)((BYTE*)Viewer + 0x23c)
+			);
+
+			// View direction buffer: forward vector from PC rotation
+			BYTE viewDirBuf[36];
+			appMemzero(viewDirBuf, 36);
+			FRotator PCRot(*(INT*)((BYTE*)PC + 0x240), *(INT*)((BYTE*)PC + 0x244), *(INT*)((BYTE*)PC + 0x248));
+			*(FVector*)viewDirBuf = PCRot.Vector();
+
+			// Time accumulators for frequency-based replication
+			DOUBLE connTime   = *(DOUBLE*)((BYTE*)Conn + 0x10c);
+			DOUBLE netDrvTime = *(DOUBLE*)((BYTE*)ndPtr + 0x48);
+
+			typedef BYTE* (__cdecl* CalcPriorityFn)(FVector*, BYTE*, UNetConnection*, UObject*);
+			CalcPriorityFn CalcPriority = (CalcPriorityFn)(0x103c4470);
+			typedef UChannel* (__thiscall* FindChanFn)(void*, AActor**);
+			FindChanFn FindChan = (FindChanFn)(0x103b7b70);
+
+			// First-2 loop: actors at index 0 and 1 get special time-based processing
+			for (INT i = 0; i < 2 && i < nActors; i++)
+			{
+				AActor* actor = Actors(i);
+				if (!actor || *(INT*)((BYTE*)actor + 0x318) == FrameCounter || *(BYTE*)((BYTE*)actor + 0x2e) == 0)
+				{
+					connTime += 0.023;
+					continue;
+				}
+				if (*(INT*)((BYTE*)actor + 0xa0) >= 0)
+				{
+					// Non-negative NetPriority: always include in priority queue
+					*(INT*)((BYTE*)actor + 0x318) = FrameCounter;
+					BYTE* entry = CalcPriority(&ViewerLoc, viewDirBuf, Conn, (UObject*)actor);
+					if (entry) sortPtrs[iVar4++] = entry;
+				}
+				else
+				{
+					// Negative NetPriority: replicate based on NetUpdateFrequency
+					FLOAT freq = *(FLOAT*)((BYTE*)actor + 0x128);
+					INT freq1 = appRound(freq * (FLOAT)connTime);
+					INT freq2 = appRound(freq * (FLOAT)netDrvTime);
+					if (freq1 != freq2)
+					{
+						UChannel* chanPtr = FindChan((void*)Conn, &actor);
+						BYTE flag = *(BYTE*)((BYTE*)actor + 0xa4);
+						INT nOut = chanPtr ? *(INT*)((BYTE*)chanPtr + 0x98) : 0;
+						INT nIn  = chanPtr ? *(INT*)((BYTE*)chanPtr + 0xb0) : 0;
+						INT ch88 = chanPtr ? *(INT*)((BYTE*)chanPtr + 0x88) : 1;
+						if ((flag & 0x80) != 0 && chanPtr != NULL && nOut != 0 && nIn == 0 && ch88 == 0)
+						{
+							*(DOUBLE*)((BYTE*)chanPtr + 0x74) = *(DOUBLE*)((BYTE*)ndPtr + 0x48);
+						}
+						else
+						{
+							*(INT*)((BYTE*)actor + 0x318) = FrameCounter;
+							BYTE* entry = CalcPriority(&ViewerLoc, viewDirBuf, Conn, (UObject*)actor);
+							if (entry) sortPtrs[iVar4++] = entry;
+						}
+					}
+					connTime   += 0.023;
+					netDrvTime += 0.023;
+				}
+			}
+
+			// Engine tick-rate multiplier for frequency comparison
+			void* engPtr = *(void**)((BYTE*)this + 0x44);
+			typedef FLOAT (__thiscall* GetEngSpeedFn)(void*);
+			FLOAT fEngine = ((GetEngSpeedFn)(*(INT*)(*(INT*)engPtr + 0xac)))(engPtr);
+
+			// Main actor loop: round-robin starting from stored float index
+			for (FLOAT fi = *(FLOAT*)((BYTE*)this + 0x108); fi < (FLOAT)nActors; fi += 1.0f)
+			{
+				AActor* actor = Actors((INT)fi);
+				if (!actor || *(INT*)((BYTE*)actor + 0x318) == FrameCounter || *(BYTE*)((BYTE*)actor + 0x2e) == 0)
+					continue;
+
+				if (*(INT*)((BYTE*)actor + 0xa0) < 0)
+				{
+					FLOAT freq = *(FLOAT*)((BYTE*)actor + 0x128);
+					INT freq1 = appRound(freq * (FLOAT)connTime);
+					INT freq2 = appRound(freq * (FLOAT)netDrvTime);
+					if (freq1 == freq2)
+					{
+						connTime += 0.023; netDrvTime += 0.023;
+						continue;
+					}
+					UChannel* chanPtr = FindChan((void*)Conn, &actor);
+					BYTE flag = *(BYTE*)((BYTE*)actor + 0xa4);
+					INT nOut = chanPtr ? *(INT*)((BYTE*)chanPtr + 0x98) : 0;
+					INT nIn  = chanPtr ? *(INT*)((BYTE*)chanPtr + 0xb0) : 0;
+					INT ch88 = chanPtr ? *(INT*)((BYTE*)chanPtr + 0x88) : 1;
+					if ((flag & 0x80) != 0 && chanPtr != NULL && nOut != 0 && nIn == 0 && ch88 == 0)
+					{
+						*(DOUBLE*)((BYTE*)chanPtr + 0x74) = *(DOUBLE*)((BYTE*)ndPtr + 0x48);
+						connTime += 0.023; netDrvTime += 0.023;
+						continue;
+					}
+				}
+				else
+				{
+					// Non-negative NetPriority
+					if ((*(DWORD*)((BYTE*)actor + 0xa0) & 0x20000000) != 0)
+					{
+						UClass* cls = actor->GetClass();
+						AActor* def = cls->GetDefaultActor();
+						if (def && *(FLOAT*)((BYTE*)def + 0xc0) - 0.15f >= *(FLOAT*)((BYTE*)actor + 0xc0))
+						{
+							connTime += 0.023; netDrvTime += 0.023;
+							continue;
+						}
+					}
+					if (*(FLOAT*)((BYTE*)actor + 0x128) < fEngine)
+					{
+						FLOAT freq = *(FLOAT*)((BYTE*)actor + 0x128);
+						INT freq1 = appRound(freq * (FLOAT)connTime);
+						INT freq2 = appRound(freq * (FLOAT)netDrvTime);
+						if (freq1 == freq2)
+						{
+							connTime += 0.023; netDrvTime += 0.023;
+							continue;
+						}
+					}
+				}
+
+				// Mark and calculate priority for this actor
+				*(INT*)((BYTE*)actor + 0x318) = FrameCounter;
+				BYTE* entry = CalcPriority(&ViewerLoc, viewDirBuf, Conn, (UObject*)actor);
+				if (entry) sortPtrs[iVar4++] = entry;
+				connTime   += 0.023;
+				netDrvTime += 0.023;
+			}
+
+			// Update Conn->LastSendTime to match current NetDriver time
+			*(DOUBLE*)((BYTE*)Conn + 0x10c) = *(DOUBLE*)((BYTE*)ndPtr + 0x48);
+
+			// Sort by priority descending
+			typedef void (__cdecl* SortPriorityFn)(BYTE**, INT);
+			((SortPriorityFn)(0x103c4300))(sortPtrs, iVar4);
+
+			void* pkgmap = *(void**)((BYTE*)Conn + 0xc8);
+			typedef INT (__thiscall* MapObjectFn)(void*, UClass*);
+
+			// Replication loop: replicate actors in priority order
+			for (INT ri = 0; ri < iVar4; ri++)
+			{
+				BYTE* pEntry = sortPtrs[ri];
+				if (!pEntry) continue;
+				AActor*   actor = *(AActor**)(pEntry + 4);
+				UChannel* chan  = *(UChannel**)(pEntry + 8);
+				if (!actor) continue;
+
+				INT bImmediateUpdate = 0;
+				INT bSkip = 0;
+
+				if ((*(BYTE*)((BYTE*)actor + 0xa4) & 0x10) != 0)
+				{
+					bSkip = 1;
+				}
+				else
+				{
+					FLOAT ndNow = *(FLOAT*)((BYTE*)ndPtr + 0x48);
+					if (chan != NULL && ndNow - *(FLOAT*)((BYTE*)chan + 0x74) <= 0.699999988079071f)
+					{
+						bSkip = 1;
+					}
+					else
+					{
+						typedef INT (__thiscall* IsRelevantFn)(void*, APlayerController*, AActor*, FLOAT, FLOAT, FLOAT);
+						bImmediateUpdate = ((IsRelevantFn)(*(INT*)(*(INT*)actor + 0x100)))(actor, PC, Viewer, viewX, viewY, viewZ);
+						if (!bImmediateUpdate) bSkip = 1;
+					}
+				}
+
+				if (bSkip)
+				{
+					if (chan != NULL)
+					{
+						FLOAT ndNow   = *(FLOAT*)((BYTE*)ndPtr + 0x48);
+						FLOAT tickFreq = *(FLOAT*)((BYTE*)ndPtr + 0x5c);
+						if (ndNow - *(FLOAT*)((BYTE*)chan + 0x74) > tickFreq)
+						{
+							typedef void (__thiscall* CloseChanFn)(void*);
+							((CloseChanFn)(*(INT*)(*(INT*)chan + 0x6c)))(chan);
+						}
+					}
+					continue;
+				}
+
+				// Create channel if this actor has none yet
+				if (chan == NULL)
+				{
+					UClass* cls = actor->GetClass();
+					INT idx = ((MapObjectFn)(*(INT*)(*(INT*)pkgmap + 0x70)))(pkgmap, cls);
+					if (idx == -1) continue;
+					chan = Conn->CreateChannel(CHTYPE_Actor, 1, -1);
+					if (!chan) continue;
+					((UActorChannel*)chan)->SetChannelActor(actor);
+				}
+
+				if (!Conn->IsNetReady(0)) break;
+
+				if (bImmediateUpdate != 0)
+					*(FLOAT*)((BYTE*)chan + 0x74) = appFrand() * 0.3f + *(FLOAT*)((BYTE*)ndPtr + 0x48);
+
+				if (chan->IsNetReady(0))
+				{
+					((UActorChannel*)chan)->ReplicateActor();
+					local_64++;
+				}
+
+				if (!Conn->IsNetReady(0)) break;
+			}
+
+			Mark.Pop();
+		}
+	}
+
+	return local_64;
 	unguard;
 }
 
@@ -1077,25 +1387,50 @@ INT ULevel::MoveActor( AActor* Actor, FVector Delta, FRotator NewRotation, FChec
 	DWORD ActorFlags2 = *(DWORD*)((BYTE*)Actor + 0xa8);
 	typedef INT (__thiscall* VFn200)(void*);
 
+	// Build collision TraceFlags from actor flags (Ghidra 0x103b9a60)
+	DWORD TraceFlags = 0;
+	if (ActorFlags2 & 0x800)                    // bCollideWorld
+		TraceFlags = (bIgnorePawns == 0) ? 0x19u : 0x18u;
+	if (ActorFlags2 & 0x1000)                   // bCollideActors
+		TraceFlags |= 0x86u;
+	if (ActorFlags2 & 0x100000)
+		TraceFlags |= 0x10000u;
+
+	AActor* FirstBlocking = NULL;
+	INT     hitFlags      = 0;
+
 	if (bExtra == 0)
 	{
 		// Standard (non-AR6ColBox) movement path.
-		AActor* BlockedActor = NULL; (void)BlockedActor;
-		AActor* BlockedBase  = NULL; (void)BlockedBase;
 
-		// Perform sweep collision if actor has collision flags and is not a physics root
-		// (vtable[200] returns 0 → not a physics root → use sweep detection)
-		if ((ActorFlags2 & 0x1800) != 0 && ((VFn200)(*(INT*)(*(INT*)Actor + 200)))(Actor) == 0 && DeltaSize != 0.0f)
+		// Perform sweep collision if actor has collision flags and is not a pawn-type
+		// vtable[0xc8/4](Actor)==0 → standard-physics actor; use MultiLineCheck sweep
+		if ((ActorFlags2 & 0x1800) != 0 && ((VFn200)(*(INT*)(*(INT*)Actor + 0xc8)))(Actor) == 0 && DeltaSize != 0.0f)
 		{
-			// Allocate FirstHit linked-list head via vtable[0xd8/4] on the level
-			typedef FCheckResult* (__thiscall* AllocFirstHitFn)(ULevel*);
-			FCheckResult* FirstHit = ((AllocFirstHitFn)(*(INT*)(*(INT*)this + 0xd8)))(this);
+			// Build actor extent (radius, radius, height)
+			FVector Extent(*(FLOAT*)((BYTE*)Actor + 0xf8),
+			               *(FLOAT*)((BYTE*)Actor + 0xf8),
+			               *(FLOAT*)((BYTE*)Actor + 0xfc));
+			// Sweep slightly past the destination to catch thin geometry
+			FVector SweepEnd = Actor->Location + Delta + Dir * 2.f;
+			ALevelInfo* pLvl = ((ActorFlags2 & 0x1000) != 0) ? GetLevelInfo() : NULL;
 
-			MoveActorFirstBlocking(Actor, bIgnorePawns, bTest, FirstHit, Hit);
+			// MultiLineCheck returns linked list of all hits in sweep path
+			FCheckResult* HitList = MultiLineCheck(GMem, SweepEnd, Actor->Location,
+			                                       Extent, pLvl, TraceFlags, Actor);
 
-			// FUN_103b7390: post-blocking cleanup helper (no explicit args)
+			hitFlags = MoveActorFirstBlocking(Actor, bIgnorePawns, bTest, HitList, Hit);
+			if (Hit.Actor != NULL)
+				FirstBlocking = Hit.Actor;
+
+			// FUN_103b7390: post-blocking cleanup helper (no exported name)
 			typedef void (__cdecl* PostBlockHelperFn)();
 			((PostBlockHelperFn)(0x103b7390))();
+
+			// Clear base AR6ColBox blocking flag if actor has a base
+			INT basePtr = *(INT*)((BYTE*)Actor + 0x180);
+			if (basePtr != 0)
+				*(DWORD*)(basePtr + 0x394) &= ~8u;
 		}
 
 		FLOAT moveX = Delta.X, moveY = Delta.Y, moveZ = Delta.Z;
@@ -1120,8 +1455,8 @@ INT ULevel::MoveActor( AActor* Actor, FVector Delta, FRotator NewRotation, FChec
 		}
 
 		// Encroachment check for encroacher actors when not testing
-		// vtable[200] != 0 → actor IS a physics encroacher
-		if (bTest == 0 && bNoFail == 0 && ((VFn200)(*(INT*)(*(INT*)Actor + 200)))(Actor) != 0)
+		// vtable[0xc8](Actor) != 0 → pawn-type encroacher; query level encroachment
+		if (bTest == 0 && bNoFail == 0 && ((VFn200)(*(INT*)(*(INT*)Actor + 0xc8)))(Actor) != 0)
 		{
 			typedef INT (__thiscall* LevelCheckEncFn)(ULevel*);
 			INT bEncroached = ((LevelCheckEncFn)(*(INT*)(*(INT*)this + 0xc0)))(this);
@@ -1134,7 +1469,7 @@ INT ULevel::MoveActor( AActor* Actor, FVector Delta, FRotator NewRotation, FChec
 
 		// Remove from collision hash before applying new position
 		FCollisionHashBase* Hash = *(FCollisionHashBase**)((BYTE*)this + 0xf0);
-		if ((ActorFlags2 & 0x800) && Hash)
+		if ((ActorFlags2 & 0x1800) && Hash)
 			Hash->RemoveActor(Actor);
 
 		// Apply delta to location
@@ -1146,7 +1481,7 @@ INT ULevel::MoveActor( AActor* Actor, FVector Delta, FRotator NewRotation, FChec
 		*(FRotator*)((BYTE*)Actor + 0x240) = NewRotation;
 
 		// Re-add to collision hash
-		if ((ActorFlags2 & 0x800) && Hash)
+		if ((ActorFlags2 & 0x1800) && Hash)
 			Hash->AddActor(Actor);
 
 		// UnTouch actors that are no longer overlapping
@@ -1164,16 +1499,14 @@ INT ULevel::MoveActor( AActor* Actor, FVector Delta, FRotator NewRotation, FChec
 			}
 		}
 
-		// Post-move notify (vtable[0x10c] on actor — actor update callback)
+		// Post-move notify (vtable[0x10c] on actor — update render/physics state)
 		typedef void (__thiscall* PostMoveFn)(AActor*);
 		((PostMoveFn)(*(INT*)(*(INT*)Actor + 0x10c)))(Actor);
 
 		Mark.Pop();
 
-		if (bTest == 0)
-			Actor->UpdateRenderData();
-
-		return (Hit.Time > 0.0f) ? 1 : 0;
+		// hitFlags==0 → no blocking hit; bTest!=0 → test-only (no real move)
+		return (hitFlags == 0 || bTest != 0) ? 1 : 0;
 	}
 	else
 	{
