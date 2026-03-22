@@ -2934,7 +2934,7 @@ static INT VerifyArmPatchFile( const TCHAR* FileName, const FGuid& Expected )
 	return bNeedsDownload;
 }
 
-IMPL_TODO("Ghidra 0x103c1d30 (3802b): full network handshake dispatcher. Log format strings (DAT_*) approximated empty; rdtsc challenge -> appSeconds(); LOGIN challenge check approximated (engine vtable[42] = GetChallengeResponse skipped); JOIN vtable[0xb4/4=45] VerifyLogin skipped; ARMPATCH download channel send bunch (FBitWriter via Pad[256] not directly serialisable via our FOutBunch declaration) skipped; FUN_103bfaf0 remove-FPackageInfo-entry approximated as raw FArray::Remove.")
+IMPL_TODO("Ghidra 0x103c1d30 (3802b): full network handshake dispatcher. Log format strings (DAT_*) approximated empty; rdtsc challenge -> appSeconds(); LOGIN challenge check now verified via Engine vtable[42]; JOIN vtable[0xb4/4=45] VerifyLogin skipped; ARMPATCH download channel send bunch (FBitWriter via Pad[256] not directly serialisable via our FOutBunch declaration) skipped; FUN_103bfaf0 remove-FPackageInfo-entry approximated as raw FArray::Remove.")
 void ULevel::NotifyReceivedText( UNetConnection* Connection, const TCHAR* Text )
 {
 	guard(ULevel::NotifyReceivedText);
