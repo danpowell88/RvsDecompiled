@@ -1102,7 +1102,7 @@ void UObject::execRotatorToString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_RotatorToString, execRotatorToString );
 
-IMPL_TODO("EX_StringToName: opcode ~0x5A unconfirmed; function exists in Core.dll but absent from Core.dll export table; implementation inferred from context")
+IMPL_TODO("EX_StringToName: opcode 0x5A inferred from position immediately after EX_RotatorToString=0x59 in conversion range 0x49-0x5F; function exists in Core.dll but is unexported — Ghidra Core.dll dispatch table binary verification needed to confirm opcode slot")
 void UObject::execStringToName( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execStringToName);
@@ -1110,6 +1110,7 @@ void UObject::execStringToName( FFrame& Stack, RESULT_DECL )
 	*(FName*)Result = FName( *S );
 	unguardexecSlow;
 }
+IMPLEMENT_FUNCTION( UObject, 0x5A, execStringToName );
 
 /*-----------------------------------------------------------------------------
 	Extended native dispatch (0x60-0x6F) — HighNative0–15.

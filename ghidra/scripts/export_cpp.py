@@ -89,7 +89,7 @@ def export_program():
     for cls_name, functions in sorted(classes.items()):
         cpp_path = os.path.join(output_dir, cls_name + ".cpp")
         
-        with open(cpp_path, "w") as cpp_file:
+        with open(cpp_path, "w", encoding="utf-8") as cpp_file:
             cpp_file.write("// " + "=" * 70 + "\n")
             cpp_file.write("// " + cls_name + " -- Raw Ghidra decompilation\n")
             cpp_file.write("// Source: " + program.getName() + "\n")
