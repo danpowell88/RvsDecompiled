@@ -526,6 +526,18 @@ def main():
         ghidra_sizes = get_ghidra_sizes(stem)
         sym_map      = get_map(stem)
 
+        # Build PE export table for accurate post-ICF address lookup.
+        # The MAP file can show pre-ICF addresses that differ from the
+        # actual export addresses (Core.dll has ~1800 such mismatches).
+        our_pe.parse_data_directories(
+            directories=[pefile.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_EXPORT"]]
+        )
+        pe_export_map = {}
+        if hasattr(our_pe, "DIRECTORY_ENTRY_EXPORT"):
+            for exp in our_pe.DIRECTORY_ENTRY_EXPORT.symbols:
+                if exp.name:
+                    pe_export_map[exp.name.decode()] = our_base + exp.address
+
         for addr, src, decl, lineno in entries:
             total += 1
             # Normalise address to full VA
@@ -545,10 +557,13 @@ def main():
             # Find function in our DLL via MAP file
             key = None
             our_va = None
-            # Strategy 0: if decl is a mangled name (starts with ?), look up directly
-            if decl.startswith('?'):
+            # Strategy 0: if decl is a mangled name (starts with ? or _),
+            # prefer PE export table (accurate post-ICF address), fall back to MAP
+            if decl.startswith('?') or decl.startswith('_'):
                 key = decl.split()[0]  # mangled name (first token)
-                our_va = sym_map.get(key)
+                our_va = pe_export_map.get(key)
+                if our_va is None:
+                    our_va = sym_map.get(key)
             if our_va is None:
                 key = _decl_to_key(decl)
             if key and our_va is None:
