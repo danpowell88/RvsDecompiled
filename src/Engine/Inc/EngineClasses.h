@@ -3694,6 +3694,73 @@ class ENGINE_API AGameInfo : public AInfo
 {
 public:
 	DECLARE_CLASS(AGameInfo,AInfo,0|CLASS_Config,Engine)
+
+	// Data members — Ghidra operator= (0x10332f20) confirms SDK layout.
+	// AInfo/AActor ends at 0x394; AGameInfo members follow.
+	BYTE     Difficulty;                     // 0x394
+	// 3 bytes padding to 0x398
+	INT      GoreLevel;                      // 0x398
+	INT      MaxSpectators;                  // 0x39c
+	INT      NumSpectators;                  // 0x3a0
+	INT      MaxPlayers;                     // 0x3a4
+	INT      NumPlayers;                     // 0x3a8
+	INT      NumBots;                        // 0x3ac
+	INT      CurrentID;                      // 0x3b0
+	BITFIELD bRestartLevel : 1;              // 0x3b4 (22 bitfields)
+	BITFIELD bPauseable : 1;
+	BITFIELD bCanChangeSkin : 1;
+	BITFIELD bGameEnded : 1;
+	BITFIELD bOverTime : 1;
+	BITFIELD bAlternateMode : 1;
+	BITFIELD bCanViewOthers : 1;
+	BITFIELD bDelayedStart : 1;
+	BITFIELD bWaitingToStartMatch : 1;
+	BITFIELD bChangeLevels : 1;
+	BITFIELD m_bChangedServerConfig : 1;
+	BITFIELD bAlreadyChanged : 1;
+	BITFIELD bLocalLog : 1;
+	BITFIELD bWorldLog : 1;
+	BITFIELD bLoggingGame : 1;
+	BITFIELD m_bGameStarted : 1;
+	BITFIELD m_bGameOver : 1;
+	BITFIELD m_bCompilingStats : 1;
+	BITFIELD m_bUseClarkVoice : 1;
+	BITFIELD m_bPlayIntroVideo : 1;
+	BITFIELD m_bPlayOutroVideo : 1;
+	BITFIELD m_bPendingLevelExists : 1;
+	FLOAT    GameSpeed;                      // 0x3b8
+	FLOAT    StartTime;                      // 0x3bc
+	class AAccessControl*         AccessControl;          // 0x3c0
+	class ABroadcastHandler*      BroadcastHandler;       // 0x3c4
+	class AGameReplicationInfo*   GameReplicationInfo;    // 0x3c8
+	class AStatLog*               StatLog;                // 0x3cc
+	class UClass*                 DeathMessageClass;      // 0x3d0
+	class UClass*                 GameMessageClass;       // 0x3d4
+	class UClass*                 PlayerControllerClass;  // 0x3d8
+	class UClass*                 GameReplicationInfoClass; // 0x3dc
+	class UClass*                 StatLogClass;           // 0x3e0
+	TArray<FString>               m_BankListToLoad;       // 0x3e4 (12 bytes)
+	FStringNoInit DefaultPlayerClassName;    // 0x3f0
+	FStringNoInit BotMenuType;               // 0x3fc
+	FStringNoInit RulesMenuType;             // 0x408
+	FStringNoInit SettingsMenuType;          // 0x414
+	FStringNoInit GameUMenuType;             // 0x420
+	FStringNoInit MultiplayerUMenuType;      // 0x42c
+	FStringNoInit GameOptionsMenuType;       // 0x438
+	FStringNoInit HUDType;                   // 0x444
+	FStringNoInit MapListType;               // 0x450
+	FStringNoInit MapPrefix;                 // 0x45c
+	FStringNoInit BeaconName;                // 0x468
+	FStringNoInit DefaultPlayerName;         // 0x474
+	FStringNoInit GameName;                  // 0x480
+	FStringNoInit AccessControlClass;        // 0x48c
+	FStringNoInit BroadcastHandlerClass;     // 0x498
+	FStringNoInit PlayerControllerClassName; // 0x4a4
+	FStringNoInit m_szGameTypeFlag;          // 0x4b0
+	FStringNoInit m_szCurrGameType;          // 0x4bc
+	FStringNoInit m_szGameOptions;           // 0x4c8
+	// sizeof(AGameInfo) = 0x4d4
+
 	DECLARE_FUNCTION(execGetNetworkNumber)
 	DECLARE_FUNCTION(execGetCurrentMapNum)
 	DECLARE_FUNCTION(execSetCurrentMapNum)
@@ -3968,10 +4035,43 @@ class ENGINE_API AHUD : public AActor
 public:
 	DECLARE_CLASS(AHUD,AActor,0|CLASS_Config,Engine)
 
-	// Data members (partially reconstructed).
-	// Ghidra shows access at this+0x3E8 -> +0x5B4 for the player viewport.
-	// Simplified to a direct Player pointer for compilation.
-	UPlayer* Player;
+	// Data members — Ghidra operator= (0x10336880) confirms SDK layout.
+	// Base AActor ends at 0x394; AHUD members follow.
+	BYTE     MessageUseBigFont[3];           // 0x394
+	// 1 byte padding to 0x398
+	BITFIELD bShowScores : 1;                // 0x398
+	BITFIELD bShowDebugInfo : 1;
+	BITFIELD bHideCenterMessages : 1;
+	BITFIELD bBadConnectionAlert : 1;
+	BITFIELD bHideHUD : 1;
+	FLOAT    MessageLife[6];                 // 0x39c
+	FLOAT    MessageKillLife[4];             // 0x3b4
+	FLOAT    MessageServerLife[3];           // 0x3c4
+	class UFont*         SmallFont;          // 0x3d0
+	class UFont*         MedFont;            // 0x3d4
+	class UFont*         BigFont;            // 0x3d8
+	class UFont*         LargeFont;          // 0x3dc
+	class UR6GameColors* Colors;             // 0x3e0
+	class AHUD*          nextHUD;            // 0x3e4
+	class APlayerController* PlayerOwner;    // 0x3e8
+	class UFont*         m_FontRainbow6_14pt;// 0x3ec
+	class UFont*         m_FontRainbow6_17pt;// 0x3f0
+	class UFont*         m_FontRainbow6_22pt;// 0x3f4
+	class UFont*         m_FontRainbow6_36pt;// 0x3f8
+	class UMaterial*     m_ConsoleBackground;// 0x3fc
+	FColor   m_ChatMessagesColor;            // 0x400
+	FColor   m_KillMessagesColor;            // 0x404
+	FColor   m_ServerMessagesColor;          // 0x408
+	FStringNoInit HUDConfigWindowType;       // 0x40c
+	FStringNoInit LoadingMessage;            // 0x418
+	FStringNoInit SavingMessage;             // 0x424
+	FStringNoInit ConnectingMessage;         // 0x430
+	FStringNoInit PausedMessage;             // 0x43c
+	FStringNoInit PrecachingMessage;         // 0x448
+	FStringNoInit TextMessages[6];           // 0x454
+	FStringNoInit TextKillMessages[4];       // 0x49c
+	FStringNoInit TextServerMessages[3];     // 0x4cc
+	// sizeof(AHUD) = 0x4f0
 
 	DECLARE_FUNCTION(execDraw3DLine)
 	// Event thunks
@@ -6803,6 +6903,12 @@ class ENGINE_API APlayerStart : public ASmallNavigationPoint
 {
 public:
 	DECLARE_CLASS(APlayerStart,ASmallNavigationPoint,0,Engine)
+
+	BYTE     TeamNumber;            // 0x3e8 (Ghidra: APlayerStart copy ctor confirms)
+	BITFIELD bSinglePlayerStart : 1; // 0x3ec
+	BITFIELD bCoopStart : 1;
+	BITFIELD bEnabled : 1;
+
 	// Auto-generated method declarations
 	virtual void addReachSpecs(APawn *,int);
 };
@@ -7022,6 +7128,83 @@ class ENGINE_API AR6EngineWeapon : public AActor
 {
 public:
 	DECLARE_CLASS(AR6EngineWeapon,AActor,0,Engine)
+
+	// Data members — Ghidra operator= (0x10337030) confirms SDK layout.
+	// AActor ends at 0x394; AR6EngineWeapon members follow.
+	BYTE     m_eWeaponType;                  // 0x394
+	BYTE     m_eGripType;                    // 0x395
+	BYTE     m_iNbBulletsInWeapon;           // 0x396
+	// 1 byte padding
+	INT      m_iNbParticlesToCreate;         // 0x398
+	INT      m_InventoryGroup;               // 0x39c
+	BITFIELD m_bDisplayHudInfo : 1;          // 0x3a0 (9 bitfields)
+	BITFIELD m_bBipod : 1;
+	BITFIELD m_bDeployBipod : 1;
+	BITFIELD m_bBipodDeployed : 1;
+	BITFIELD bFiredABullet : 1;
+	BITFIELD m_bPawnIsWalking : 1;
+	BITFIELD m_bIsSilenced : 1;
+	BITFIELD m_bUnlimitedClip : 1;
+	BITFIELD m_bUseMicroAnim : 1;
+	FLOAT    m_fTimeDisplayParticule;        // 0x3a4
+	FLOAT    m_fMaxZoom;                     // 0x3a8
+	FLOAT    m_fFireAnimRate;                // 0x3ac
+	FLOAT    m_fFPBlend;                     // 0x3b0
+	FLOAT    BobDamping;                     // 0x3b4
+	FLOAT    m_fReloadTime;                  // 0x3b8
+	FLOAT    m_fReloadEmptyTime;             // 0x3bc
+	FLOAT    m_fPauseWhenChanging;           // 0x3c0
+	class USound*       m_ReloadSound;       // 0x3c4
+	class UTexture*     m_ScopeTexture;      // 0x3c8
+	class UTexture*     m_ScopeAdd;          // 0x3cc
+	class UStaticMesh*  m_WithScopeSM;       // 0x3d0
+	class UTexture*     m_FPMuzzleFlashTexture; // 0x3d4
+	class USound*       m_EquipSnd;          // 0x3d8
+	class USound*       m_UnEquipSnd;        // 0x3dc
+	class USound*       m_ReloadSnd;         // 0x3e0
+	class USound*       m_ReloadEmptySnd;    // 0x3e4
+	class USound*       m_ChangeROFSnd;      // 0x3e8
+	class USound*       m_SingleFireStereoSnd;   // 0x3ec
+	class USound*       m_SingleFireEndStereoSnd;// 0x3f0
+	class USound*       m_BurstFireStereoSnd;    // 0x3f4
+	class USound*       m_FullAutoStereoSnd;     // 0x3f8
+	class USound*       m_FullAutoEndMonoSnd;    // 0x3fc
+	class USound*       m_FullAutoEndStereoSnd;  // 0x400
+	class USound*       m_EmptyMagSnd;       // 0x404
+	class USound*       m_TriggerSnd;        // 0x408
+	class USound*       m_ShellSingleFireSnd;// 0x40c
+	class USound*       m_ShellBurstFireSnd; // 0x410
+	class USound*       m_ShellFullAutoSnd;  // 0x414
+	class USound*       m_ShellEndFullAutoSnd;   // 0x418
+	class USound*       m_CommonWeaponZoomSnd;   // 0x41c
+	class USound*       m_SniperZoomFirstSnd;    // 0x420
+	class USound*       m_SniperZoomSecondSnd;   // 0x424
+	class USound*       m_BipodSnd;          // 0x428
+	class UMaterial*    m_HUDTexture;        // 0x42c
+	FName    m_PawnWaitAnimLow;              // 0x430
+	FName    m_PawnWaitAnimHigh;             // 0x434
+	FName    m_PawnWaitAnimProne;            // 0x438
+	FName    m_PawnFiringAnim;               // 0x43c
+	FName    m_PawnFiringAnimProne;          // 0x440
+	FName    m_PawnReloadAnim;               // 0x444
+	FName    m_PawnReloadAnimTactical;       // 0x448
+	FName    m_PawnReloadAnimProne;          // 0x44c
+	FName    m_PawnReloadAnimProneTactical;  // 0x450
+	FName    m_AttachPoint;                  // 0x454
+	FName    m_HoldAttachPoint;              // 0x458
+	FName    m_HoldAttachPoint2;             // 0x45c
+	FVector  m_vPositionOffset;              // 0x460 (12 bytes)
+	FVector  m_FPFlashLocation;              // 0x46c (12 bytes)
+	FPlane   m_HUDTexturePos;               // 0x478 (16 bytes)
+	FStringNoInit m_NameID;                  // 0x488
+	FStringNoInit m_WeaponDesc;              // 0x494
+	FStringNoInit m_WeaponShortName;         // 0x4a0
+	FStringNoInit m_szMagazineClass;         // 0x4ac
+	FStringNoInit m_szMuzzleClass;           // 0x4b8
+	FStringNoInit m_szSilencerClass;         // 0x4c4
+	FStringNoInit m_szTacticalLightClass;    // 0x4d0
+	// sizeof(AR6EngineWeapon) = 0x4dc
+
 	// Event thunks
 	void eventDeployWeaponBipod(DWORD bDeploy);
 	DWORD eventIsGoggles();

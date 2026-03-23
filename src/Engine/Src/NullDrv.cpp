@@ -6,6 +6,9 @@ Reconstructed for Ravenshield decompilation project.
 
 // Placement new for placement-new stubs in this TU.
 #include "EnginePrivate.h"
+
+// BLIT_Direct3D from UnCamera.h (can't include directly — redefinition conflicts)
+enum { BLIT_Direct3D = 0x0010 };
 #pragma warning(push)
 #pragma warning(disable: 4291)
 inline void* operator new(size_t, void* p) noexcept { return p; }

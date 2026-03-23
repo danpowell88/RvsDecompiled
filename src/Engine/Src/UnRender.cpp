@@ -544,9 +544,9 @@ void AHUD::execDraw3DLine( FFrame& Stack, RESULT_DECL )
 	P_GET_VECTOR(End);
 	P_GET_STRUCT(FColor, Color);
 	P_FINISH;
-	if( Player )
+	if( PlayerOwner )
 	{
-		UViewport* VP = *(UViewport**)((BYTE*)Player + 0x5B4);
+		UViewport* VP = *(UViewport**)((BYTE*)PlayerOwner + 0x5B4);
 		if( VP && VP->IsA( UViewport::StaticClass() ) )
 		{
 			FRenderInterface* RI = *(FRenderInterface**)((BYTE*)VP + 0x164);
