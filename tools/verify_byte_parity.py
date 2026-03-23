@@ -536,7 +536,13 @@ def main():
         if hasattr(our_pe, "DIRECTORY_ENTRY_EXPORT"):
             for exp in our_pe.DIRECTORY_ENTRY_EXPORT.symbols:
                 if exp.name:
-                    pe_export_map[exp.name.decode()] = our_base + exp.address
+                    name = exp.name.decode()
+                    va = our_base + exp.address
+                    pe_export_map[name] = va
+                    # Also store demangled form for Strategy 1-3 lookups
+                    d = demangle(name)
+                    if d != name:
+                        pe_export_map[d] = va
 
         for addr, src, decl, lineno in entries:
             total += 1
@@ -567,21 +573,28 @@ def main():
             if our_va is None:
                 key = _decl_to_key(decl)
             if key and our_va is None:
-                # Strategy 1: exact match
-                our_va = sym_map.get(key)
+                # Strategy 1: exact match — prefer PE exports over MAP
+                our_va = pe_export_map.get(key)
+                if our_va is None:
+                    our_va = sym_map.get(key)
                 if our_va is None:
                     # Strategy 2: demangled name contains "ClassName::MethodName("
                     # (avoids matching FVector::Size when looking for FVector::SizeSquared)
                     key_paren = key + "("
-                    for sym_key, sym_va in sym_map.items():
+                    # Check PE exports first (accurate post-ICF addresses)
+                    for sym_key, sym_va in pe_export_map.items():
                         if key_paren in sym_key:
                             our_va = sym_va
                             break
+                    if our_va is None:
+                        for sym_key, sym_va in sym_map.items():
+                            if key_paren in sym_key:
+                                our_va = sym_va
+                                break
                 if our_va is None:
                     # Strategy 3: ends with ::MethodName or contains " ClassName::MethodName"
-                    for sym_key, sym_va in sym_map.items():
+                    for sym_key, sym_va in pe_export_map.items():
                         if sym_key.endswith("::" + key.split("::")[-1] + "("):
-                            # Make sure the class name also matches if we have one
                             if "::" in key:
                                 cls = key.split("::")[0]
                                 if cls in sym_key:
@@ -590,6 +603,17 @@ def main():
                             else:
                                 our_va = sym_va
                                 break
+                    if our_va is None:
+                        for sym_key, sym_va in sym_map.items():
+                            if sym_key.endswith("::" + key.split("::")[-1] + "("):
+                                if "::" in key:
+                                    cls = key.split("::")[0]
+                                    if cls in sym_key:
+                                        our_va = sym_va
+                                        break
+                                else:
+                                    our_va = sym_va
+                                    break
             if our_va is None:
                 print(f"  SKIP {src.name}:{lineno} — '{key}' not found in MAP file")
                 skipped += 1
