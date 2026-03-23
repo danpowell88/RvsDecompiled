@@ -200,6 +200,7 @@ struct CORE_API FFrame : public FOutputDevice
 	UObject*	Object;
 	BYTE*		Code;
 	BYTE*		Locals;
+	INT			FramePad;	// +0x14: Ghidra copy-ctor copies 5 DWORDs; default ctor does NOT init this
 
 	// Constructors.
 	FFrame( UObject* InObject );
