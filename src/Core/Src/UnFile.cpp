@@ -1268,6 +1268,7 @@ CORE_API UBOOL Parse( const TCHAR* Stream, const TCHAR* Match, FGuid& Guid )
 IMPL_MATCH("Core.dll", 0x10130140)
 CORE_API UBOOL ParseUBOOL( const TCHAR* Stream, const TCHAR* Match, UBOOL& OnOff )
 {
+	guard(ParseUBOOL);
 	TCHAR Temp[256] = TEXT("");
 	if( Parse(Stream, Match, Temp, ARRAY_COUNT(Temp)) )
 	{
@@ -1275,6 +1276,7 @@ CORE_API UBOOL ParseUBOOL( const TCHAR* Stream, const TCHAR* Match, UBOOL& OnOff
 		return 1;
 	}
 	return 0;
+	unguard;
 }
 
 IMPL_MATCH("Core.dll", 0x10130660)

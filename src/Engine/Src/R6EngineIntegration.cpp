@@ -20,6 +20,7 @@ inline void  operator delete(void*, void*) noexcept {}
 IMPL_MATCH("Engine.dll", 0x10377620)
 INT* AR6AbstractCircumstantialActionQuery::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
+	guard(AR6AbstractCircumstantialActionQuery::GetOptimizedRepList);
 static DWORD  s_InitFlags            = 0;
 static INT*   s_iHasAction            = NULL;
 static INT*   s_iInRange              = NULL;
@@ -98,6 +99,7 @@ if (*(BYTE*)((BYTE*)this + 0x39c + i) != *(BYTE*)(Mem + 0x39c + i))
 *Ptr++ = *(unsigned short*)((BYTE*)s_iTeamSubActionsIDList + 0x4a) + (INT)i;
 }
 return Ptr;
+	unguard;
 }
 
 

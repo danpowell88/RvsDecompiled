@@ -71,7 +71,7 @@ _WORD UFont::RemapChar(_WORD Char)
 IMPL_MATCH("Engine.dll", 0x1039c230)
 void UFont::Serialize(FArchive& Ar)
 {
-	guardSlow(UFont::Serialize);
+	guard(UFont::Serialize);
 	Super::Serialize(Ar);
 	UBOOL SavedLazyLoad = GLazyLoad;
 	GLazyLoad = 1; // Ghidra: force eager load during font serialize
@@ -103,6 +103,6 @@ void UFont::Serialize(FArchive& Ar)
 		// DIVERGENCE: FUN_1031f260 not called; lookup table not rebuilt.
 	}
 	Ar.ByteOrderSerialize((BYTE*)this + 0x50, 4); // DropShadowX at +0x50
-	unguardSlow;
+	unguard;
 }
 

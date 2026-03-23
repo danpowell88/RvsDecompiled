@@ -18,8 +18,10 @@ inline void  operator delete(void*, void*) noexcept {}
 IMPL_MATCH("Engine.dll", 0x10489160)
 void UBinaryFileDownload::StaticConstructor()
 {
+	guard(UBinaryFileDownload::StaticConstructor);
 	// Retail: 0x189160, 71b. Sets the config key FString at +0x38 to "Enabled".
 	*(FString*)((BYTE*)this + 0x38) = TEXT("Enabled");
+	unguard;
 }
 
 IMPL_EMPTY("Tick — Ghidra shows retail is shared empty stub at 0x176d60")
@@ -41,6 +43,7 @@ int UBinaryFileDownload::TrySkipFile()
 IMPL_MATCH("Engine.dll", 0x10489270)
 void UBinaryFileDownload::ReceiveData(BYTE* Data, int Size)
 {
+	guard(UBinaryFileDownload::ReceiveData);
 	// Retail: 0x189270. Lazy-opens a write-file at path this+0x4C, then appends Data bytes.
 	// this+0x44c = bytes received so far; this+0x48 = FArchive* file handle.
 	if (*(INT*)((BYTE*)this + 0x44C) == 0 && *(INT*)((BYTE*)this + 0x48) == 0)
@@ -57,6 +60,7 @@ void UBinaryFileDownload::ReceiveData(BYTE* Data, int Size)
 		file->Serialize(Data, Size);
 		*(INT*)((BYTE*)this + 0x44C) += Size;
 	}
+	unguard;
 }
 IMPL_EMPTY("ReceiveFile — Ghidra shows retail is shared empty stub at 0x14770")
 void UBinaryFileDownload::ReceiveFile(UNetConnection *,int,const TCHAR*,int)
@@ -66,13 +70,16 @@ void UBinaryFileDownload::ReceiveFile(UNetConnection *,int,const TCHAR*,int)
 IMPL_MATCH("Engine.dll", 0x104891e0)
 void UBinaryFileDownload::Serialize(FArchive& Ar)
 {
+	guard(UBinaryFileDownload::Serialize);
 	// Retail: 0x1891e0. UChannelDownload::Serialize + serialize connection ptr at this+0x458.
 	UChannelDownload::Serialize(Ar);
 	Ar << *(UObject**)((BYTE*)this + 0x458);
+	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x10489a30)
 void UBinaryFileDownload::Destroy()
 {
+	guard(UBinaryFileDownload::Destroy);
 	// Retail: 0x189a30. Clear connection back-pointer at conn+0x68, call UChannelDownload::Destroy.
 	// Diverges: FPackageInfo at this+0x34 is not explicitly freed (forward decl only).
 	INT connPtr = *(INT*)((BYTE*)this + 0x458);
@@ -80,10 +87,12 @@ void UBinaryFileDownload::Destroy()
 		*(INT*)(connPtr + 0x68) = 0;
 	*(INT*)((BYTE*)this + 0x458) = 0;
 	UChannelDownload::Destroy();
+	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x10489330)
 void UBinaryFileDownload::DownloadDone()
 {
+	guard(UBinaryFileDownload::DownloadDone);
 	// Retail: 0x189330. Closes the file write handle and notifies connection.
 	// this+0x48 = FArchive* file handle; calls vtable[0x13].Close() then deletes object.
 	FArchive* file = *(FArchive**)((BYTE*)this + 0x48);
@@ -97,6 +106,7 @@ void UBinaryFileDownload::DownloadDone()
 		*(INT*)((BYTE*)this + 0x48)  = 0;
 		*(INT*)((BYTE*)this + 0x44C) = 0;
 	}
+	unguard;
 }
 IMPL_EMPTY("DownloadError — Ghidra shows retail is shared empty stub at 0x176d60")
 void UBinaryFileDownload::DownloadError(const TCHAR*)
@@ -109,8 +119,10 @@ void UBinaryFileDownload::DownloadError(const TCHAR*)
 IMPL_MATCH("Engine.dll", 0x10488ea0)
 void UChannelDownload::StaticConstructor()
 {
+	guard(UChannelDownload::StaticConstructor);
 	// Retail: 0x188ea0, 71b. Sets the config key FString at +0x38 to "Enabled".
 	*(FString*)((BYTE*)this + 0x38) = TEXT("Enabled");
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10488fb0)
@@ -171,20 +183,24 @@ void UChannelDownload::ReceiveFile(UNetConnection* Connection, int PackageIndex,
 IMPL_MATCH("Engine.dll", 0x10488f20)
 void UChannelDownload::Serialize(FArchive& Ar)
 {
+	guard(UChannelDownload::Serialize);
 	// Retail: 0x188f20, 84b.
 	UDownload::Serialize(Ar);
 	Ar << *(UObject**)((BYTE*)this + 0x458);
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x104890d0)
 void UChannelDownload::Destroy()
 {
+	guard(UChannelDownload::Destroy);
 	// Retail: 0x1890d0, 84b. Clear the channel's back-pointer, then chain to base Destroy.
 	INT ch = *(INT*)((BYTE*)this + 0x458);
 	if (ch != 0 && *(UChannelDownload**)(ch + 0x68) == this)
 		*(DWORD*)(ch + 0x68) = 0;
 	*(DWORD*)((BYTE*)this + 0x458) = 0;
 	UDownload::Destroy();
+	unguard;
 }
 
 
@@ -192,9 +208,11 @@ void UChannelDownload::Destroy()
 IMPL_MATCH("Engine.dll", 0x104889d0)
 void UDownload::StaticConstructor()
 {
+	guard(UDownload::StaticConstructor);
 	// Retail: 0x1889d0, 80b. Initialise config key FString at +0x38 to "" and zero +0x44.
 	*(FString*)((BYTE*)this + 0x38) = TEXT("");
 	*(DWORD*)((BYTE*)this + 0x44) = 0;
+	unguard;
 }
 
 IMPL_EMPTY("Tick — Ghidra shows retail is shared empty stub at 0x176d60")
@@ -219,6 +237,7 @@ int UDownload::TrySkipFile()
 IMPL_MATCH("Engine.dll", 0x10488b10)
 void UDownload::ReceiveData(BYTE* Data, int Size)
 {
+	guard(UDownload::ReceiveData);
 	// Retail: 0x188b10, 544b. Lazy-open a temp file on the first call, then append data.
 	// +0x44c = total bytes received; +0x48 = FArchive* write handle; +0x4c = temp path buffer.
 	if (*(INT*)((BYTE*)this + 0x44c) == 0 && *(INT*)((BYTE*)this + 0x48) == 0)
@@ -243,6 +262,7 @@ void UDownload::ReceiveData(BYTE* Data, int Size)
 		archive->Serialize(Data, Size);
 		*(INT*)((BYTE*)this + 0x44c) += Size;
 	}
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10489460)
@@ -258,14 +278,17 @@ void UDownload::ReceiveFile(UNetConnection* Connection, int Channel, const TCHAR
 IMPL_MATCH("Engine.dll", 0x10488a60)
 void UDownload::Serialize(FArchive& Ar)
 {
+	guard(UDownload::Serialize);
 	// Retail: 0x188a60, 82b.
 	UObject::Serialize(Ar);
 	Ar << *(UObject**)((BYTE*)this + 0x2c);
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10488df0)
 void UDownload::Destroy()
 {
+	guard(UDownload::Destroy);
 	// Retail: 0x188df0, 124b. Close and delete the temp file, clear connection back-pointer.
 	if (*(INT*)((BYTE*)this + 0x48) != 0)
 	{
@@ -281,11 +304,13 @@ void UDownload::Destroy()
 		*(INT*)(conn + 0x4ba8) = 0;
 	*(INT*)((BYTE*)this + 0x2c) = 0;
 	UObject::Destroy();
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x1048ae80)
 void UDownload::DownloadDone()
 {
+	guard(UDownload::DownloadDone);
 	// Retail: 0x18ae80, 1347b. Finalises the download: closes the temp file, moves it
 	// to the cache directory under a GUID-based name, and triggers package loading.
 	// NOTE: Full package-load sequence (FUN_103b1d90 + cache.ini write) is partially
@@ -356,12 +381,15 @@ void UDownload::DownloadDone()
 	if (conn != 0 && *(UDownload**)(conn + 0x4ba8) == this)
 		*(INT*)(conn + 0x4ba8) = 0;
 	*(INT*)((BYTE*)this + 0x2c) = 0;
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10488d70)
 void UDownload::DownloadError(const TCHAR* Error)
 {
+	guard(UDownload::DownloadError);
 	// Retail: 0x188d70, 79b. Copy error string into the error buffer at +0x24c.
 	appStrcpy((TCHAR*)((BYTE*)this + 0x24c), Error);
+	unguard;
 }
 

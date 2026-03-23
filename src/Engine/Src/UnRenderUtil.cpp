@@ -595,6 +595,7 @@ void FLineBatcher::DrawConvexVolume(FConvexVolume Volume, FColor Color)
 IMPL_MATCH("Engine.dll", 0x104147c0)
 void FLineBatcher::DrawBox(FBox Box, FColor Color)
 {
+	guard(FLineBatcher::DrawBox);
 	// Ghidra 0x1147c0: draw 12 edges of an axis-aligned box.
 	// Iterates over all 4 combinations of (i,j) in {0,1}^2, drawing 3 edges per combo.
 	FVector V[2] = { Box.Min, Box.Max };
@@ -610,11 +611,13 @@ void FLineBatcher::DrawBox(FBox Box, FColor Color)
 			DrawLine(FVector(V[i].X, V[0].Y, V[j].Z), FVector(V[i].X, V[1].Y, V[j].Z), Color);
 		}
 	}
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x104149f0)
 void FLineBatcher::DrawCircle(FVector Center, FVector X, FVector Y, FColor Color, FLOAT Radius, INT NumSides)
 {
+	guard(FLineBatcher::DrawCircle);
 	// Ghidra 0x1149f0: draw a circle using NumSides line segments.
 	// X and Y are the in-plane axes; Radius scales them.
 	if (NumSides <= 0) return;
@@ -627,11 +630,13 @@ void FLineBatcher::DrawCircle(FVector Center, FVector X, FVector Y, FColor Color
 		DrawLine(Prev, Next, Color);
 		Prev = Next;
 	}
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10414e50)
 void FLineBatcher::DrawCylinder(FRenderInterface* RI, FVector Base, FVector X, FVector Y, FVector Z, FColor Color, FLOAT Radius, FLOAT HalfHeight, INT NumSides)
 {
+	guard(FLineBatcher::DrawCylinder);
 	// Ghidra 0x114e50 (772b): loop identical to DrawCircle but draws 3 lines per step:
 	// bottom ring (Prev-Z*HH → Curr-Z*HH), top ring (Prev+Z*HH → Curr+Z*HH),
 	// and vertical strut (Prev-Z*HH → Prev+Z*HH). Initial point at angle 0 = Base+X*Radius.
@@ -646,11 +651,13 @@ void FLineBatcher::DrawCylinder(FRenderInterface* RI, FVector Base, FVector X, F
 		DrawLine(Prev - Z * HalfHeight, Prev + Z * HalfHeight, Color);
 		Prev = Curr;
 	}
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10415190)
 void FLineBatcher::DrawDirectionalArrow(FVector Origin, FRotator Rotation, FColor Color, FLOAT ArrowSize)
 {
+	guard(FLineBatcher::DrawDirectionalArrow);
 	// Ghidra 0x115190: convert Rotation to FCoords, draw main shaft + two arrow-head wings.
 	FCoords Coords = GMath.UnitCoords / Rotation;
 	FLOAT Length = ArrowSize * 48.0f;
@@ -662,6 +669,7 @@ void FLineBatcher::DrawDirectionalArrow(FVector Origin, FRotator Rotation, FColo
 	FLOAT WingScale = ArrowSize * 16.0f;
 	DrawLine(Tip - Forward * (1.0f / 3.0f) + Coords.YAxis * WingScale, Tip, Color);
 	DrawLine(Tip - Forward * (1.0f / 3.0f) - Coords.YAxis * WingScale, Tip, Color);
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x104143c0)
@@ -678,6 +686,7 @@ void FLineBatcher::DrawLine(FVector Start, FVector End, FColor Color)
 IMPL_MATCH("Engine.dll", 0x104144a0)
 void FLineBatcher::DrawPoint(FSceneNode* Scene, FVector Point, FColor Color)
 {
+	guard(FLineBatcher::DrawPoint);
 	// Ghidra 0x1144a0: draw a screen-aligned square cross at Point using camera axes.
 	// Camera right at Scene+0x19C, camera up at Scene+0x1A8.
 	FVector CamX = *(FVector*)((BYTE*)Scene + 0x19C);
@@ -686,6 +695,7 @@ void FLineBatcher::DrawPoint(FSceneNode* Scene, FVector Point, FColor Color)
 	DrawLine(Point + CamX - CamY, Point + CamX + CamY, Color);
 	DrawLine(Point + CamX + CamY, Point - CamX + CamY, Color);
 	DrawLine(Point - CamX + CamY, Point - CamX - CamY, Color);
+	unguard;
 }
 
 IMPL_DIVERGE("FUN_10370d70 (852b, FMatrix ctor from FRotator via CosTab/SinTab) is an unexported Engine.dll internal; current implementation uses FCoords/FRotator — produces identical axis vectors but different codegen")
@@ -1045,6 +1055,7 @@ int FSkinVertexStream::GetSize()
 IMPL_MATCH("Engine.dll", 0x10430c50)
 void FSkinVertexStream::GetStreamData(void* Dest)
 {
+	guard(FSkinVertexStream::GetStreamData);
 	// Retail: 0x130c50. Two paths:
 	// GPU: if skinned VB exists (Pad+0x18 != 0) and parent object (Pad+4) != NULL,
 	//      call vtable[0x134/4=0x4D] on that parent object.
@@ -1063,6 +1074,7 @@ void FSkinVertexStream::GetStreamData(void* Dest)
 	void*  data = *(void**)(Pad + 0x1C);
 	INT    num  = *(INT*)(Pad + 0x20);
 	appMemcpy(Dest, data, num << 5); // num * 32
+	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x1042f4a0)
 int FSkinVertexStream::GetStride()
@@ -1152,6 +1164,7 @@ return 2;
 IMPL_MATCH("Engine.dll", 0x1040fe60)
 void * FStaticLightMapTexture::GetRawTextureData(int MipIndex)
 {
+	guard(FStaticLightMapTexture::GetRawTextureData);
 	// Retail: 0x10FE60, ~100b SEH. In editor only (asserts GIsEditor).
 	// Loads mip data via lazy-loader at this + MipIndex*0x18 + 0x10 if not yet loaded.
 	// DIVERGENCE: GIsEditor assertion removed; returns NULL when not editor-loaded.
@@ -1166,6 +1179,7 @@ void * FStaticLightMapTexture::GetRawTextureData(int MipIndex)
 		Load((void*)((BYTE*)this + MipIndex * 0x18 + 4));
 	}
 	return *(void**)((BYTE*)this + MipIndex * 0x18 + 0x10);
+	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x10316740)
 int FStaticLightMapTexture::GetRevision()
@@ -1357,6 +1371,7 @@ return Texture->Mips.Num();
 IMPL_MATCH("Engine.dll", 0x10469cd0)
 void * FStaticTexture::GetRawTextureData(int MipIndex)
 {
+	guard(FStaticTexture::GetRawTextureData);
 	// Ghidra (149B): Access Mips array directly via raw offsets.
 	// Mips at Texture+0xBC (TArray), element stride 0x28 (40 bytes).
 	// Mip data pointer at element+0x1C. Lazy loader vtable at element+0x10.
@@ -1381,6 +1396,7 @@ void * FStaticTexture::GetRawTextureData(int MipIndex)
 	}
 
 	return *(void**)(MipEntry + 0x1C);
+	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x10468c80)
 int FStaticTexture::GetRevision()
@@ -2539,12 +2555,14 @@ FArchive& operator<<(FArchive& Ar, FSkinVertex& V);
 IMPL_MATCH("Engine.dll", 0x10410d90)
 void UIndexBuffer::Serialize(FArchive& Ar)
 {
+	guard(UIndexBuffer::Serialize);
 	// Ghidra 0x110d90 (83b): URenderResource::Serialize, then FUN_1031e600(Ar, this+0x30)
 	// = TArray<unsigned short> serializer (CountBytes + count + per-element ByteOrderSerialize(2)).
 	guardSlow(UIndexBuffer::Serialize);
 	URenderResource::Serialize(Ar);
 	Ar << *(TArray<_WORD>*)((BYTE*)this + 0x30);
 	unguardSlow;
+	unguard;
 }
 
 

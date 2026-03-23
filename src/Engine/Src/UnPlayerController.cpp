@@ -179,6 +179,7 @@ void APlayerController::R6PBKickPlayer(FString KickMsg)
 IMPL_MATCH("Engine.dll", 0x1037a5c0)
 void APlayerController::SetPlayer(UPlayer* InPlayer)
 {
+	guard(APlayerController::SetPlayer);
 	// Ghidra 0x7a5c0: bi-directional controller<->player link, init input if viewport.
 	if (!InPlayer)
 		appFailAssert("InPlayer!=NULL", ".\\UnActor.cpp", 0x760);
@@ -198,13 +199,16 @@ void APlayerController::SetPlayer(UPlayer* InPlayer)
 
 	// Log
 	debugf(TEXT("%s"), GetFullName());
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x1038d7d0)
 int APlayerController::LocalPlayerController()
 {
+	guard(APlayerController::LocalPlayerController);
 	UPlayer* Player = (UPlayer*)_NativeData[50]; // offset 0x5B4
 	return Player && Player->IsA(UViewport::StaticClass());
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x1037de60)
@@ -359,11 +363,13 @@ INT* APlayerController::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Reti
 IMPL_MATCH("Engine.dll", 0x10425a40)
 FString APlayerController::GetPlayerNetworkAddress()
 {
+	guard(APlayerController::GetPlayerNetworkAddress);
 	// Ghidra shows vtable dispatch to LowLevelGetRemoteAddress on the Player connection.
 	UNetConnection* Conn = Cast<UNetConnection>( *(UPlayer**)(&_NativeData[50]) ); // offset 0x5B4
 	if( Conn )
 		return Conn->LowLevelGetRemoteAddress();
 	return FString(TEXT(""));
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x1038d420)

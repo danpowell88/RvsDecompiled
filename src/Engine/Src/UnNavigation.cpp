@@ -39,9 +39,11 @@ void AJumpDest::SetupForcedPath(APawn* Scout, UReachSpec* Spec)
 IMPL_MATCH("Engine.dll", 0x103d69e0)
 void AJumpDest::ClearPaths()
 {
+	guard(AJumpDest::ClearPaths);
 	// Ghidra 0xd69e0, 24B. Call base, then zero the path-count field at +0x3E8.
 	ANavigationPoint::ClearPaths();
 	*(DWORD*)((BYTE*)this + 0x3E8) = 0; // NumPaths / jump-destination counter
+	unguard;
 }
 
 
@@ -160,6 +162,7 @@ void ALadder::addReachSpecs(APawn* Scout, int bOnlyChanged)
 IMPL_MATCH("Engine.dll", 0x103d7130)
 int ALadder::ProscribedPathTo(ANavigationPoint * Nav)
 {
+	guard(ALadder::ProscribedPathTo);
 	// Ghidra 0xd7130, 131B: if Nav is ALadder with same MyLadder ptr, proscribed
 	if (Nav)
 	{
@@ -170,11 +173,13 @@ int ALadder::ProscribedPathTo(ANavigationPoint * Nav)
 		}
 	}
 	return ANavigationPoint::ProscribedPathTo(Nav);
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x103d6a60)
 void ALadder::ClearPaths()
 {
+	guard(ALadder::ClearPaths);
 	// Ghidra 0xd6a60, 90B: call base, clear ladder reference, zero pointers
 	ANavigationPoint::ClearPaths();
 	INT* MyLadder = (INT*)((BYTE*)this + 0x3E8);
@@ -182,6 +187,7 @@ void ALadder::ClearPaths()
 		*(INT*)(*MyLadder + 0x47c) = 0;
 	*(INT*)((BYTE*)this + 0x3ec) = 0;
 	*MyLadder = 0;
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x103d81f0)
@@ -306,6 +312,7 @@ FVector ALadderVolume::FindCenter()
 IMPL_MATCH("Engine.dll", 0x103e05b0)
 FVector ALadderVolume::FindTop(FVector InLoc)
 {
+	guard(ALadderVolume::FindTop);
 	if (AVolume::Encompasses(InLoc))
 	{
 		return FindTop(FVector(
@@ -321,6 +328,7 @@ FVector ALadderVolume::FindTop(FVector InLoc)
 		InLoc.Z - *(FLOAT*)((BYTE*)this + 0x4ac) * 10000.0f);
 	XLevel->SingleLineCheck(Hit, this, InLoc, start, 0, FVector(0,0,0));
 	return Hit.Location;
+	unguard;
 }
 
 
@@ -586,10 +594,12 @@ void ALineOfSightTrigger::TickAuthoritative(FLOAT DeltaTime)
 IMPL_MATCH("Engine.dll", 0x103980f0)
 void ANote::CheckForErrors()
 {
+	guard(ANote::CheckForErrors);
 	// Ghidra 0x980f0: log the Note text via GWarn, then call super.
 	FString& noteStr = *(FString*)((BYTE*)this + 0x394);
 	GWarn->Logf(TEXT("%s"), *noteStr);
 	AActor::CheckForErrors();
+	unguard;
 }
 
 
@@ -861,6 +871,7 @@ void ANavigationPoint::SetupForcedPath(APawn* Scout, UReachSpec* Spec) {}
 IMPL_MATCH("Engine.dll", 0x103d6940)
 void ANavigationPoint::ClearPaths()
 {
+	guard(ANavigationPoint::ClearPaths);
 	// Retail: 104b SEH. Zeros the 4 path-chain pointer fields, then empties PathList.
 	// PathList confirmed at this+0x3D8 via disassembly; chain ptrs from +0x3A8.
 	nextNavigationPoint = NULL;
@@ -868,6 +879,7 @@ void ANavigationPoint::ClearPaths()
 	prevOrdered         = NULL;
 	previousPath        = NULL;
 	((TArray<UReachSpec*>*)((BYTE*)this + 0x3D8))->Empty();
+	unguard;
 }
 IMPL_EMPTY("pawn base no-op — subclass overrides")
 void ANavigationPoint::FindBase() {}
@@ -906,8 +918,10 @@ INT ANavigationPoint::PrunePaths()
 IMPL_MATCH("Engine.dll", 0x103D5CE0)
 INT ANavigationPoint::IsIdentifiedAs(FName Name)
 {
+	guard(ANavigationPoint::IsIdentifiedAs);
 	// Ghidra 0xd5ce0 79B. Compare our actor name with the provided Name.
 	return Name == GetFName();
+	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x103d62f0)
 INT ANavigationPoint::ReviewPath(APawn* Scout)
@@ -961,6 +975,7 @@ INT ANavigationPoint::CanReach(ANavigationPoint* Nav, FLOAT Dist)
 IMPL_MATCH("Engine.dll", 0x103d7080)
 void ANavigationPoint::CleanUpPruned()
 {
+	guard(ANavigationPoint::CleanUpPruned);
 	// Retail: 124b SEH. Iterates PathList backwards, removing specs with bPruned set.
 	// Finishes with TArray::Shrink to release excess memory.
 	TArray<UReachSpec*>* myPathList = (TArray<UReachSpec*>*)((BYTE*)this + 0x3D8);
@@ -971,6 +986,7 @@ void ANavigationPoint::CleanUpPruned()
 			myPathList->Remove(i, 1);
 	}
 	myPathList->Shrink();
+	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x103D6DB0)
 INT ANavigationPoint::FindAlternatePath(UReachSpec* Spec, INT CostSoFar)
@@ -1036,6 +1052,7 @@ INT ANavigationPoint::FindAlternatePath(UReachSpec* Spec, INT CostSoFar)
 IMPL_MATCH("Engine.dll", 0x103d6610)
 UReachSpec* ANavigationPoint::GetReachSpecTo(ANavigationPoint* Nav)
 {
+	guard(ANavigationPoint::GetReachSpecTo);
 	// Retail: 103b SEH. Linear scan of PathList (at this+0x3D8) for spec->End == Nav.
 	TArray<UReachSpec*>* myPathList = (TArray<UReachSpec*>*)((BYTE*)this + 0x3D8);
 	for (INT i = 0; i < myPathList->Num(); i++)
@@ -1045,6 +1062,7 @@ UReachSpec* ANavigationPoint::GetReachSpecTo(ANavigationPoint* Nav)
 			return Spec;
 	}
 	return NULL;
+	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x103d5fd0)
 INT ANavigationPoint::ShouldBeBased()
@@ -1518,6 +1536,7 @@ void AAIScript::AddMyMarker(AActor* param_1)
 IMPL_MATCH("Engine.dll", 0x1041c590)
 ANavigationPoint* FSortedPathList::findEndAnchor(APawn* Scout, AActor* End, FVector EndVec, INT bAllowFallback)
 {
+	guard(FSortedPathList::findEndAnchor);
 	ANavigationPoint** Paths = (ANavigationPoint**)Pad;
 	INT Count = *(INT*)(Pad + 0x100);
 	ANavigationPoint* Best = NULL;
@@ -1532,12 +1551,14 @@ ANavigationPoint* FSortedPathList::findEndAnchor(APawn* Scout, AActor* End, FVec
 		if (bAllowFallback && !Best) Best = Nav;
 	}
 	return Best;
+	unguard;
 }
 
 // ?findStartAnchor@FSortedPathList@@QAEPAVANavigationPoint@@PAVAPawn@@@Z
 IMPL_MATCH("Engine.dll", 0x1041c3b0)
 ANavigationPoint* FSortedPathList::findStartAnchor(APawn* Scout)
 {
+	guard(FSortedPathList::findStartAnchor);
 	ANavigationPoint** Paths = (ANavigationPoint**)Pad;
 	INT Count = *(INT*)(Pad + 0x100);
 	for (INT i = 0; i < Count; i++)
@@ -1548,6 +1569,7 @@ ANavigationPoint* FSortedPathList::findStartAnchor(APawn* Scout)
 		if (Scout->actorReachable(Nav, 1, 1)) return Nav;
 	}
 	return NULL;
+	unguard;
 }
 
 // ??4FPathBuilder@@QAEAAV0@ABV0@@Z
@@ -1560,6 +1582,7 @@ FPathBuilder & FPathBuilder::operator=(FPathBuilder const & Other) { appMemcpy(t
 IMPL_MATCH("Engine.dll", 0x103E4E00)
 int FPathBuilder::buildPaths(ULevel* Level)
 {
+	guard(FPathBuilder::buildPaths);
 	// Ghidra 0xe4e00 381B. Build all navigation paths in the level.
 	*(ULevel**)Pad = Level;
 	definePaths(Level);
@@ -1580,6 +1603,7 @@ int FPathBuilder::buildPaths(ULevel* Level)
 	definePaths(Level);
 	debugf(NAME_Log, TEXT("Path build complete"));
 	return result;
+	unguard;
 }
 
 // ?removePaths@FPathBuilder@@QAEHPAVULevel@@@Z
@@ -1587,6 +1611,7 @@ int FPathBuilder::buildPaths(ULevel* Level)
 IMPL_MATCH("Engine.dll", 0x103e0ff0)
 int FPathBuilder::removePaths(ULevel* Level)
 {
+	guard(FPathBuilder::removePaths);
 	// Store level pointer at this+0 (first field in Pad)
 	*(ULevel**)Pad = Level;
 
@@ -1616,6 +1641,7 @@ int FPathBuilder::removePaths(ULevel* Level)
 	Flags &= ~0x800;
 
 	return Count;
+	unguard;
 }
 // ?BuildActionSpotList@FPathBuilder@@QAEXPAVULevel@@@Z
 // Ghidra: For each AR6ActionSpot, set CollisionHeight, call PutOnGround,
@@ -1623,6 +1649,7 @@ int FPathBuilder::removePaths(ULevel* Level)
 // chain into LevelInfo->m_ActionSpotList linked list.
 IMPL_MATCH("Engine.dll", 0x103e2c20)
 void FPathBuilder::BuildActionSpotList(ULevel* Level) {
+	guard(FPathBuilder::BuildActionSpotList);
 	*(ULevel**)Pad = Level;
 	// Spawn a scout if one is not already present (local_18 tracks whether we did)
 	UBOOL bSpawnedScout = (*(APawn**)(Pad + 4) == NULL);
@@ -1693,6 +1720,7 @@ void FPathBuilder::BuildActionSpotList(ULevel* Level) {
 		if (AICtrl) (*(ULevel**)Pad)->DestroyActor(AICtrl);
 		(*(ULevel**)Pad)->DestroyActor(Scout);
 	}
+	unguard;
 }
 
 // ?ReviewPaths@FPathBuilder@@QAEXPAVULevel@@@Z
@@ -1700,6 +1728,7 @@ void FPathBuilder::BuildActionSpotList(ULevel* Level) {
 // then warn about movers without associated nav points.
 IMPL_MATCH("Engine.dll", 0x103e29f0)
 void FPathBuilder::ReviewPaths(ULevel* Level) {
+	guard(FPathBuilder::ReviewPaths);
 	debugf(NAME_Log, TEXT("Reviewing paths"));
 	GWarn->BeginSlowTask(TEXT("Reviewing paths..."), 0, 0);
 	*(ULevel**)Pad = Level;
@@ -1757,6 +1786,7 @@ void FPathBuilder::ReviewPaths(ULevel* Level) {
 	// No nav point list defined
 	debugf(NAME_Warning, TEXT("No navigation point list. Paths define needed."));
 	GWarn->EndSlowTask();
+	unguard;
 }
 
 // ?defineChangedPaths@FPathBuilder@@QAEXPAVULevel@@@Z
@@ -1766,6 +1796,7 @@ void FPathBuilder::ReviewPaths(ULevel* Level) {
 // as definePaths but operates on the changed subset and spawns its own scout.
 IMPL_MATCH("Engine.dll", 0x103e2e50)
 void FPathBuilder::defineChangedPaths(ULevel* Level) {
+	guard(FPathBuilder::defineChangedPaths);
 	*(ULevel**)Pad = Level;
 
 	// Clear NavigationPointList head and the bPathsRebuilt bit
@@ -1922,6 +1953,7 @@ void FPathBuilder::defineChangedPaths(ULevel* Level) {
 	debugf(NAME_Log, TEXT("defineChangedPaths done"));
 	// Deviation: skip GWarn vtable[0x1c] call (undeclared)
 	GWarn->EndSlowTask();
+	unguard;
 }
 
 // ?definePaths@FPathBuilder@@QAEXPAVULevel@@@Z
@@ -1930,6 +1962,7 @@ void FPathBuilder::defineChangedPaths(ULevel* Level) {
 // set bPathsDefined, then BuildActionSpotList + PostPath on all actors.
 IMPL_MATCH("Engine.dll", 0x103e3830)
 void FPathBuilder::definePaths(ULevel* Level) {
+	guard(FPathBuilder::definePaths);
 	undefinePaths(Level);
 	*(ULevel**)Pad = Level;
 	getScout();
@@ -2053,6 +2086,7 @@ void FPathBuilder::definePaths(ULevel* Level) {
 	debugf(NAME_Log, TEXT("definePaths done"));
 	// Deviation: skip GWarn vtable[0x1c] call (slot not declared)
 	GWarn->EndSlowTask();
+	unguard;
 }
 
 // ?undefinePaths@FPathBuilder@@QAEXPAVULevel@@@Z
@@ -2060,6 +2094,7 @@ void FPathBuilder::definePaths(ULevel* Level) {
 // clear bPathsDefined on LevelInfo.
 IMPL_MATCH("Engine.dll", 0x103e1120)
 void FPathBuilder::undefinePaths(ULevel* Level) {
+	guard(FPathBuilder::undefinePaths);
 	*(ULevel**)Pad = Level;
 	debugf(NAME_Log, TEXT("Undefining paths"));
 
@@ -2100,6 +2135,7 @@ void FPathBuilder::undefinePaths(ULevel* Level) {
 		}
 		i++;
 	}
+	unguard;
 }
 // ============================================================================
 // FSortedPathList

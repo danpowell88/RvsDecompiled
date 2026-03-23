@@ -33,6 +33,7 @@ static void RegisterSceneManager(ASceneManager* Scene)
 IMPL_MATCH("Engine.dll", 0x1041f6d0)
 void ASceneManager::UpdateViewerFromPct(float Pct)
 {
+	guard(ASceneManager::UpdateViewerFromPct);
 	// Retail: 0x11f6d0, ordinal 4956. Clamps Pct to [0.0001, 100.0].
 	// If Pct <= 1.0: gets current action via GetActionFromPct, fires ActionStart event
 	// if action changed, updates all sub-actions via their Update vtable slot.
@@ -62,6 +63,7 @@ void ASceneManager::UpdateViewerFromPct(float Pct)
 			((UpdateFn)(*(void***)sub)[0x64 / 4])(sub, Pct, this);
 		}
 	}
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x1041db90)
@@ -117,6 +119,7 @@ void ASceneManager::RefreshSubActions(float Pct)
 IMPL_MATCH("Engine.dll", 0x1041f2d0)
 void ASceneManager::SceneEnded()
 {
+	guard(ASceneManager::SceneEnded);
 	// Retail: 0x11f2d0, ordinal 4353. Clears playing/hasPC flags (bits 1+2) of state at this+0x3C0,
 	// zeros this+0x448, fires SceneEnded script event, empties PathSamples TArray at this+0x3E4,
 	// decrements global scene counter at 0x1061b80c, clears PC fade if applicable,
@@ -138,11 +141,13 @@ void ASceneManager::SceneEnded()
 				*(DWORD*)((BYTE*)viewport + 0x138) = 0;
 		}
 	}
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x1041fcd0)
 void ASceneManager::SceneStarted()
 {
+	guard(ASceneManager::SceneStarted);
 	// Retail: 0x11fcd0, ordinal 4354. Calls InitializeActions, sets bit 1 (flag 2) of
 	// this+0x3C0 (playing), calls SetSceneStartTime, fires SceneStarted script event,
 	// sets scene-speed this+0x3C8=1.0 and clears cached action ptr this+0x3D8.
@@ -171,6 +176,7 @@ void ASceneManager::SceneStarted()
 		if (viewport && viewport->IsA(UViewport::StaticClass()))
 			*(DWORD*)((BYTE*)viewport + 0x138) = 1;
 	}
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x1041f970)
@@ -244,6 +250,7 @@ void ASceneManager::DeletePathSamples()
 IMPL_MATCH("Engine.dll", 0x1041dbe0)
 UMatAction * ASceneManager::GetActionFromPct(float Pct)
 {
+	guard(ASceneManager::GetActionFromPct);
 	// Retail: 0x11dbe0, ordinal 2878. Walks Actions TArray at this+0x3A8 (TArray<UMatAction*>)
 	// until it finds the first action whose EndPct (action+0x7C) >= Pct. Calls
 	// appFailAssert if the array is exhausted (should not happen in normal use).
@@ -256,11 +263,13 @@ UMatAction * ASceneManager::GetActionFromPct(float Pct)
 	}
 	appFailAssert("0", ".\\UnSceneManager.cpp", 0xa8);
 	return NULL;
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x1041ddd0)
 float ASceneManager::GetActionPctFromScenePct(float Pct)
 {
+	guard(ASceneManager::GetActionPctFromScenePct);
 	// Retail: 0x11ddd0, ordinal 2881. Uses cached current action at this+0x3D8;
 	// if NULL, calls GetActionFromPct to populate it. Then computes local pct within
 	// the action: (Pct - action.StartPct) / action.Duration. Clamped to [0.0001, 100.0].
@@ -280,11 +289,13 @@ float ASceneManager::GetActionPctFromScenePct(float Pct)
 	if (t > 100.0f)
 		return 100.0f;
 	return t;
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x1041e030)
 FVector ASceneManager::GetLocation(TArray<FVector> *,float)
 {
+	guard(ASceneManager::GetLocation);
 	// Retail: 102b SEH. Returns the current action's cached location if the scene is playing.
 	// Bit 2 (mask 4) of the state byte at this+0x398 indicates "playing".
 	// When playing, dereferences the action pointer at this+0x3DC and reads FVector at +0x234.
@@ -292,11 +303,13 @@ FVector ASceneManager::GetLocation(TArray<FVector> *,float)
 		return FVector(0,0,0);
 	BYTE* action = *(BYTE**)((BYTE*)this + 0x3DC);
 	return *(FVector*)(action + 0x234);
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x1041e9e0)
 FRotator ASceneManager::GetRotation(TArray<FVector> *,float,FVector,FRotator,UMatAction *,int)
 {
+	guard(ASceneManager::GetRotation);
 	// Retail: 106b SEH. Same guard as GetLocation: bit 2 of state byte at this+0x398.
 	// When playing, reads FRotator from action data pointer (this+0x3DC) at offset +0x240.
 	// The extra parameters (FVector, FRotator, UMatAction*, INT) are accepted but unused here.
@@ -304,6 +317,7 @@ FRotator ASceneManager::GetRotation(TArray<FVector> *,float,FVector,FRotator,UMa
 		return FRotator(0,0,0);
 	BYTE* action = *(BYTE**)((BYTE*)this + 0x3DC);
 	return *(FRotator*)(action + 0x240);
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x1041dda0)
@@ -375,9 +389,11 @@ void UMatAction::PostEditChange()
 IMPL_MATCH("Engine.dll", 0x1041d750)
 void UMatAction::PostLoad()
 {
+	guard(UMatAction::PostLoad);
 	Super::PostLoad();
 	if (*(INT*)((BYTE*)this + 0x40) != 0 && *(SBYTE*)(*(INT*)((BYTE*)this + 0x40) + 0xa0) < 0)
 		*(INT*)((BYTE*)this + 0x40) = 0;
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x1041e880)
@@ -500,6 +516,7 @@ int UMatSubAction::IsRunning()
 IMPL_MATCH("Engine.dll", 0x10386800)
 int USubActionCameraEffect::Update(float Pct, ASceneManager* SceneMgr)
 {
+	guard(USubActionCameraEffect::Update);
 	// Retail: 0x86800, ordinal 4914. Calls parent Update; if not running returns 0.
 	// Gets scene manager via vtable+0x6C. If manager has a valid actor (IsA PlayerController)
 	// and the camera effect at this+0x58 exists:
@@ -543,12 +560,15 @@ int USubActionCameraEffect::Update(float Pct, ASceneManager* SceneMgr)
 		((APlayerController*)actor)->eventRemoveCameraEffect((UCameraEffect*)effectPtr);
 	}
 	return 1;
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x103862a0)
 FString USubActionCameraEffect::GetStatString()
 {
+	guard(USubActionCameraEffect::GetStatString);
 	return FString(TEXT(""));
+	unguard;
 }
 
 
@@ -741,6 +761,7 @@ int USubActionOrientation::Update(float Pct, ASceneManager* SceneMgr)
 IMPL_MATCH("Engine.dll", 0x1041d7e0)
 void USubActionOrientation::PostLoad()
 {
+	guard(USubActionOrientation::PostLoad);
 	// Retail: 0x11d7e0, 89b. Clear stale (pending-kill) UObject reference at +0x5c.
 	UObject::PostLoad();
 	if (*(INT*)((BYTE*)this + 0x5c) != 0 &&
@@ -748,6 +769,7 @@ void USubActionOrientation::PostLoad()
 	{
 		*(INT*)((BYTE*)this + 0x5c) = 0;
 	}
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x1041e4e0)
@@ -868,13 +890,16 @@ FString USubActionTrigger::GetStatString()
 IMPL_MATCH("Engine.dll", 0x1041fa50)
 void ASceneManager::PostEditChange()
 {
+	guard(ASceneManager::PostEditChange);
 	Super::PostEditChange();
 	PreparePath();
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x1041fee0)
 INT ASceneManager::Tick( FLOAT DeltaTime, ELevelTick TickType )
 {
+	guard(ASceneManager::Tick);
 	unsigned __int64 tsc = __rdtsc();
 	INT tsc_lo = (INT)(tsc & 0xFFFFFFFF);
 
@@ -965,21 +990,25 @@ INT ASceneManager::Tick( FLOAT DeltaTime, ELevelTick TickType )
 		}
 	}
 	return 1;
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x1041fe20)
 void ASceneManager::PostBeginPlay()
 {
+	guard(ASceneManager::PostBeginPlay);
 	Super::PostBeginPlay();
 	*(DWORD*)((BYTE*)this + 0x3DC) = 0;
 	RegisterSceneManager(this);
 	InitializeActions();
 	PreparePath();
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x1041e930)
 void ASceneManager::CheckForErrors()
 {
+	guard(ASceneManager::CheckForErrors);
 	if (*(BYTE*)((BYTE*)this + 0x398) & 4)
 		return;
 	BYTE* actionsBase = (BYTE*)this + 0x3a8;
@@ -990,11 +1019,13 @@ void ASceneManager::CheckForErrors()
 		if (*(INT*)(action + 0x40) == 0)
 			GWarn->Logf(TEXT("Action found with NULL InterpolationPoint"));
 	}
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x1041ded0)
 FLOAT ASceneManager::GetTotalSceneTime()
 {
+	guard(ASceneManager::GetTotalSceneTime);
 	FLOAT total = 0.0f;
 	BYTE* actionsBase = (BYTE*)this + 0x3a8;
 	INT count = *(INT*)(actionsBase + 4);
@@ -1004,6 +1035,7 @@ FLOAT ASceneManager::GetTotalSceneTime()
 		total += *(FLOAT*)(action + 0x34);
 	}
 	return total;
+	unguard;
 }
 
 // =============================================================================
@@ -1025,6 +1057,7 @@ void ASceneManager::SetCurrentTime( FLOAT NewTime ) {
 IMPL_MATCH("Engine.dll", 0x1041f400)
 void ASceneManager::SetSceneStartTime()
 {
+	guard(ASceneManager::SetSceneStartTime);
 	RegisterSceneManager(this);
 
 	FLOAT totalSceneTime = GetTotalSceneTime();
@@ -1081,6 +1114,7 @@ void ASceneManager::SetSceneStartTime()
 
 		actionTime += *(FLOAT*)((BYTE*)Action + 0x34);
 	}
+	unguard;
 }
 
 // =============================================================================
@@ -1187,6 +1221,7 @@ ASceneManager * FMatineeTools::GetCurrent() { return CurrentScene; }
 IMPL_MATCH("Engine.dll", 0x103ca220)
 ASceneManager * FMatineeTools::SetCurrent(UEngine * Engine, ULevel * Level, ASceneManager * Scene)
 {
+	guard(FMatineeTools::SetCurrent);
 	CurrentScene = Scene;
 	if (Scene)
 	{
@@ -1205,12 +1240,14 @@ ASceneManager * FMatineeTools::SetCurrent(UEngine * Engine, ULevel * Level, ASce
 		CurrentSubAction = NULL;
 	}
 	return Scene;
+	unguard;
 }
 
 // ?SetCurrent@FMatineeTools@@QAEPAVASceneManager@@PAVUEngine@@PAVULevel@@VFString@@@Z
 IMPL_MATCH("Engine.dll", 0x103ca220)
 ASceneManager * FMatineeTools::SetCurrent(UEngine * Engine, ULevel * Level, FString Name)
 {
+	guard(FMatineeTools::SetCurrent);
 	for (INT i = 0; i < Level->Actors.Num(); i++)
 	{
 		AActor* Actor = Level->Actors(i);
@@ -1221,6 +1258,7 @@ ASceneManager * FMatineeTools::SetCurrent(UEngine * Engine, ULevel * Level, FStr
 		}
 	}
 	return SetCurrent(Engine, Level, (ASceneManager*)NULL);
+	unguard;
 }
 
 // ?GetOrientationDesc@FMatineeTools@@QAE?AVFString@@H@Z
@@ -1255,12 +1293,14 @@ UMatAction * FMatineeTools::GetCurrentAction() { return CurrentAction; }
 IMPL_MATCH("Engine.dll", 0x103c9ac0)
 UMatAction * FMatineeTools::GetNextAction(ASceneManager * Scene, UMatAction * Current)
 {
+	guard(FMatineeTools::GetNextAction);
 	if (!Scene) return NULL;
 	TArray<UMatAction*>& Actions = *(TArray<UMatAction*>*)((BYTE*)Scene + 0x3A8);
 	INT Count = Actions.Num();
 	if (Count == 0) return NULL;
 	INT Idx = GetActionIdx(Scene, Current);
 	return Actions((Idx + 1) % Count);
+	unguard;
 }
 
 // ?GetNextMovementAction@FMatineeTools@@QAEPAVUMatAction@@PAVASceneManager@@PAV2@@Z
@@ -1268,6 +1308,7 @@ UMatAction * FMatineeTools::GetNextAction(ASceneManager * Scene, UMatAction * Cu
 IMPL_MATCH("Engine.dll", 0x103ca080)
 UMatAction * FMatineeTools::GetNextMovementAction(ASceneManager * Scene, UMatAction * Current)
 {
+	guard(FMatineeTools::GetNextMovementAction);
 	TArray<UMatAction*>& Actions = *(TArray<UMatAction*>*)((BYTE*)Scene + 0x3A8);
 	INT Count = Actions.Num();
 	if (Count == 0) return NULL;
@@ -1280,6 +1321,7 @@ UMatAction * FMatineeTools::GetNextMovementAction(ASceneManager * Scene, UMatAct
 		Candidate = GetNextAction(Scene, Candidate);
 	}
 	return NULL;
+	unguard;
 }
 
 // ?GetPrevAction@FMatineeTools@@QAEPAVUMatAction@@PAVASceneManager@@PAV2@@Z
@@ -1287,6 +1329,7 @@ UMatAction * FMatineeTools::GetNextMovementAction(ASceneManager * Scene, UMatAct
 IMPL_MATCH("Engine.dll", 0x103c9b90)
 UMatAction * FMatineeTools::GetPrevAction(ASceneManager * Scene, UMatAction * Current)
 {
+	guard(FMatineeTools::GetPrevAction);
 	if (!Scene) return NULL;
 	TArray<UMatAction*>& Actions = *(TArray<UMatAction*>*)((BYTE*)Scene + 0x3A8);
 	INT Count = Actions.Num();
@@ -1294,6 +1337,7 @@ UMatAction * FMatineeTools::GetPrevAction(ASceneManager * Scene, UMatAction * Cu
 	INT Idx = GetActionIdx(Scene, Current);
 	INT Prev = (Idx <= 0) ? Count - 1 : Idx - 1;
 	return Actions(Prev);
+	unguard;
 }
 
 // ?SetCurrentAction@FMatineeTools@@QAEPAVUMatAction@@PAV2@@Z
@@ -1333,6 +1377,7 @@ UMatSubAction * FMatineeTools::SetCurrentSubAction(UMatSubAction * SubAction)
 IMPL_MATCH("Engine.dll", 0x103c9960)
 int FMatineeTools::GetActionIdx(ASceneManager* SM, UMatAction* Action)
 {
+	guard(FMatineeTools::GetActionIdx);
 	if (!SM)
 		return -1;
 	// ASceneManager + 0x3A8 = TArray<UMatAction*> Actions
@@ -1343,6 +1388,7 @@ int FMatineeTools::GetActionIdx(ASceneManager* SM, UMatAction* Action)
 			return i;
 	}
 	return -1;
+	unguard;
 }
 
 // ?GetPathStyle@FMatineeTools@@QAEHPAVUMatAction@@@Z
@@ -1363,6 +1409,7 @@ int FMatineeTools::GetPathStyle(UMatAction* Action)
 IMPL_MATCH("Engine.dll", 0x103c9a10)
 int FMatineeTools::GetSubActionIdx(UMatSubAction* SubAction)
 {
+	guard(FMatineeTools::GetSubActionIdx);
 	if (!CurrentAction)
 		return -1;
 	// UMatAction + 0x48 = TArray<UMatSubAction*> SubActions
@@ -1373,6 +1420,7 @@ int FMatineeTools::GetSubActionIdx(UMatSubAction* SubAction)
 			return i;
 	}
 	return -1;
+	unguard;
 }
 // ?m_vStartLipsynch@ECLipSynchData@@QAEXXZ
 IMPL_MATCH("Engine.dll", 0x10354bd0)

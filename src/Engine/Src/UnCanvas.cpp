@@ -148,20 +148,24 @@ void __cdecl UCanvas::WrappedPrint(ERenderStyle,int &,int &,UFont *,int,const TC
 IMPL_MATCH("Engine.dll", 0x1038b500)
 void UCanvas::WrappedPrintf(UFont* Font, INT bCenter, const TCHAR* Fmt, ...)
 {
+	guard(UCanvas::WrappedPrintf);
 	// Ghidra 0x8b500, 128B. Format varargs then call WrappedPrint with STY_Normal.
 	TCHAR Buffer[4097];
 	appGetVarArgs(Buffer, ARRAY_COUNT(Buffer), Fmt);
 	INT XL = 0, YL = 0;
 	WrappedPrint(STY_Normal, XL, YL, Font, bCenter, Buffer);
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x1038b450)
 void UCanvas::WrappedStrLenf(UFont* Font, INT& XL, INT& YL, const TCHAR* Fmt, ...)
 {
+	guard(UCanvas::WrappedStrLenf);
 	// Ghidra 0x8b450, 122B. Format varargs then call WrappedPrint with STY_None to measure.
 	TCHAR Buffer[4097];
 	appGetVarArgs(Buffer, ARRAY_COUNT(Buffer), Fmt);
 	WrappedPrint(STY_None, XL, YL, Font, 0, Buffer);
+	unguard;
 }
 
 // (merged from earlier occurrence)
@@ -258,6 +262,7 @@ void UCanvas::SetStretch(float stretchX, float stretchY)
 IMPL_MATCH("Engine.dll", 0x10388f10)
 void UCanvas::DrawTileClipped(UMaterial* Material, FLOAT XL, FLOAT YL, FLOAT U, FLOAT V, FLOAT UL, FLOAT VL)
 {
+	guard(UCanvas::DrawTileClipped);
 	// Ghidra 0x88f10, ~200B. Clip tile to current canvas bounds, then call DrawTile.
 	if (XL <= 0.0f || YL <= 0.0f)
 		return;
@@ -299,6 +304,7 @@ void UCanvas::DrawTileClipped(UMaterial* Material, FLOAT XL, FLOAT YL, FLOAT U, 
 	// Advance cursor: SpaceX + current CurX + drawn width
 	CurX  = SpaceX + CurX + XL;
 	CurYL = Max(CurYL, YL);
+	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x1038b130)
 int UCanvas::_DrawString(UFont *Font, int XL, int YL, const TCHAR* Text, FPlane Color, int CR, int RenderStyle, int DrawExtraLine)
@@ -333,16 +339,19 @@ void UCanvas::SetClip(INT X, INT Y, INT W, INT H)
 IMPL_MATCH("Engine.dll", 0x103880f0)
 void UCanvas::DrawIcon(UMaterial* Material, FLOAT X, FLOAT Y, FLOAT XSize, FLOAT YSize, FLOAT ZDepth, FPlane Color, FPlane AlphaScale)
 {
+	guard(UCanvas::DrawIcon);
 	// Ghidra 0x880f0, 170B. Get material UV dimensions, then call DrawTile.
 	if (!Material) return;
 	INT MatUSize = Material->MaterialUSize();
 	INT MatVSize = Material->MaterialVSize();
 	DrawTile(Material, X, Y, XSize, YSize, 0.0f, 0.0f,
 	         (FLOAT)MatUSize, (FLOAT)MatVSize, ZDepth, Color, AlphaScale, 0.0f);
+	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x10387ff0)
 void UCanvas::DrawPattern(UMaterial* Material, FLOAT X, FLOAT Y, FLOAT XL, FLOAT YL, FLOAT Scale, FLOAT TileU, FLOAT TileV, FLOAT TileZ, FPlane Color, FPlane AlphaScale)
 {
+	guard(UCanvas::DrawPattern);
 	// Ghidra 0x87ff0. Tile the material across the surface using Scale and UV offsets.
 	if (!Material) return;
 	INT MatUSize = Material->MaterialUSize();
@@ -351,6 +360,7 @@ void UCanvas::DrawPattern(UMaterial* Material, FLOAT X, FLOAT Y, FLOAT XL, FLOAT
 	         (X - TileU) * Scale + (FLOAT)MatUSize,
 	         (Y - TileV) * Scale + (FLOAT)MatVSize,
 	         XL * Scale, YL * Scale, TileZ, Color, AlphaScale, 0.0f);
+	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x1038a980)
 void UCanvas::DrawTile(UMaterial *,float,float,float,float,float,float,float,float,float,FPlane,FPlane,float)

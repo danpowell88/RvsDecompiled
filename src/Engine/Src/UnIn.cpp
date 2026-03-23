@@ -347,9 +347,11 @@ INT UInput::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
 IMPL_MATCH("Engine.dll", 0x103b4b40)
 void UInput::Serialize( FArchive& Ar )
 {
+	guard(UInput::Serialize);
 	Super::Serialize( Ar );
 	// Serialize the UViewport* stored at offset 0xEA8
 	Ar << *(UViewport**)((BYTE*)this + 0xEA8);
+	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x103b3f50)
 void UInput::Init( UViewport* InViewport )
@@ -449,6 +451,7 @@ void UInput::ResetInput()
 IMPL_MATCH("Engine.dll", 0x103b4130)
 BYTE UInput::GetKey( const TCHAR* KeyName )
 {
+	guard(UInput::GetKey);
 	// Scan bindings array (FString[255] at offset 0x2B0, 0xC bytes each)
 	// Returns the key index (0-254) whose binding string matches KeyName,
 	// or 0 if not found. Retail exits on first match or after 255 slots.
@@ -460,6 +463,7 @@ BYTE UInput::GetKey( const TCHAR* KeyName )
 			found = i;
 	}
 	return found;
+	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x103b41e0)
 void UInput::SetKey( const TCHAR* KeyName )
@@ -497,7 +501,12 @@ void UInput::SetKey( const TCHAR* KeyName )
 	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x103b4350)
-FString UInput::GetActionKey( BYTE Key ) { return *(FString*)((BYTE*)this + Key * 0xC + 0x2B0); }
+FString UInput::GetActionKey( BYTE Key )
+{
+	guard(UInput::GetActionKey);
+	return *(FString*)((BYTE*)this + Key * 0xC + 0x2B0);
+	unguard;
+}
 IMPL_MATCH("Engine.dll", 0x103b5870)
 BYTE* UInput::FindButtonName( AActor* Actor, const TCHAR* ButtonName ) const
 {
@@ -638,6 +647,7 @@ INT UInput::PreProcess(EInputKey Key, EInputAction Action, FLOAT Delta)
 IMPL_MATCH("Engine.dll", 0x103b5300)
 INT UInput::Process(FOutputDevice& Ar, EInputKey Key, EInputAction Action, FLOAT Delta)
 {
+	guard(UInput::Process);
 	if ((INT)Key < 0 || (INT)Key >= 0xFF)
 		appFailAssert("iKey>=0&&iKey<IK_MAX", ".\\UnIn.cpp", 0x1E8);
 	// Bindings array at offset 0x2B0 (FString[IK_MAX], 0xC each)
@@ -652,6 +662,7 @@ INT UInput::Process(FOutputDevice& Ar, EInputKey Key, EInputAction Action, FLOAT
 		return 1;
 	}
 	return 0;
+	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x103b5400)
 void UInput::DirectAxis(EInputKey Key, FLOAT Value, FLOAT Delta)
@@ -688,6 +699,7 @@ void UInput::DirectAxis(EInputKey Key, FLOAT Value, FLOAT Delta)
 IMPL_MATCH("Engine.dll", 0x103b55d0)
 const TCHAR* UInput::GetKeyName(EInputKey Key) const
 {
+	guard(UInput::GetKeyName);
 	static TCHAR GenBuf[16]; // used for dynamically generated names
 	DWORD k = (DWORD)Key;
 
@@ -758,6 +770,7 @@ const TCHAR* UInput::GetKeyName(EInputKey Key) const
 
 	appSprintf(GenBuf, TEXT("Unknown%02X"), k & 0xFF);
 	return GenBuf;
+	unguard;
 }
 
 // Retail prepends "IK_", creates an FName, and scans the same key-name array through
@@ -765,6 +778,7 @@ const TCHAR* UInput::GetKeyName(EInputKey Key) const
 IMPL_MATCH("Engine.dll", 0x103b5df0)
 INT UInput::FindKeyName(const TCHAR* KeyName, EInputKey& Key) const
 {
+	guard(UInput::FindKeyName);
 	for (INT i = 0; i < 0xFF; i++)
 	{
 		if (!appStricmp(GetKeyName((EInputKey)i), KeyName))
@@ -774,6 +788,7 @@ INT UInput::FindKeyName(const TCHAR* KeyName, EInputKey& Key) const
 		}
 	}
 	return 0;
+	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x10311730)
 void UInput::SetInputAction(EInputAction Action, FLOAT Delta)

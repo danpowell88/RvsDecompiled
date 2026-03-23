@@ -254,6 +254,7 @@ void AEmitter::RenderEditorInfo(FLevelSceneNode *,FRenderInterface *,FDynamicAct
 IMPL_MATCH("Engine.dll", 0x103df3b0)
 void AEmitter::Kill()
 {
+	guard(AEmitter::Kill);
 	// Ghidra 0xdf3b0, 178b: iterate emitter list at this+0x398, clear flags and reset per-emitter counters.
 	FArray* emitters = (FArray*)((BYTE*)this + 0x398);
 	for (INT i = 0; i < emitters->Num(); i++)
@@ -270,11 +271,13 @@ void AEmitter::Kill()
 		}
 	}
 	*(DWORD*)((BYTE*)this + 0x394) &= ~0x200u;
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x103df300)
 void AEmitter::PostScriptDestroyed()
 {
+	guard(AEmitter::PostScriptDestroyed);
 	// Ghidra 0xdf300, 113b: if spawn flag set at bit 2 of this+0x3c8,
 	// iterate emitter list and call vtable[3](1) on each, then null the slot.
 	if (*(BYTE*)((BYTE*)this + 0x3c8) & 4)
@@ -293,6 +296,7 @@ void AEmitter::PostScriptDestroyed()
 			*slot = NULL;
 		}
 	}
+	unguard;
 }
 
 // Ghidra: 0x103dfe90, 387 bytes
@@ -487,6 +491,7 @@ void UBeamEmitter::Scale(float)
 IMPL_MATCH("Engine.dll", 0x10380850)
 void UBeamEmitter::PostEditChange()
 {
+	guard(UBeamEmitter::PostEditChange);
 	// Ghidra 0x80850: call parent, then CleanUp (vtbl[26]) and Initialize(MaxParticles) (vtbl[25]).
 	UParticleEmitter::PostEditChange();
 	void** vtbl = *(void***)this;
@@ -494,17 +499,20 @@ void UBeamEmitter::PostEditChange()
 	typedef void(__thiscall* InitFn)(UBeamEmitter*, INT);
 	((NoArgFn)vtbl[26])(this);
 	((InitFn)vtbl[25])(this, *(INT*)((BYTE*)this + 0x3C));
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10380af0)
 void UBeamEmitter::CleanUp()
 {
+	guard(UBeamEmitter::CleanUp);
 	// Ghidra 0x80af0, ~100b: empty beam/noise arrays then delegate to parent.
 	for (INT i = 0; i < *(INT*)((BYTE*)this + 0x3e4); i++) {}
 	((FArray*)((BYTE*)this + 0x3e0))->Empty(0x10, 0);
 	for (INT i = 0; i < *(INT*)((BYTE*)this + 0x3f0); i++) {}
 	((FArray*)((BYTE*)this + 0x3ec))->Empty(0xc, 0);
 	UParticleEmitter::CleanUp();
+	unguard;
 }
 
 IMPL_EMPTY("beam emitter initialize no-op")
@@ -549,6 +557,7 @@ int UMeshEmitter::RenderParticles(FDynamicActor* param_1, FLevelSceneNode* param
 IMPL_MATCH("Engine.dll", 0x103cabc0)
 void UMeshEmitter::PostEditChange()
 {
+	guard(UMeshEmitter::PostEditChange);
 	// Ghidra 0xcabc0: same pattern as UBeamEmitter::PostEditChange.
 	UParticleEmitter::PostEditChange();
 	void** vtbl = *(void***)this;
@@ -556,6 +565,7 @@ void UMeshEmitter::PostEditChange()
 	typedef void(__thiscall* InitFn)(UMeshEmitter*, INT);
 	((NoArgFn)vtbl[26])(this);
 	((InitFn)vtbl[25])(this, *(INT*)((BYTE*)this + 0x3C));
+	unguard;
 }
 
 IMPL_EMPTY("mesh emitter initialize no-op")
@@ -584,7 +594,9 @@ void UParticleEmitter::SpawnParticle(int,float,int,int,FVector const &)
 IMPL_MATCH("Engine.dll", 0x103ddb40)
 float UParticleEmitter::SpawnParticles(float,float,float)
 {
+	guard(UParticleEmitter::SpawnParticles);
 	return 0.0f;
+	unguard;
 }
 
 // Ghidra: 0x103ddca0, 5049 bytes
@@ -805,6 +817,7 @@ int UParticleEmitter::RenderParticles(FDynamicActor* param_1, FLevelSceneNode* p
 IMPL_MATCH("Engine.dll", 0x103dcb10)
 void UParticleEmitter::Reset()
 {
+	guard(UParticleEmitter::Reset);
 	// Ghidra 0xdcb10: clear state flags, zero counters, seed initial delay/warm-up timers.
 	*(DWORD*)((BYTE*)this + 0x2dc) &= ~0x18u;  // clear bits 3-4
 	*(DWORD*)((BYTE*)this + 0x2c4) = 0;
@@ -813,6 +826,7 @@ void UParticleEmitter::Reset()
 	*(DWORD*)((BYTE*)this + 0x2f4) = 0;
 	*(FLOAT*)((BYTE*)this + 0x2e8) = ((FRange*)((BYTE*)this + 0x250))->GetRand();
 	*(FLOAT*)((BYTE*)this + 0x2ec) = ((FRange*)((BYTE*)this + 0x168))->GetRand();
+	unguard;
 }
 
 IMPL_EMPTY("particle emitter scale no-op")
@@ -825,6 +839,7 @@ void UParticleEmitter::Scale(float)
 IMPL_MATCH("Engine.dll", 0x103dcf30)
 void UParticleEmitter::PostEditChange()
 {
+	guard(UParticleEmitter::PostEditChange);
 	// Ghidra 0xdcf30: re-initialize if particle count changed or dirty bit set;
 	// then normalize any actor-force vectors.
 	INT numParticles = ((FArray*)((BYTE*)this + 0x2f8))->Num();
@@ -843,37 +858,44 @@ void UParticleEmitter::PostEditChange()
 		for (INT i = 0; i < forces->Num(); i++)
 			((FVector*)(data + i * 0x10))->Normalize();
 	}
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x103dca10)
 void UParticleEmitter::PostLoad()
 {
+	guard(UParticleEmitter::PostLoad);
 	// Ghidra 0xdca10: call super, then Initialize(MaxParticles) via vtable[25].
 	UObject::PostLoad();
 	void** vtbl = *(void***)this;
 	typedef void(__thiscall* InitFn)(UParticleEmitter*, INT);
 	((InitFn)vtbl[25])(this, *(INT*)((BYTE*)this + 0x3C));
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x103dd0e0)
 void UParticleEmitter::CleanUp()
 {
+	guard(UParticleEmitter::CleanUp);
 	// Ghidra 0xdd0e0: empty loop over active particles, then free array and clear counters.
 	for (INT i = 0; i < *(INT*)((BYTE*)this + 0x2fc); i++) {}
 	((FArray*)((BYTE*)this + 0x2f8))->Empty(0x8c, 0);
 	*(DWORD*)((BYTE*)this + 0x2c4) = 0;
 	*(DWORD*)((BYTE*)this + 0x2c0) = 0;
 	*(DWORD*)((BYTE*)this + 0x2dc) &= ~1u;  // clear initialized bit
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x103dca90)
 void UParticleEmitter::Destroy()
 {
+	guard(UParticleEmitter::Destroy);
 	// Ghidra 0xdca90: CleanUp via vtable[26], then super Destroy.
 	void** vtbl = *(void***)this;
 	typedef void(__thiscall* NoArgFn)(UParticleEmitter*);
 	((NoArgFn)vtbl[26])(this);
 	UObject::Destroy();
+	unguard;
 }
 
 IMPL_EMPTY("actor force handling no-op")
@@ -963,10 +985,12 @@ void USparkEmitter::PostEditChange()
 IMPL_MATCH("Engine.dll", 0x10443460)
 void USparkEmitter::CleanUp()
 {
+	guard(USparkEmitter::CleanUp);
 	// Ghidra 0x143460: call parent CleanUp, then empty spark line array.
 	UParticleEmitter::CleanUp();
 	for (INT i = 0; i < *(INT*)((BYTE*)this + 0x36c); i++) {}
 	((FArray*)((BYTE*)this + 0x368))->Empty(0x20, 0);
+	unguard;
 }
 
 IMPL_EMPTY("spark emitter initialize no-op")
@@ -1030,8 +1054,10 @@ void USpriteEmitter::PostEditChange()
 IMPL_MATCH("Engine.dll", 0x10443ed0)
 void USpriteEmitter::CleanUp()
 {
+	guard(USpriteEmitter::CleanUp);
 	// Ghidra 0x143ed0: delegate to parent only.
 	UParticleEmitter::CleanUp();
+	unguard;
 }
 
 // Ghidra: 0x104440b0, 3625 bytes

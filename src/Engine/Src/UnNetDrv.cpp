@@ -39,6 +39,7 @@ unguard;
 IMPL_MATCH("Engine.dll", 0x1048b820)
 void UNetDriver::TickFlush()
 {
+	guard(UNetDriver::TickFlush);
 // Retail: 0x18b820, ordinal 4877. Calls TickFlush on ServerConnection (this+0x3C)
 // if present, then calls TickFlush on each connection in the ClientConnections
 // TArray at this+0x30 via vtable slot 0x84/4 (= TickFlush virtual).
@@ -53,6 +54,7 @@ for (INT i = 0; i < Clients.Num(); i++)
 INT* conn = (INT*)Clients(i);
 ((TickFlushFn)(*(void**)(*conn + 0x84)))(conn);
 }
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x1048b8c0)
@@ -1019,6 +1021,7 @@ UNetDriver* UNetConnection::GetDriver() { return Driver; }
 IMPL_MATCH("Engine.dll", 0x10484680)
 void UNetConnection::PreSend( INT SizeBits )
 {
+	guard(UNetConnection::PreSend);
 // Out(FBitWriter) at offset 0x250, MaxPacket(INT) at offset 0xD0
 FBitWriter& Out = *(FBitWriter*)((BYTE*)this + 0x250);
 INT MaxPacket = *(INT*)((BYTE*)this + 0xD0);
@@ -1035,6 +1038,7 @@ appFailAssert("Out.GetNumBits()<=MAX_PACKET_HEADER_BITS", ".\\UnConn.cpp", 0x2A4
 // Final overflow check.
 if (Out.GetNumBits() + 1 + SizeBits > MaxPacket * 8)
 appErrorf(TEXT("PreSend overflow: %i+%i>%i"), Out.GetNumBits(), SizeBits, MaxPacket * 8);
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10485440)

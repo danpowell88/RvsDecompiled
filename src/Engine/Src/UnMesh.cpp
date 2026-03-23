@@ -895,11 +895,13 @@ UClass * ULodMesh::MeshGetInstanceClass()
 IMPL_MATCH("Engine.dll", 0x103ca570)
 void UMesh::Serialize(FArchive& Ar)
 {
+	guard(UMesh::Serialize);
 	// Retail: 0xca570, 60b. Calls UPrimitive::Serialize, then if archive is not
 	// persistent (in-memory), serializes the mesh instance pointer at this+0x58.
 	UPrimitive::Serialize(Ar);
 	if (!Ar.IsPersistent())
 		Ar << *(UObject**)((BYTE*)this + 0x58);
+	unguard;
 }
 
 // Ghidra 0x103ca620 (251b): cleanup branch dispatches via GetStatus() at vtable+0x98.
@@ -1238,6 +1240,7 @@ int UMeshAnimation::MemFootprint()
 IMPL_MATCH("Engine.dll", 0x10430a30)
 void UMeshAnimation::PostLoad()
 {
+	guard(UMeshAnimation::PostLoad);
 	// Ghidra 0x130a30, 119b. Calls UObject::PostLoad then, for each FMeshAnimSeq in
 	// Sequences (this+0x48, stride 0x2C), inlines FUN_103ca8f0(GetOuter()) with
 	// ECX = the sequence entry.
@@ -1277,6 +1280,7 @@ void UMeshAnimation::PostLoad()
 		}
 		i++;
 	}
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10320f50)
@@ -1539,7 +1543,7 @@ void USkeletalMesh::m_bLoadLbpFile(FString FileName)
 IMPL_MATCH("Engine.dll", 0x10438890)
 int USkeletalMesh::SetAttachAlias(FName param_2, FName param_3, FCoords& param_4)
 {
-	guardSlow(USkeletalMesh::SetAttachAlias);
+	guard(USkeletalMesh::SetAttachAlias);
 	FName none(NAME_None);
 	if (param_2 == none) return 0;
 	if (param_3 == none) return 0;
@@ -1580,7 +1584,7 @@ int USkeletalMesh::SetAttachAlias(FName param_2, FName param_3, FCoords& param_4
 		for (INT iVar3 = 0xc; iVar3 != 0; iVar3--) { *dst = *src; src++; dst++; }
 	}
 	return 1;
-	unguardSlow;
+	unguard;
 }
 
 IMPL_DIVERGE("Karma physics interface callbacks at param_3+0x328+0xf0 use proprietary runtime vtables (slots [2]/[3]); gameplay path is implemented with raw calls, but exact typed integration cannot be made byte-parity-safe")
@@ -2142,15 +2146,19 @@ int USkeletalMesh::MemFootprint(int param_1)
 IMPL_MATCH("Engine.dll", 0x1042f5d0)
 void USkeletalMesh::Destroy()
 {
+	guard(USkeletalMesh::Destroy);
 	// Retail: 0x1042f5d0. Just calls UObject::Destroy (no custom cleanup beyond base class).
 	UObject::Destroy();
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x1042f6e0)
 FBox USkeletalMesh::GetCollisionBoundingBox(const AActor* Owner) const
 {
+	guard(USkeletalMesh::GetCollisionBoundingBox);
 	// Retail: 0x12f6e0. Delegates to UPrimitive::GetCollisionBoundingBox.
 	return UPrimitive::GetCollisionBoundingBox(Owner);
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x1042f800)

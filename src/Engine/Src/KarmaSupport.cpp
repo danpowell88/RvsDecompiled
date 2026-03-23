@@ -108,10 +108,12 @@ unguard;
 IMPL_MATCH("Engine.dll", 0x10359dc0)
 void AKConstraint::CheckForErrors()
 {
+	guard(AKConstraint::CheckForErrors);
 // Ghidra 0x59dc0: call super, then warn if neither constraint actor is set.
 AActor::CheckForErrors();
 if (*(INT*)((BYTE*)this + 0x3C0) == 0 && *(INT*)((BYTE*)this + 0x3C4) == 0)
 GWarn->Logf(TEXT("KConstraint which does not point to any Actors."));
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x1035a410)

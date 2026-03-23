@@ -41,6 +41,7 @@ void AProjector::TickSpecial(float DeltaTime)
 IMPL_MATCH("Engine.dll", 0x103fad80)
 void AProjector::UpdateParticleMaterial(UParticleMaterial* PM, int Index)
 {
+	guard(AProjector::UpdateParticleMaterial);
 	// Retail: 0xfad80, 162b. Copy projector texture + matrix rows + flags into a
 	// per-particle-material slot at Index * 0x4c within the UParticleMaterial.
 	UObject* tex = *(UObject**)((BYTE*)this + 0x3a4);
@@ -51,13 +52,16 @@ void AProjector::UpdateParticleMaterial(UParticleMaterial* PM, int Index)
 	appMemcpy((BYTE*)PM + Index * 0x4c + 0x8c, (BYTE*)this + 0x4d0, 0x40);
 	*(DWORD*)((BYTE*)PM + Index * 0x4c + 0xcc) = (*(INT*)((BYTE*)this + 0x398) != 0) ? 1u : 0u;
 	*(DWORD*)((BYTE*)PM + Index * 0x4c + 0xd0) = (DWORD)*(BYTE*)((BYTE*)this + 0x395);
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x1040b970)
 void AProjector::RenderEditorSelected(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
+	guard(AProjector::RenderEditorSelected);
 	RenderWireframe(RI);
 	AActor::RenderEditorSelected(SceneNode, RI, DA);
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x103f8ae0)
@@ -130,6 +134,7 @@ void AProjector::PostEditMove()
 IMPL_MATCH("Engine.dll", 0x103fb7f0)
 void AProjector::Abandon()
 {
+	guard(AProjector::Abandon);
 	// Retail: 0xfb7f0, 103b. Decrement the render-info refcount and free when zero.
 	INT* renderInfo = *(INT**)((BYTE*)this + 0x48c);
 	if (renderInfo)
@@ -143,6 +148,7 @@ void AProjector::Abandon()
 		}
 		*(DWORD*)((BYTE*)this + 0x48c) = 0;
 	}
+	unguard;
 }
 
 // DIVERGENCE: FUN_10322eb0 (BSP TArray cleanup) replaced by C++ RAII TArray dtor —
@@ -608,6 +614,7 @@ void AProjector::Destroy()
 IMPL_MATCH("Engine.dll", 0x103fb6e0)
 void AProjector::Detach(int Flush)
 {
+	guard(AProjector::Detach);
 	// Retail: 0xfb6e0, 209b. Timestamp the render info with the current TSC-based
 	// time, optionally zero the geometry data, then decrement the refcount and free.
 	INT* renderInfo = *(INT**)((BYTE*)this + 0x48c);
@@ -634,14 +641,17 @@ void AProjector::Detach(int Flush)
 		GMalloc->Free((void*)renderInfo);
 	}
 	*(DWORD*)((BYTE*)this + 0x48c) = 0;
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x103faca0)
 UPrimitive * AProjector::GetPrimitive()
 {
+	guard(AProjector::GetPrimitive);
 	if (!GProjectorPrimitive)
 		GProjectorPrimitive = ConstructObject<UProjectorPrimitive>(UProjectorPrimitive::StaticClass());
 	return GProjectorPrimitive;
+	unguard;
 }
 
 
@@ -704,9 +714,11 @@ int UProjectorPrimitive::PointCheck(FCheckResult &Result, AActor *Actor, FVector
 IMPL_MATCH("Engine.dll", 0x103f8270)
 void UProjectorPrimitive::Destroy()
 {
+	guard(UProjectorPrimitive::Destroy);
 	// Retail: 0xf8270, 73b. Clear the singleton primitive global then chain to base.
 	GProjectorPrimitive = NULL;
 	UObject::Destroy();
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x103f8250)

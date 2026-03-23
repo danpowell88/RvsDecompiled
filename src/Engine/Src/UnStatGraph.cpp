@@ -428,6 +428,7 @@ void FStats::CalcMovingAverage(INT StatIdx, DWORD WindowSize)
 IMPL_MATCH("Engine.dll", 0x1044f430)
 void FStats::Clear()
 {
+	guard(FStats::Clear);
 	BYTE* Base = (BYTE*)this;
 	INT*   IntData     = *(INT**)(Base + 0x1C);
 	INT    IntNum      = *(INT*)(Base + 0x20);
@@ -457,6 +458,7 @@ void FStats::Clear()
 		FString* Str = (FString*)(StrData + i * 0xC);
 		*Str = TEXT("");
 	}
+	unguard;
 }
 
 // ============================================================================

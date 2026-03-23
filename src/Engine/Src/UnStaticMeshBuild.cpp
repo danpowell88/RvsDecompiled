@@ -688,11 +688,13 @@ int UStaticMesh::PointCheck(FCheckResult& Result, AActor* Owner, FVector Locatio
 IMPL_MATCH("Engine.dll", 0x104469d0)
 void UStaticMesh::Destroy()
 {
+	guard(UStaticMesh::Destroy);
 	// Retail: 0x104469d0.Calls FUN_103582d0(this) to release the static mesh collision
 	// node tree and triangle arrays at this+0x164. Then calls UObject::Destroy.
 	typedef void (__cdecl *FreeMeshFn)(UStaticMesh*);
 	((FreeMeshFn)0x103582d0)(this);
 	UObject::Destroy();
+	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x1044c130)
 FBox UStaticMesh::GetCollisionBoundingBox(const AActor* Actor) const

@@ -14,25 +14,25 @@
 IMPL_MATCH("Core.dll", 0x1012ef20)
 void FOutputDevice::Log( const TCHAR* S )
 {
-	guard(FOutputDevice::Log);
+	guardSlow(FOutputDevice::Log);
 	Serialize( S, NAME_Log );
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Core.dll", 0x1012ef20)
 void FOutputDevice::Log( enum EName Type, const TCHAR* S )
 {
-	guard(FOutputDevice::Log);
+	guardSlow(FOutputDevice::Log);
 	Serialize( S, Type );
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Core.dll", 0x1012ef20)
 void FOutputDevice::Log( const FString& S )
 {
-	guard(FOutputDevice::Log);
+	guardSlow(FOutputDevice::Log);
 	Serialize( *S, NAME_Log );
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Core.dll", 0x1012EF20)

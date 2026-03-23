@@ -25,9 +25,11 @@ FMeshAnimSeq * ULodMeshInstance::GetAnimSeq(FName)
 IMPL_MATCH("Engine.dll", 0x103c6ff0)
 void ULodMeshInstance::Serialize(FArchive& Ar)
 {
+	guard(ULodMeshInstance::Serialize);
 	// Retail 0x103c6ff0, 79b. Calls UPrimitive::Serialize, which chains UObject::Serialize
 	// then serializes BoundingBox and BoundingSphere render bounds.
 	UPrimitive::Serialize(Ar);
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x103149A0)
@@ -424,6 +426,7 @@ int UMeshInstance::IsAnimTweening(int)
 IMPL_MATCH("Engine.dll", 0x1042ff20)
 int USkeletalMeshInstance::TraceHeadHit(FCheckResult& Hit, FVector const& Start, FVector const& End, FVector const& DirNorm, float const& Extent)
 {
+	guard(USkeletalMeshInstance::TraceHeadHit);
 	// Retail: 0x12FF20, 96b. Casts a line from Start toward End with the given half-extent
 	// to detect a head-bone collision. Uses FVector arithmetic (delta, normalization) on
 	// stack locals then calls vtbl-based line check. Returns non-zero if head hit.
@@ -432,11 +435,13 @@ int USkeletalMeshInstance::TraceHeadHit(FCheckResult& Hit, FVector const& Start,
 	//   dotProduct = dot(dir2, DirNorm) * each component + ...
 	// Returning 0 is safe for a stub that doesn't affect gameplay critically.
 	return 0;
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10434ef0)
 void USkeletalMeshInstance::UpdateBlendAlpha(INT Channel, float Alpha, float DeltaTime)
 {
+	guard(USkeletalMeshInstance::UpdateBlendAlpha);
 	// Retail: 0x134EF0, 160b.
 	// Bounds-check Channel vs this+0x10C TArray Num().
 	// Channel element blend alpha stored at elem+0x50.
@@ -460,6 +465,7 @@ void USkeletalMeshInstance::UpdateBlendAlpha(INT Channel, float Alpha, float Del
 		else
 			*(FLOAT*)(elem + 0x50) = current + DeltaTime;
 	}
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10430f40)
@@ -479,6 +485,7 @@ int USkeletalMeshInstance::ValidateAnimChannel(INT Channel)
 IMPL_MATCH("Engine.dll", 0x10434a90)
 void USkeletalMeshInstance::SetAnimRate(INT Channel, FLOAT Rate)
 {
+	guard(USkeletalMeshInstance::SetAnimRate);
 	// Disasm: 0x134A90, 240b.
 	// Multiplies Rate by the per-channel rate scale (elem+0x20) and stores to elem+0x0C.
 	// With a zero rate, sets elem+0x40 = 0 (paused); non-zero sets elem+0x40 = 1 (playing).
@@ -490,6 +497,7 @@ void USkeletalMeshInstance::SetAnimRate(INT Channel, FLOAT Rate)
 	FLOAT Stored = Rate * Scale;
 	*(FLOAT*)(elem + 0x0C) = Stored;
 	*(INT*)(elem + 0x40) = (Rate > 0.0f) ? 1 : 0;
+	unguard;
 }
 
 // Ghidra 0x10434FC0 (241b): finds the anim object for SeqName via vtbl[0x12C/4],
@@ -498,6 +506,7 @@ void USkeletalMeshInstance::SetAnimRate(INT Channel, FLOAT Rate)
 IMPL_MATCH("Engine.dll", 0x10434FC0)
 void USkeletalMeshInstance::SetAnimSequence(INT Channel, FName SeqName)
 {
+	guard(USkeletalMeshInstance::SetAnimSequence);
 	if (Channel < 0) return;
 	FArray* arr = (FArray*)((BYTE*)this + 0x10C);
 	if (Channel >= arr->Num()) return;
@@ -534,11 +543,13 @@ void USkeletalMeshInstance::SetAnimSequence(INT Channel, FName SeqName)
 	// vtbl[0xC8/4] = IsLooping(seqObj) → store bool in elem+0x34
 	typedef INT (__thiscall *IsLoopingFn)(USkeletalMeshInstance*, void*);
 	*(DWORD*)(elem + 0x34) = ((*(IsLoopingFn*)((*(BYTE**)this) + 0xC8))(this, SeqObj) != 0) ? 1 : 0;
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10434C20)
 void USkeletalMeshInstance::SetBlendAlpha(INT Channel, FLOAT Alpha)
 {
+	guard(USkeletalMeshInstance::SetBlendAlpha);
 	// Retail: 145b SEH. Clamps Alpha to [0.0, 1.0] and stores at element+0x50 in TArray at this+0x10C.
 	if (Channel < 0) return;
 	BYTE* seqBase = (BYTE*)this + 0x10C;
@@ -548,6 +559,7 @@ void USkeletalMeshInstance::SetBlendAlpha(INT Channel, FLOAT Alpha)
 	if (clamped < 0.0f) clamped = 0.0f;
 	if (clamped > 1.0f) clamped = 1.0f;
 	*(FLOAT*)(*(BYTE**)(seqBase) + Channel * 0x74 + 0x50) = clamped;
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x104326b0)
@@ -634,6 +646,7 @@ int USkeletalMeshInstance::SetBoneLocation(FName BoneName, FVector Location, FLO
 IMPL_MATCH("Engine.dll", 0x10431ba0)
 int USkeletalMeshInstance::SetBonePosition(FName BoneName, FRotator Rot, FVector Loc, FLOAT Scale)
 {
+	guard(USkeletalMeshInstance::SetBonePosition);
 	// Retail: 0x131BA0. Faithfully decompiled from Ghidra.
 	// this+0x13C: bone position override TArray, stride 0x40, max 256.
 	// entry+0x00=boneIdx, +0x04=BoneName, +0x08=Rotation(FRotator), +0x20=Location(FVector),
@@ -673,6 +686,7 @@ int USkeletalMeshInstance::SetBonePosition(FName BoneName, FRotator Rot, FVector
 	*(FRotator*)(elem + 0x08) = Rot;
 	*(FVector*) (elem + 0x20) = Loc;
 	return 1;
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10431890)
@@ -761,6 +775,7 @@ int USkeletalMeshInstance::SetBoneRotation(FName BoneName, FRotator NewRot, INT 
 IMPL_MATCH("Engine.dll", 0x10431620)
 int USkeletalMeshInstance::SetBoneScale(INT BoneChannel, FLOAT Scale, FName BoneName)
 {
+	guard(USkeletalMeshInstance::SetBoneScale);
 	// Retail: 0x131620. Faithfully decompiled from Ghidra.
 	// this+0x118: per-channel bone scale TArray, stride 0x3C, indexed by BoneChannel (0-256).
 	// entry+0x00=boneIdx(-1 if inactive), +0x04=BoneName, +0x08=Scale.
@@ -802,6 +817,7 @@ int USkeletalMeshInstance::SetBoneScale(INT BoneChannel, FLOAT Scale, FName Bone
 	*(INT*)  slot       = 0xFFFFFFFF; // boneIdx = -1
 	*(FLOAT*)(slot + 4) = 0.0f;       // scale = 0
 	return 1;
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x104325D0)
@@ -843,6 +859,7 @@ int USkeletalMeshInstance::SetSkelAnim(UMeshAnimation* Anim, USkeletalMesh* Mesh
 IMPL_MATCH("Engine.dll", 0x1042FA90)
 int USkeletalMeshInstance::LockRootMotion(INT Mode, INT /*Unused*/)
 {
+	guard(USkeletalMeshInstance::LockRootMotion);
 	// Disasm: store Mode at this+0x1C4, set lock flag at this+0x228=1, clear this+0x188=0
 	*(INT*)((BYTE*)this + 0x1C4) = Mode;
 	*(INT*)((BYTE*)this + 0x228) = 1;
@@ -862,6 +879,7 @@ int USkeletalMeshInstance::LockRootMotion(INT Mode, INT /*Unused*/)
 	// if owner is non-NULL more work is done but is safe to defer
 	if (!Owner) return 0;
 	return 1;
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10430d40)
@@ -913,6 +931,7 @@ int USkeletalMeshInstance::MatchRefBone(FName BoneName)
 IMPL_MATCH("Engine.dll", 0x104351b0)
 void USkeletalMeshInstance::BlendToAlpha(INT Channel, FLOAT BlendAlpha, FLOAT DeltaTime)
 {
+	guard(USkeletalMeshInstance::BlendToAlpha);
 	// Retail: 0x1351B0, ~130b.
 	// Sets up a timed blend on channel elem+0x38/0x5C/0x60.
 	// If DeltaTime == 0.0f: do nothing (no-op guard at retail).
@@ -925,6 +944,7 @@ void USkeletalMeshInstance::BlendToAlpha(INT Channel, FLOAT BlendAlpha, FLOAT De
 	*(INT*)(elem + 0x60)  = *(INT*)&BlendAlpha; // store as int-aliased float
 	*(FLOAT*)(elem + 0x5C) = DeltaTime;
 	*(INT*)(elem + 0x38)   = 1;
+	unguard;
 }
 
 IMPL_DIVERGE("FCoords source (local_30) for TransformPointBy is unresolvable from Ghidra output (vtbl[0x110/4] writes to local_1c only, not local_30). Cannot implement without disassembly of FUN references. Ghidra 0x104361a0")
@@ -956,6 +976,7 @@ void USkeletalMeshInstance::ClearSkelAnims()
 IMPL_MATCH("Engine.dll", 0x10434980)
 void USkeletalMeshInstance::CopyAnimation(INT Src, INT Dst)
 {
+	guard(USkeletalMeshInstance::CopyAnimation);
 	// Retail: 0x134980, ~200b.
 	// Both Src and Dst must be valid channels (>= 0 and < Num). Dst is ValidateAnimChannel'd.
 	// Copies channel fields from Src to Dst: +8(FName), +4(slotIdx), +0C(rate), +20(rateScale),
@@ -977,6 +998,7 @@ void USkeletalMeshInstance::CopyAnimation(INT Src, INT Dst)
 	*(INT*)(dst + 0x14) = *(INT*)(src + 0x14); // frame count
 	*(INT*)(dst + 0x34) = *(INT*)(src + 0x34); // isLooping
 	*(INT*)(dst + 0x2C) = *(INT*)(src + 0x2C); // loop flag 1
+	unguard;
 }
 
 IMPL_TODO("Ghidra 0x10436390 (933b): DrawCollisionCylinders blocked by m_fCylindersRadius binary data — implement after m_fCylindersRadius is extracted from Engine.dll data section (see GetBoneCylinder below)")
@@ -991,6 +1013,7 @@ void USkeletalMeshInstance::DrawCollisionCylinders(FSceneNode *)
 IMPL_MATCH("Engine.dll", 0x104338b0)
 int USkeletalMeshInstance::EnableChannelNotify(INT Channel, INT bEnable)
 {
+	guard(USkeletalMeshInstance::EnableChannelNotify);
 	// Retail: 0x1338B0, ~130b.
 	// ValidateAnimChannel(Channel). Then elem+0x48 = !bEnable (i.e. 0 when enabling, 1 when disabling).
 	// Returns 1 on success, 0 if ValidateAnimChannel fails.
@@ -999,11 +1022,13 @@ int USkeletalMeshInstance::EnableChannelNotify(INT Channel, INT bEnable)
 	BYTE* elem = base + Channel * 0x74;
 	*(INT*)(elem + 0x48) = (bEnable == 0) ? 1 : 0;
 	return 1;
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10434b80)
 void USkeletalMeshInstance::ForceAnimRate(INT Channel, FLOAT Rate)
 {
+	guard(USkeletalMeshInstance::ForceAnimRate);
 	// Retail: 0x134B80, 96b. Stores Rate at channel element+0x0C in TArray at this+0x10C
 	// (stride 0x74). Bounds-checks channel first; ignores negative channel.
 	if (Channel < 0)
@@ -1013,6 +1038,7 @@ void USkeletalMeshInstance::ForceAnimRate(INT Channel, FLOAT Rate)
 		return;
 	BYTE* elem = (BYTE*)(*(INT*)arr) + Channel * 0x74;
 	*(FLOAT*)(elem + 0x0C) = Rate;
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x1042F760)
@@ -1026,12 +1052,14 @@ int USkeletalMeshInstance::GetAnimChannelCount()
 IMPL_MATCH("Engine.dll", 0x10434E40)
 float USkeletalMeshInstance::GetAnimFrame(INT Channel)
 {
+	guard(USkeletalMeshInstance::GetAnimFrame);
 	// Retail: 93b SEH. Same TArray at this+0x10C (stride 0x74), frame float at element+0x10.
 	if (Channel < 0) return 0.0f;
 	BYTE* seqBase = (BYTE*)this + 0x10C;
 	INT count = *(INT*)(seqBase + 4);
 	if (Channel >= count) return 0.0f;
 	return *(FLOAT*)(*(BYTE**)(seqBase) + Channel * 0x74 + 0x10);
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10435b20)
@@ -1064,6 +1092,7 @@ float USkeletalMeshInstance::GetAnimRateOnChannel(INT Channel)
 IMPL_MATCH("Engine.dll", 0x104350F0)
 FName USkeletalMeshInstance::GetAnimSequence(INT Channel)
 {
+	guard(USkeletalMeshInstance::GetAnimSequence);
 	// Retail: 98b SEH. Reads FName.Index from channel element+0x08 in TArray at this+0x10C.
 	// Same layout as GetActiveAnimSequence; [ebp+0xC] used as arg due to hidden return ptr.
 	if (Channel < 0) return FName(NAME_None);
@@ -1072,17 +1101,20 @@ FName USkeletalMeshInstance::GetAnimSequence(INT Channel)
 	if (Channel >= count) return FName(NAME_None);
 	BYTE* data = *(BYTE**)(seqBase);
 	return *(FName*)(data + Channel * 0x74 + 0x08);
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10434CF0)
 float USkeletalMeshInstance::GetBlendAlpha(INT Channel)
 {
+	guard(USkeletalMeshInstance::GetBlendAlpha);
 	// Retail: 93b SEH. Same TArray at this+0x10C (stride 0x74), blend alpha float at element+0x50.
 	if (Channel < 0) return 0.0f;
 	BYTE* seqBase = (BYTE*)this + 0x10C;
 	INT count = *(INT*)(seqBase + 4);
 	if (Channel >= count) return 0.0f;
 	return *(FLOAT*)(*(BYTE**)(seqBase) + Channel * 0x74 + 0x50);
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10433210)
@@ -1262,6 +1294,7 @@ FVector USkeletalMeshInstance::GetRootLocation()
 IMPL_MATCH("Engine.dll", 0x10433790)
 FVector USkeletalMeshInstance::GetRootLocationDelta()
 {
+	guard(USkeletalMeshInstance::GetRootLocationDelta);
 	// Disasm: 0x133790, 288b.
 	// 1. Guard: root motion lock (this+0x228) set AND GetOwner vtable non-null.
 	// 2. Call vtbl[0x110/4] to refresh root motion caches.
@@ -1288,6 +1321,7 @@ FVector USkeletalMeshInstance::GetRootLocationDelta()
 	if (*(INT*)((BYTE*)this + 0x22C))
 		LockRootMotion(*(INT*)((BYTE*)this + 0x100), 1);
 	return FVector(dX, dY, dZ);
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x1042f950)
@@ -1305,6 +1339,7 @@ FRotator USkeletalMeshInstance::GetRootRotation()
 IMPL_MATCH("Engine.dll", 0x1042f9b0)
 FRotator USkeletalMeshInstance::GetRootRotationDelta()
 {
+	guard(USkeletalMeshInstance::GetRootRotationDelta);
 	// Disasm: 0x12F9B0, 224b.
 	// 1. Guard: root motion lock (this+0x228) set AND GetOwner vtable non-null.
 	// 2. Call vtbl[0x110/4] to refresh root motion caches.
@@ -1326,6 +1361,7 @@ FRotator USkeletalMeshInstance::GetRootRotationDelta()
 	*(FRotator*)((BYTE*)this + 0x1EC) = Current;
 	// Return yaw-only delta (retail zeroes Pitch and Roll)
 	return FRotator(0, Current.Yaw - Prev.Yaw, 0);
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10435bf0)
@@ -1678,6 +1714,7 @@ void USkeletalMeshInstance::Serialize(FArchive& Ar)
 IMPL_MATCH("Engine.dll", 0x10434DA0)
 void USkeletalMeshInstance::SetAnimFrame(INT Channel, FLOAT Frame)
 {
+	guard(USkeletalMeshInstance::SetAnimFrame);
 	// Retail: 96b SEH. Bounds-checks Channel against TArray count at this+0x10C,
 	// then stores Frame (float) into channel element at Data + Channel*0x74 + 0x10.
 	if (Channel < 0) return;
@@ -1686,6 +1723,7 @@ void USkeletalMeshInstance::SetAnimFrame(INT Channel, FLOAT Frame)
 	if (Channel >= count) return;
 	BYTE* data = *(BYTE**)(seqBase);
 	*(FLOAT*)(data + Channel * 0x74 + 0x10) = Frame;
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10435aa0)
@@ -1713,6 +1751,7 @@ void USkeletalMeshInstance::SetMesh(UMesh* NewMesh)
 IMPL_MATCH("Engine.dll", 0x10430e40)
 void USkeletalMeshInstance::SetScale(FVector Scale)
 {
+	guard(USkeletalMeshInstance::SetScale);
 	// Disasm: 0x130E40, 96b.
 	// Get mesh via vtbl[0x8C/4], write Scale to mesh+0x7C,
 	// then ensure mesh+0x84 (some float, likely DrawScale) is non-negative.
@@ -1724,6 +1763,7 @@ void USkeletalMeshInstance::SetScale(FVector Scale)
 	// Abs-value the draw scale at mesh+0x84
 	FLOAT* DrawScale = (FLOAT*)(Mesh + 0x84);
 	if (*DrawScale < 0.0f) *DrawScale = -*DrawScale;
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10433b50)
@@ -1812,6 +1852,7 @@ void USkeletalMeshInstance::MeshSkinVertsCallback(void *)
 IMPL_MATCH("Engine.dll", 0x10431d50)
 int USkeletalMeshInstance::PlayAnim(INT Channel, FName SeqName, FLOAT Rate, FLOAT TweenTime, INT bLooping, INT bLoopLast, INT bIdle)
 {
+	guard(USkeletalMeshInstance::PlayAnim);
 	// Retail: 0x131D50, ~700b. Faithfully decompiled from Ghidra.
 	// bLooping: loop the animation. bLoopLast: stored at elem+0x40 (bIdle field).
 	// bIdle: if non-zero, use Rate directly; otherwise scale Rate by rateScale.
@@ -2041,6 +2082,7 @@ int USkeletalMeshInstance::PlayAnim(INT Channel, FName SeqName, FLOAT Rate, FLOA
 		*(FLOAT*)(elem + 0x10) = -invFC;
 		return 1;
 	}
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10433960)
@@ -2258,6 +2300,7 @@ int USkeletalMeshInstance::AnimIsInGroup(void* Channel, FName GroupName)
 IMPL_MATCH("Engine.dll", 0x10431350)
 int USkeletalMeshInstance::AnimStopLooping(INT channel)
 {
+	guard(USkeletalMeshInstance::AnimStopLooping);
 	// Retail: 104b (SEH). TArray at this+0x10C, stride 0x74=116b.
 	// Clears loop flag at element+0x30 and element+0x2C, returns 1.
 	BYTE* seqBase = (BYTE*)this + 0x10C;
@@ -2268,11 +2311,13 @@ int USkeletalMeshInstance::AnimStopLooping(INT channel)
 	*(INT*)(elem + 0x30) = 0;
 	*(INT*)(elem + 0x2C) = 0;
 	return 1;
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10432500)
 void USkeletalMeshInstance::ClearChannel(INT Channel)
 {
+	guard(USkeletalMeshInstance::ClearChannel);
 	// Retail: 0x132500, 141b. If Channel is within the channel TArray (this+0x10C,
 	// stride 0x74), reset the slot: sequence name→NAME_None, frame/rate/tween/etc→0.
 	FArray* arr = (FArray*)((BYTE*)this + 0x10C);
@@ -2287,6 +2332,7 @@ void USkeletalMeshInstance::ClearChannel(INT Channel)
 	*(INT*)(elem + 0x60) = 0;
 	*(INT*)(elem + 0x5C) = 0;
 	*(INT*)(elem + 0x38) = 0;  // loop
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10432770)
@@ -2322,12 +2368,14 @@ UMeshAnimation* USkeletalMeshInstance::CurrentSkelAnim(INT Channel)
 IMPL_MATCH("Engine.dll", 0x1042f640)
 void USkeletalMeshInstance::Destroy()
 {
+	guard(USkeletalMeshInstance::Destroy);
 	// Retail: 0x12f640. Calls FUN_10367df0(this) to release bone geometry arrays
 	// (TArrays at this+0x308 and this+0x314 — cached transform/ref lists), then
 	// calls UObject::Destroy for the UObject cleanup chain.
 	typedef void (__thiscall *CleanupFn)(USkeletalMeshInstance*);
 	((CleanupFn)0x10367df0)(this);
 	UObject::Destroy();
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10432a50)
@@ -2401,28 +2449,33 @@ int USkeletalMeshInstance::FreezeAnimAt(FLOAT Frame, INT Channel)
 IMPL_MATCH("Engine.dll", 0x10431570)
 float USkeletalMeshInstance::GetActiveAnimFrame(INT Channel)
 {
+	guard(USkeletalMeshInstance::GetActiveAnimFrame);
 	// Retail: 93b (SEH). TArray at this+0x10C, stride 0x74=116b, frame float at element+0x10.
 	BYTE* seqBase = (BYTE*)this + 0x10C;
 	INT count = *(INT*)(seqBase + 4);
 	if (count <= Channel || Channel < 0) return 0.0f;
 	BYTE* data = *(BYTE**)(seqBase);
 	return *(FLOAT*)(data + Channel * 0x74 + 0x10);
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x104314C0)
 float USkeletalMeshInstance::GetActiveAnimRate(INT Channel)
 {
+	guard(USkeletalMeshInstance::GetActiveAnimRate);
 	// Retail: 93b (SEH). Same TArray at this+0x10C (stride 0x74=116b), rate float at element+0x0C.
 	BYTE* seqBase = (BYTE*)this + 0x10C;
 	INT count = *(INT*)(seqBase + 4);
 	if (count <= Channel || Channel < 0) return 0.0f;
 	BYTE* data = *(BYTE**)(seqBase);
 	return *(FLOAT*)(data + Channel * 0x74 + 0x0C);
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10431400)
 FName USkeletalMeshInstance::GetActiveAnimSequence(INT Channel)
 {
+	guard(USkeletalMeshInstance::GetActiveAnimSequence);
 	// Retail: 98b SEH. Reads FName from channel element+0x08 in TArray at this+0x10C.
 	// Returns NAME_None if Channel < 0 or Channel >= count.
 	if (Channel < 0) return FName(NAME_None);
@@ -2431,6 +2484,7 @@ FName USkeletalMeshInstance::GetActiveAnimSequence(INT Channel)
 	if (Channel >= count) return FName(NAME_None);
 	BYTE* data = *(BYTE**)(seqBase);
 	return *(FName*)(data + Channel * 0x74 + 0x08);
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10432810)
@@ -2571,17 +2625,20 @@ int USkeletalMeshInstance::IsAnimating(int Channel)
 IMPL_MATCH("Engine.dll", 0x104311E0)
 int USkeletalMeshInstance::IsAnimLooping(INT Channel)
 {
+	guard(USkeletalMeshInstance::IsAnimLooping);
 	// Retail: 93b (SEH). TArray at this+0x10C, stride 0x74=116b, loop flag (INT) at element+0x30.
 	BYTE* seqBase = (BYTE*)this + 0x10C;
 	INT count = *(INT*)(seqBase + 4);
 	if (count <= Channel || Channel < 0) return 0;
 	BYTE* data = *(BYTE**)(seqBase);
 	return *(INT*)(data + Channel * 0x74 + 0x30);
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10431290)
 int USkeletalMeshInstance::IsAnimPastLastFrame(INT Channel)
 {
+	guard(USkeletalMeshInstance::IsAnimPastLastFrame);
 	// Retail: 111b (SEH). Compares current frame (element+0x10) with end frame (element+0x14).
 	// Returns 1 if current >= end (animation has reached or passed last frame).
 	BYTE* seqBase = (BYTE*)this + 0x10C;
@@ -2590,11 +2647,13 @@ int USkeletalMeshInstance::IsAnimPastLastFrame(INT Channel)
 	BYTE* data = *(BYTE**)(seqBase);
 	BYTE* elem = data + Channel * 0x74;
 	return (*(FLOAT*)(elem + 0x10) >= *(FLOAT*)(elem + 0x14)) ? 1 : 0;
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10431110)
 int USkeletalMeshInstance::IsAnimTweening(int Channel)
 {
+	guard(USkeletalMeshInstance::IsAnimTweening);
 	// Retail: 0x131110, 117 bytes. Returns 1 if channel's current frame < 0 and vtbl
 	// IsAnimating check (vtbl[0xD8/4]) also returns non-zero.
 	// TArray at this+0x10C, stride 0x74, frame at elem+0x10.
@@ -2608,6 +2667,7 @@ int USkeletalMeshInstance::IsAnimTweening(int Channel)
 	typedef INT (__thiscall *AnimCheckFn)(USkeletalMeshInstance*, INT);
 	AnimCheckFn fn = (AnimCheckFn)((*(void***)this)[0xD8 / sizeof(void*)]);
 	return fn(this, Channel) ? 1 : 0;
+	unguard;
 }
 
 
@@ -2726,10 +2786,12 @@ FMeshAnimSeq * UVertMeshInstance::GetAnimSeq(FName Name)
 IMPL_MATCH("Engine.dll", 0x104726C0)
 int UVertMeshInstance::StopAnimating(INT Channel)
 {
+	guard(UVertMeshInstance::StopAnimating);
 	// Retail: 15b. Clears the animation sequence name (FName) at this+0xB8 and returns 1.
 	// Channel argument is ignored (single-channel vertex mesh).
 	*(FName*)((BYTE*)this + 0xB8) = FName(NAME_None);
 	return 1;
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10472950)
@@ -3688,20 +3750,25 @@ void UVertMeshInstance::GetMeshVerts(AActor *,FVector *,int,int &)
 IMPL_MATCH("Engine.dll", 0x104733E0)
 FBox UVertMeshInstance::GetRenderBoundingBox(const AActor* Owner)
 {
+	guard(UVertMeshInstance::GetRenderBoundingBox);
 	// Retail: 33b. Same pattern as GetRenderBoundingSphere: get mesh, call mesh's method.
 	return GetMesh()->GetRenderBoundingBox(Owner);
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10472540)
 FSphere UVertMeshInstance::GetRenderBoundingSphere(const AActor*)
 {
+	guard(UVertMeshInstance::GetRenderBoundingSphere);
 	// Retail: 84b (SEH). Calls vtbl[35] to get mesh, copies FSphere from mesh+0x48.
 	return *(FSphere*)((BYTE*)GetMesh() + 0x48);
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x104725d0)
 int UVertMeshInstance::IsAnimating(int Channel)
 {
+	guard(UVertMeshInstance::IsAnimating);
 	// Retail: 0x1725d0, 74b. Only channel 0 supported on vertex meshes.
 	// If actor (this+0x5C) is set AND channel is 0 AND anim name (this+0xB8) is not NAME_None:
 	//   if frame (this+0xC0) < 0 (tweening): return whether tween-rate (this+0xC8) != 0
@@ -3714,6 +3781,7 @@ int UVertMeshInstance::IsAnimating(int Channel)
 	if (*(FLOAT*)((BYTE*)this + 0xC0) < 0.0f)
 		return (*(FLOAT*)((BYTE*)this + 0xC8) != 0.0f) ? 1 : 0;
 	return (*(FLOAT*)((BYTE*)this + 0xBC) != 0.0f) ? 1 : 0;
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10472770)

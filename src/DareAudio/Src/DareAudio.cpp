@@ -383,6 +383,7 @@ Sound playback.
 IMPL_MATCH("DareAudio.dll", 0x10003e10)
 UBOOL UDareAudioSubsystem::PlaySoundW(AActor* Actor, USound* Sound, INT Slot, INT Flags)
 {
+	guard(UDareAudioSubsystem::PlaySoundW);
 if (!m_bInitialized || !Sound) return 0;
 
 const char* name = TCHAR_TO_ANSI(Sound->GetName());
@@ -419,6 +420,7 @@ req->ReqId = reqId;
 req->Slot  = Slot;
 
 return 1;
+	unguard;
 }
 
 IMPL_MATCH("DareAudio.dll", 0x10005990)
@@ -472,6 +474,7 @@ Music.
 IMPL_MATCH("DareAudio.dll", 0x100020a0)
 UBOOL UDareAudioSubsystem::PlayMusic(USound* Music, INT SongSection)
 {
+	guard(UDareAudioSubsystem::PlayMusic);
 if (!m_bInitialized || !Music) return 0;
 
 const char* name = TCHAR_TO_ANSI(Music->GetName());
@@ -508,11 +511,13 @@ req->ReqId = reqId;
 req->Slot  = SLOT_Music;
 
 return 1;
+	unguard;
 }
 
 IMPL_MATCH("DareAudio.dll", 0x100020a0)
 UBOOL UDareAudioSubsystem::PlayMusic(FString MusicName, FLOAT FadeInTime)
 {
+	guard(UDareAudioSubsystem::PlayMusic);
 if (!m_bInitialized) return 0;
 
 const char* name = TCHAR_TO_ANSI(*MusicName);
@@ -525,6 +530,7 @@ if (!reqId) return 0;
 
 F_INT(this, 0x58) = 1;
 return 1;
+	unguard;
 }
 
 IMPL_MATCH("DareAudio.dll", 0x10002170)
@@ -633,6 +639,7 @@ if (m_pViewport)
 IMPL_MATCH("DareAudio.dll", 0x10005710)
 void UDareAudioSubsystem::SetBankInfo(ER6SoundState State)
 {
+	guard(UDareAudioSubsystem::SetBankInfo);
 if (!m_bInitialized) return;
 
 if (State == BANK_UnloadAll)
@@ -672,6 +679,7 @@ banks[dst++] = banks[i];
 }
 BMAP_COUNT(this) = dst;
 }
+	unguard;
 }
 
 /*-----------------------------------------------------------------------------
@@ -1214,12 +1222,14 @@ F_LONG(this, 0x234) = SND_fn_lAddSoundVolumeLine((INT)SLOT_GrenadeEffect,  0, 0)
 IMPL_MATCH("DareAudio.dll", 0x10005850)
 void UDareAudioSubsystem::StopSoundPlaying(FString EventName)
 {
+	guard(UDareAudioSubsystem::StopSoundPlaying);
 if (!m_bInitialized) return;
 const char* name = TCHAR_TO_ANSI(*EventName);
 void* evHandle = SND_fn_hGetSoundEventHandleFromSectionName(name);
 if (!evHandle) return;
 void* stopEvent = SND_fn_hGenerateSoundEventStop(evHandle, 0);
 (void)stopEvent;
+	unguard;
 }
 
 /*-----------------------------------------------------------------------------

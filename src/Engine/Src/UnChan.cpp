@@ -483,6 +483,7 @@ FString UFileChannel::Describe()
 IMPL_MATCH("Engine.dll", 0x10484100)
 void UFileChannel::Destroy()
 {
+	guard(UFileChannel::Destroy);
 	// Ghidra 0x184100: assert Connection, call RouteDestroy.
 	// If returns 0: assert Channels[ChIndex]==this, delete SendFile at +0x6C,
 	// if InType and Download at +0x68 exist: flush download then delete it,
@@ -521,6 +522,7 @@ void UFileChannel::Destroy()
 
 		UChannel::Destroy();
 	}
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10480f30)
@@ -678,9 +680,11 @@ void UActorChannel::SetClosingFlag()
 IMPL_MATCH("Engine.dll", 0x104813e0)
 void UActorChannel::Close()
 {
+	guard(UActorChannel::Close);
 // Ghidra 0x1813e0: UChannel::Close then zero the actor reference at this+0x6C.
 UChannel::Close();
 *(INT*)((BYTE*)this + 0x6C) = 0;
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10480dc0)
@@ -877,11 +881,13 @@ FString UControlChannel::Describe()
 IMPL_MATCH("Engine.dll", 0x10482070)
 void UControlChannel::Destroy()
 {
+	guard(UControlChannel::Destroy);
 	// Ghidra 0x182070: assert Connection, call RouteDestroy.
 	// If returns 0: call UChannel::Destroy.
 	check(Connection != NULL);
 	if (RouteDestroy() == 0)
 		UChannel::Destroy();
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10480960)
@@ -1068,11 +1074,13 @@ return 0;
 IMPL_MATCH("Engine.dll", 0x10480780)
 INT UChannel::IsNetReady( INT Saturate )
 {
+	guard(UChannel::IsNetReady);
 	// Ghidra 0x180780: if NumOutRec > 126, return 0.
 	// Otherwise delegate to Connection->IsNetReady(Saturate) virtual.
 	if (NumOutRec > 0x7E)
 		return 0;
 	return Connection->IsNetReady(Saturate);
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10481320)
@@ -1302,7 +1310,12 @@ FInBunch& FInBunch::operator=(const FInBunch& Other) { appMemcpy(this, &Other, s
 IMPL_MATCH("Engine.dll", 0x1047f6e0)
 FArchive& FInBunch::operator<<(UObject*& Obj) { return *this; }
 IMPL_MATCH("Engine.dll", 0x1047f770)
-FArchive& FInBunch::operator<<(FName& N) { return *this; }
+FArchive& FInBunch::operator<<(FName& N)
+{
+	guard(FInBunch::operator<<);
+	return *this;
+	unguard;
+}
 
 // ============================================================================
 // FOutBunch
@@ -1312,18 +1325,33 @@ FArchive& FInBunch::operator<<(FName& N) { return *this; }
 // extra fields (Pad[128]).  Do NOT appMemzero(this) — that would destroy the vtable
 // and the TArray buffer state set by the FBitWriter base ctor.
 IMPL_MATCH("Engine.dll", 0x1047f820)
-FOutBunch::FOutBunch() : FBitWriter(0) { appMemzero(Pad, sizeof(Pad)); }
+FOutBunch::FOutBunch() : FBitWriter(0)
+{
+	guard(FOutBunch::FOutBunch);
+	appMemzero(Pad, sizeof(Pad));
+	unguard;
+}
 // DIVERGENCE: retail calls FBitWriter copy-ctor then sets vtable + individual fields
 //             (offsets 0x54-0x7a).  FBitWriter(0) initialises base; appMemcpy copies
 //             the entire Other over this (including vtable = same FOutBunch vftable).
 //             aliasing of TArray::Data is accepted (same caveat as FInBunch above).
 IMPL_MATCH("Engine.dll", 0x1047f820)
-FOutBunch::FOutBunch(const FOutBunch& Other) : FBitWriter(0) { appMemcpy(this, &Other, sizeof(*this)); }
+FOutBunch::FOutBunch(const FOutBunch& Other) : FBitWriter(0)
+{
+	guard(FOutBunch::FOutBunch);
+	appMemcpy(this, &Other, sizeof(*this));
+	unguard;
+}
 // DIVERGENCE: retail calls FBitWriter(connection->MaxPacket*8-81), sets Channel (0x58),
 //             ChIndex (0x68), ChSequence (0x6c), flags (0x78-0x7a), validates assertions.
 //             We call FBitWriter(0) and zero only the extra Pad fields.
 IMPL_MATCH("Engine.dll", 0x1047f820)
-FOutBunch::FOutBunch(UChannel*, INT) : FBitWriter(0) { appMemzero(Pad, sizeof(Pad)); }
+FOutBunch::FOutBunch(UChannel*, INT) : FBitWriter(0)
+{
+	guard(FOutBunch::FOutBunch);
+	appMemzero(Pad, sizeof(Pad));
+	unguard;
+}
 // Ghidra 0x1036f9c0 (88b): calls FBitWriter::operator= for base, then copies
 // fields 0x54-0x7a individually. We use appMemcpy which covers everything; the
 // vtable pointer at offset 0 is identical between source and dest (both FOutBunch).
@@ -1334,7 +1362,12 @@ FOutBunch::~FOutBunch() {}
 IMPL_MATCH("Engine.dll", 0x1047f930)
 FArchive& FOutBunch::operator<<(UObject*& Obj) { return *(FArchive*)this; }
 IMPL_MATCH("Engine.dll", 0x1047f9c0)
-FArchive& FOutBunch::operator<<(FName& N) { return *(FArchive*)this; }
+FArchive& FOutBunch::operator<<(FName& N)
+{
+	guard(FOutBunch::operator<<);
+	return *(FArchive*)this;
+	unguard;
+}
 
 // --- Moved from EngineStubs.cpp ---
 UClass** UChannel::ChannelClasses = NULL;

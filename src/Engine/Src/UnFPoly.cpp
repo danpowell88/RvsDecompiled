@@ -59,15 +59,18 @@ FPoly & FPoly::operator=(FPoly const & Other) {
 IMPL_MATCH("Engine.dll", 0x1039cb40)
 FVector FPoly::GetTextureSize()
 {
+	guard(FPoly::GetTextureSize);
 	if( !Material )
 		return FVector( 256.f, 256.f, 0.f );
 	return FVector( (FLOAT)Material->MaterialVSize(), (FLOAT)Material->MaterialUSize(), 0.f );
+	unguard;
 }
 
 // --- Moved from EngineStubs.cpp ---
 // ?Area@FPoly@@QAEMXZ
 IMPL_MATCH("Engine.dll", 0x1039c510)
 float FPoly::Area() {
+	guard(FPoly::Area);
 	FLOAT TotalArea = 0.f;
 	FVector Side1 = Vertex[1] - Vertex[0];
 	for( INT i=2; i<NumVertices; i++ ) {
@@ -77,10 +80,12 @@ float FPoly::Area() {
 		Side1 = Side2;
 	}
 	return TotalArea;
+	unguard;
 }
 // ?CalcNormal@FPoly@@QAEHH@Z
 IMPL_MATCH("Engine.dll", 0x1039c780)
 int FPoly::CalcNormal(int bSilent) {
+	guard(FPoly::CalcNormal);
 	Normal = FVector(0,0,0);
 	for( INT i=2; i<NumVertices; i++ )
 		Normal += (Vertex[i-1] - Vertex[0]) ^ (Vertex[i] - Vertex[0]);
@@ -89,6 +94,7 @@ int FPoly::CalcNormal(int bSilent) {
 	}
 	Normal.Normalize();
 	return 0;
+	unguard;
 }
 
 // ?DoesLineIntersect@FPoly@@QAEHVFVector@@0PAV2@@Z
@@ -96,6 +102,7 @@ int FPoly::CalcNormal(int bSilent) {
 // Tests if a line segment intersects this polygon. Optionally returns the hit point.
 IMPL_MATCH("Engine.dll", 0x1039e760)
 int FPoly::DoesLineIntersect(FVector Start, FVector End, FVector * Intersection) {
+	guard(FPoly::DoesLineIntersect);
 	FLOAT d1 = (Start - Vertex[0]) | Normal;
 	FLOAT d2 = (End   - Vertex[0]) | Normal;
 
@@ -111,6 +118,7 @@ int FPoly::DoesLineIntersect(FVector Start, FVector End, FVector * Intersection)
 			return OnPoly( Hit );
 	}
 	return 0;
+	unguard;
 }
 
 // ?Faces@FPoly@@QBEHABV1@@Z
@@ -136,6 +144,7 @@ int FPoly::Faces(FPoly const & Other) const {
 // Cleans up polygon: removes duplicate verts, validates, computes normal & texture vectors.
 IMPL_MATCH("Engine.dll", 0x1039e190)
 int FPoly::Finalize(int bSilent) {
+	guard(FPoly::Finalize);
 	Fix();
 	if( NumVertices < 3 )
 	{
@@ -165,12 +174,14 @@ int FPoly::Finalize(int bSilent) {
 		}
 	}
 	return 0;
+	unguard;
 }
 
 // ?Fix@FPoly@@QAEHXZ
 IMPL_MATCH("Engine.dll", 0x1039cec0)
 int FPoly::Fix()
 {
+	guard(FPoly::Fix);
 	INT j = 0;
 	INT prev = NumVertices - 1;
 	for( INT i = 0; i < NumVertices; i++ )
@@ -191,6 +202,7 @@ int FPoly::Fix()
 		j = 0;
 	NumVertices = j;
 	return j;
+	unguard;
 }
 
 // ?IsBackfaced@FPoly@@QBEHABVFVector@@@Z
@@ -225,6 +237,7 @@ int FPoly::OnPlane(FVector Point) {
 // Returns 1 if Point lies inside the polygon, 0 otherwise.
 IMPL_MATCH("Engine.dll", 0x1039dd10)
 int FPoly::OnPoly(FVector Point) {
+	guard(FPoly::OnPoly);
 	for( INT i=0; i<NumVertices; i++ )
 	{
 		INT j = i - 1;
@@ -236,12 +249,14 @@ int FPoly::OnPoly(FVector Point) {
 			return 0;
 	}
 	return 1;
+	unguard;
 }
 
 // ?Split@FPoly@@QAEHABVFVector@@0H@Z
 IMPL_MATCH("Engine.dll", 0x1039def0)
 int FPoly::Split(const FVector& Base, const FVector& Normal, INT NoOverflow)
 {
+	guard(FPoly::Split);
 	if (NoOverflow && NumVertices >= 14)
 	{
 		// Too many vertices — just classify without allocating output polys.
@@ -260,12 +275,14 @@ int FPoly::Split(const FVector& Base, const FVector& Normal, INT NoOverflow)
 	if (Result == SP_Split)
 		*this = Front;
 	return NumVertices;
+	unguard;
 }
 
 // ?SplitPrecise@FPoly@@QAEHABVFVector@@0H@Z
 IMPL_MATCH("Engine.dll", 0x1039e040)
 int FPoly::SplitPrecise(const FVector& Base, const FVector& Normal, INT NoOverflow)
 {
+	guard(FPoly::SplitPrecise);
 	if (NoOverflow && NumVertices >= 14)
 	{
 		FPlane Plane(Normal.X, Normal.Y, Normal.Z, Normal | Base);
@@ -283,6 +300,7 @@ int FPoly::SplitPrecise(const FVector& Base, const FVector& Normal, INT NoOverfl
 	if (Result == SP_Split)
 		*this = Front;
 	return NumVertices;
+	unguard;
 }
 
 // ?SplitWithNode@FPoly@@QBEHPBVUModel@@HPAV1@1H@Z
@@ -300,6 +318,7 @@ int FPoly::SplitPrecise(const FVector& Base, const FVector& Normal, INT NoOverfl
 IMPL_MATCH("Engine.dll", 0x1039d610)
 int FPoly::SplitWithNode(UModel const * p0, int p1, FPoly * p2, FPoly * p3, int p4) const
 {
+	guard(FPoly::SplitWithNode);
 	const BYTE* NodesData  = (const BYTE*)*(const INT*)((const BYTE*)p0 + 0x5c);
 	const BYTE* VertsData  = (const BYTE*)*(const INT*)((const BYTE*)p0 + 0x6c);
 	const BYTE* VectorsData= (const BYTE*)*(const INT*)((const BYTE*)p0 + 0x7c);
@@ -317,6 +336,7 @@ int FPoly::SplitWithNode(UModel const * p0, int p1, FPoly * p2, FPoly * p3, int 
 	const FVector* PlaneNormal = (const FVector*)(VectorsData + vNormal * 0xc);
 
 	return SplitWithPlane(*PointBase, *PlaneNormal, p2, p3, p4);
+	unguard;
 }
 
 // ?SplitWithPlane@FPoly@@QBEHABVFVector@@0PAV1@1H@Z
@@ -325,6 +345,7 @@ int FPoly::SplitWithNode(UModel const * p0, int p1, FPoly * p2, FPoly * p3, int 
 IMPL_MATCH("Engine.dll", 0x1039cfe0)
 int FPoly::SplitWithPlane(FVector const & p0, FVector const & p1, FPoly * p2, FPoly * p3, int p4) const
 {
+	guard(FPoly::SplitWithPlane);
 	FPlane Plane(p1.X, p1.Y, p1.Z, p1 | p0);
 	INT Result = SplitWithPlaneFast(Plane, p2, p3);
 	if (p4 && Result == SP_Split)
@@ -333,6 +354,7 @@ int FPoly::SplitWithPlane(FVector const & p0, FVector const & p1, FPoly * p2, FP
 		if (p3) p3->CalcNormal(1);
 	}
 	return Result;
+	unguard;
 }
 
 // ?SplitWithPlaneFast@FPoly@@QBEHVFPlane@@PAV1@1@Z
@@ -342,6 +364,7 @@ int FPoly::SplitWithPlane(FVector const & p0, FVector const & p1, FPoly * p2, FP
 IMPL_MATCH("Engine.dll", 0x1039d6d0)
 int FPoly::SplitWithPlaneFast(FPlane p0, FPoly * p1, FPoly * p2) const
 {
+	guard(FPoly::SplitWithPlaneFast);
 	const FLOAT Thresh = THRESH_SPLIT_POLY_WITH_PLANE;
 
 	// Classify every vertex against the plane
@@ -397,6 +420,7 @@ int FPoly::SplitWithPlaneFast(FPlane p0, FPoly * p1, FPoly * p2) const
 		PrevDist = CurDist;
 	}
 	return SP_Split;
+	unguard;
 }
 
 // ?SplitWithPlaneFastPrecise@FPoly@@QBEHVFPlane@@PAV1@1@Z
@@ -404,6 +428,7 @@ int FPoly::SplitWithPlaneFast(FPlane p0, FPoly * p1, FPoly * p2) const
 IMPL_MATCH("Engine.dll", 0x1039d9f0)
 int FPoly::SplitWithPlaneFastPrecise(FPlane p0, FPoly * p1, FPoly * p2) const
 {
+	guard(FPoly::SplitWithPlaneFastPrecise);
 	const FLOAT Thresh = THRESH_SPLIT_POLY_PRECISELY;
 
 	FLOAT Dist[16];
@@ -455,6 +480,7 @@ int FPoly::SplitWithPlaneFastPrecise(FPlane p0, FPoly * p1, FPoly * p2) const
 		PrevDist = CurDist;
 	}
 	return SP_Split;
+	unguard;
 }
 
 // ??9FPoly@@QAEHV0@@Z — Ghidra at 0x8bce0.
@@ -481,6 +507,7 @@ int FPoly::operator==(FPoly Other) {
 // ?Init@FPoly@@QAEXXZ
 IMPL_MATCH("Engine.dll", 0x1039cd40)
 void FPoly::Init() {
+	guard(FPoly::Init);
 	Base     = FVector(0,0,0);
 	Normal   = FVector(0,0,0);
 	TextureU = FVector(0,0,0);
@@ -500,6 +527,7 @@ void FPoly::Init() {
 	*(INT*)&_RvsExtra[56] = INDEX_NONE;  // 0x148
 	*(INT*)&_RvsExtra[60] = INDEX_NONE;  // 0x14C
 	*(DWORD*)&_RvsExtra[68] = 0xFF808080; // 0x154
+	unguard;
 }
 
 // ?InsertVertex@FPoly@@QAEXHVFVector@@@Z
@@ -507,22 +535,26 @@ void FPoly::Init() {
 IMPL_MATCH("Engine.dll", 0x1039e9b0)
 void FPoly::InsertVertex(int InPos, FVector InVtx)
 {
+	guard(FPoly::InsertVertex);
 	check(InPos <= NumVertices);
 	for( INT i = NumVertices; i > InPos; i-- )
 		Vertex[i] = Vertex[i - 1];
 	Vertex[InPos] = InVtx;
 	NumVertices++;
+	unguard;
 }
 
 // ?Reverse@FPoly@@QAEXXZ
 IMPL_MATCH("Engine.dll", 0x1039c400)
 void FPoly::Reverse() {
+	guard(FPoly::Reverse);
 	Normal *= -1.f;
 	for( INT i=0; i<NumVertices/2; i++ ) {
 		FVector Temp = Vertex[i];
 		Vertex[i] = Vertex[NumVertices-1-i];
 		Vertex[NumVertices-1-i] = Temp;
 	}
+	unguard;
 }
 
 // ?SplitInHalf@FPoly@@QAEXPAV1@@Z
@@ -530,6 +562,7 @@ void FPoly::Reverse() {
 // Splits a polygon in two halves along the vertex midpoint.
 IMPL_MATCH("Engine.dll", 0x1039c640)
 void FPoly::SplitInHalf(FPoly * OtherHalf) {
+	guard(FPoly::SplitInHalf);
 	INT Half = NumVertices / 2;
 	if( NumVertices < 4 || NumVertices > 16 )
 		appErrorf( TEXT("FPoly::SplitInHalf: Vertex count = %i"), NumVertices );
@@ -551,6 +584,7 @@ void FPoly::SplitInHalf(FPoly * OtherHalf) {
 	// Mark both halves as cut (PF_EdCut = 0x80000000).
 	PolyFlags |= 0x80000000;
 	OtherHalf->PolyFlags |= 0x80000000;
+	unguard;
 }
 
 // ?Transform@FPoly@@QAEXABVFModelCoords@@ABVFVector@@1M@Z
@@ -558,6 +592,7 @@ void FPoly::SplitInHalf(FPoly * OtherHalf) {
 // Transforms all polygon data by the given coordinate system.
 IMPL_MATCH("Engine.dll", 0x1039c8f0)
 void FPoly::Transform(FModelCoords const & Coords, FVector const & PreSubtract, FVector const & PostAdd, float Orientation) {
+	guard(FPoly::Transform);
 	// Transform texture mapping vectors by the contravariant (vector) transform.
 	TextureU = TextureU.TransformVectorBy( Coords.VectorXform );
 	TextureV = TextureV.TransformVectorBy( Coords.VectorXform );
@@ -582,6 +617,7 @@ void FPoly::Transform(FModelCoords const & Coords, FVector const & PreSubtract, 
 
 	// Re-compute the normal after transformation.
 	Normal = Normal.TransformVectorBy( Coords.VectorXform ).SafeNormal();
+	unguard;
 }
 // ?RemoveColinears@FPoly@@QAEHXZ
 // Removes collinear (in-line) vertices. A vertex is collinear if it lies within
@@ -590,6 +626,7 @@ void FPoly::Transform(FModelCoords const & Coords, FVector const & PreSubtract, 
 IMPL_MATCH("Engine.dll", 0x1039e470)
 INT FPoly::RemoveColinears()
 {
+	guard(FPoly::RemoveColinears);
 	BYTE Colinear[16];
 	for (INT i = 0; i < NumVertices; i++)
 	{
@@ -611,6 +648,7 @@ INT FPoly::RemoveColinears()
 			Vertex[j++] = Vertex[i];
 	NumVertices = j;
 	return NumVertices;
+	unguard;
 }
 // ============================================================================
 // TArray<BYTE> operators

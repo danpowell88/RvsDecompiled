@@ -95,7 +95,7 @@ static FVector       GCurrentBrushPos;            // DAT_1061b73c (X,Y,Z)
 IMPL_MATCH("Engine.dll", 0x10465a30)
 int UTerrainBrush::BeginPainting(UTexture** param_1, ATerrainInfo** param_2)
 {
-	guardSlow(UTerrainBrush::BeginPainting);
+	guard(UTerrainBrush::BeginPainting);
 
 	bool bVar3 = (GCurrentTerrainInfo != NULL);
 	*param_2 = GCurrentTerrainInfo;
@@ -120,7 +120,7 @@ int UTerrainBrush::BeginPainting(UTexture** param_1, ATerrainInfo** param_2)
 
 	return 0;
 
-	unguardSlow;
+	unguard;
 }
 
 IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
@@ -226,6 +226,7 @@ void UTerrainBrushEdgeTurn::Execute(int)
 IMPL_MATCH("Engine.dll", 0x10466130)
 FBox UTerrainBrushEdgeTurn::GetRect()
 {
+	guard(UTerrainBrushEdgeTurn::GetRect);
 	FBox box(1);
 	box += GCurrentBrushPos;
 	if (GCurrentTerrainInfo != NULL)
@@ -237,6 +238,7 @@ FBox UTerrainBrushEdgeTurn::GetRect()
 		box += corner2;
 	}
 	return box;
+	unguard;
 }
 
 
@@ -463,10 +465,12 @@ void UTerrainBrushSelect::Execute(int)
 IMPL_MATCH("Engine.dll", 0x104657c0)
 FBox UTerrainBrushSelect::GetRect()
 {
+	guard(UTerrainBrushSelect::GetRect);
 	FBox box(1);
 	box += *(FVector*)((BYTE*)this + 0x3c);
 	box += *(FVector*)((BYTE*)this + 0x48);
 	return box;
+	unguard;
 }
 
 
@@ -705,6 +709,7 @@ void UTerrainBrushVisibility::Execute(int)
 IMPL_MATCH("Engine.dll", 0x10466050)
 FBox UTerrainBrushVisibility::GetRect()
 {
+	guard(UTerrainBrushVisibility::GetRect);
 	FBox box(1);
 	box += GCurrentBrushPos;
 	if (GCurrentTerrainInfo != NULL)
@@ -716,5 +721,6 @@ FBox UTerrainBrushVisibility::GetRect()
 		box += corner2;
 	}
 	return box;
+	unguard;
 }
 

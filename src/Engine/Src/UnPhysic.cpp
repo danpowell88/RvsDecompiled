@@ -343,6 +343,7 @@ void AVolume::PostBeginPlay()
 IMPL_MATCH("Engine.dll", 0x103f05c0)
 int AVolume::Encompasses(FVector Location)
 {
+	guard(AVolume::Encompasses);
 	// Ghidra: Check if Brush is NULL (offset 0x178), return 0 if so.
 	// Then call Brush->PointCheck with the location and zero extent.
 	// Return 1 if PointCheck returns 0 (point is inside the volume).
@@ -353,6 +354,7 @@ int AVolume::Encompasses(FVector Location)
 	FCheckResult Result(1.0f);
 	INT Check = Brush->PointCheck(Result, this, Location, FVector(0, 0, 0), 0);
 	return (Check == 0) ? 1 : 0;
+	unguard;
 }
 
 
@@ -401,7 +403,7 @@ void AWarpZoneInfo::AddMyMarker(AActor* param_1)
 IMPL_MATCH("Engine.dll", 0x103D8360)
 void AWarpZoneMarker::addReachSpecs(APawn* Scout, int bOnlyWeightedPaths)
 {
-	guardSlow(AWarpZoneMarker::addReachSpecs);
+	guard(AWarpZoneMarker::addReachSpecs);
 	// Ghidra 0xd8360 (393 bytes): iterate Level's actor list; for each other
 	// AWarpZoneMarker that shares the same WarpZone name (and at least one has bTwoWay set),
 	// create a UReachSpec linking this to that marker, add to PathList. Then call base.
@@ -453,7 +455,7 @@ void AWarpZoneMarker::addReachSpecs(APawn* Scout, int bOnlyWeightedPaths)
 		}
 		i++;
 	}
-	unguardSlow;
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x103d5f00)

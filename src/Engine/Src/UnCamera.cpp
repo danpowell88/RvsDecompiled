@@ -74,6 +74,7 @@ void UMotionBlur::PreRender(UViewport *,FRenderInterface *)
 IMPL_MATCH("Engine.dll", 0x10386330)
 void UMotionBlur::Destroy()
 {
+	guard(UMotionBlur::Destroy);
 	// Retail: 0x86330, ordinal 2491. Calls parent Destroy, then frees the two
 	// render buffer allocations at this+0x38 and this+0x3C (if non-NULL).
 	// Freed via GMalloc->Free(ptr); each slot zeroed after free.
@@ -87,6 +88,7 @@ void UMotionBlur::Destroy()
 			*slot = 0;
 		}
 	}
+	unguard;
 }
 
 
@@ -386,6 +388,7 @@ FArchive & operator<<(FArchive & Ar, FAnimMeshVertexStream & V) {
 // All internal functions fully decoded from _unnamed.cpp.
 IMPL_MATCH("Engine.dll", 0x103cf6f0)
 FArchive & operator<<(FArchive & Ar, FBspNode & V) {
+	guard(operator<<);
 	BYTE* P = (BYTE*)&V;
 
 	// FPlane at offset 0x00 (X, Y, Z, W)
@@ -507,6 +510,7 @@ FArchive & operator<<(FArchive & Ar, FBspNode & V) {
 	// — skipped as it has no effect on actual serialization.
 
 	return Ar;
+	unguard;
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFBspSection@@@Z
@@ -535,6 +539,7 @@ FArchive & operator<<(FArchive & Ar, FBspSection & V) {
 // ByteOrderSerialize, and Serialize. No FUN_xxx dependencies.
 IMPL_MATCH("Engine.dll", 0x103cbf50)
 FArchive & operator<<(FArchive & Ar, FBspSurf & V) {
+	guard(operator<<);
 	Ar << V.Texture;
 	Ar.ByteOrderSerialize((BYTE*)&V.PolyFlags, 4);
 	Ar << *(FCompactIndex*)&V.pBase;
@@ -579,6 +584,7 @@ FArchive & operator<<(FArchive & Ar, FBspSurf & V) {
 		V.LightMapScale = 32.0f;
 	}
 	return Ar;
+	unguard;
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFBspVertexStream@@@Z
@@ -586,9 +592,11 @@ FArchive & operator<<(FArchive & Ar, FBspSurf & V) {
 // Layout (after vtable): Pad[0] TArray<FBspVertex>  Pad[0x14] Revision
 IMPL_MATCH("Engine.dll", 0x10322590)
 FArchive & operator<<(FArchive & Ar, FBspVertexStream & V) {
+	guard(operator<<);
 	Ar << *(TArray<FBspVertex>*)V.Pad;            // TArray at Pad[0] = obj+0x04
 	Ar.ByteOrderSerialize(&V.Pad[0x14], 4);      // Revision at Pad[0x14] = obj+0x18
 	return Ar;
+	unguard;
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFLightMap@@@Z
@@ -654,9 +662,11 @@ FArchive & operator<<(FArchive & Ar, FPoly & V) {
 // Layout (after vtable): Pad[0] TArray<DWORD>  Pad[0x14] Revision
 IMPL_MATCH("Engine.dll", 0x1037fbd0)
 FArchive & operator<<(FArchive & Ar, FRaw32BitIndexBuffer & V) {
+	guard(operator<<);
 	Ar << *(TArray<DWORD>*)V.Pad;                 // TArray at Pad[0] = obj+0x04
 	Ar.ByteOrderSerialize(&V.Pad[0x14], 4);      // Revision at Pad[0x14] = obj+0x18
 	return Ar;
+	unguard;
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFRawColorStream@@@Z
@@ -665,6 +675,7 @@ FArchive & operator<<(FArchive & Ar, FRaw32BitIndexBuffer & V) {
 // Layout (after vtable): Pad[0] TArray<FColor>  Pad[0x14] Revision
 IMPL_MATCH("Engine.dll", 0x104170d0)
 FArchive & operator<<(FArchive & Ar, FRawColorStream & V) {
+	guard(operator<<);
 	TArray<FColor>& Colors = *(TArray<FColor>*)V.Pad;
 	Colors.CountBytes(Ar);
 	if (Ar.IsLoading()) {
@@ -692,6 +703,7 @@ FArchive & operator<<(FArchive & Ar, FRawColorStream & V) {
 	}
 	Ar.ByteOrderSerialize(&V.Pad[0x14], 4);  // Revision at Pad[0x14] = obj+0x18
 	return Ar;
+	unguard;
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFRawIndexBuffer@@@Z
@@ -699,9 +711,11 @@ FArchive & operator<<(FArchive & Ar, FRawColorStream & V) {
 // Layout (after vtable): Pad[0] TArray<_WORD>  Pad[0x14] Revision
 IMPL_MATCH("Engine.dll", 0x1031e600)
 FArchive & operator<<(FArchive & Ar, FRawIndexBuffer & V) {
+	guard(operator<<);
 	Ar << *(TArray<_WORD>*)V.Pad;                 // TArray at Pad[0] = obj+0x04
 	Ar.ByteOrderSerialize(&V.Pad[0x14], 4);      // Revision at Pad[0x14] = obj+0x18
 	return Ar;
+	unguard;
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFSkinVertexStream@@@Z
@@ -711,6 +725,7 @@ FArchive & operator<<(FArchive & Ar, FRawIndexBuffer & V) {
 //   Pad[0x14] INT  Pad[0x18] INT  Pad[0x1C] TArray<0x20-elem>
 IMPL_MATCH("Engine.dll", 0x10323030)
 FArchive & operator<<(FArchive & Ar, FSkinVertexStream & V) {
+	guard(operator<<);
 	if (!Ar.IsPersistent()) {
 		Ar << *(UObject**)&V.Pad[0x00];   // UObject* at Pad[0] = obj+0x04
 		Ar << *(UObject**)&V.Pad[0x04];   // UObject* at Pad[4] = obj+0x08
@@ -741,6 +756,7 @@ FArchive & operator<<(FArchive & Ar, FSkinVertexStream & V) {
 		}
 	}
 	return Ar;
+	unguard;
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticLightMapTexture@@@Z
@@ -784,10 +800,12 @@ FArchive & operator<<(FArchive & Ar, FStaticMeshSection & p1) { return Ar; }
 // Layout (after vtable): Pad[0] TArray<FStaticMeshUV>  Pad[0x0C] INT  Pad[0x18] Revision
 IMPL_MATCH("Engine.dll", 0x10324510)
 FArchive & operator<<(FArchive & Ar, FStaticMeshUVStream & V) {
+	guard(operator<<);
 	Ar << *(TArray<FStaticMeshUV>*)V.Pad;         // TArray at Pad[0] = obj+0x04
 	Ar.ByteOrderSerialize(&V.Pad[0x0C], 4);      // INT at Pad[0x0C] = obj+0x10
 	Ar.ByteOrderSerialize(&V.Pad[0x18], 4);      // Revision at Pad[0x18] = obj+0x1C
 	return Ar;
+	unguard;
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFStaticMeshVertexStream@@@Z
@@ -795,9 +813,11 @@ FArchive & operator<<(FArchive & Ar, FStaticMeshUVStream & V) {
 // Layout (after vtable): Pad[0] TArray<FStaticMeshVertex>  Pad[0x14] Revision
 IMPL_MATCH("Engine.dll", 0x103243e0)
 FArchive & operator<<(FArchive & Ar, FStaticMeshVertexStream & V) {
+	guard(operator<<);
 	Ar << *(TArray<FStaticMeshVertex>*)V.Pad;     // TArray at Pad[0] = obj+0x04
 	Ar.ByteOrderSerialize(&V.Pad[0x14], 4);      // Revision at Pad[0x14] = obj+0x18
 	return Ar;
+	unguard;
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFTags@@@Z
@@ -805,27 +825,33 @@ FArchive & operator<<(FArchive & Ar, FStaticMeshVertexStream & V) {
 // then serializes FString at offset 0x30.
 IMPL_MATCH("Engine.dll", 0x103cc180)
 FArchive & operator<<(FArchive & Ar, FTags & V) {
+	guard(operator<<);
 	for (INT i = 0; i < 12; i++)
 		Ar.ByteOrderSerialize(V._Data + i * 4, 4);
 	Ar << V.TagString;
 	return Ar;
+	unguard;
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFTerrainVertexStream@@@Z
 // FUN_10323cd0 = TArray<FTerrainVertex>::Serialize (elem_size 0x24)
 IMPL_MATCH("Engine.dll", 0x10323cd0)
 FArchive & operator<<(FArchive & Ar, FTerrainVertexStream & V) {
+	guard(operator<<);
 	Ar << V.Vertices;
 	Ar.ByteOrderSerialize((BYTE*)&V.Revision, 4);
 	return Ar;
+	unguard;
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAVFURL@@@Z
 IMPL_MATCH("Engine.dll", 0x10323cd0)
 FArchive & operator<<(FArchive& Ar, FURL& U) {
+	guard(operator<<);
 	Ar << U.Protocol << U.Host << U.Map << U.Portal << U.Op;
 	Ar << U.Port << U.Valid;
 	return Ar;
+	unguard;
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFBspVertex@@@Z
@@ -1008,6 +1034,7 @@ int GetSUBSTRING(const TCHAR* Stream, const TCHAR* Match, TCHAR* Value, int MaxL
 IMPL_MATCH("Engine.dll", 0x103dc700)
 int GetFROTATOR(const TCHAR* Stream, FRotator& Rotation, int ScaleFactor)
 {
+	guard(GetFROTATOR);
 	FLOAT Temp = 0.f;
 	int Count = 0;
 	if( Parse( Stream, TEXT("PITCH="), Temp ) ) { Rotation.Pitch = (INT)(Temp * ScaleFactor); Count++; }
@@ -1028,22 +1055,26 @@ int GetFROTATOR(const TCHAR* Stream, FRotator& Rotation, int ScaleFactor)
 		}
 	}
 	return 0;
+	unguard;
 }
 
 // ?GetFROTATOR@@YAHPBG0AAVFRotator@@H@Z
 IMPL_MATCH("Engine.dll", 0x103dc8a0)
 int GetFROTATOR(const TCHAR* Stream, const TCHAR* Match, FRotator& Rotation, int ScaleFactor)
 {
+	guard(GetFROTATOR);
 	TCHAR Temp[80];
 	if( !GetSUBSTRING( Stream, Match, Temp, 80 ) )
 		return 0;
 	return GetFROTATOR( Temp, Rotation, ScaleFactor );
+	unguard;
 }
 
 // ?GetFVECTOR@@YAHPBGAAVFVector@@@Z
 IMPL_MATCH("Engine.dll", 0x103dc430)
 int GetFVECTOR(const TCHAR* Stream, FVector& Value)
 {
+	guard(GetFVECTOR);
 	int NumParsed = 0;
 	NumParsed += Parse( Stream, TEXT("X="), Value.X );
 	NumParsed += Parse( Stream, TEXT("Y="), Value.Y );
@@ -1063,16 +1094,19 @@ int GetFVECTOR(const TCHAR* Stream, FVector& Value)
 		}
 	}
 	return 0;
+	unguard;
 }
 
 // ?GetFVECTOR@@YAHPBG0AAVFVector@@@Z
 IMPL_MATCH("Engine.dll", 0x103dc650)
 int GetFVECTOR(const TCHAR* Stream, const TCHAR* Match, FVector& Value)
 {
+	guard(GetFVECTOR);
 	TCHAR Temp[80];
 	if( !GetSUBSTRING( Stream, Match, Temp, 80 ) )
 		return 0;
 	return GetFVECTOR( Temp, Value );
+	unguard;
 }
 
 // ?GetSUBSTRING@@YAHPBG0PAGH@Z
@@ -1081,6 +1115,7 @@ int GetFVECTOR(const TCHAR* Stream, const TCHAR* Match, FVector& Value)
 IMPL_MATCH("Engine.dll", 0x103dc570)
 int GetSUBSTRING(const TCHAR* Stream, const TCHAR* Match, TCHAR* Value, int MaxLen)
 {
+	guard(GetSUBSTRING);
 	const TCHAR* Found = appStrfind( Stream, Match );
 	if( Found )
 	{
@@ -1094,6 +1129,7 @@ int GetSUBSTRING(const TCHAR* Stream, const TCHAR* Match, TCHAR* Value, int MaxL
 		}
 	}
 	return 0;
+	unguard;
 }
 
 // ?getGameShutDown@@YAHXZ
@@ -1107,6 +1143,7 @@ int getGameShutDown() { return bGameShutDown; }
 // FPathBuilder layout: Pad[0..3]=ULevel*, Pad[4..7]=APawn* Scout.
 IMPL_MATCH("Engine.dll", 0x103e07b0)
 ANavigationPoint* FPathBuilder::newPath(FVector Location) {
+	guard(FPathBuilder::newPath);
 	ULevel* Level = *(ULevel**)((BYTE*)this);
 	APawn* Scout  = *(APawn**)((BYTE*)this + 4);
 
@@ -1132,6 +1169,7 @@ ANavigationPoint* FPathBuilder::newPath(FVector Location) {
 	*(DWORD*)((BYTE*)NavPt + 0x3a4) |= 0x80;
 
 	return NavPt;
+	unguard;
 }
 
 // ?DistanceToHashPlane@FCollisionHash@@AAEMHMMH@Z
@@ -1154,6 +1192,7 @@ float FCollisionHash::DistanceToHashPlane(INT CellIdx, FLOAT Dir, FLOAT Pos, INT
 // FPathBuilder layout: Pad[0..3] = ULevel*, Pad[4..7] = APawn* Scout.
 IMPL_MATCH("Engine.dll", 0x103e0060)
 int FPathBuilder::TestReach(FVector Start, FVector End) {
+	guard(FPathBuilder::TestReach);
 	ULevel* Level = *(ULevel**)((BYTE*)this);
 	APawn* Scout = *(APawn**)((BYTE*)this + 4);
 
@@ -1177,11 +1216,17 @@ int FPathBuilder::TestReach(FVector Start, FVector End) {
 	Level->FarMoveActor(Scout, OldLoc, 0, 1, 0, 0);
 
 	return bReachable;
+	unguard;
 }
 
 // ?TestWalk@FPathBuilder@@AAEHVFVector@@UFCheckResult@@M@Z
 IMPL_MATCH("Engine.dll", 0x103e0170)
-int FPathBuilder::TestWalk(FVector p0, FCheckResult p1, float p2) { return 0; }
+int FPathBuilder::TestWalk(FVector p0, FCheckResult p1, float p2)
+{
+	guard(FPathBuilder::TestWalk);
+	return 0;
+	unguard;
+}
 
 // ?ValidNode@FPathBuilder@@AAEHPAVANavigationPoint@@PAVAActor@@@Z
 // Retail ordinal 4962 (0xe0c90).
@@ -1191,6 +1236,7 @@ int FPathBuilder::TestWalk(FVector p0, FCheckResult p1, float p2) { return 0; }
 //   - p1 is a NavigationPoint but NOT a LiftCenter
 IMPL_MATCH("Engine.dll", 0x103e0c90)
 int FPathBuilder::ValidNode(ANavigationPoint* NavPoint, AActor* Candidate) {
+	guard(FPathBuilder::ValidNode);
 	if (Candidate && Candidate != (AActor*)NavPoint && *(SBYTE*)((BYTE*)Candidate + 0xa0) >= 0) {
 		if (((UObject*)Candidate)->IsA(ANavigationPoint::StaticClass())) {
 			if (!((UObject*)Candidate)->IsA(ALiftCenter::StaticClass()))
@@ -1198,11 +1244,17 @@ int FPathBuilder::ValidNode(ANavigationPoint* NavPoint, AActor* Candidate) {
 		}
 	}
 	return 0;
+	unguard;
 }
 
 // ?createPaths@FPathBuilder@@AAEHXZ
 IMPL_MATCH("Engine.dll", 0x103e3ef0)
-int FPathBuilder::createPaths() { return 0; }
+int FPathBuilder::createPaths()
+{
+	guard(FPathBuilder::createPaths);
+	return 0;
+	unguard;
+}
 
 // ?StoreActor@FOctreeNode@@AAEXPAVAActor@@PAVFCollisionOctree@@PBVFPlane@@@Z
 // Ghidra (0xdb4e0): Leaf storage — adds the actor to this node's TArray and records
@@ -1212,12 +1264,14 @@ int FPathBuilder::createPaths() { return 0; }
 IMPL_MATCH("Engine.dll", 0x103db4e0)
 void FOctreeNode::StoreActor(AActor* Actor, FCollisionOctree* OctHash, FPlane const* Plane)
 {
+	guard(FOctreeNode::StoreActor);
 	// Add actor to this node's actor list (TArray<AActor*> at FOctreeNode offset 0)
 	TArray<AActor*>& ActorList = *(TArray<AActor*>*)this;
 	ActorList.AddItem(Actor);
 	// Record this node in the actor's OctreeNodes list (TArray<FOctreeNode*> at actor+0x338)
 	TArray<FOctreeNode*>& NodeList = *(TArray<FOctreeNode*>*)((BYTE*)Actor + 0x338);
 	NodeList.AddItem(this);
+	unguard;
 }
 
 // ?FindBlockingNormal@FPathBuilder@@AAEXAAVFVector@@@Z
@@ -1235,6 +1289,7 @@ void FOctreeNode::StoreActor(AActor* Actor, FCollisionOctree* OctHash, FPlane co
 IMPL_MATCH("Engine.dll", 0x103e0d50)
 void FPathBuilder::FindBlockingNormal(FVector& p0)
 {
+	guard(FPathBuilder::FindBlockingNormal);
 	ULevel* Level = *(ULevel**)((BYTE*)this);
 	AActor* Scout = *(AActor**)((BYTE*)this + 4);
 
@@ -1291,11 +1346,16 @@ void FPathBuilder::FindBlockingNormal(FVector& p0)
 		// Pass 3 found a hit: set output to its surface normal.
 		p0 = Hit.Normal;
 	}
+	unguard;
 }
 
 // ?Pass2From@FPathBuilder@@AAEXVFVector@@0M@Z
 IMPL_MATCH("Engine.dll", 0x103e18d0)
-void FPathBuilder::Pass2From(FVector p0, FVector p1, float p2) {}
+void FPathBuilder::Pass2From(FVector p0, FVector p1, float p2)
+{
+	guard(FPathBuilder::Pass2From);
+	unguard;
+}
 
 // ?SetPathCollision@FPathBuilder@@AAEXH@Z
 // Retail ordinal 4485 (0xe0300).
@@ -1310,6 +1370,7 @@ void FPathBuilder::Pass2From(FVector p0, FVector p1, float p2) {}
 //   building; bit 3 (0x8) = "collision was disabled for path test; restore it".
 IMPL_MATCH("Engine.dll", 0x103e0300)
 void FPathBuilder::SetPathCollision(int bDisable) {
+	guard(FPathBuilder::SetPathCollision);
 	ULevel* Level = *(ULevel**)((BYTE*)this);
 	INT Count = Level->Actors.Num();
 
@@ -1349,6 +1410,7 @@ void FPathBuilder::SetPathCollision(int bDisable) {
 			A->SetCollision(0, bBlockPlayers, (Flags >> 14) & 1);
 		}
 	}
+	unguard;
 }
 
 // ?getScout@FPathBuilder@@AAEXXZ
@@ -1362,6 +1424,7 @@ void FPathBuilder::SetPathCollision(int bDisable) {
 IMPL_MATCH("Engine.dll", 0x103e16b0)
 void FPathBuilder::getScout()
 {
+	guard(FPathBuilder::getScout);
 	ULevel* Level = *(ULevel**)((BYTE*)this);
 	*(AActor**)((BYTE*)this + 4) = NULL;
 
@@ -1414,6 +1477,7 @@ void FPathBuilder::getScout()
 	// vtable[0x114] on Scout — second physics/state init call (no visible args)
 	tVoidFn fn2 = *(tVoidFn*)((BYTE*)(*(void**)Scout) + 0x114);
 	fn2(Scout);
+	unguard;
 }
 
 // ?testPathsFrom@FPathBuilder@@AAEXVFVector@@@Z
@@ -1421,6 +1485,7 @@ void FPathBuilder::getScout()
 // else retry findStart with Start.Z+20. If neither works, return.
 IMPL_MATCH("Engine.dll", 0x103e3de0)
 void FPathBuilder::testPathsFrom(FVector Start) {
+	guard(FPathBuilder::testPathsFrom);
 	AScout* Scout = *(AScout**)(Pad + 4);
 	if (Scout->findStart(Start)) {
 		// Check if scout landed close enough in Z (within MaxStepHeight at Scout+0xfc)
@@ -1436,12 +1501,14 @@ void FPathBuilder::testPathsFrom(FVector Start) {
 	// Retry 20 units higher
 	if (Scout->findStart(FVector(Start.X, Start.Y, Start.Z + 20.0f)))
 		testPathwithRadius(Start, 40.0f);
+	unguard;
 }
 
 // ?testPathwithRadius@FPathBuilder@@AAEXVFVector@@M@Z
 // Ghidra: resize Scout to Radius x 85, then probe 8 horizontal directions (±X, ±Y) at ±1 walk.
 IMPL_MATCH("Engine.dll", 0x103e35c0)
 void FPathBuilder::testPathwithRadius(FVector Start, float Radius) {
+	guard(FPathBuilder::testPathwithRadius);
 	AActor* Scout = *(AActor**)(Pad + 4);
 	Scout->SetCollisionSize(Radius, 85.0f);
 	Pass2From(Start, FVector( 1.0f, 0.0f, 0.0f),  1.0f);
@@ -1452,6 +1519,7 @@ void FPathBuilder::testPathwithRadius(FVector Start, float Radius) {
 	Pass2From(Start, FVector(-1.0f, 0.0f, 0.0f), -1.0f);
 	Pass2From(Start, FVector( 0.0f,-1.0f, 0.0f),  1.0f);
 	Pass2From(Start, FVector( 0.0f,-1.0f, 0.0f), -1.0f);
+	unguard;
 }
 
 // ??0ECLipSynchData@@QAE@PAVUMeshInstance@@PAVUSound@@1PAVAActor@@@Z
@@ -1513,13 +1581,16 @@ FCollisionHash::FCollisionHash() {
 // ??0FCollisionOctree@@QAE@ABV0@@Z
 IMPL_MATCH("Engine.dll", 0x103db9f0)
 FCollisionOctree::FCollisionOctree(FCollisionOctree const& p0) {
+	guard(FCollisionOctree::FCollisionOctree);
 	appMemcpy(Pad, p0.Pad, sizeof(Pad));
+	unguard;
 }
 
 // ??0FCollisionOctree@@QAE@XZ
 // Ghidra: allocates a root FOctreeNode, zeroes counters, sets world bitmask.
 IMPL_MATCH("Engine.dll", 0x103db9f0)
 FCollisionOctree::FCollisionOctree() {
+	guard(FCollisionOctree::FCollisionOctree);
 	appMemzero(Pad, sizeof(Pad));
 	// Pad[0..3] = root FOctreeNode* (object offset +4, ref from Ghidra)
 	FOctreeNode* root = new FOctreeNode();
@@ -1527,6 +1598,7 @@ FCollisionOctree::FCollisionOctree() {
 	// Pad[4..7] = world size bitmask 0x1fffffff (object offset +8)
 	*(INT*)(Pad + 4) = 0x1fffffff;
 	// FVector/FRotator fields at Pad+0x10..0x4c already zeroed by appMemzero
+	unguard;
 }
 
 // ??0FDirectionalLightMapSceneNode@@QAE@PAVUViewport@@PAVAActor@@AAVFBspSurf@@PAVFLightMap@@@Z
@@ -1635,17 +1707,32 @@ void UViewport::Serialize( const TCHAR* Data, EName Event ) {}
 IMPL_MATCH("Engine.dll", 0x10385bc0)
 void UViewport::Destroy() { Super::Destroy(); }
 IMPL_MATCH("Engine.dll", 0x103831e0)
-void UViewport::Serialize( FArchive& Ar ) { Super::Serialize( Ar ); }
+void UViewport::Serialize( FArchive& Ar )
+{
+	guard(UViewport::Serialize);
+	Super::Serialize( Ar );
+	unguard;
+}
 IMPL_EMPTY("body unanalyzed; no input polling implemented")
 void UViewport::ReadInput( FLOAT DeltaSeconds ) {}
 IMPL_MATCH("Engine.dll", 0x10383480)
-INT UViewport::Lock( BYTE* HitData, INT* HitSize ) { return 0; }
+INT UViewport::Lock( BYTE* HitData, INT* HitSize )
+{
+	guard(UViewport::Lock);
+	return 0;
+	unguard;
+}
 IMPL_EMPTY("body unanalyzed; no render device unlock implemented")
 void UViewport::Unlock() {}
 IMPL_EMPTY("body unanalyzed; no frame present implemented")
 void UViewport::Present() {}
 IMPL_MATCH("Engine.dll", 0x103832b0)
-INT UViewport::SetDrag( INT NewDrag ) { return 0; }
+INT UViewport::SetDrag( INT NewDrag )
+{
+	guard(UViewport::SetDrag);
+	return 0;
+	unguard;
+}
 IMPL_EMPTY("Ghidra VA 0x10414310 (RVA 0x114310) confirms retail body is trivial (3 bytes) — null return")
 void* UViewport::GetServer() { return NULL; }
 IMPL_EMPTY("body unanalyzed; render device selection not implemented")
@@ -1688,7 +1775,12 @@ INT UViewport::IsRealtime()
 	return (*(DWORD*)((BYTE*)st + 0x4F8) & 0x4800) ? 1 : 0;
 }
 IMPL_MATCH("Engine.dll", 0x10383380)
-INT UViewport::IsWire() { return 0; }
+INT UViewport::IsWire()
+{
+	guard(UViewport::IsWire);
+	return 0;
+	unguard;
+}
 IMPL_EMPTY("body unanalyzed; screenshot capture not implemented")
 void UViewport::ScreenShot() {}
 IMPL_MATCH("Engine.dll", 0x103129d0)

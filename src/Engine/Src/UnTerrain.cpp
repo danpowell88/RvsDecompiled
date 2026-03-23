@@ -47,6 +47,7 @@ void ATerrainInfo::ResetMove()
 IMPL_MATCH("Engine.dll", 0x10464960)
 void ATerrainInfo::PostEditChange()
 {
+	guard(ATerrainInfo::PostEditChange);
 	// Ghidra 0x164960: update terrain arrays, rebuild sectors, recalculate coords.
 	// Divergence: two unknown function calls (FUN_10352020, FUN_1032ecd0) omitted.
 	AActor::PostEditChange();
@@ -59,6 +60,7 @@ void ATerrainInfo::PostEditChange()
 	SetupSectors();
 	CalcCoords();
 	Update(0.0f, 0, 0, 0, 0, 0);
+	unguard;
 }
 
 IMPL_EMPTY("virtual base no-op — subclass overrides")
@@ -774,6 +776,7 @@ void ATerrainInfo::Serialize(FArchive& Ar)
 IMPL_MATCH("Engine.dll", 0x103977b0)
 void ATerrainInfo::CheckForErrors()
 {
+	guard(ATerrainInfo::CheckForErrors);
 	// Retail: 0x977b0. Iterates 32 layer slots at this+0x3AC (stride 0x78),
 	// warns via GWarn if any alpha-map texture has more than 1 mip level.
 	for (INT i = 0; i < 0x20; i++)
@@ -785,10 +788,12 @@ void ATerrainInfo::CheckForErrors()
 				AlphaTex->GetPathName());
 		}
 	}
+	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x104566f0)
 void ATerrainInfo::Destroy()
 {
+	guard(ATerrainInfo::Destroy);
 	// Retail: 0x1566f0. Checks this->LevelInfo (this+0x144); reads ULevel* at levelInfo+0x328
 	// and calls ULevel::UpdateTerrainArrays to evict this terrain from the level cache.
 	// Then calls AActor::Destroy.
@@ -800,6 +805,7 @@ void ATerrainInfo::Destroy()
 			level->UpdateTerrainArrays();
 	}
 	AActor::Destroy();
+	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x103155c0)
 UPrimitive* ATerrainInfo::GetPrimitive()
@@ -866,6 +872,7 @@ void FTerrainTools::SetAdjust(int Value)
 IMPL_MATCH("Engine.dll", 0x104665d0)
 void FTerrainTools::SetCurrentBrush(int BrushID)
 {
+	guard(FTerrainTools::SetCurrentBrush);
 	// Ghidra 0x1665d0: if a current terrain info is set, clear its selection list.
 	// Then search the brush list (at Pad[0x48], stride 0x68) for BrushID match
 	// at element+0x1c; store the found element pointer and the BrushID.
@@ -889,6 +896,7 @@ void FTerrainTools::SetCurrentBrush(int BrushID)
 		}
 	}
 	appFailAssert("0", ".\\UnTerrainTools.cpp", 0x372);
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10465a10)
@@ -1153,8 +1161,10 @@ void UTerrainPrimitive::Illuminate(AActor*, INT) {}
 IMPL_MATCH("Engine.dll", 0x10456620)
 FBox UTerrainPrimitive::GetRenderBoundingBox(const AActor* Owner, INT /*bDetailed*/)
 {
+	guard(UTerrainPrimitive::GetRenderBoundingBox);
 	// Retail: 82b. Returns a degenerate (point) FBox at the actor's world Location (actor+0x234).
 	return FBox(*(FVector*)((BYTE*)Owner + 0x234), *(FVector*)((BYTE*)Owner + 0x234));
+	unguard;
 }
 
 IMPL_DIVERGE("Counting-path (neither loading nor saving) serializes runtime render buffers; FRawColorStream has no FArchive op<<; Ravenshield packages are always ver>=0x75 so legacy branch is unreachable. Ghidra 0x10460b60")
@@ -1302,6 +1312,7 @@ INT UTerrainSector::PassShouldRenderTriangle(INT, INT, INT, INT, INT) { return 1
 IMPL_MATCH("Engine.dll", 0x10458c30)
 INT UTerrainSector::IsSectorAll(INT layerIdx, BYTE value)
 {
+	guard(UTerrainSector::IsSectorAll);
 	// Alpha map pointer: TerrainInfo + 0x3AC + layerIdx * 0x78
 	UTexture* alphaMap = *(UTexture**)((BYTE*)TerrainInfo + 0x3AC + layerIdx * 0x78);
 	INT QuadsX = *(INT*)((BYTE*)TerrainInfo + 0x12E0);
@@ -1327,6 +1338,7 @@ INT UTerrainSector::IsSectorAll(INT layerIdx, BYTE value)
 				return 0;
 
 	return 1;
+	unguard;
 }
 IMPL_TODO("Ghidra 0x10458D70: terrain texel alpha triangle check blocked by terrain sector texel/alpha buffer layout not yet reconstructed")
 INT UTerrainSector::IsTriangleAll(INT, INT, INT, INT, INT, BYTE) { return 0; }

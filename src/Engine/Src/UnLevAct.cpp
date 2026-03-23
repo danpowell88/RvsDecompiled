@@ -18,6 +18,7 @@ inline void  operator delete(void*, void*) noexcept {}
 IMPL_MATCH("Engine.dll", 0x1030fd00)
 void ULevelSummary::PostLoad()
 {
+	guard(ULevelSummary::PostLoad);
 	// Ghidra 0xfd00: UObject::PostLoad, then localize the Level title from package.
 	// Localize("LevelInfo0", "Title", OuterName) -> set Title (FString at +0x30).
 	UObject::PostLoad();
@@ -29,5 +30,6 @@ void ULevelSummary::PostLoad()
 		if (localTitle && *localTitle)
 			*(FString*)((BYTE*)this + 0x30) = localTitle;
 	}
+	unguard;
 }
 

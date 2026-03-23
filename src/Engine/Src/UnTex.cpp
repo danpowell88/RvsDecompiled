@@ -606,6 +606,7 @@ void UTexture::ArithOp(UTexture* param_1, ETextureArithOp param_2)
 IMPL_MATCH("Engine.dll", 0x1046a570)
 void UTexture::Clear(DWORD ClearFlags)
 {
+	guard(UTexture::Clear);
 	// Ghidra 0x16a570, 58B with SEH. If bit 1 of ClearFlags is set, zero each mip's DataArray.
 	if (ClearFlags & 2)
 	{
@@ -616,10 +617,12 @@ void UTexture::Clear(DWORD ClearFlags)
 			Mip->Clear();
 		}
 	}
+	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x1046a570)
 void UTexture::Clear(FColor InColor)
 {
+	guard(UTexture::Clear);
 	// Ghidra 0x169470, 108B. TEXF_RGBA8 (5) only: fill all pixels with InColor.
 	// this+0x58=Format, this+0x60=USize, this+0x64=VSize, this+0xBC=Mips TArray.
 	if (Format == TEXF_RGBA8)
@@ -633,6 +636,7 @@ void UTexture::Clear(FColor InColor)
 				Pixels[i] = ColorDW;
 		}
 	}
+	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x10467b60)
 void UTexture::ConstantTimeTick()
@@ -812,11 +816,13 @@ FMipmap& FMipmap::operator=(const FMipmap& Other)
 IMPL_MATCH("Engine.dll", 0x10318e10)
 void FMipmap::Clear()
 {
+	guard(FMipmap::Clear);
 	// Ghidra 0x18e10, ~40B. Zeroes all bytes in DataArray (at +0x1C).
 	BYTE* Data = *(BYTE**)((BYTE*)this + 0x1C);
 	INT   Num  = *(INT*) ((BYTE*)this + 0x20);
 	if (Data && Num > 0)
 		appMemzero(Data, Num);
+	unguard;
 }
 
 
@@ -1194,6 +1200,7 @@ FBaseTexture * UProxyBitmapMaterial::GetRenderInterface()
 IMPL_MATCH("Engine.dll", 0x1042e3f0)
 void UShadowBitmapMaterial::Destroy()
 {
+	guard(UShadowBitmapMaterial::Destroy);
 	// Retail: 0x12e3f0, 125 bytes. Free two render buffers at +0x9C and +0xA0 then
 	// call Super::Destroy(). Uses GMalloc->Free (vtable[2]) for deallocation.
 	void** buf0 = (void**)((BYTE*)this + 0x9C);
@@ -1201,6 +1208,7 @@ void UShadowBitmapMaterial::Destroy()
 	if (*buf0) { appFree(*buf0); *buf0 = NULL; }
 	if (*buf1) { appFree(*buf1); *buf1 = NULL; }
 	UObject::Destroy();
+	unguard;
 }
 
 IMPL_DIVERGE("FUN_10417080 is an unexported Engine.dll internal; 2594-byte shadow-map rendering pipeline permanently unimplementable")

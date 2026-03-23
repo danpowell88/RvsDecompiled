@@ -70,9 +70,11 @@ ULevelBase::ULevelBase( UEngine* InOwner, const FURL& InURL )
 :	Actors( this )
 ,	URL( InURL )
 {
+	guard(ULevelBase::ULevelBase);
 	Engine = InOwner;
 	NetDriver = NULL;
 	DemoRecDriver = NULL;
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x103bf030)

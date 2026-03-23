@@ -742,7 +742,11 @@ void AGameInfo::InitGameInfoGameService() {}
 IMPL_MATCH("Engine.dll", 0x103a2be0)
 void AGameInfo::ProcessR6Availabilty(ULevel*, FString) {}
 IMPL_MATCH("Engine.dll", 0x103a0720)
-void UGameEngine::BuildServerMasterMap(UNetDriver*, ULevel*) {}
+void UGameEngine::BuildServerMasterMap(UNetDriver*, ULevel*)
+{
+	guard(UGameEngine::BuildServerMasterMap);
+	unguard;
+}
 
 // =============================================================================
 // UGameEngine::Browse — retail Engine.dll @ 0x103a4da0

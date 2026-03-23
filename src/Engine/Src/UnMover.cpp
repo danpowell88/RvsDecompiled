@@ -543,6 +543,7 @@ void AMover::PostEditMove()
 IMPL_MATCH("Engine.dll", 0x103d4f70)
 void AMover::PostLoad()
 {
+	guard(AMover::PostLoad);
 	// Ghidra 0xd4f70: AActor::PostLoad, init position sentinel (-12345.678f = 0xC640E400)
 	// at DeltaPosition fields, and store a default rotation at this+0x6B8..0x6C0.
 	AActor::PostLoad();
@@ -554,6 +555,7 @@ void AMover::PostLoad()
 	*(INT*)((BYTE*)this + 0x6B8) = 0x7B;
 	*(INT*)((BYTE*)this + 0x6BC) = 0x1C8;
 	*(INT*)((BYTE*)this + 0x6C0) = 0x315;
+	unguard;
 }
 
 // Static snapshot of mover's SimInterpolate position, set by PreNetReceive and read by

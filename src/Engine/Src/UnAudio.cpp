@@ -33,6 +33,7 @@ inline void  operator delete(void*, void*) noexcept {}
 IMPL_MATCH("Engine.dll", 0x1037eee0)
 void USound::PostLoad()
 {
+	guard(USound::PostLoad);
 	// Ghidra 0x7eee0: UObject::PostLoad, then if Audio exists call vtable[0x70/4] to
 	// register the sound with the audio subsystem, then a small cleanup helper.
 	UObject::PostLoad();
@@ -43,6 +44,7 @@ void USound::PostLoad()
 		((RegisterFn)(*(INT*)(vt + 0x70)))(Audio, this);
 	}
 	// NOTE: Divergence — FUN_1037ef65() cleanup helper skipped (not identified).
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x1037ef80)
@@ -71,14 +73,17 @@ USound::USound(const TCHAR* InName, INT InFlags)
 IMPL_MATCH("Engine.dll", 0x1037fe10)
 void USound::Serialize(FArchive& Ar)
 {
+	guard(USound::Serialize);
 	// Retail: 0x1037fe10. Calls UObject::Serialize, then serializes FSoundData at +0x48.
 	// FSoundData serialization uses internal helpers. Divergence: base class only;
 	// raw sound data is loaded directly from the .u package stream.
 	UObject::Serialize(Ar);
+	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x1037ee40)
 void USound::Destroy()
 {
+	guard(USound::Destroy);
 	// Retail: 0x1037ee40. Notifies global audio subsystem (at 0x10666b58) to release
 	// any cached/playing references to this sound, via vtbl[0x1D](audioSys, this).
 	// Then calls UObject::Destroy.
@@ -90,6 +95,7 @@ void USound::Destroy()
 		fn(audioSys, this);
 	}
 	UObject::Destroy();
+	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x103151f0)
 float USound::GetDuration()
@@ -209,6 +215,7 @@ INT FWaveModInfo::ReadWaveInfo(TArray<BYTE>& WavData) {
 IMPL_MATCH("Engine.dll", 0x1037f7f0)
 INT FWaveModInfo::UpdateWaveData(TArray<BYTE>& WavData)
 {
+	guard(FWaveModInfo::UpdateWaveData);
 	if (NewDataSize < SampleDataSize) {
 		DWORD delta = Pad16Bit(SampleDataSize) - Pad16Bit(NewDataSize);
 		*pWaveDataSize     = NewDataSize;
@@ -229,6 +236,7 @@ INT FWaveModInfo::UpdateWaveData(TArray<BYTE>& WavData)
 		WavData.Remove(WavData.Num() - delta, delta);
 	}
 	return 1;
+	unguard;
 }
 
 // ?Pad16Bit@FWaveModInfo@@QAEKK@Z
@@ -239,6 +247,7 @@ DWORD FWaveModInfo::Pad16Bit(DWORD InVal) { return (InVal + 1) & ~1; }
 IMPL_MATCH("Engine.dll", 0x1037f2c0)
 void FWaveModInfo::HalveData()
 {
+	guard(FWaveModInfo::HalveData);
 	if (*pBitsPerSample == 16)
 	{
 		DWORD DataSize = SampleDataSize;
@@ -277,12 +286,14 @@ void FWaveModInfo::HalveData()
 		NewDataSize = DataSize >> 1;
 		*pSamplesPerSec >>= 1;
 	}
+	unguard;
 }
 
 // ?HalveReduce16to8@FWaveModInfo@@QAEXXZ
 IMPL_MATCH("Engine.dll", 0x1037f000)
 void FWaveModInfo::HalveReduce16to8()
 {
+	guard(FWaveModInfo::HalveReduce16to8);
 	DWORD DataSize = SampleDataSize;
 	short* Data16 = (short*)SampleDataStart;
 	BYTE* Data8 = SampleDataStart;
@@ -302,12 +313,14 @@ void FWaveModInfo::HalveReduce16to8()
 	*pBitsPerSample = 8;
 	*pSamplesPerSec >>= 1;
 	NoiseGate = 1;
+	unguard;
 }
 
 // ?NoiseGateFilter@FWaveModInfo@@QAEXXZ
 IMPL_MATCH("Engine.dll", 0x1037fa00)
 void FWaveModInfo::NoiseGateFilter()
 {
+	guard(FWaveModInfo::NoiseGateFilter);
 	BYTE* Data = SampleDataStart;
 	INT TotalSamples = *pWaveDataSize;
 	DWORD Rate = *pSamplesPerSec;
@@ -334,12 +347,14 @@ void FWaveModInfo::NoiseGateFilter()
 			SilenceStart = 0;
 		}
 	}
+	unguard;
 }
 
 // ?Reduce16to8@FWaveModInfo@@QAEXXZ
 IMPL_MATCH("Engine.dll", 0x1037f190)
 void FWaveModInfo::Reduce16to8()
 {
+	guard(FWaveModInfo::Reduce16to8);
 	DWORD DataSize = SampleDataSize;
 	short* Data16 = (short*)SampleDataStart;
 	BYTE* Data8 = SampleDataStart;
@@ -356,6 +371,7 @@ void FWaveModInfo::Reduce16to8()
 	NewDataSize = DataSize >> 1;
 	*pBitsPerSample = 8;
 	NoiseGate = 1;
+	unguard;
 }
 
 // ============================================================================

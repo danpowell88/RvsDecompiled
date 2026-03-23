@@ -284,6 +284,7 @@ UPackageMapLevel::UPackageMapLevel(UNetConnection*) {}
 IMPL_MATCH("Engine.dll", 0x104855e0)
 UChannel* UNetConnection::CreateChannel(EChannelType ChType, INT bOpenedLocally, INT ChIndex)
 {
+	guard(UNetConnection::CreateChannel);
 	if (!UChannel::IsKnownChannelType((INT)ChType))
 		appFailAssert("UChannel::IsKnownChannelType(ChType)", ".\\UnConn.cpp", 0x31E);
 
@@ -345,10 +346,12 @@ UChannel* UNetConnection::CreateChannel(EChannelType ChType, INT bOpenedLocally,
 	*(UChannel**)(*(BYTE**)((BYTE*)this + 0x4B7C) + arrIdx * sizeof(UChannel*)) = Ch;
 
 	return Ch;
+	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x104847a0)
 void UNetConnection::PostSend()
 {
+	guard(UNetConnection::PostSend);
 	// Out(FBitWriter) at offset 0x250, MaxPacket(INT) at offset 0xD0
 	FBitWriter& Out = *(FBitWriter*)((BYTE*)this + 0x250);
 	INT MaxPacket = *(INT*)((BYTE*)this + 0xD0);
@@ -356,6 +359,7 @@ void UNetConnection::PostSend()
 		appFailAssert("Out.GetNumBits()<=MaxPacket*8", ".\\UnConn.cpp", 0x2B6);
 	if (Out.GetNumBits() == MaxPacket * 8)
 		FlushNet();
+	unguard;
 }
 // 0x1037eb40 = default ctor (void), sets vtables only — matched by C++ compiler.
 // 0x104884f0 = 3-arg ctor: calls UNetConnection(Driver,URL) base, then sets two extra fields.
@@ -371,11 +375,17 @@ UDemoRecConnection::UDemoRecConnection(UNetDriver* Driver, const FURL& URL)
 IMPL_EMPTY("Ghidra VA 0x10476D60 (RVA 0x176D60) confirms retail body is trivial (1 byte)")
 void UDemoRecConnection::StaticConstructor() {}
 IMPL_MATCH("Engine.dll", 0x10487c50)
-FString UDemoRecConnection::LowLevelDescribe() { return FString(TEXT("Demo recording driver connection")); }
+FString UDemoRecConnection::LowLevelDescribe()
+{
+	guard(UDemoRecConnection::LowLevelDescribe);
+	return FString(TEXT("Demo recording driver connection"));
+	unguard;
+}
 IMPL_MATCH("Engine.dll", 0x10487af0)
 FString UDemoRecConnection::LowLevelGetRemoteAddress() { return FString(TEXT("")); }
 IMPL_MATCH("Engine.dll", 0x10487b80)
 void UDemoRecConnection::LowLevelSend(void* Data, INT Count) {
+	guard(UDemoRecConnection::LowLevelSend);
 	// Ghidra at 0x187b80. Writes demo packet: FrameNum, DemoFrameTime, Count, Data.
 	if (Driver->ServerConnection == NULL) {
 		FArchive* FileAr = *(FArchive**)((BYTE*)Driver + 0xB4);
@@ -384,6 +394,7 @@ void UDemoRecConnection::LowLevelSend(void* Data, INT Count) {
 		FileAr->ByteOrderSerialize(&Count, 4);                  // packet size
 		FileAr->Serialize(Data, Count);                          // packet data
 	}
+	unguard;
 }
 
 // Retail: 16b. Flushes only when playing back a demo (client, ServerConnection != NULL).
@@ -400,7 +411,12 @@ void UDemoRecConnection::HandleClientPlayer(APlayerController*) {}
 IMPL_MATCH("Engine.dll", 0x103701c0)
 UDemoRecDriver* UDemoRecConnection::GetDriver() { return (UDemoRecDriver*)Driver; }
 IMPL_MATCH("Engine.dll", 0x1048bd30)
-INT UPackageMapLevel::SerializeObject(FArchive&, UClass*, UObject*&) { return 1; } // Ghidra 0x18bd30: returns 1 on all paths; full net-object lookup TODO
+INT UPackageMapLevel::SerializeObject(FArchive&, UClass*, UObject*&)
+{
+	guard(UPackageMapLevel::SerializeObject);
+	return 1;
+	unguard;
+}
 // Ghidra at 0x48BCD0: default return is 1 (can serialize), returns 0 only for specific Actor flag checks.
 IMPL_MATCH("Engine.dll", 0x1048bcd0)
 INT UPackageMapLevel::CanSerializeObject(UObject*) { return 1; }
