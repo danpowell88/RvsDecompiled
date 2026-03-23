@@ -16,6 +16,7 @@ IMPLEMENT_FUNCTION(UR6PlanningInfo, -1, execInsertToTeam)
 IMPL_MATCH("R6Game.dll", 0x10009550)
 void UR6PlanningInfo::AddPoint(AActor* param_1)
 {
+	guard(UR6PlanningInfo::AddPoint);
 	// Append param_1 to the action-point array at this+0x5C
 	FArray* arr = (FArray*)((BYTE*)this + 0x5c);
 	INT idx = arr->Add(1, sizeof(AActor*));
@@ -28,6 +29,7 @@ void UR6PlanningInfo::AddPoint(AActor* param_1)
 		*(INT*)((BYTE*)param_1 + 0x394) =
 			*(INT*)((BYTE*)arr->GetData() + leaderIdx * sizeof(AActor*));
 	}
+	unguard;
 }
 
 IMPL_MATCH("R6Game.dll", 0x10006f80)
@@ -41,6 +43,7 @@ AActor* UR6PlanningInfo::GetTeamLeader()
 IMPL_MATCH("R6Game.dll", 0x100070a0)
 INT UR6PlanningInfo::NoStairsBetweenPoints(AActor* param_1)
 {
+	guard(UR6PlanningInfo::NoStairsBetweenPoints);
 	AController* pCtrl = *(AController**)((BYTE*)this + 0x58);
 
 	// Use the path between origin and param_1; zero-vector means "from current position"
@@ -65,11 +68,13 @@ INT UR6PlanningInfo::NoStairsBetweenPoints(AActor* param_1)
 		}
 	}
 	return 1;
+	unguard;
 }
 
 IMPL_MATCH("R6Game.dll", 0x10009fa0)
 void UR6PlanningInfo::TransferFile(FArchive& Ar)
 {
+	guard(UR6PlanningInfo::TransferFile);
 	// Ghidra checks ArIsLoading at Ar+0x14; if zero this is the SAVING branch
 	if (*(INT*)((BYTE*)&Ar + 0x14) == 0)
 	{
@@ -155,30 +160,39 @@ void UR6PlanningInfo::TransferFile(FArchive& Ar)
 			*(INT*)((BYTE*)this + 0x34) = savedLeaderIdx;
 		}
 	}
+	unguard;
 }
 
 IMPL_MATCH("R6Game.dll", 0x10006fa0)
 void UR6PlanningInfo::execAddToTeam(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6PlanningInfo::execAddToTeam);
 	P_FINISH;
+	unguard;
 }
 
 IMPL_MATCH("R6Game.dll", 0x1000a340)
 void UR6PlanningInfo::execDeletePoint(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6PlanningInfo::execDeletePoint);
 	P_FINISH;
+	unguard;
 }
 
 IMPL_MATCH("R6Game.dll", 0x100095f0)
 void UR6PlanningInfo::execFindPathToNextPoint(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6PlanningInfo::execFindPathToNextPoint);
 	P_FINISH;
+	unguard;
 }
 
 IMPL_MATCH("R6Game.dll", 0x100091a0)
 void UR6PlanningInfo::execInsertToTeam(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6PlanningInfo::execInsertToTeam);
 	P_FINISH;
+	unguard;
 }
 
 /*-----------------------------------------------------------------------------

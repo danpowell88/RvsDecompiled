@@ -15,19 +15,25 @@ IMPLEMENT_FUNCTION(AR6PlanningCtrl, -1, execPlanningTrace)
 IMPL_MATCH("R6Game.dll", 0x100084f0)
 void AR6PlanningCtrl::execGetClickResult(FFrame& Stack, RESULT_DECL)
 {
+	guard(AR6PlanningCtrl::execGetClickResult);
 	P_FINISH;
+	unguard;
 }
 
 IMPL_MATCH("R6Game.dll", 0x100081c0)
 void AR6PlanningCtrl::execGetXYPoint(FFrame& Stack, RESULT_DECL)
 {
+	guard(AR6PlanningCtrl::execGetXYPoint);
 	P_FINISH;
+	unguard;
 }
 
 IMPL_MATCH("R6Game.dll", 0x100080a0)
 void AR6PlanningCtrl::execPlanningTrace(FFrame& Stack, RESULT_DECL)
 {
+	guard(AR6PlanningCtrl::execPlanningTrace);
 	P_FINISH;
+	unguard;
 }
 
 /*-----------------------------------------------------------------------------

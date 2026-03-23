@@ -70,7 +70,8 @@ if(MSVC)
     add_compile_options(/GR)            # RTTI enabled (Unreal uses it)
     add_compile_options(/GS-)           # Disable stack cookies (not needed with guard disabled)
     # Use async exception handling so SEH exceptions are visible to C++ code.
-    # MSVC 7.1 (1310) uses /EHsc — the /EHsc→/EHa replacement is VS2019-only.
+    # Both MSVC 7.1 /GX and later /EHsc use synchronous C++ EH by default.
+    # Only replace on VS2019+ for the mixed-ABI builds.
     if(MSVC_VERSION GREATER 1310)
         string(REPLACE "/EHsc" "/EHa" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
     endif()

@@ -22,26 +22,32 @@ void AR6AbstractCorpse::AddImpulseToBone(INT, FVector) {}
 IMPL_MATCH("R6Abstract.dll", 0x10001000)
 void AR6AbstractCorpse::execAddImpulseToBone(FFrame& Stack, RESULT_DECL)
 {
+	guard(AR6AbstractCorpse::execAddImpulseToBone);
 	P_GET_INT(iTracedBone);
 	P_GET_STRUCT(FVector, vMomentum);
 	P_FINISH;
 	AddImpulseToBone(iTracedBone, vMomentum);
+	unguard;
 }
 
 IMPL_MATCH("R6Abstract.dll", 0x100011d0)
 void AR6AbstractCorpse::execFirstInit(FFrame& Stack, RESULT_DECL)
 {
+	guard(AR6AbstractCorpse::execFirstInit);
 	P_GET_OBJECT(AR6AbstractPawn, pawnOwner);
 	P_FINISH;
 	FirstInit(pawnOwner);
+	unguard;
 }
 
 IMPL_MATCH("R6Abstract.dll", 0x10001100)
 void AR6AbstractCorpse::execRenderBones(FFrame& Stack, RESULT_DECL)
 {
+	guard(AR6AbstractCorpse::execRenderBones);
 	P_GET_OBJECT(UCanvas, C);
 	P_FINISH;
 	RenderBones(C);
+	unguard;
 }
 
 /*-----------------------------------------------------------------------------

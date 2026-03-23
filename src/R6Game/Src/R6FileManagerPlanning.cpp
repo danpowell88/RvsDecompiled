@@ -15,19 +15,25 @@ IMPLEMENT_FUNCTION(UR6FileManagerPlanning, -1, execSavePlanning)
 IMPL_MATCH("R6Game.dll", 0x10007ae0)
 void UR6FileManagerPlanning::execGetNumberOfFiles(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6FileManagerPlanning::execGetNumberOfFiles);
 	P_FINISH;
+	unguard;
 }
 
 IMPL_MATCH("R6Game.dll", 0x100071a0)
 void UR6FileManagerPlanning::execLoadPlanning(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6FileManagerPlanning::execLoadPlanning);
 	P_FINISH;
+	unguard;
 }
 
 IMPL_MATCH("R6Game.dll", 0x10007700)
 void UR6FileManagerPlanning::execSavePlanning(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6FileManagerPlanning::execSavePlanning);
 	P_FINISH;
+	unguard;
 }
 
 /*-----------------------------------------------------------------------------

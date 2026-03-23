@@ -43,31 +43,38 @@ IMPLEMENT_CLASS(AR6Weapons)
 IMPL_MATCH("R6Weapons.dll", 0x10003f40)
 void AR6Weapons::ProcessState(FLOAT DeltaTime)
 {
+	guard(AR6Weapons::ProcessState);
 	Super::ProcessState(DeltaTime);
+	unguard;
 }
 
 IMPL_MATCH("R6Weapons.dll", 0x10003c30)
 INT AR6Weapons::IsBlockedBy(AActor const* Other) const
 {
+	guard(AR6Weapons::IsBlockedBy);
 	// Ghidra 0x3c30: if Other has bTrailerSameRotation (bit 17 of flags DWORD at +0xa8), don't block.
 	// DIVERGENCE: bTrailerSameRotation is the reconstructed name for 0xa8 & 0x20000 in this engine layout;
 	// the actual R6 usage is as a "pass-through" collision flag.
 	if (Other->bTrailerSameRotation)
 		return 0;
 	return Super::IsBlockedBy(Other);
+	unguard;
 }
 
 IMPL_MATCH("R6Weapons.dll", 0x10003bb0)
 void AR6Weapons::PreNetReceive()
 {
+	guard(AR6Weapons::PreNetReceive);
 	Super::PreNetReceive();
 	// Snapshot bullet-count byte for PostNetReceive change-detection (Ghidra: DAT_1000cb08 = this[0x396]).
 	g_net_old_nbBullets = *(BYTE*)((BYTE*)this + 0x396);
+	unguard;
 }
 
 IMPL_MATCH("R6Weapons.dll", 0x10004c30)
 void AR6Weapons::PostNetReceive()
 {
+	guard(AR6Weapons::PostNetReceive);
 	Super::PostNetReceive();
 
 	// Fire HideAttachment event when bullet count transitions to zero.
@@ -86,12 +93,15 @@ void AR6Weapons::PostNetReceive()
 		*(DWORD*)((BYTE*)this + 0x3a0) = uFlags;
 		AR6EngineWeapon::eventDeployWeaponBipod((uFlags >> 3) & 1);
 	}
+	unguard;
 }
 
 IMPL_MATCH("R6Weapons.dll", 0x10004030)
 void AR6Weapons::TickAuthoritative(FLOAT DeltaTime)
 {
+	guard(AR6Weapons::TickAuthoritative);
 	Super::TickAuthoritative(DeltaTime);
+	unguard;
 }
 
 IMPL_MATCH("R6Weapons.dll", 0x10001310)
@@ -246,6 +256,7 @@ void AR6Weapons::ShowWeaponParticles(AR6Pawn* param_1, AR6PlayerController* para
 IMPL_MATCH("R6Weapons.dll", 0x10004aa0)
 FLOAT AR6Weapons::ComputeEffectiveAccuracy(FLOAT DeltaTime, FLOAT DeltaFrame)
 {
+	guard(AR6Weapons::ComputeEffectiveAccuracy);
 	// Sync old worst accuracy when it drifts from current worst
 	if (m_fWorstAccuracy != m_fOldWorstAccuracy)
 	{
@@ -287,11 +298,13 @@ FLOAT AR6Weapons::ComputeEffectiveAccuracy(FLOAT DeltaTime, FLOAT DeltaFrame)
 		}
 	}
 	return m_fEffectiveAccuracy;
+	unguard;
 }
 
 IMPL_MATCH("R6Weapons.dll", 0x10004600)
 FLOAT AR6Weapons::GetMovingModifier(FLOAT DeltaTime, FLOAT DeltaFrame)
 {
+	guard(AR6Weapons::GetMovingModifier);
 	AR6AbstractPawn* pPawn = (AR6AbstractPawn*)Owner;
 	if (!pPawn)
 		return m_fWorstAccuracy;
@@ -431,6 +444,7 @@ FLOAT AR6Weapons::GetMovingModifier(FLOAT DeltaTime, FLOAT DeltaFrame)
 		m_fWorstAccuracy = (m_fWorstAccuracy - m_stAccuracyValues.fBaseAccuracy) * 0.2f + m_stAccuracyValues.fBaseAccuracy;
 
 	return m_fWorstAccuracy;
+	unguard;
 }
 
 IMPL_MATCH("R6Weapons.dll", 0x100039e0)
