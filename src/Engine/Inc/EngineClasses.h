@@ -3319,17 +3319,186 @@ public:
 	void eventSeePlayer(class APawn*);
 };
 
+// Embedded structs used by APlayerController
+// SDK: EngineClasses old.h line 3905. sizeof=28 (Ghidra verified via operator= inlining).
+struct FPlayerVerCDKeyStatus
+{
+	BYTE        m_eCDKeyRequest;           // 0x00 (padded to 4)
+	FString     m_szAuthorizationID;       // 0x04 (12 bytes)
+	INT         m_iCDKeyReqID;             // 0x10
+	BITFIELD    m_bCDKeyValSecondTry : 1;  // 0x14
+	BYTE        m_eCDKeyStatus;            // 0x18 (padded to 4) — total 0x1C = 28
+};
+
+// SDK: EngineClasses old.h line 7401. sizeof=120 (10 × FString, Ghidra FUN_10308b70).
+struct FPlayerPrefInfo
+{
+	FString m_CharacterName;       // 0x00
+	FString m_ArmorName;           // 0x0C
+	FString m_WeaponName1;         // 0x18
+	FString m_WeaponName2;         // 0x24
+	FString m_WeaponGadgetName1;   // 0x30
+	FString m_WeaponGadgetName2;   // 0x3C
+	FString m_BulletType1;         // 0x48
+	FString m_BulletType2;         // 0x54
+	FString m_GadgetName1;         // 0x60
+	FString m_GadgetName2;         // 0x6C  — total 0x78 = 120
+};
+
 class ENGINE_API APlayerController : public AController
 {
 public:
 	DECLARE_CLASS(APlayerController,AController,0|CLASS_Config|CLASS_NativeReplication,Engine)
 
-	// Hidden native data (772 bytes at 0x4EC-0x7EF).
-	// These exist in the retail binary but are not declared in the SDK headers.
-	// Constructor initialises FVectors from 0x5EC, FRotators, FStrings, FStringNoInits,
-	// and an FArray at 0x7DC. The scalar region 0x4EC-0x5EB contains BYTEs, INTs,
-	// and a bitfield at 0x524. Identified: UPlayer* at 0x5B4 (SetPlayer).
-	INT _NativeData[193];
+	// APlayerController members (764 bytes at 0x4EC-0x7E7).
+	// Layout from Ghidra operator= at 0x10335c30, cross-referenced with SDK.
+	// sizeof(APlayerController) = 0x7E8 (confirmed by AR6PlayerController::operator= starting at 0x7E8).
+
+	// --- BYTE region: 0x4EC-0x4F7 (12 bytes) ---
+	BYTE        bStrafe;                   // 0x4EC  CPF_Input
+	BYTE        bSnapLevel;                // 0x4ED  CPF_Input
+	BYTE        bLook;                     // 0x4EE  CPF_Input
+	BYTE        bFreeLook;                 // 0x4EF  CPF_Input
+	BYTE        bTurn180;                  // 0x4F0  CPF_Input
+	BYTE        bTurnToNearest;            // 0x4F1  CPF_Input
+	BYTE        bXAxis;                    // 0x4F2  CPF_Input
+	BYTE        bYAxis;                    // 0x4F3  CPF_Input
+	BYTE        DoubleClickDir;            // 0x4F4
+	BYTE        Transition;                // 0x4F5
+	BYTE        m_TeamSelection;           // 0x4F6  CPF_Net
+	BYTE        m_eCameraMode;             // 0x4F7  CPF_Net
+
+	// --- INT region: 0x4F8-0x523 (11 INTs = 44 bytes) ---
+	INT         ShowFlags;                 // 0x4F8
+	INT         Misc1;                     // 0x4FC
+	INT         Misc2;                     // 0x500
+	INT         RendMap;                   // 0x504
+	INT         WeaponUpdate;              // 0x508
+	INT         EnemyTurnSpeed;            // 0x50C  CPF_Config
+	INT         GroundPitch;               // 0x510
+	INT         DemoViewPitch;             // 0x514  CPF_Net
+	INT         DemoViewYaw;               // 0x518  CPF_Net
+	INT         m_iChangeNameLastTime;     // 0x51C
+	INT         iPBEnabled;                // 0x520
+
+	// --- Bitfield DWORD: 0x524 (28 bits) ---
+	BITFIELD    bLookUpStairs : 1;                 // 0x524 bit 0
+	BITFIELD    bSnapToLevel : 1;                  // bit 1
+	BITFIELD    bAlwaysMouseLook : 1;              // bit 2
+	BITFIELD    bKeyboardLook : 1;                 // bit 3
+	BITFIELD    bCenterView : 1;                   // bit 4
+	BITFIELD    bBehindView : 1;                   // bit 5
+	BITFIELD    bFrozen : 1;                       // bit 6
+	BITFIELD    bPressedJump : 1;                  // bit 7
+	BITFIELD    bUpdatePosition : 1;               // bit 8
+	BITFIELD    bIsTyping : 1;                     // bit 9
+	BITFIELD    bFixedCamera : 1;                  // bit 10
+	BITFIELD    bJumpStatus : 1;                   // bit 11
+	BITFIELD    bUpdating : 1;                     // bit 12
+	BITFIELD    bZooming : 1;                      // bit 13
+	BITFIELD    bOnlySpectator : 1;                // bit 14  CPF_Net
+	BITFIELD    m_bReadyToEnterSpectatorMode : 1;  // bit 15
+	BITFIELD    bSetTurnRot : 1;                   // bit 16
+	BITFIELD    bCheatFlying : 1;                  // bit 17
+	BITFIELD    bFreeCamera : 1;                   // bit 18
+	BITFIELD    bZeroRoll : 1;                     // bit 19
+	BITFIELD    bCameraPositionLocked : 1;         // bit 20
+	BITFIELD    ReceivedSecretChecksum : 1;        // bit 21
+	BITFIELD    m_bInitFirstTick : 1;              // bit 22
+	BITFIELD    m_PreLogOut : 1;                   // bit 23
+	BITFIELD    m_bRadarActive : 1;                // bit 24  CPF_Net
+	BITFIELD    m_bHeatVisionActive : 1;           // bit 25
+	BITFIELD    m_bLoadSoundGun : 1;               // bit 26
+	BITFIELD    m_bInstructionTouch : 1;           // bit 27
+
+	// --- FLOAT region: 0x528-0x5B3 (35 FLOATs = 140 bytes) ---
+	FLOAT       AimingHelp;                // 0x528
+	FLOAT       WaitDelay;                 // 0x52C
+	FLOAT       aBaseX;                    // 0x530  CPF_Input
+	FLOAT       aBaseY;                    // 0x534  CPF_Input
+	FLOAT       aBaseZ;                    // 0x538  CPF_Input
+	FLOAT       aMouseX;                   // 0x53C  CPF_Input
+	FLOAT       aMouseY;                   // 0x540  CPF_Input
+	FLOAT       aForward;                  // 0x544  CPF_Input
+	FLOAT       aTurn;                     // 0x548  CPF_Input
+	FLOAT       aStrafe;                   // 0x54C  CPF_Input
+	FLOAT       aUp;                       // 0x550  CPF_Input
+	FLOAT       aLookUp;                   // 0x554  CPF_Input
+	FLOAT       OrthoZoom;                 // 0x558
+	FLOAT       CameraDist;                // 0x55C
+	FLOAT       DesiredFOV;                // 0x560
+	FLOAT       DefaultFOV;                // 0x564
+	FLOAT       ZoomLevel;                 // 0x568
+	FLOAT       DesiredFlashScale;         // 0x56C
+	FLOAT       ConstantGlowScale;         // 0x570
+	FLOAT       InstantFlash;              // 0x574
+	FLOAT       TargetEyeHeight;           // 0x578  CPF_Net
+	FLOAT       LastPlaySound;             // 0x57C
+	FLOAT       CurrentTimeStamp;          // 0x580
+	FLOAT       LastUpdateTime;            // 0x584
+	FLOAT       ServerTimeStamp;           // 0x588
+	FLOAT       TimeMargin;               // 0x58C
+	FLOAT       ClientUpdateTime;          // 0x590
+	FLOAT       MaxTimeMargin;             // 0x594  CPF_Config|CPF_GlobalConfig
+	FLOAT       ProgressTimeOut;           // 0x598
+	FLOAT       MaxShakeRoll;              // 0x59C
+	FLOAT       ShakeRollRate;             // 0x5A0
+	FLOAT       ShakeRollTime;             // 0x5A4
+	FLOAT       NetClientMaxTickRate;      // 0x5A8  CPF_Config|CPF_GlobalConfig
+	FLOAT       m_fNextUpdateTime;         // 0x5AC
+	FLOAT       m_fLoginTime;              // 0x5B0
+
+	// --- Pointer region: 0x5B4-0x5EB (14 pointers = 56 bytes) ---
+	class UPlayer*                  Player;                    // 0x5B4
+	class AActor*                   ViewTarget;                // 0x5B8  CPF_Net
+	class AHUD*                     myHUD;                     // 0x5BC
+	class ASavedMove*               SavedMoves;                // 0x5C0
+	class ASavedMove*               FreeMoves;                 // 0x5C4
+	class ASavedMove*               PendingMove;               // 0x5C8
+	class AGameReplicationInfo*     GameReplicationInfo;       // 0x5CC  CPF_Net
+	class APawn*                    TurnTarget;                // 0x5D0
+	class UCheatManager*            CheatManager;              // 0x5D4
+	class AR6RainbowStartInfo*      m_PlayerStartInfo;         // 0x5D8
+	class AActor*                   m_SaveOldClientBase;       // 0x5DC
+	class UClass*                   LocalMessageClass;         // 0x5E0
+	class UClass*                   CheatClass;                // 0x5E4
+	class UClass*                   InputClass;                // 0x5E8
+
+	// --- FVector/FRotator/FColor region: 0x5EC-0x697 (172 bytes) ---
+	FVector     FlashScale;                // 0x5EC
+	FVector     FlashFog;                  // 0x5F8
+	FVector     DesiredFlashFog;           // 0x604
+	FVector     ConstantGlowFog;           // 0x610
+	FVector     InstantFog;                // 0x61C
+	FRotator    TargetViewRotation;        // 0x628  CPF_Net
+	FVector     TargetWeaponViewOffset;    // 0x634  CPF_Net
+	FColor      ProgressColor[4];          // 0x640
+	FVector     MaxShakeOffset;            // 0x650
+	FVector     ShakeOffsetRate;           // 0x65C
+	FVector     ShakeOffset;               // 0x668
+	FVector     ShakeOffsetTime;           // 0x674
+	FRotator    TurnRot180;                // 0x680
+	FVector     OldFloor;                  // 0x68C
+
+	// --- Embedded structs: 0x698-0x747 (176 bytes) ---
+	FPlayerVerCDKeyStatus   m_stPlayerVerCDKeyStatus;      // 0x698 (28 bytes)
+	FPlayerVerCDKeyStatus   m_stPlayerVerModCDKeyStatus;   // 0x6B4 (28 bytes)
+	FPlayerPrefInfo         m_PlayerPrefs;                 // 0x6D0 (120 bytes)
+
+	// --- FStringNoInit region: 0x748-0x7D7 (12 strings = 144 bytes) ---
+	FStringNoInit   Song;                  // 0x748
+	FStringNoInit   ProgressMessage[4];    // 0x754
+	FStringNoInit   QuickSaveString;       // 0x784
+	FStringNoInit   NoPauseMessage;        // 0x790
+	FStringNoInit   ViewingFrom;           // 0x79C
+	FStringNoInit   OwnCamera;             // 0x7A8
+	FStringNoInit   ngWorldSecret;         // 0x7B4
+	FStringNoInit   m_szGlobalID;          // 0x7C0
+	FStringNoInit   m_szIpAddr;            // 0x7CC
+
+	// --- Tail: 0x7D8-0x7E7 (16 bytes) ---
+	class UPlayerInput*             PlayerInput;               // 0x7D8  CPF_Transient
+	TArray<class UCameraEffect*>    CameraEffects;             // 0x7DC  CPF_Transient|CPF_NeedCtorLink
 
 	// Indexed exec
 	DECLARE_FUNCTION(execFindStairRotation)

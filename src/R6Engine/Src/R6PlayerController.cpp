@@ -197,7 +197,7 @@ IMPL_MATCH("R6Engine.dll", 0x10030f70)
 void AR6PlayerController::PostNetReceive()
 {
 	guard(AR6PlayerController::PostNetReceive);
-	if (GR6PlayerController_OldTeamByte != ((BYTE*)_NativeData)[10])
+	if (GR6PlayerController_OldTeamByte != m_TeamSelection)
 		eventPlayerTeamSelectionReceived();
 	APlayerController::PostNetReceive();
 	unguard;
@@ -207,7 +207,7 @@ IMPL_MATCH("R6Engine.dll", 0x1002ff00)
 void AR6PlayerController::PreNetReceive()
 {
 	guard(AR6PlayerController::PreNetReceive);
-	GR6PlayerController_OldTeamByte = ((BYTE*)_NativeData)[10];
+	GR6PlayerController_OldTeamByte = m_TeamSelection;
 	APlayerController::PreNetReceive();
 	unguard;
 }

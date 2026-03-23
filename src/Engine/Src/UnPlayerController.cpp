@@ -187,10 +187,10 @@ void APlayerController::SetPlayer(UPlayer* InPlayer)
 	// Clear old player's back-pointer to this controller
 	APlayerController* oldActor = *(APlayerController**)((BYTE*)InPlayer + 0x34);
 	if (oldActor)
-		*(UPlayer**)((BYTE*)oldActor + 0x5B4) = NULL;
+		oldActor->Player = NULL;
 
 	// Establish bidirectional link
-	*(UPlayer**)((BYTE*)this + 0x5B4) = InPlayer;
+	Player = InPlayer;
 	*(APlayerController**)((BYTE*)InPlayer + 0x34) = this;
 
 	// If InPlayer is a viewport, initialise input system
@@ -206,8 +206,8 @@ IMPL_MATCH("Engine.dll", 0x1038d7d0)
 int APlayerController::LocalPlayerController()
 {
 	guard(APlayerController::LocalPlayerController);
-	UPlayer* Player = (UPlayer*)_NativeData[50]; // offset 0x5B4
-	return Player && Player->IsA(UViewport::StaticClass());
+	UPlayer* PlayerRef = Player; // offset 0x5B4
+	return PlayerRef && PlayerRef->IsA(UViewport::StaticClass());
 	unguard;
 }
 
@@ -365,7 +365,7 @@ FString APlayerController::GetPlayerNetworkAddress()
 {
 	guard(APlayerController::GetPlayerNetworkAddress);
 	// Ghidra shows vtable dispatch to LowLevelGetRemoteAddress on the Player connection.
-	UNetConnection* Conn = Cast<UNetConnection>( *(UPlayer**)(&_NativeData[50]) ); // offset 0x5B4
+	UNetConnection* Conn = Cast<UNetConnection>( Player ); // offset 0x5B4
 	if( Conn )
 		return Conn->LowLevelGetRemoteAddress();
 	return FString(TEXT(""));
@@ -375,7 +375,6 @@ FString APlayerController::GetPlayerNetworkAddress()
 IMPL_MATCH("Engine.dll", 0x1038d420)
 AActor * APlayerController::GetViewTarget()
 {
-	AActor*& ViewTarget = *(AActor**)(&_NativeData[51]); // offset 0x5B8
 	if( !ViewTarget )
 	{
 		if( Pawn && !Pawn->bDeleteMe && !Pawn->bPendingDelete )
