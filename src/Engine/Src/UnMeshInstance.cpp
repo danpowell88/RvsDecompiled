@@ -1,4 +1,3 @@
-#pragma optimize("", off)
 #include "EnginePrivate.h"
 
 // Ghidra labels 80-bit x87 float returns as FLOAT10; treat as double for compilation.

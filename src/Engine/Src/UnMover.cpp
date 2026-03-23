@@ -1,4 +1,3 @@
-#pragma optimize("", off)
 #include "EnginePrivate.h"
 struct FPropertyRetirement;
 // --- AMover ---

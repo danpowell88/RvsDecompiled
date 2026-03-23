@@ -2,7 +2,6 @@
 	UnStatGraph.cpp: Statistics graph rendering (FStatGraphLine)
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
-#pragma optimize("", off)
 
 // Placement new for placement-new stubs in this TU.
 #include "EnginePrivate.h"

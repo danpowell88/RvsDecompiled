@@ -1,8 +1,7 @@
-﻿/*=============================================================================
+/*=============================================================================
 	UnCanvas.cpp: 2D canvas rendering (UCanvas, FCanvasUtil)
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
-#pragma optimize("", off)
 
 // Placement new for placement-new stubs in this TU.
 #include "EnginePrivate.h"

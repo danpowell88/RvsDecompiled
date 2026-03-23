@@ -1,4 +1,3 @@
-#pragma optimize("", off)
 #include "EnginePrivate.h"
 // --- AJumpDest ---
 IMPL_MATCH("Engine.dll", 0x103d67a0)

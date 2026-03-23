@@ -20,7 +20,6 @@
         +0x1ec         enabled/active flags DWORD
         +0x230         sleep counter / pending update flag
 =============================================================================*/
-#pragma optimize("", off)
 #include "ImplSource.h"
 #include "MeTypes.h"
 #include <math.h>

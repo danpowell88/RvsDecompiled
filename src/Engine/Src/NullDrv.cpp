@@ -1,8 +1,7 @@
-﻿/*=============================================================================
+/*=============================================================================
 NullDrv.cpp: Null render device stubs (URenderDevice)
 Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
-#pragma optimize("", off)
 
 // Placement new for placement-new stubs in this TU.
 #include "EnginePrivate.h"

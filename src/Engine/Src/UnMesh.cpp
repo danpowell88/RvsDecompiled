@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
 	UnMesh.cpp: UMesh, ULodMesh, USkeletalMesh, UStaticMesh registration.
 	Reconstructed for Ravenshield decompilation project.
 
@@ -24,7 +24,6 @@ IMPLEMENT_CLASS(UStaticMeshInstance);
 // Stubs imported from EngineStubs.cpp during file reorganization.
 // These will be replaced with full implementations as decompilation progresses.
 // =============================================================================
-#pragma optimize("", off)
 
 #pragma warning(push)
 #pragma warning(disable: 4291)

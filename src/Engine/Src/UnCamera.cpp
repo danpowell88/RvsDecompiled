@@ -1,8 +1,7 @@
-﻿/*=============================================================================
+/*=============================================================================
 	UnCamera.cpp: Camera, viewport and motion blur (ACamera, UViewport)
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
-#pragma optimize("", off)
 
 // Placement new for placement-new stubs in this TU.
 #include "EnginePrivate.h"

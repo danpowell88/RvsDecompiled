@@ -4,7 +4,6 @@
     
     Moved from EngineStubs.cpp when that file was dissolved.
 =============================================================================*/
-#pragma optimize("", off)
 
 #include "EnginePrivate.h"
 #include "EngineDecls.h"

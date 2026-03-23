@@ -1,4 +1,3 @@
-#pragma optimize("", off)
 #include "EnginePrivate.h"
 // --- AStaticMeshActor ---
 IMPL_MATCH("Engine.dll", 0x103718b0)

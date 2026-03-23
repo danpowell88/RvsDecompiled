@@ -10,7 +10,6 @@ lighting, BSP queries, and render data management.
 IMPLEMENT_CLASS(UModel);
 IMPLEMENT_CLASS(UPolys);
 
-#pragma optimize("", off)
 
 #pragma warning(push)
 #pragma warning(disable: 4291)

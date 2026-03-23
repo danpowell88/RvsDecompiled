@@ -20,7 +20,6 @@
     MdtContactGroup layout (field +0x160 read by FUN_10496010):
         +0x160  first field (contact count or ID)
 =============================================================================*/
-#pragma optimize("", off)
 #include "ImplSource.h"
 #include "MeTypes.h"
 #include <math.h>

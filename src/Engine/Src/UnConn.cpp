@@ -1,8 +1,7 @@
-﻿/*=============================================================================
+/*=============================================================================
 	UnConn.cpp: Net connection and player/client stubs (UNetConnection)
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
-#pragma optimize("", off)
 
 // Placement new for placement-new stubs in this TU.
 #include "EnginePrivate.h"

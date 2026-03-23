@@ -4,7 +4,6 @@
     Reconstructed from Ghidra decompilation of Engine.dll
     VA range 0x104f3640-0x10506380.
 =============================================================================*/
-#pragma optimize("", off)
 #include "ImplSource.h"
 #include "MeTypes.h"
 

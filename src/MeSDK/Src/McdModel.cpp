@@ -7,7 +7,6 @@
     McdModel internal layout (partial, recovered from accessor functions):
         +0x24   geometry handle or geometry count (int)
 =============================================================================*/
-#pragma optimize("", off)
 #include "ImplSource.h"
 #include "MeTypes.h"
 

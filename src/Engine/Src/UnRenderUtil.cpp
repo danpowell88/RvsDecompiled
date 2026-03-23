@@ -2,7 +2,6 @@
 	UnRenderUtil.cpp: Render buffers, lighting, and BSP geometry helpers
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
-#pragma optimize("", off)
 
 // Placement new for placement-new stubs in this TU.
 #include "EnginePrivate.h"
@@ -1149,7 +1148,7 @@ if (UTexture::__Client != NULL && *(INT*)((BYTE*)UTexture::__Client + 0x70) != 0
 IMPL_MATCH("Engine.dll", 0x10304780)
 ETextureFormat FStaticLightMapTexture::GetFormat()
 {
-return (ETextureFormat)*(INT*)(Pad + 48);
+return (ETextureFormat)*(BYTE*)(Pad + 48);
 }
 IMPL_MATCH("Engine.dll", 0x10318b20)
 int FStaticLightMapTexture::GetHeight()

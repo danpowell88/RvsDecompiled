@@ -2,7 +2,6 @@
 KarmaSupport.cpp: Karma physics actors and geometry elements
 Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
-#pragma optimize("", off)
 #include "ImplSource.h"
 
 // Placement new for placement-new stubs in this TU.

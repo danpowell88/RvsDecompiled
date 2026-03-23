@@ -2,7 +2,6 @@
 	UnTex.cpp: Texture and material system (UTexture hierarchy)
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
-#pragma optimize("", off)
 
 #include "EnginePrivate.h"
 #include "ImplSource.h"
@@ -664,7 +663,7 @@ UBitmapMaterial * UTexture::Get(double Time, UViewport *)
 IMPL_MATCH("Engine.dll", 0x10304480)
 FBaseTexture * UTexture::GetRenderInterface()
 {
-	return *(FBaseTexture**)((BYTE*)this + 0xAC);
+	return *(FBaseTexture**)((BYTE*)this + 0xCC);
 }
 IMPL_MATCH("Engine.dll", 0x1046b920)
 void UTexture::Init(int InUSize, int InVSize)
