@@ -32,6 +32,8 @@ DLL_CONFIGS = [
     ("R6Abstract.dll",  "R6Abstract",       "R6Abstract"),
     ("D3DDrv.dll",      "D3DDrv",           "D3DDrv"),
     ("DareAudio.dll",   "DareAudio",        "DareAudio"),
+    ("DareAudioRelease.dll","DareAudioRelease","DareAudioRelease"),
+    ("DareAudioScript.dll","DareAudioScript","DareAudioScript"),
     ("R6GameService.dll","R6GameService",   "R6GameService"),
     ("WinDrv.dll",      "WinDrv",           "WinDrv"),
     ("Window.dll",      "Window",           "Window"),
