@@ -362,10 +362,16 @@ def _decl_to_key(decl: str) -> str | None:
         method_parts = method_name.split()
         if len(method_parts) >= 2 and method_parts[0] == 'operator' and method_parts[1] in ('new', 'delete', 'new[]', 'delete[]'):
             method_name = method_parts[0] + ' ' + method_parts[1]
+        elif method_parts and method_parts[0].startswith('operator'):
+            # Single-char operators: operator*, operator+, operator==, etc.
+            # Keep the full operator token as-is (don't strip at * or &)
+            method_name = method_parts[0]
         else:
             method_name = method_parts[0] if method_parts else method_name
-        # Strip trailing template / pointer junk from method name
-        method_name = re.split(r'[<\s*&]', method_name)[0] if ' ' not in method_name else method_name
+        # Strip trailing template / pointer junk from method name, but
+        # NOT for operator overloads (operator* would lose its *)
+        if not method_name.startswith('operator'):
+            method_name = re.split(r'[<\s*&]', method_name)[0] if ' ' not in method_name else method_name
         if class_name:
             return f"{class_name}::{method_name}"
     
