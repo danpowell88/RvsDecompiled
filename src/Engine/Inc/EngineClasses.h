@@ -2788,6 +2788,44 @@ class ENGINE_API AProjector : public AActor
 {
 public:
 	DECLARE_CLASS(AProjector,AActor,0,Engine)
+
+	// Ghidra operator= at 0x10331180 (1040 bytes). AActor ends at 0x394.
+	BYTE        MaterialBlendingOp;         // 0x394
+	BYTE        FrameBufferBlendingOp;      // 0x395
+	// 2 bytes padding
+	INT         FOV;                        // 0x398
+	INT         MaxTraceDistance;            // 0x39C
+	BITFIELD    bProjectBSP : 1;            // 0x3A0 bit 0
+	BITFIELD    bProjectTerrain : 1;        // bit 1
+	BITFIELD    bProjectStaticMesh : 1;     // bit 2
+	BITFIELD    bProjectParticles : 1;      // bit 3
+	BITFIELD    bProjectActor : 1;          // bit 4
+	BITFIELD    bProjectBullet : 1;         // bit 5
+	BITFIELD    bLevelStatic : 1;           // bit 6
+	BITFIELD    bClipBSP : 1;              // bit 7
+	BITFIELD    m_bClipStaticMesh : 1;      // bit 8
+	BITFIELD    m_bRelative : 1;            // bit 9
+	BITFIELD    m_bDirectionalModulation : 1; // bit 10
+	BITFIELD    m_bProjectTransparent : 1;  // bit 11
+	BITFIELD    m_bProjectOnlyOnFloor : 1;  // bit 12
+	BITFIELD    bProjectOnUnlit : 1;        // bit 13
+	BITFIELD    bGradient : 1;              // bit 14
+	BITFIELD    bProjectOnAlpha : 1;        // bit 15
+	BITFIELD    bProjectOnParallelBSP : 1;  // bit 16
+	BITFIELD    bProjectOnlyFirst : 1;      // bit 17
+	BITFIELD    bLightInfluenced : 1;       // bit 18
+	class UMaterial*    ProjTexture;        // 0x3A4
+	class UTexture*     GradientTexture;    // 0x3A8
+	FName               ProjectTag;         // 0x3AC
+	FPlane              FrustumPlanes[6];   // 0x3B0 (96 bytes)
+	FVector             FrustumVertices[8]; // 0x410 (96 bytes)
+	FBox                Box;                // 0x470 (28 bytes)
+	FProjectorRenderInfoPtr  RenderInfo;    // 0x48C (4 bytes)
+	FMatrix             GradientMatrix;     // 0x490 (64 bytes)
+	FMatrix             Matrix;             // 0x4D0 (64 bytes)
+	FVector             OldLocation;        // 0x510 (12 bytes)
+	// sizeof(AProjector) = 0x51C
+
 	DECLARE_FUNCTION(execAbandonProjector)
 	DECLARE_FUNCTION(execAttachActor)
 	DECLARE_FUNCTION(execAttachProjector)
