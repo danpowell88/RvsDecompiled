@@ -8,7 +8,7 @@ IMPLEMENT_CLASS(AR6SmokeCloud)
 
 // --- AR6SmokeCloud ---
 
-IMPL_EMPTY("retail implementation is empty; smoke clouds are never blocked")
+IMPL_MATCH("R6Weapons.dll", 0x10002e90)
 INT AR6SmokeCloud::IsBlockedBy(AActor const* Other) const
 {
 	// retail: empty — smoke clouds are never blocked.

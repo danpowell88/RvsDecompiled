@@ -144,7 +144,7 @@ void FArchiveCountMem::CountBytes( SIZE_T InNum, SIZE_T InMax )
 	Max += InMax;
 }
 
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10107C80 size 4 bytes")
+IMPL_MATCH("Core.dll", 0x10107c80)
 DWORD FArchiveCountMem::GetNum()
 {
 	return (DWORD)Num;

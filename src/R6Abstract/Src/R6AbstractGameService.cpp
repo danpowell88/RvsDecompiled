@@ -10,24 +10,24 @@ IMPLEMENT_FUNCTION(UR6AbstractGameService, -1, execNativeSubmitMatchResult)
 
 // --- UR6AbstractGameService ---
 
-IMPL_EMPTY("retail: empty")
+IMPL_MATCH("R6Abstract.dll", 0x10002d40)
 void UR6AbstractGameService::Created() {}
-IMPL_EMPTY("retail: empty")
+IMPL_MATCH("R6Abstract.dll", 0x10002cf0)
 void UR6AbstractGameService::DisconnectAllCDKeyPlayers() {}
-IMPL_EMPTY("retail: empty")
+IMPL_MATCH("R6Abstract.dll", 0x10002d20)
 void UR6AbstractGameService::RequestGSCDKeyAuthID() {}
-IMPL_EMPTY("retail: empty")
+IMPL_MATCH("R6Abstract.dll", 0x10002ce0)
 void UR6AbstractGameService::ResetAuthId() {}
-IMPL_EMPTY("retail: empty")
+IMPL_MATCH("R6Abstract.dll", 0x10002d00)
 void UR6AbstractGameService::ServerRoundFinish() {}
-IMPL_EMPTY("retail: empty")
+IMPL_MATCH("R6Abstract.dll", 0x100028d0)
 void UR6AbstractGameService::SubmitMatchResult() {}
-IMPL_EMPTY("retail: empty")
+IMPL_MATCH("R6Abstract.dll", 0x10002d30)
 void UR6AbstractGameService::UnInitializeGSClientSPW() {}
 
-IMPL_EMPTY("retail: empty")
+IMPL_MATCH("R6Abstract.dll", 0x10002d10)
 INT UR6AbstractGameService::GetGroupID()              { return 0; } // retail: empty
-IMPL_EMPTY("retail: empty")
+IMPL_MATCH("R6Abstract.dll", 0x10002d50)
 INT UR6AbstractGameService::GetLobbyID()              { return 0; } // retail: empty
 IMPL_EMPTY("retail: empty")
 INT UR6AbstractGameService::GetLoggedInUbiDotCom()    { return 0; } // retail: empty

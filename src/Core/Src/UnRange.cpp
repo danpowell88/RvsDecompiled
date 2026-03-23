@@ -76,7 +76,7 @@ INT FRange::Booleanize()
 	return Min != 0.f || Max != 0.f;
 }
 
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10104760 size 10 bytes")
+IMPL_MATCH("Core.dll", 0x10104760)
 FLOAT& FRange::Component( INT Index )
 {
 	return Index == 0 ? Min : Max;

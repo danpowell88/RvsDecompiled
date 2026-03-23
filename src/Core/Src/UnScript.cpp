@@ -210,7 +210,7 @@ void UObject::execCase( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_Case, execCase );
 
 // 0x0B — EX_Nothing.
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x1011B360 size 3 bytes")
+IMPL_MATCH("Core.dll", 0x1011b360)
 void UObject::execNothing( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execNothing);
@@ -382,7 +382,7 @@ void UObject::execEndFunctionParms( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_EndFunctionParms, execEndFunctionParms );
 
 // 0x17 — EX_Self.
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x1011B3A0 size 9 bytes")
+IMPL_MATCH("Core.dll", 0x1011b3a0)
 void UObject::execSelf( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSelf);

@@ -75,7 +75,7 @@ void AR6InteractiveObject::PostNetReceive()
 
 // Verified from Ghidra: function at 0x1c220 is a no-op (body is just 'return').
 // Verified from Ghidra: function at 0x1c220 is a no-op (body is just 'return').
-IMPL_EMPTY("Verified no-op in Ghidra at 0x1c220; body is just return")
+IMPL_MATCH("R6Engine.dll", 0x1001c220)
 void AR6InteractiveObject::PostScriptDestroyed()
 {
 	guard(AR6InteractiveObject::PostScriptDestroyed);

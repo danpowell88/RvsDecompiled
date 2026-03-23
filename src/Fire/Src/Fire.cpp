@@ -303,7 +303,7 @@ void UFractalTexture::Prime()
 	UTexture::Prime();
 }
 
-IMPL_EMPTY("Confirmed empty in retail binary")
+IMPL_MATCH("Fire.dll", 0x1050a5e0)
 void UFractalTexture::TouchTexture( INT X, INT Y, FLOAT Z )
 {
 	// Confirmed empty in retail binary.
@@ -2228,7 +2228,7 @@ void UWaveTexture::PostLoad()
 	UWaterTexture::PostLoad();
 }
 
-IMPL_EMPTY("Confirmed empty in retail binary")
+IMPL_MATCH("Fire.dll", 0x105027e0)
 void UWaveTexture::SetWaveLight()
 {
 	// Confirmed empty in the retail binary (just 'ret').

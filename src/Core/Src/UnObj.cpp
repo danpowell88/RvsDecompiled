@@ -215,7 +215,7 @@ void UObject::ProcessDelegate( FName DelegateName, FScriptDelegate* Delegate, vo
 	unguard;
 }
 
-IMPL_EMPTY("Retail Core.dll: truly empty, no SEH frame")
+IMPL_MATCH("Core.dll", 0x1011bd30)
 void UObject::ProcessState( FLOAT DeltaSeconds )
 {
 	// Retail Core.dll: ret 4 (truly empty, no SEH frame)
@@ -442,7 +442,7 @@ void UObject::InitExecution()
 	unguard;
 }
 
-IMPL_EMPTY("Retail Core.dll: truly empty")
+IMPL_MATCH("Core.dll", 0x10136aa0)
 void UObject::ShutdownAfterError()
 {
 	// Retail Core.dll: ret (truly empty, no SEH frame)
@@ -745,7 +745,7 @@ const TCHAR* UObject::GetPathName( UObject* StopOuter, TCHAR* Str ) const
 	unguard;
 }
 
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10101E20 size 4 bytes")
+IMPL_MATCH("Core.dll", 0x10101e20)
 FStateFrame* UObject::GetStateFrame()
 {
 	return StateFrame;
@@ -767,7 +767,7 @@ void UObject::ClearFlags( DWORD NewFlags )
 	ObjectFlags &= ~NewFlags;
 }
 
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10101DC0 size 10 bytes")
+IMPL_MATCH("Core.dll", 0x10101dc0)
 void UObject::SetClass( UClass* NewClass )
 {
 	Class = NewClass;
@@ -860,13 +860,13 @@ void UObject::StaticShutdownAfterError()
 // StaticConfigName() defined inline in UObject class header.
 // StaticExec full implementation is at the bottom of this file (3-param exported version).
 
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10136EF0 size 6 bytes")
+IMPL_MATCH("Core.dll", 0x10136ef0)
 INT UObject::GetInitialized()
 {
 	return GObjInitialized;
 }
 
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10137010 size 6 bytes")
+IMPL_MATCH("Core.dll", 0x10137010)
 const TCHAR* UObject::GetLanguage()
 {
 	return GLanguage;
@@ -887,7 +887,7 @@ void UObject::SetLanguage( const TCHAR* LangExt )
 	unguard;
 }
 
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10136F00 size 6 bytes")
+IMPL_MATCH("Core.dll", 0x10136f00)
 UPackage* UObject::GetTransientPackage()
 {
 	return GObjTransientPkg;
@@ -1847,7 +1847,7 @@ void UObject::CheckDanglingRefs( UObject* Obj )
 	unguard;
 }
 
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10136A90 size 1 bytes")
+IMPL_MATCH("Core.dll", 0x10136a90)
 void UObject::StaticConstructor()
 {
 	guard(UObject::StaticConstructor);

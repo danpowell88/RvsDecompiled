@@ -8,7 +8,7 @@ IMPLEMENT_CLASS(AR6Door)
 
 // --- AR6Door ---
 
-IMPL_EMPTY("Ghidra 0x1cfb0: shared null stub; returns NULL with no SEH frame")
+IMPL_MATCH("R6Engine.dll", 0x1001cfb0)
 AActor * AR6Door::AssociatedLevelGeometry()
 {
 	// Retail 0x1cfb0: shared null-stub, no SEH frame.

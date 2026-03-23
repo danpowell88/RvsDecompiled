@@ -790,7 +790,7 @@ void ANavigationPoint::Destroy()
 	}
 	unguard;
 }
-IMPL_EMPTY("pawn base no-op — subclass overrides")
+IMPL_MATCH("Engine.dll", 0x104651e0)
 void ANavigationPoint::PostEditMove() {}
 IMPL_MATCH("Engine.dll", 0x103d5b50)
 void ANavigationPoint::Spawned()

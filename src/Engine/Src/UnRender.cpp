@@ -995,7 +995,7 @@ IMPL_MATCH("Engine.dll", 0x10302a00)
 FDbgVectorInfo::FDbgVectorInfo() { appMemzero(this, sizeof(*this)); }
 IMPL_MATCH("Engine.dll", 0x10302a00)
 FDbgVectorInfo::FDbgVectorInfo(const FDbgVectorInfo& Other) { appMemcpy(this, &Other, sizeof(*this)); }
-IMPL_EMPTY("trivial destructor; no heap resources to free")
+IMPL_MATCH("Engine.dll", 0x103029f0)
 FDbgVectorInfo::~FDbgVectorInfo() {}
 // Ghidra 0x10302a60: copies 8 DWORDs (0x0–0x1c) then calls FString::operator= for m_szDef at +0x20.
 IMPL_MATCH("Engine.dll", 0x10302a60)

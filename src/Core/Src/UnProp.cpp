@@ -243,7 +243,7 @@ void UProperty::CopyCompleteValue( void* Dest, void* Src ) const
 	unguard;
 }
 
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x101438B0 size 3 bytes")
+IMPL_MATCH("Core.dll", 0x101438b0)
 void UProperty::DestroyValue( void* Dest ) const
 {
 	guard(UProperty::DestroyValue);
@@ -1046,7 +1046,7 @@ void UMapProperty::Link( FArchive& Ar, UProperty* Prev )
 	// Map not used in Ravenshield.
 }
 
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10145270 size 8 bytes")
+IMPL_MATCH("Core.dll", 0x10145270)
 UBOOL UMapProperty::Identical( const void* A, const void* B ) const
 {
 	// Ghidra 0x45270: maps are always considered identical (unused in Ravenshield).
@@ -1059,7 +1059,7 @@ IMPL_MATCH("Core.dll", 0x101452A0)
 void UMapProperty::ExportCppItem( FOutputDevice& Out ) const {}
 IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10145370 size 3 bytes")
 void UMapProperty::ExportTextItem( TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags ) const { *ValueStr = 0; }
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10145380 size 7 bytes")
+IMPL_MATCH("Core.dll", 0x10145380)
 const TCHAR* UMapProperty::ImportText( const TCHAR* Buffer, BYTE* Data, INT PortFlags ) const { return Buffer; }
 IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10145390 size 3 bytes")
 void UMapProperty::CopySingleValue( void* Dest, void* Src ) const {}
@@ -1373,7 +1373,7 @@ void UProperty::SerializeBin( FArchive& Ar, BYTE* Data ) const
 	SerializeItem( Ar, Data );
 }
 
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10143880 size 3 bytes")
+IMPL_MATCH("Core.dll", 0x10143880)
 void UProperty::CleanupDestroyed( BYTE* Data ) const
 {
 	guard(UProperty::CleanupDestroyed);
@@ -1502,7 +1502,7 @@ IMPL_MATCH("Core.dll", 0x101452A0)
 void UMapProperty::ExportCppItem( FOutputDevice& Out, INT Indent ) const { Out.Log( TEXT("/* Map */") ); }
 IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10145390 size 3 bytes")
 void UMapProperty::CopySingleValue( void* Dest, void* Src, UObject* SuperObject ) const { CopySingleValue( Dest, Src ); }
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x101453A0 size 3 bytes")
+IMPL_MATCH("Core.dll", 0x101453a0)
 void UMapProperty::DestroyValue( void* Dest ) const {}
 
 // UStructProperty.

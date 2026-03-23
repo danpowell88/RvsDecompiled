@@ -67,25 +67,25 @@ void FBitWriter::Serialize( void* Src, INT LengthBytes )
 	SerializeBits( Src, LengthBytes*8 );
 }
 
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10113A40 size 4 bytes")
+IMPL_MATCH("Core.dll", 0x10113a40)
 BYTE* FBitWriter::GetData()
 {
 	return &Buffer(0);
 }
 
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x101134B0 size 10 bytes")
+IMPL_MATCH("Core.dll", 0x101134b0)
 INT FBitWriter::GetNumBytes()
 {
 	return (Num+7)>>3;
 }
 
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x101134C0 size 4 bytes")
+IMPL_MATCH("Core.dll", 0x101134c0)
 INT FBitWriter::GetNumBits()
 {
 	return Num;
 }
 
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x101134D0 size 8 bytes")
+IMPL_MATCH("Core.dll", 0x101134d0)
 void FBitWriter::SetOverflowed()
 {
 	ArIsError = 1;
@@ -180,7 +180,7 @@ void FBitReader::Serialize( void* Dest, INT LengthBytes )
 	SerializeBits( Dest, LengthBytes*8 );
 }
 
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10113BE0 size 4 bytes")
+IMPL_MATCH("Core.dll", 0x10113be0)
 BYTE* FBitReader::GetData()
 {
 	return &Buffer(0);
@@ -192,25 +192,25 @@ UBOOL FBitReader::AtEnd()
 	return ArIsError || Pos >= Num;
 }
 
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10113550 size 8 bytes")
+IMPL_MATCH("Core.dll", 0x10113550)
 void FBitReader::SetOverflowed()
 {
 	ArIsError = 1;
 }
 
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10113560 size 10 bytes")
+IMPL_MATCH("Core.dll", 0x10113560)
 INT FBitReader::GetNumBytes()
 {
 	return (Num+7)>>3;
 }
 
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10113570 size 4 bytes")
+IMPL_MATCH("Core.dll", 0x10113570)
 INT FBitReader::GetNumBits()
 {
 	return Num;
 }
 
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10113580 size 4 bytes")
+IMPL_MATCH("Core.dll", 0x10113580)
 INT FBitReader::GetPosBits()
 {
 	return Pos;

@@ -69,7 +69,7 @@ void FOutputDevice::Logf( enum EName Type, const TCHAR* Fmt, ... )
 	FErrorOutError / FLogOutError / FNullOutError / FThrowOut classes.
 -----------------------------------------------------------------------------*/
 
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10108500 size 9 bytes")
+IMPL_MATCH("Core.dll", 0x10108500)
 FErrorOutError::FErrorOutError() {}
 IMPL_MATCH("Core.dll", 0x10108510)
 FErrorOutError::FErrorOutError( const FErrorOutError& ) {}
@@ -83,7 +83,7 @@ void FErrorOutError::Serialize( const TCHAR* V, EName Event ) {}
 IMPL_MATCH("Core.dll", 0x10101320)
 void FErrorOutError::HandleError() {}
 
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10108520 size 9 bytes")
+IMPL_MATCH("Core.dll", 0x10108520)
 FLogOutError::FLogOutError() {}
 IMPL_MATCH("Core.dll", 0x10108530)
 FLogOutError::FLogOutError( const FLogOutError& ) {}
@@ -94,7 +94,7 @@ FLogOutError& FLogOutError::operator=( const FLogOutError& ) { return *this; }
 IMPL_MATCH("Core.dll", 0x10101290)
 void FLogOutError::Serialize( const TCHAR* V, EName Event ) {}
 
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x101012A0 size 9 bytes")
+IMPL_MATCH("Core.dll", 0x101012a0)
 FNullOutError::FNullOutError() {}
 IMPL_MATCH("Core.dll", 0x101012B0)
 FNullOutError::FNullOutError( const FNullOutError& ) {}
@@ -111,7 +111,7 @@ void FNullOutError::Serialize( const TCHAR* V, EName Event )
 
 IMPL_MATCH("Core.dll", 0x10108540)
 FThrowOut::FThrowOut() {}
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10108540 size 9 bytes")
+IMPL_MATCH("Core.dll", 0x10101260)
 FThrowOut::FThrowOut( const FThrowOut& ) {}
 // Retail 0x13c0: shared trivial-return stub.
 IMPL_MATCH("Core.dll", 0x101013C0)
@@ -152,7 +152,7 @@ INT FArchive::IsCriticalError()
 
 // All MapCheck base-class methods are trivial no-ops in Core.dll.
 // MapCheck_Add: Ghidra 0x10101330 (3 bytes — ret only)
-IMPL_EMPTY("Ghidra 0x10101330: 3-byte trivial no-op")
+IMPL_MATCH("Core.dll", 0x10101330)
 void FFeedbackContext::MapCheck_Add( INT Type, void* Obj, const TCHAR* Msg )
 {
 }
@@ -163,7 +163,7 @@ void FFeedbackContext::MapCheck_Clear()
 {
 }
 
-IMPL_EMPTY("Ghidra 0x10101320: 1-byte trivial no-op (shared stub)")
+IMPL_MATCH("Core.dll", 0x10101320)
 void FFeedbackContext::MapCheck_Hide()
 {
 }

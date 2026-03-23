@@ -94,10 +94,9 @@ void AR6Weapons::TickAuthoritative(FLOAT DeltaTime)
 	Super::TickAuthoritative(DeltaTime);
 }
 
-IMPL_EMPTY("retail: base class always returns 0; AR6HBSGadget overrides")
+IMPL_MATCH("R6Weapons.dll", 0x10001310)
 INT AR6Weapons::GetHeartBeatStatus()
 {
-	// retail: empty — base class always returns 0; AR6HBSGadget overrides.
 	return 0;
 }
 

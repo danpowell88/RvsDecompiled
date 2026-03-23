@@ -118,13 +118,13 @@ void UField::AddCppProperty( UProperty* Property )
 	unguard;
 }
 
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10115000 size 6 bytes")
+IMPL_MATCH("Core.dll", 0x10115000)
 UBOOL UField::MergeBools()
 {
 	return 1;
 }
 
-IMPL_EMPTY("Retail Core.dll: truly empty, confirmed")
+IMPL_MATCH("Core.dll", 0x10114f60)
 void UField::Bind()
 {
 	// Retail Core.dll: ret (truly empty)
@@ -140,7 +140,7 @@ UClass* UField::GetOwnerClass()
 	unguard;
 }
 
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10114FF0 size 3 bytes")
+IMPL_MATCH("Core.dll", 0x10114ff0)
 INT UField::GetPropertiesSize()
 {
 	return 0;
