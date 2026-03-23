@@ -169,7 +169,7 @@ void UCanvas::execClipTextNative( FFrame& Stack, RESULT_DECL )
 	P_GET_FLOAT(Y);
 	P_GET_STR(S);
 	P_GET_FLOAT(GUIScale);
-	struct FRegion { INT X, Y, W, H; } ClipRegion = {0,0,0,0};
+	FRegion ClipRegion = {0,0,0,0};
 	Stack.Step(Stack.Object, &ClipRegion);
 	P_GET_UBOOL_OPTX(bCheckHotKey, 0);
 	P_FINISH;

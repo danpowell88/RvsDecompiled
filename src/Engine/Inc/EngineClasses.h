@@ -3736,6 +3736,56 @@ public:
 	virtual void PostEditChange();
 };
 
+// Embedded structs for ALevelInfo
+// FRegion: 16 bytes (4 INTs). Used for menu clip regions.
+struct FRegion { INT X, Y, W, H; };
+
+// FSoundZoneAudibleZones: 8 bytes (64 bitfields = 2 DWORDs). SDK line 16600.
+struct FSoundZoneAudibleZones
+{
+	BITFIELD bZone00:1; BITFIELD bZone01:1; BITFIELD bZone02:1; BITFIELD bZone03:1;
+	BITFIELD bZone04:1; BITFIELD bZone05:1; BITFIELD bZone06:1; BITFIELD bZone07:1;
+	BITFIELD bZone08:1; BITFIELD bZone09:1; BITFIELD bZone10:1; BITFIELD bZone11:1;
+	BITFIELD bZone12:1; BITFIELD bZone13:1; BITFIELD bZone14:1; BITFIELD bZone15:1;
+	BITFIELD bZone16:1; BITFIELD bZone17:1; BITFIELD bZone18:1; BITFIELD bZone19:1;
+	BITFIELD bZone20:1; BITFIELD bZone21:1; BITFIELD bZone22:1; BITFIELD bZone23:1;
+	BITFIELD bZone24:1; BITFIELD bZone25:1; BITFIELD bZone26:1; BITFIELD bZone27:1;
+	BITFIELD bZone28:1; BITFIELD bZone29:1; BITFIELD bZone30:1; BITFIELD bZone31:1;
+	BITFIELD bZone32:1; BITFIELD bZone33:1; BITFIELD bZone34:1; BITFIELD bZone35:1;
+	BITFIELD bZone36:1; BITFIELD bZone37:1; BITFIELD bZone38:1; BITFIELD bZone39:1;
+	BITFIELD bZone40:1; BITFIELD bZone41:1; BITFIELD bZone42:1; BITFIELD bZone43:1;
+	BITFIELD bZone44:1; BITFIELD bZone45:1; BITFIELD bZone46:1; BITFIELD bZone47:1;
+	BITFIELD bZone48:1; BITFIELD bZone49:1; BITFIELD bZone50:1; BITFIELD bZone51:1;
+	BITFIELD bZone52:1; BITFIELD bZone53:1; BITFIELD bZone54:1; BITFIELD bZone55:1;
+	BITFIELD bZone56:1; BITFIELD bZone57:1; BITFIELD bZone58:1; BITFIELD bZone59:1;
+	BITFIELD bZone60:1; BITFIELD bZone61:1; BITFIELD bZone62:1; BITFIELD bZone63:1;
+};
+
+// Forward declarations for TArray element types in ALevelInfo
+// SDK: EngineClasses old.h line 16590. sizeof=16.
+struct FWritableMapVertex { FVector Position; FColor Color; };
+// SDK line 16580. sizeof=8.
+struct FWritableMapStroke { FLOAT TimeStamp; INT numPoints; };
+// SDK line 16567. sizeof=20.
+struct FWritableMapIcon { FLOAT TimeStamp; INT iIconIndex; FColor Color; INT iPosX; INT iPosY; };
+// SDK line 16540. sizeof=80 (2 FString + BYTE + 6 bitfields + 4 FString).
+struct FGameTypeInfo
+{
+	FString m_szGameType;
+	FString m_szDisplayAsGameType;
+	BYTE m_eGameModeInfo;
+	BITFIELD m_bTeamAdversarial : 1;
+	BITFIELD m_bUsePreRecMessages : 1;
+	BITFIELD m_bCanSetNbOfTerroristToSpawn : 1;
+	BITFIELD m_bPlayWithNonRainbowNPCs : 1;
+	BITFIELD m_bUseRainbowComm : 1;
+	BITFIELD m_bDisplayBombTimer : 1;
+	FString m_szNameLocalization;
+	FString m_szClassName;
+	FString m_szGreenTeamObjective;
+	FString m_szRedTeamObjective;
+};
+
 class ENGINE_API ALevelInfo : public AZoneInfo
 {
 public:
@@ -3825,7 +3875,92 @@ public:
 	class AController* ControllerList;               // 0x4D4
 	class APhysicsVolume* PhysicsVolumeList;         // 0x4D8
 	class AR6ActionSpot* m_ActionSpotList;           // 0x4DC
-	// Remaining fields continue after 0x4E0 (skins, meshes, sounds, etc.)
+	class UMaterial* GreenTeamSkin;                  // 0x4E0
+	class UMaterial* GreenHeadSkin;                  // 0x4E4
+	class UMaterial* GreenGogglesSkin;               // 0x4E8
+	class UMaterial* GreenHandSkin;                  // 0x4EC
+	class UMaterial* GreenMenuSkin;                  // 0x4F0
+	class UMesh* GreenMesh;                          // 0x4F4
+	class UStaticMesh* GreenHelmetMesh;              // 0x4F8
+	class UMaterial* GreenHelmetSkin;                // 0x4FC
+	class UMaterial* RedTeamSkin;                    // 0x500
+	class UMaterial* RedHeadSkin;                    // 0x504
+	class UMaterial* RedGogglesSkin;                 // 0x508
+	class UMaterial* RedHandSkin;                    // 0x50C
+	class UMaterial* RedMenuSkin;                    // 0x510
+	class UMesh* RedMesh;                            // 0x514
+	class UStaticMesh* RedHelmetMesh;                // 0x518
+	class UMaterial* RedHelmetSkin;                  // 0x51C
+	class USound* m_sndMissionComplete;              // 0x520
+	class AEmitter* m_WeatherEmitter;                // 0x524
+	class AActor* m_WeatherViewTarget;               // 0x528
+	class USound* m_sndPlayMissionIntro;             // 0x52C
+	class USound* m_sndPlayMissionExtro;             // 0x530
+	class USound* m_SurfaceSwitchSnd;                // 0x534
+	class USound* m_SurfaceSwitchForOtherPawnSnd;    // 0x538
+	class USound* m_BodyFallSwitchSnd;               // 0x53C
+	class USound* m_BodyFallSwitchForOtherPawnSnd;   // 0x540
+	class USound* m_StartingMusic;                   // 0x544
+	class AR6DecalManager* m_DecalManager;           // 0x548
+	class UTexture* m_pScopeMaskTexture;             // 0x54C
+	class UTexture* m_pScopeAddTexture;              // 0x550
+	class AR6AbstractHostageMgr* m_hostageMgr;       // 0x554
+	class UR6AbstractTerroristMgr* m_terroristMgr;   // 0x558
+	class UMaterial* m_pProneTrailMaterial;           // 0x55C
+	class UR6ServerInfo* m_ServerSettings;            // 0x560
+	class AR6LimitedSFX* m_aLimitedSFX[6];           // 0x564  (24 bytes)
+	class UTexture* m_tWritableMapTexture;           // 0x57C
+	class UClass* GreenHelmet;                       // 0x580
+	class UClass* RedHelmet;                         // 0x584
+	class UClass* m_WeatherEmitterClass;             // 0x588
+	class UClass* m_RepWeatherEmitterClass;          // 0x58C
+	class UClass* m_BreathingEmitterClass;           // 0x590
+	TArray<class UR6MissionObjectiveBase*> m_aMissionObjectives; // 0x594
+	TArray<struct FWritableMapVertex> m_aCurrentStrip;          // 0x5A0
+	TArray<struct FWritableMapVertex> m_aWritableMapStrip;      // 0x5AC
+	TArray<struct FWritableMapStroke> m_aWritableMapTimeStamp;  // 0x5B8
+	TArray<struct FWritableMapIcon> m_aWritableMapIcons;        // 0x5C4
+	TArray<struct FGameTypeInfo> m_aGameTypeInfo;               // 0x5D0
+	FVector CameraLocationDynamic;                   // 0x5DC
+	FVector CameraLocationTop;                       // 0x5E8
+	FVector CameraLocationFront;                     // 0x5F4
+	FVector CameraLocationSide;                      // 0x600
+	FRotator CameraRotationDynamic;                  // 0x60C
+	FVector R6PlanningMaxVector;                     // 0x618
+	FVector R6PlanningMinVector;                     // 0x624
+	FRegion GreenMenuRegion;                         // 0x630  (16 bytes)
+	FRegion RedMenuRegion;                           // 0x640  (16 bytes)
+	FSoundZoneAudibleZones m_SoundZoneAudibleZones[64]; // 0x650  (512 bytes)
+	FVector m_vPredVector;                           // 0x850
+	FVector m_vPredPredVector;                       // 0x85C
+	FStringNoInit Title;                             // 0x868
+	FStringNoInit Author;                            // 0x874
+	FStringNoInit LevelEnterText;                    // 0x880
+	FStringNoInit LocalizedPkg;                      // 0x88C
+	FStringNoInit VisibleGroups;                     // 0x898
+	FStringNoInit Song;                              // 0x8A4
+	FStringNoInit m_szGameTypeShown;                 // 0x8B0
+	FStringNoInit ComputerName;                      // 0x8BC
+	FStringNoInit EngineVersion;                     // 0x8C8
+	FStringNoInit MinNetVersion;                     // 0x8D4
+	FStringNoInit DefaultGameType;                   // 0x8E0
+	FStringNoInit NextURL;                           // 0x8EC
+	FStringNoInit GreenTeamPawnClass;                // 0x8F8
+	FStringNoInit RedTeamPawnClass;                  // 0x904
+	FStringNoInit m_szMissionObjLocalization;        // 0x910
+	FStringNoInit m_csVoicesOneLinersBankName;       // 0x91C
+	BYTE LevelAction;                                // 0x928
+	INT Year;                                        // 0x92C
+	INT Month;                                       // 0x930
+	INT Day;                                         // 0x934
+	INT DayOfWeek;                                   // 0x938
+	INT Hour;                                        // 0x93C
+	INT Minute;                                      // 0x940
+	INT Second;                                      // 0x944
+	INT Millisecond;                                 // 0x948
+	BITFIELD bPhysicsVolumesInitialized : 1;         // 0x94C
+	FStringNoInit SelectedGroups;                    // 0x950
+	// sizeof(ALevelInfo) = 0x95C
 
 	DECLARE_FUNCTION(execGetAddressURL)
 	DECLARE_FUNCTION(execGetLocalURL)
