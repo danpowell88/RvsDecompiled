@@ -290,27 +290,29 @@ IMPL_MATCH_RE = re.compile(
 def scan_sources(src_root: Path, dll_filter: str | None = None) -> list:
     """Yield (dll_name, va_int, src_file, func_decl_line, line_no) tuples."""
     results = []
-    for cpp in src_root.rglob("*.cpp"):
-        lines = cpp.read_text(encoding="utf-8", errors="replace").splitlines()
-        for i, line in enumerate(lines):
-            m = IMPL_MATCH_RE.search(line)
-            if not m:
-                continue
-            dll  = m.group(1)           # e.g. "Engine.dll"
-            addr = int(m.group(2), 16)  # may be RVA or full VA
+    # Scan both .cpp source files and .parity manifest files
+    for pattern in ("*.cpp", "*.parity"):
+        for cpp in src_root.rglob(pattern):
+            lines = cpp.read_text(encoding="utf-8", errors="replace").splitlines()
+            for i, line in enumerate(lines):
+                m = IMPL_MATCH_RE.search(line)
+                if not m:
+                    continue
+                dll  = m.group(1)           # e.g. "Engine.dll"
+                addr = int(m.group(2), 16)  # may be RVA or full VA
 
-            if dll_filter and dll.lower() != dll_filter.lower():
-                continue
+                if dll_filter and dll.lower() != dll_filter.lower():
+                    continue
 
-            # Next non-blank line should be the function declaration
-            decl = ""
-            for j in range(i + 1, min(i + 5, len(lines))):
-                stripped = lines[j].strip()
-                if stripped and not stripped.startswith("//"):
-                    decl = stripped
-                    break
+                # Next non-blank line should be the function declaration
+                decl = ""
+                for j in range(i + 1, min(i + 5, len(lines))):
+                    stripped = lines[j].strip()
+                    if stripped and not stripped.startswith("//"):
+                        decl = stripped
+                        break
 
-            results.append((dll, addr, cpp, decl, i + 1))
+                results.append((dll, addr, cpp, decl, i + 1))
     return results
 
 # ── Name normalisation (source decl → lookup key) ────────────────────────────
@@ -355,9 +357,15 @@ def _decl_to_key(decl: str) -> str | None:
             i -= 1
         class_start = i + 1
         class_name  = left[class_start:class_end]
-        method_name = before_paren[last_dc + 2:].strip().split()[0]
+        method_name = before_paren[last_dc + 2:].strip()
+        # Handle multi-word operators: "operator new", "operator delete"
+        method_parts = method_name.split()
+        if len(method_parts) >= 2 and method_parts[0] == 'operator' and method_parts[1] in ('new', 'delete', 'new[]', 'delete[]'):
+            method_name = method_parts[0] + ' ' + method_parts[1]
+        else:
+            method_name = method_parts[0] if method_parts else method_name
         # Strip trailing template / pointer junk from method name
-        method_name = re.split(r'[<\s*&]', method_name)[0]
+        method_name = re.split(r'[<\s*&]', method_name)[0] if ' ' not in method_name else method_name
         if class_name:
             return f"{class_name}::{method_name}"
     
@@ -535,9 +543,15 @@ def main():
                 continue
 
             # Find function in our DLL via MAP file
-            key = _decl_to_key(decl)
+            key = None
             our_va = None
-            if key:
+            # Strategy 0: if decl is a mangled name (starts with ?), look up directly
+            if decl.startswith('?'):
+                key = decl.split()[0]  # mangled name (first token)
+                our_va = sym_map.get(key)
+            if our_va is None:
+                key = _decl_to_key(decl)
+            if key and our_va is None:
                 # Strategy 1: exact match
                 our_va = sym_map.get(key)
                 if our_va is None:

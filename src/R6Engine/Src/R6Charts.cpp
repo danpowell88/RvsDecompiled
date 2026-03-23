@@ -7,15 +7,12 @@
 
 // --- R6Charts ---
 
-IMPL_EMPTY("Ghidra confirms constructor body is trivial — implicit return this")
+IMPL_MATCH("R6Engine.dll", 0x1003f6c0)
 R6Charts::R6Charts()
 {
-	guard(R6Charts::R6Charts);
-	// Ghidra: constructor body is just 'return this' (implicit).
-	unguard;
 }
 
-IMPL_MATCH("R6Engine.dll", 0x1003f780)
+IMPL_MATCH("R6Engine.dll", 0x1003f6d0)
 R6Charts& R6Charts::operator=(R6Charts const &)
 {
 	return *this;

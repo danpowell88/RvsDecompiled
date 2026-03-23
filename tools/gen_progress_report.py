@@ -60,7 +60,7 @@ def scan_source_files(src_dir):
 
     for dirpath, dirnames, filenames in os.walk(src_dir):
         for fname in filenames:
-            if not fname.endswith((".cpp", ".h")):
+            if not fname.endswith((".cpp", ".h", ".parity")):
                 continue
 
             fpath = os.path.join(dirpath, fname)
