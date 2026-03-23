@@ -1285,8 +1285,13 @@ void UTerrainSector::Serialize(FArchive& Ar)
 
 	unguard;
 }
-IMPL_TODO("virtual base no-op — subclass overrides - retail has 63B at 0x104564e0")
-void UTerrainSector::PostLoad() {}
+IMPL_MATCH("Engine.dll", 0x104564e0)
+void UTerrainSector::PostLoad()
+{
+	guard(UTerrainSector::PostLoad);
+	UObject::PostLoad();
+	unguard;
+}
 IMPL_TODO("virtual base no-op — subclass overrides - retail has 870B at 0x10459390")
 void UTerrainSector::StaticLight(INT) {}
 IMPL_TODO("terrain editor tool — not needed for runtime gameplay - retail has 3351B at 0x1045f9b0")

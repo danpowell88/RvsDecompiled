@@ -75,7 +75,7 @@ BYTE UR6AbstractGameService::GetGSGameState()     { return 0; } // retail: empty
 IMPL_MATCH("R6Abstract.dll", 0x10002ce0)
 BYTE UR6AbstractGameService::GetLoginRegServer()  { return 0; } // retail: empty
 
-IMPL_TODO("retail: empty - retail has 13B at 0x10002d00")
+IMPL_MATCH("R6Abstract.dll", 0x10002d00)
 void UR6AbstractGameService::CDKeyDisconnecUser(FString) {}
 IMPL_MATCH("R6Abstract.dll", 0x100028d0)
 void UR6AbstractGameService::GameServiceManager(INT, INT, INT, INT) {}
@@ -83,9 +83,9 @@ IMPL_EMPTY("retail: empty")
 void UR6AbstractGameService::MasterServerManager(AR6AbstractGameInfo*, ALevelInfo*) {}
 IMPL_MATCH("R6Abstract.dll", 0x10002d30)
 void UR6AbstractGameService::ProcessLoginMasterSrv(INT, FLOAT*) {}
-IMPL_TODO("retail: empty - retail has 13B at 0x10002d10")
+IMPL_MATCH("R6Abstract.dll", 0x10002d10)
 void UR6AbstractGameService::ProcessUbiComJoinServer(INT, INT, FString, FLOAT*) {}
-IMPL_TODO("retail: empty - retail has 34B at 0x10002d50")
+IMPL_MATCH("R6Abstract.dll", 0x10002d50)
 FString UR6AbstractGameService::GetAuthID(INT) { return TEXT(""); }
 
 IMPL_TODO("exec thunk for intentionally empty native - retail has 107B at 0x10003420")

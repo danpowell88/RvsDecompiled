@@ -109,14 +109,14 @@ static BYTE GsComIID[16]   = {0}; // DAT_10072ff8
 
 // --- UR6GSServers ---
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 374B at 0x1000ab00")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 374B at 0x1000ab00")
 void UR6GSServers::AddPlayerToIDList(FString, FString, FString, INT)
 {
 	guard(UR6GSServers::AddPlayerToIDList);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 716B at 0x1000f7e0")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 716B at 0x1000f7e0")
 void UR6GSServers::CDKeyDisconnecUser(FString)
 {
 	guard(UR6GSServers::CDKeyDisconnecUser);
@@ -187,70 +187,70 @@ INT UR6GSServers::CDKeyValidateUser(FString szCDKey, INT bMod, INT bCheckModKey)
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 18B at 0x1000cca0")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 18B at 0x1000cca0")
 void UR6GSServers::CancelGSCDKeyActID()
 {
 	guard(UR6GSServers::CancelGSCDKeyActID);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 18B at 0x1000ce10")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 18B at 0x1000ce10")
 void UR6GSServers::CancelGSCDKeyAuthID()
 {
 	guard(UR6GSServers::CancelGSCDKeyAuthID);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 29B at 0x1000d000")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 29B at 0x1000d000")
 void UR6GSServers::CopyActivationIDInByteArray(BYTE *, BYTE *)
 {
 	guard(UR6GSServers::CopyActivationIDInByteArray);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 270B at 0x1000c670")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 270B at 0x1000c670")
 void UR6GSServers::CreatedCDKey()
 {
 	guard(UR6GSServers::CreatedCDKey);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 173B at 0x10005680")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 173B at 0x10005680")
 void UR6GSServers::Destroy()
 {
 	guard(UR6GSServers::Destroy);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 808B at 0x1000f480")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 808B at 0x1000f480")
 void UR6GSServers::DisconnectAllCDKeyPlayers()
 {
 	guard(UR6GSServers::DisconnectAllCDKeyPlayers);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 966B at 0x1000d2a0")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 966B at 0x1000d2a0")
 void UR6GSServers::EnterCDKey(FString)
 {
 	guard(UR6GSServers::EnterCDKey);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 426B at 0x100109c0")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 426B at 0x100109c0")
 void UR6GSServers::GSClientPostMessage(BYTE)
 {
 	guard(UR6GSServers::GSClientPostMessage);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 443B at 0x10011820")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 443B at 0x10011820")
 void UR6GSServers::GSClientUpdateServerInfo()
 {
 	guard(UR6GSServers::GSClientUpdateServerInfo);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 552B at 0x1000c290")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 552B at 0x1000c290")
 void UR6GSServers::GameServiceManager(INT, INT, INT, INT)
 {
 	guard(UR6GSServers::GameServiceManager);
@@ -304,14 +304,14 @@ INT UR6GSServers::GetServerRegistered()
 	return GsServerRegistered;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 1968B at 0x10007eb0")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 1968B at 0x10007eb0")
 void UR6GSServers::Init(FString)
 {
 	guard(UR6GSServers::Init);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 351B at 0x1000f1e0")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 351B at 0x1000f1e0")
 void UR6GSServers::InitCDKey(INT, INT)
 {
 	guard(UR6GSServers::InitCDKey);
@@ -371,14 +371,14 @@ INT UR6GSServers::InitGSClient()
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 598B at 0x1000b640")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 598B at 0x1000b640")
 void UR6GSServers::InitMSClient()
 {
 	guard(UR6GSServers::InitMSClient);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 118B at 0x10012a00")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 118B at 0x10012a00")
 void UR6GSServers::InitProcessUpdateUbiServer(AGameInfo *, ALevelInfo *)
 {
 	guard(UR6GSServers::InitProcessUpdateUbiServer);
@@ -531,21 +531,21 @@ INT UR6GSServers::IsServerJoined()
 	return GsServerJoined;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 330B at 0x10009400")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 330B at 0x10009400")
 void UR6GSServers::LogGSVersion()
 {
 	guard(UR6GSServers::LogGSVersion);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 78B at 0x10012060")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 78B at 0x10012060")
 void UR6GSServers::LogOutServer()
 {
 	guard(UR6GSServers::LogOutServer);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 333B at 0x10007280")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 333B at 0x10007280")
 void UR6GSServers::MSCLientJoinServer(INT, INT, FString)
 {
 	guard(UR6GSServers::MSCLientJoinServer);
@@ -578,21 +578,21 @@ INT UR6GSServers::MSCLientLeaveServer()
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 152B at 0x10007530")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 152B at 0x10007530")
 void UR6GSServers::MSClientServerConnected(INT, INT)
 {
 	guard(UR6GSServers::MSClientServerConnected);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 253B at 0x1000a9c0")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 253B at 0x1000a9c0")
 void UR6GSServers::MasterServerManager(AR6AbstractGameInfo *, ALevelInfo *)
 {
 	guard(UR6GSServers::MasterServerManager);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 535B at 0x1000fae0")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 535B at 0x1000fae0")
 void UR6GSServers::NativeCDKeyPlayerStatusReply(FString, BYTE, INT)
 {
 	guard(UR6GSServers::NativeCDKeyPlayerStatusReply);
@@ -651,7 +651,7 @@ INT UR6GSServers::OnSameSubNet(FString szIPAddr)
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 146B at 0x10005980")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 146B at 0x10005980")
 void UR6GSServers::PingRequest(FString, FString)
 {
 	guard(UR6GSServers::PingRequest);
@@ -699,70 +699,70 @@ INT UR6GSServers::PlayerIsInIDList(FString szPlayerName, FString szGlobalID, INT
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 113B at 0x10009870")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 113B at 0x10009870")
 void UR6GSServers::PollCallbacks(INT, INT, INT, INT)
 {
 	guard(UR6GSServers::PollCallbacks);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 3058B at 0x1000dd90")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 3058B at 0x1000dd90")
 void UR6GSServers::PollClientCDKeyCallbacks(INT, INT, INT)
 {
 	guard(UR6GSServers::PollClientCDKeyCallbacks);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 1459B at 0x10011220")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 1459B at 0x10011220")
 void UR6GSServers::PollGSClientCallbacks(INT)
 {
 	guard(UR6GSServers::PollGSClientCallbacks);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 981B at 0x10006880")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 981B at 0x10006880")
 void UR6GSServers::PollMSClientCallbacks(INT)
 {
 	guard(UR6GSServers::PollMSClientCallbacks);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 104B at 0x10005a50")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 104B at 0x10005a50")
 void UR6GSServers::PollPingManager(INT)
 {
 	guard(UR6GSServers::PollPingManager);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 228B at 0x10013330")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 228B at 0x10013330")
 void UR6GSServers::PollRegServerCallbacks(INT)
 {
 	guard(UR6GSServers::PollRegServerCallbacks);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 610B at 0x10010590")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 610B at 0x10010590")
 void UR6GSServers::ProcessAuthIdRequest(AController *)
 {
 	guard(UR6GSServers::ProcessAuthIdRequest);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 732B at 0x10013990")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 732B at 0x10013990")
 void UR6GSServers::ProcessInternetSrv(AR6AbstractGameInfo *, ALevelInfo *)
 {
 	guard(UR6GSServers::ProcessInternetSrv);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 161B at 0x10007c60")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 161B at 0x10007c60")
 void UR6GSServers::ProcessIsLobbyDisconnect(FLOAT *)
 {
 	guard(UR6GSServers::ProcessIsLobbyDisconnect);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 151B at 0x10007ad0")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 151B at 0x10007ad0")
 void UR6GSServers::ProcessIsRouterDisconnect(FLOAT *)
 {
 	guard(UR6GSServers::ProcessIsRouterDisconnect);
@@ -776,77 +776,77 @@ void UR6GSServers::ProcessJoinServer(FLOAT *)
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 304B at 0x10007870")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 304B at 0x10007870")
 void UR6GSServers::ProcessJoinServerRequest()
 {
 	guard(UR6GSServers::ProcessJoinServerRequest);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 207B at 0x1000a8c0")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 207B at 0x1000a8c0")
 void UR6GSServers::ProcessLoginMasterSrv(INT, FLOAT *)
 {
 	guard(UR6GSServers::ProcessLoginMasterSrv);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 301B at 0x1000bf00")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 301B at 0x1000bf00")
 void UR6GSServers::ProcessMSClientInitRequest()
 {
 	guard(UR6GSServers::ProcessMSClientInitRequest);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 2071B at 0x1000fd30")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 2071B at 0x1000fd30")
 void UR6GSServers::ProcessPC_CDKeyRequest(AR6AbstractGameInfo *, ALevelInfo *, APlayerController *, INT)
 {
 	guard(UR6GSServers::ProcessPC_CDKeyRequest);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 203B at 0x10012be0")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 203B at 0x10012be0")
 void UR6GSServers::ProcessRegServerGetLobbiesRequest()
 {
 	guard(UR6GSServers::ProcessRegServerGetLobbiesRequest);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 227B at 0x10012e30")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 227B at 0x10012e30")
 void UR6GSServers::ProcessRegServerLoginRequest()
 {
 	guard(UR6GSServers::ProcessRegServerLoginRequest);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 203B at 0x10012ac0")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 203B at 0x10012ac0")
 void UR6GSServers::ProcessRegServerLoginRouterRequest()
 {
 	guard(UR6GSServers::ProcessRegServerLoginRouterRequest);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 217B at 0x10012d00")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 217B at 0x10012d00")
 void UR6GSServers::ProcessRegServerRegOnLobbyRequest()
 {
 	guard(UR6GSServers::ProcessRegServerRegOnLobbyRequest);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 181B at 0x10012f60")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 181B at 0x10012f60")
 void UR6GSServers::ProcessRegServerUpdateRequest()
 {
 	guard(UR6GSServers::ProcessRegServerUpdateRequest);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 172B at 0x10011170")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 172B at 0x10011170")
 void UR6GSServers::ProcessSubmitMatchResultReply()
 {
 	guard(UR6GSServers::ProcessSubmitMatchResultReply);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 169B at 0x100079f0")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 169B at 0x100079f0")
 void UR6GSServers::ProcessUbiComJoinServer(INT, INT, FString, FLOAT *)
 {
 	guard(UR6GSServers::ProcessUbiComJoinServer);
@@ -937,112 +937,112 @@ INT UR6GSServers::ReceiveServer()
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 541B at 0x1000ee80")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 541B at 0x1000ee80")
 void UR6GSServers::ReceiveValidation()
 {
 	guard(UR6GSServers::ReceiveValidation);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 190B at 0x10009dd0")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 190B at 0x10009dd0")
 void UR6GSServers::RefreshOneServer(INT)
 {
 	guard(UR6GSServers::RefreshOneServer);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 233B at 0x1000c0d0")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 233B at 0x1000c0d0")
 void UR6GSServers::RefreshServers()
 {
 	guard(UR6GSServers::RefreshServers);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 115B at 0x10012890")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 115B at 0x10012890")
 void UR6GSServers::RegServerGetLobbies()
 {
 	guard(UR6GSServers::RegServerGetLobbies);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 235B at 0x10012710")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 235B at 0x10012710")
 void UR6GSServers::RegServerRouterLogin()
 {
 	guard(UR6GSServers::RegServerRouterLogin);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 442B at 0x100121b0")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 442B at 0x100121b0")
 void UR6GSServers::RegisterServer()
 {
 	guard(UR6GSServers::RegisterServer);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 402B at 0x1000cab0")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 402B at 0x1000cab0")
 void UR6GSServers::RequestActivation(FString, INT)
 {
 	guard(UR6GSServers::RequestActivation);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 263B at 0x1000ccc0")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 263B at 0x1000ccc0")
 void UR6GSServers::RequestAuthorization(INT)
 {
 	guard(UR6GSServers::RequestAuthorization);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 21B at 0x1000cc80")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 21B at 0x1000cc80")
 void UR6GSServers::RequestGSCDKeyActID()
 {
 	guard(UR6GSServers::RequestGSCDKeyActID);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 11B at 0x1000ce00")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 11B at 0x1000ce00")
 void UR6GSServers::RequestGSCDKeyAuthID()
 {
 	guard(UR6GSServers::RequestGSCDKeyAuthID);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 532B at 0x1000d790")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 532B at 0x1000d790")
 void UR6GSServers::RequestModCDKeyProcess(INT)
 {
 	guard(UR6GSServers::RequestModCDKeyProcess);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 28B at 0x1000ce30")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 28B at 0x1000ce30")
 void UR6GSServers::ResetAuthId()
 {
 	guard(UR6GSServers::ResetAuthId);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 93B at 0x10012800")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 93B at 0x10012800")
 void UR6GSServers::RouterDisconnect()
 {
 	guard(UR6GSServers::RouterDisconnect);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 189B at 0x10012620")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 189B at 0x10012620")
 void UR6GSServers::ServerLogin()
 {
 	guard(UR6GSServers::ServerLogin);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 175B at 0x10013560")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 175B at 0x10013560")
 void UR6GSServers::ServerRoundFinish()
 {
 	guard(UR6GSServers::ServerRoundFinish);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 269B at 0x10013420")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 269B at 0x10013420")
 void UR6GSServers::ServerRoundStart(INT)
 {
 	guard(UR6GSServers::ServerRoundStart);
@@ -1087,42 +1087,42 @@ INT UR6GSServers::SetGSClientComInterface()
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 730B at 0x10010bc0")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 730B at 0x10010bc0")
 void UR6GSServers::SetGSGameState(BYTE)
 {
 	guard(UR6GSServers::SetGSGameState);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 13B at 0x10012ab0")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 13B at 0x10012ab0")
 void UR6GSServers::SetGameServiceRequestState(BYTE)
 {
 	guard(UR6GSServers::SetGameServiceRequestState);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 13B at 0x10012600")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 13B at 0x10012600")
 void UR6GSServers::SetLoginRegServer(BYTE)
 {
 	guard(UR6GSServers::SetLoginRegServer);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 13B at 0x100125f0")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 13B at 0x100125f0")
 void UR6GSServers::SetRegServerLoginRequest(BYTE)
 {
 	guard(UR6GSServers::SetRegServerLoginRequest);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 387B at 0x1000a1f0")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 387B at 0x1000a1f0")
 void UR6GSServers::SubmitMatchResult()
 {
 	guard(UR6GSServers::SubmitMatchResult);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 177B at 0x1000c9c0")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 177B at 0x1000c9c0")
 void UR6GSServers::UnInitCDKey()
 {
 	guard(UR6GSServers::UnInitCDKey);
@@ -1158,14 +1158,14 @@ INT UR6GSServers::UnInitMSClient()
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 131B at 0x10011fd0")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 131B at 0x10011fd0")
 void UR6GSServers::UnInitRegServer()
 {
 	guard(UR6GSServers::UnInitRegServer);
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 323B at 0x100123b0")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 323B at 0x100123b0")
 void UR6GSServers::UpdateServer()
 {
 	guard(UR6GSServers::UpdateServer);
@@ -1300,7 +1300,7 @@ void UR6GSServers::execGetMaxUbiServerNameSize(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 134B at 0x10012940")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 134B at 0x10012940")
 void UR6GSServers::execHandleAnyLobbyConnectionFail(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execHandleAnyLobbyConnectionFail);
@@ -1317,7 +1317,7 @@ void UR6GSServers::execInitGSCDKey(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 129B at 0x10008670")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 129B at 0x10008670")
 void UR6GSServers::execInitialize(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execInitialize);
@@ -1334,7 +1334,7 @@ void UR6GSServers::execInitializeMSClient(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 127B at 0x10007050")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 127B at 0x10007050")
 void UR6GSServers::execIsRefreshServersInProgress(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execIsRefreshServersInProgress);
@@ -1342,7 +1342,7 @@ void UR6GSServers::execIsRefreshServersInProgress(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 106B at 0x100067c0")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 106B at 0x100067c0")
 void UR6GSServers::execNativeGetMSClientInitialized(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execNativeGetMSClientInitialized);
@@ -1350,7 +1350,7 @@ void UR6GSServers::execNativeGetMSClientInitialized(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 162B at 0x10005e40")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 162B at 0x10005e40")
 void UR6GSServers::execNativeGetSeconds(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execNativeGetSeconds);
@@ -1358,7 +1358,7 @@ void UR6GSServers::execNativeGetSeconds(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 124B at 0x10010fc0")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 124B at 0x10010fc0")
 void UR6GSServers::execNativeIsGSReadyToChangeMod(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execNativeIsGSReadyToChangeMod);
@@ -1366,7 +1366,7 @@ void UR6GSServers::execNativeIsGSReadyToChangeMod(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 133B at 0x10007ba0")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 133B at 0x10007ba0")
 void UR6GSServers::execNativeIsRouterDisconnect(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execNativeIsRouterDisconnect);
@@ -1374,7 +1374,7 @@ void UR6GSServers::execNativeIsRouterDisconnect(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 113B at 0x10010f10")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 113B at 0x10010f10")
 void UR6GSServers::execNativeIsWaitingForGSInit(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execNativeIsWaitingForGSInit);
@@ -1392,7 +1392,7 @@ void UR6GSServers::execNativeLogOutServer(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 239B at 0x10007400")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 239B at 0x10007400")
 void UR6GSServers::execNativeMSCLientJoinServer(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execNativeMSCLientJoinServer);
@@ -1400,7 +1400,7 @@ void UR6GSServers::execNativeMSCLientJoinServer(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 215B at 0x10007600")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 215B at 0x10007600")
 void UR6GSServers::execNativeMSClientReqAltInfo(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execNativeMSClientReqAltInfo);
@@ -1408,7 +1408,7 @@ void UR6GSServers::execNativeMSClientReqAltInfo(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 384B at 0x10005c80")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 384B at 0x10005c80")
 void UR6GSServers::execNativeProcessIcmpPing(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execNativeProcessIcmpPing);
@@ -1416,7 +1416,7 @@ void UR6GSServers::execNativeProcessIcmpPing(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 556B at 0x10009f90")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 556B at 0x10009f90")
 void UR6GSServers::execNativeSetMatchResult(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execNativeSetMatchResult);
@@ -1424,7 +1424,7 @@ void UR6GSServers::execNativeSetMatchResult(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 105B at 0x10012530")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 105B at 0x10012530")
 void UR6GSServers::execNativeUpdateServer(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execNativeUpdateServer);
@@ -1460,7 +1460,7 @@ void UR6GSServers::execSetLastServerQueried(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 104B at 0x10007100")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 104B at 0x10007100")
 void UR6GSServers::execStopRefreshServers(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execStopRefreshServers);
@@ -1477,7 +1477,7 @@ void UR6GSServers::execUnInitializeMSClient(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_TODO("GameSpy server browser — servers permanently offline - retail has 118B at 0x1000f0d0")
+IMPL_DIVERGE("GameSpy servers permanently offline — retail has 118B at 0x1000f0d0")
 void UR6GSServers::registerCDKeySDKCallbacks(UR6GSServers *, void *, void *)
 {
 	guard(UR6GSServers::registerCDKeySDKCallbacks);
