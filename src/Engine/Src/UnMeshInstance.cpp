@@ -94,19 +94,19 @@ INT ULodMeshInstance::GetStatus()
 IMPL_MATCH("Engine.dll", 0x4720)
 int UMeshInstance::StopAnimating(int)
 {
-	guard(UMeshInstance::StopAnimating);
+	guardSlow(UMeshInstance::StopAnimating);
 	// Retail 0x4720: shared null-stub, returns 0.
 	return 0;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x4720)
 int UMeshInstance::UpdateAnimation(float)
 {
-	guard(UMeshInstance::UpdateAnimation);
+	guardSlow(UMeshInstance::UpdateAnimation);
 	// Retail 0x4720: shared null-stub, returns 0.
 	return 0;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x14770)
@@ -152,43 +152,43 @@ void UMeshInstance::SetStatus(int)
 IMPL_MATCH("Engine.dll", 0x10314650)
 int UMeshInstance::LineCheck(FCheckResult &Hit,AActor *Owner,FVector End,FVector Start,FVector Extent,DWORD ExtraNodeFlags,DWORD TraceFlags)
 {
-	guard(UMeshInstance::LineCheck);
+	guardSlow(UMeshInstance::LineCheck);
 	// Retail 0x14650: delegates to GetMesh()->vtbl[0x68/4].
 	typedef BYTE* (__thiscall *GetMeshFn)(UMeshInstance*);
 	BYTE* pMesh = (*(GetMeshFn*)((*(BYTE**)this) + 0x8C))(this);
 	typedef INT (__thiscall *MeshLineCheckFn)(BYTE*, FCheckResult&, AActor*, FVector, FVector, FVector, DWORD, DWORD);
 	return (*(MeshLineCheckFn*)((*(BYTE**)pMesh) + 0x68))(pMesh, Hit, Owner, End, Start, Extent, ExtraNodeFlags, TraceFlags);
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x10314580)
 int UMeshInstance::PlayAnim(int,FName,float,float,int,int,int)
 {
-	guard(UMeshInstance::PlayAnim);
+	guardSlow(UMeshInstance::PlayAnim);
 	// Retail 0x14580: null-stub, returns 0.
 	return 0;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x103145f0)
 int UMeshInstance::PointCheck(FCheckResult &Hit,AActor *Owner,FVector Point,FVector Extent,DWORD TraceFlags)
 {
-	guard(UMeshInstance::PointCheck);
+	guardSlow(UMeshInstance::PointCheck);
 	// Retail 0x145f0: delegates to GetMesh()->vtbl[0x64/4].
 	typedef BYTE* (__thiscall *GetMeshFn)(UMeshInstance*);
 	BYTE* pMesh = (*(GetMeshFn*)((*(BYTE**)this) + 0x8C))(this);
 	typedef INT (__thiscall *MeshPointCheckFn)(BYTE*, FCheckResult&, AActor*, FVector, FVector, DWORD);
 	return (*(MeshPointCheckFn*)((*(BYTE**)pMesh) + 0x64))(pMesh, Hit, Owner, Point, Extent, TraceFlags);
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x33a0)
 int UMeshInstance::AnimForcePose(FName,float,float,int)
 {
-	guard(UMeshInstance::AnimForcePose);
+	guardSlow(UMeshInstance::AnimForcePose);
 	// Retail 0x33a0: shared null-stub, returns 0.
 	return 0;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x14590)
@@ -213,10 +213,10 @@ FName UMeshInstance::AnimGetName(void *)
 IMPL_MATCH("Engine.dll", 0x4720)
 int UMeshInstance::AnimGetNotifyCount(void *)
 {
-	guard(UMeshInstance::AnimGetNotifyCount);
+	guardSlow(UMeshInstance::AnimGetNotifyCount);
 	// Retail 0x4720: shared null-stub, returns 0.
 	return 0;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x6c990)
@@ -250,19 +250,19 @@ float UMeshInstance::AnimGetRate(void *)
 IMPL_MATCH("Engine.dll", 0x6c990)
 int UMeshInstance::AnimIsInGroup(void *,FName)
 {
-	guard(UMeshInstance::AnimIsInGroup);
+	guardSlow(UMeshInstance::AnimIsInGroup);
 	// Retail 0x6c990: shared null-stub, returns 0.
 	return 0;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x4720)
 int UMeshInstance::AnimStopLooping(int)
 {
-	guard(UMeshInstance::AnimStopLooping);
+	guardSlow(UMeshInstance::AnimStopLooping);
 	// Retail 0x4720: shared null-stub, returns 0.
 	return 0;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_INTENTIONALLY_EMPTY("virtual base no-op; subclasses override")
@@ -274,10 +274,10 @@ void UMeshInstance::ClearChannel(int)
 IMPL_MATCH("Engine.dll", 0x6c990)
 int UMeshInstance::FreezeAnimAt(float,int)
 {
-	guard(UMeshInstance::FreezeAnimAt);
+	guardSlow(UMeshInstance::FreezeAnimAt);
 	// Retail 0x6c990: shared null-stub, returns 0.
 	return 0;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x14590)
@@ -385,37 +385,37 @@ int UMeshInstance::GetStatus()
 IMPL_MATCH("Engine.dll", 0x4720)
 int UMeshInstance::IsAnimating(int)
 {
-	guard(UMeshInstance::IsAnimating);
+	guardSlow(UMeshInstance::IsAnimating);
 	// Retail 0x4720: shared null-stub, returns 0.
 	return 0;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x4720)
 int UMeshInstance::IsAnimLooping(int)
 {
-	guard(UMeshInstance::IsAnimLooping);
+	guardSlow(UMeshInstance::IsAnimLooping);
 	// Retail 0x4720: shared null-stub, returns 0.
 	return 0;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x4720)
 int UMeshInstance::IsAnimPastLastFrame(int)
 {
-	guard(UMeshInstance::IsAnimPastLastFrame);
+	guardSlow(UMeshInstance::IsAnimPastLastFrame);
 	// Retail 0x4720: shared null-stub, returns 0.
 	return 0;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x4720)
 int UMeshInstance::IsAnimTweening(int)
 {
-	guard(UMeshInstance::IsAnimTweening);
+	guardSlow(UMeshInstance::IsAnimTweening);
 	// Retail 0x4720: shared null-stub, returns 0.
 	return 0;
-	unguard;
+	unguardSlow;
 }
 
 
@@ -3202,7 +3202,7 @@ int UVertMeshInstance::PlayAnim(INT Channel, FName SeqName, FLOAT Rate, FLOAT Tw
 IMPL_MATCH("Engine.dll", 0x104724f0)
 int UVertMeshInstance::AnimForcePose(FName SeqName, FLOAT Frame, FLOAT Rate, INT Channel)
 {
-	guard(UVertMeshInstance::AnimForcePose);
+	guardSlow(UVertMeshInstance::AnimForcePose);
 	// Retail 0x1724f0, 60b. Forces a pose on the single vertex-mesh animation channel.
 	// Only channel 0 is valid; other channels log a warning and return 0.
 	if (Channel != 0)
@@ -3213,7 +3213,7 @@ int UVertMeshInstance::AnimForcePose(FName SeqName, FLOAT Frame, FLOAT Rate, INT
 	*(INT*)((BYTE*)this + 0xB8) = *(INT*)&SeqName;
 	*(FLOAT*)((BYTE*)this + 0xC0) = Frame;
 	return 1;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x104724C0)

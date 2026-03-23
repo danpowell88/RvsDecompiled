@@ -11,11 +11,11 @@ IMPLEMENT_CLASS(AR6DZonePath)
 IMPL_MATCH("R6Engine.dll", 0x100193d0)
 void AR6DZonePath::CheckForErrors()
 {
-	guard(AR6DZonePath::CheckForErrors);
+	guardSlow(AR6DZonePath::CheckForErrors);
 	if (m_aNode.Num() == 0)
 		GWarn->Logf(TEXT("%s don't have any node!"), GetName());
 	AR6DeploymentZone::CheckForErrors(true);
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("R6Engine.dll", 0x1001a090)

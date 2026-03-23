@@ -95,7 +95,7 @@ static FVector       GCurrentBrushPos;            // DAT_1061b73c (X,Y,Z)
 IMPL_MATCH("Engine.dll", 0x10465a30)
 int UTerrainBrush::BeginPainting(UTexture** param_1, ATerrainInfo** param_2)
 {
-	guard(UTerrainBrush::BeginPainting);
+	guardSlow(UTerrainBrush::BeginPainting);
 
 	bool bVar3 = (GCurrentTerrainInfo != NULL);
 	*param_2 = GCurrentTerrainInfo;
@@ -120,7 +120,7 @@ int UTerrainBrush::BeginPainting(UTexture** param_1, ATerrainInfo** param_2)
 
 	return 0;
 
-	unguard;
+	unguardSlow;
 }
 
 IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
@@ -179,8 +179,8 @@ UTerrainBrushColor& UTerrainBrushColor::operator=(const UTerrainBrushColor& Othe
 IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
 void UTerrainBrushColor::Execute(int)
 {
-	guard(UTerrainBrushColor::Execute);
-	unguard;
+	guardSlow(UTerrainBrushColor::Execute);
+	unguardSlow;
 }
 
 
@@ -219,8 +219,8 @@ UTerrainBrushEdgeTurn& UTerrainBrushEdgeTurn::operator=(const UTerrainBrushEdgeT
 IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
 void UTerrainBrushEdgeTurn::Execute(int)
 {
-	guard(UTerrainBrushEdgeTurn::Execute);
-	unguard;
+	guardSlow(UTerrainBrushEdgeTurn::Execute);
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x10466130)
@@ -275,8 +275,8 @@ UTerrainBrushFlatten& UTerrainBrushFlatten::operator=(const UTerrainBrushFlatten
 IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
 void UTerrainBrushFlatten::Execute(int)
 {
-	guard(UTerrainBrushFlatten::Execute);
-	unguard;
+	guardSlow(UTerrainBrushFlatten::Execute);
+	unguardSlow;
 }
 
 
@@ -315,8 +315,8 @@ UTerrainBrushNoise& UTerrainBrushNoise::operator=(const UTerrainBrushNoise& Othe
 IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
 void UTerrainBrushNoise::Execute(int)
 {
-	guard(UTerrainBrushNoise::Execute);
-	unguard;
+	guardSlow(UTerrainBrushNoise::Execute);
+	unguardSlow;
 }
 
 
@@ -355,8 +355,8 @@ UTerrainBrushPaint& UTerrainBrushPaint::operator=(const UTerrainBrushPaint& Othe
 IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
 void UTerrainBrushPaint::Execute(int)
 {
-	guard(UTerrainBrushPaint::Execute);
-	unguard;
+	guardSlow(UTerrainBrushPaint::Execute);
+	unguardSlow;
 }
 
 
@@ -364,8 +364,8 @@ void UTerrainBrushPaint::Execute(int)
 IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
 void UTerrainBrushPlanningPaint::MouseButtonDown(UViewport *)
 {
-	guard(UTerrainBrushPlanningPaint::MouseButtonDown);
-	unguard;
+	guardSlow(UTerrainBrushPlanningPaint::MouseButtonDown);
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x10465990)
@@ -402,8 +402,8 @@ UTerrainBrushPlanningPaint& UTerrainBrushPlanningPaint::operator=(const UTerrain
 IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
 void UTerrainBrushPlanningPaint::Execute(int)
 {
-	guard(UTerrainBrushPlanningPaint::Execute);
-	unguard;
+	guardSlow(UTerrainBrushPlanningPaint::Execute);
+	unguardSlow;
 }
 
 
@@ -411,8 +411,8 @@ void UTerrainBrushPlanningPaint::Execute(int)
 IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
 void UTerrainBrushSelect::MouseButtonDown(UViewport *)
 {
-	guard(UTerrainBrushSelect::MouseButtonDown);
-	unguard;
+	guardSlow(UTerrainBrushSelect::MouseButtonDown);
+	unguardSlow;
 }
 
 IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
@@ -456,8 +456,8 @@ UTerrainBrushSelect& UTerrainBrushSelect::operator=(const UTerrainBrushSelect& O
 IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
 void UTerrainBrushSelect::Execute(int)
 {
-	guard(UTerrainBrushSelect::Execute);
-	unguard;
+	guardSlow(UTerrainBrushSelect::Execute);
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x104657c0)
@@ -505,8 +505,8 @@ UTerrainBrushSmooth& UTerrainBrushSmooth::operator=(const UTerrainBrushSmooth& O
 IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
 void UTerrainBrushSmooth::Execute(int)
 {
-	guard(UTerrainBrushSmooth::Execute);
-	unguard;
+	guardSlow(UTerrainBrushSmooth::Execute);
+	unguardSlow;
 }
 
 
@@ -514,8 +514,8 @@ void UTerrainBrushSmooth::Execute(int)
 IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
 void UTerrainBrushTexPan::MouseMove(float,float)
 {
-	guard(UTerrainBrushTexPan::MouseMove);
-	unguard;
+	guardSlow(UTerrainBrushTexPan::MouseMove);
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x10465530)
@@ -554,8 +554,8 @@ UTerrainBrushTexPan& UTerrainBrushTexPan::operator=(const UTerrainBrushTexPan& O
 IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
 void UTerrainBrushTexRotate::MouseMove(float,float)
 {
-	guard(UTerrainBrushTexRotate::MouseMove);
-	unguard;
+	guardSlow(UTerrainBrushTexRotate::MouseMove);
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x104655c0)
@@ -594,8 +594,8 @@ UTerrainBrushTexRotate& UTerrainBrushTexRotate::operator=(const UTerrainBrushTex
 IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
 void UTerrainBrushTexScale::MouseMove(float,float)
 {
-	guard(UTerrainBrushTexScale::MouseMove);
-	unguard;
+	guardSlow(UTerrainBrushTexScale::MouseMove);
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x10465650)
@@ -698,8 +698,8 @@ UTerrainBrushVisibility& UTerrainBrushVisibility::operator=(const UTerrainBrushV
 IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
 void UTerrainBrushVisibility::Execute(int)
 {
-	guard(UTerrainBrushVisibility::Execute);
-	unguard;
+	guardSlow(UTerrainBrushVisibility::Execute);
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x10466050)

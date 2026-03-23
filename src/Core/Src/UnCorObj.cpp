@@ -134,10 +134,10 @@ UCommandlet::UCommandlet()
 ,	ShowErrorCount( 0 )
 ,	ShowBanner    ( 1 )
 {
-	guard(UCommandlet::UCommandlet);
+	guardSlow(UCommandlet::UCommandlet);
 	// Ghidra 0x1013af70: has SEH frame; compiler calls _eh_vector_constructor_iterator_
 	// for FStringNoInit arrays at +0x5C and +0x11C (member init handled by compiler).
-	unguard;
+	unguardSlow;
 }
 
 // UCommandlet::~UCommandlet (Ghidra 0x1010bf20): calls ConditionalDestroy() then
@@ -158,11 +158,11 @@ INT UCommandlet::Main( const TCHAR* Parms )
 IMPL_MATCH("Core.dll", 0x1013a1d0)
 void UCommandlet::execMain( FFrame& Stack, RESULT_DECL )
 {
-	guard(UCommandlet::execMain);
+	guardSlow(UCommandlet::execMain);
 	P_GET_STR(InParms);
 	P_FINISH;
 	*(INT*)Result = Main( *InParms );
-	unguard;
+	unguardSlow;
 }
 IMPLEMENT_FUNCTION( UCommandlet, 0, execMain );
 

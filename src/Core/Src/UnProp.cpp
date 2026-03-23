@@ -211,10 +211,10 @@ void UProperty::ExportCpp( FOutputDevice& Out, UBOOL IsLocal, UBOOL IsParm ) con
 IMPL_MATCH("Core.dll", 0x101438C0)
 UBOOL UProperty::NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const
 {
-	guard(UProperty::NetSerializeItem);
+	guardSlow(UProperty::NetSerializeItem);
 	SerializeItem( Ar, Data );
 	return 1;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Core.dll", 0x101458F0)
@@ -237,10 +237,10 @@ void UProperty::CopySingleValue( void* Dest, void* Src ) const
 IMPL_MATCH("Core.dll", 0x101438E0)
 void UProperty::CopyCompleteValue( void* Dest, void* Src ) const
 {
-	guard(UProperty::CopyCompleteValue);
+	guardSlow(UProperty::CopyCompleteValue);
 	for( INT i=0; i<ArrayDim; i++ )
 		CopySingleValue( (BYTE*)Dest + i*ElementSize, (BYTE*)Src + i*ElementSize );
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Core.dll", 0x101438b0)
@@ -959,7 +959,7 @@ UBOOL UArrayProperty::Identical( const void* A, const void* B ) const
 IMPL_MATCH("Core.dll", 0x10147E40)
 void UArrayProperty::SerializeItem( FArchive& Ar, void* Value ) const
 {
-	guard(UArrayProperty::SerializeItem);
+	guardSlow(UArrayProperty::SerializeItem);
 	FArray* Array = (FArray*)Value;
 	INT Count = Array->Num();
 	Ar << AR_INDEX(Count);
@@ -970,7 +970,7 @@ void UArrayProperty::SerializeItem( FArchive& Ar, void* Value ) const
 	}
 	for( INT i=0; i<Count; i++ )
 		Inner->SerializeItem( Ar, (BYTE*)Array->GetData() + i*Inner->ElementSize );
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Core.dll", 0x10144D70)
@@ -1015,7 +1015,7 @@ void UArrayProperty::CopySingleValue( void* Dest, void* Src ) const
 IMPL_MATCH("Core.dll", 0x101471F0)
 void UArrayProperty::DestroyValue( void* Dest ) const
 {
-	guard(UArrayProperty::DestroyValue);
+	guardSlow(UArrayProperty::DestroyValue);
 	FArray* Array = (FArray*)Dest;
 	if( Inner )
 	{
@@ -1023,7 +1023,7 @@ void UArrayProperty::DestroyValue( void* Dest ) const
 			Inner->DestroyValue( (BYTE*)Array->GetData() + i*Inner->ElementSize );
 	}
 	Array->Empty( Inner ? Inner->ElementSize : 0 );
-	unguard;
+	unguardSlow;
 }
 
 IMPLEMENT_CLASS(UArrayProperty);
@@ -1088,20 +1088,20 @@ void UStructProperty::Link( FArchive& Ar, UProperty* Prev )
 IMPL_MATCH("Core.dll", 0x101480C0)
 UBOOL UStructProperty::Identical( const void* A, const void* B ) const
 {
-	guard(UStructProperty::Identical);
+	guardSlow(UStructProperty::Identical);
 	if( !Struct )
 		return 1;
 	return Struct->StructCompare( A, B ? B : &((UClass*)Struct)->Defaults(0) );
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Core.dll", 0x10145460)
 void UStructProperty::SerializeItem( FArchive& Ar, void* Value ) const
 {
-	guard(UStructProperty::SerializeItem);
+	guardSlow(UStructProperty::SerializeItem);
 	if( Struct )
 		Struct->SerializeBin( Ar, (BYTE*)Value );
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Core.dll", 0x101454D0)
@@ -1159,7 +1159,7 @@ void UStructProperty::CopySingleValue( void* Dest, void* Src ) const
 IMPL_MATCH("Core.dll", 0x10145580)
 void UStructProperty::DestroyValue( void* Dest ) const
 {
-	guard(UStructProperty::DestroyValue);
+	guardSlow(UStructProperty::DestroyValue);
 	if( Struct )
 	{
 		for( TFieldIterator<UProperty> It(Struct); It; ++It )
@@ -1169,7 +1169,7 @@ void UStructProperty::DestroyValue( void* Dest ) const
 					It->DestroyValue( (BYTE*)Dest + i*ElementSize + It->Offset );
 		}
 	}
-	unguard;
+	unguardSlow;
 }
 
 IMPLEMENT_CLASS(UStructProperty);
@@ -1242,19 +1242,19 @@ void UDelegateProperty::ExportCppItem( FOutputDevice& Out, INT Indent ) const
 IMPL_MATCH("Core.dll", 0x10145D90)
 void UDelegateProperty::SerializeItem( FArchive& Ar, void* Value, INT MaxReadBytes ) const
 {
-	guard(UDelegateProperty::SerializeItem);
+	guardSlow(UDelegateProperty::SerializeItem);
 	Ar << *(FName*)Value;
 	Ar << *((UObject**)Value + 1);
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Core.dll", 0x10145DB0)
 UBOOL UDelegateProperty::NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const
 {
-	guard(UDelegateProperty::NetSerializeItem);
+	guardSlow(UDelegateProperty::NetSerializeItem);
 	SerializeItem( Ar, Data, 0 );
 	return 1;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Core.dll", 0x10147AC0)
@@ -1303,10 +1303,10 @@ void UDelegateProperty::CopySingleValue( void* Dest, void* Src, UObject* SuperOb
 IMPL_MATCH("Core.dll", 0x10143D20)
 void UDelegateProperty::CopyCompleteValue( void* Dest, void* Src, UObject* SuperObject ) const
 {
-	guard(UDelegateProperty::CopyCompleteValue);
+	guardSlow(UDelegateProperty::CopyCompleteValue);
 	for( INT i=0; i<ArrayDim; i++ )
 		CopySingleValue( (BYTE*)Dest + i*ElementSize, (BYTE*)Src + i*ElementSize, SuperObject );
-	unguard;
+	unguardSlow;
 }
 
 IMPLEMENT_CLASS(UDelegateProperty);
@@ -1546,9 +1546,9 @@ UBOOL UStructProperty::NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* D
 IMPL_EMPTY("base class virtual no-op; not in named exports; just guard/unguard")
 void UProperty::ExportCppItem( FOutputDevice& Out ) const
 {
-	guard(UProperty::ExportCppItem);
+	guardSlow(UProperty::ExportCppItem);
 	// Retail: base no-op; subclasses override.
-	unguard;
+	unguardSlow;
 }
 
 IMPL_EMPTY("base class virtual no-op; not in named exports; just guard/unguard")

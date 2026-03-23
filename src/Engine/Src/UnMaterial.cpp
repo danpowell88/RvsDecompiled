@@ -58,9 +58,9 @@ IMPLEMENT_CLASS(UPlayerLight);
 IMPL_MATCH("Engine.dll", 0x103c78b0)
 void UMaterial::Serialize( FArchive& Ar )
 {
-	guard(UMaterial::Serialize);
+	guardSlow(UMaterial::Serialize);
 	UObject::Serialize( Ar );
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x103c8a60)

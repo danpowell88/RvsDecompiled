@@ -287,19 +287,19 @@ void UGameEngine::LoadRandomMenuBackgroundImage(FString Path)
 IMPL_MATCH("Engine.dll", 0x103a5c00)
 void UGameEngine::PostRenderFullScreenEffects(FLevelSceneNode* SceneNode, UViewport* Viewport)
 {
-	guard(UGameEngine::PostRenderFullScreenEffects);
+	guardSlow(UGameEngine::PostRenderFullScreenEffects);
 	// Ghidra 0x103a5c00: creates FCanvasUtil from Viewport+0x164 (FRenderInterface*),
 	// lazily constructs two UFinalBlend materials cached in global statics
 	// (DAT_10671748 and DAT_10671744), adjusts blend flags, then runs full-screen passes.
 	// FUN_10385b30 = UFinalBlend lazy construction helper (creates via StaticConstructObject).
 	// TODO: implement UGameEngine::PostRenderFullScreenEffects (retail 0x103a5c00: creates FCanvasUtil, lazily constructs UFinalBlend materials, runs full-screen passes)
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x1039f150)
 void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, APawn* Pawn)
 {
-	guard(UGameEngine::AddLinkerToMasterMap);
+	guardSlow(UGameEngine::AddLinkerToMasterMap);
 	// Ghidra 0x103e0000: for APawn, look up its linker (or outer's linker), then add
 	// to the master map and flag the entry with 0x4000.
 	if (!Pawn)
@@ -322,13 +322,13 @@ void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, APawn* Pawn)
 	// Mark the entry at iIdx*0x44+0x40 with flag 0x4000 (mutable/relevant).
 	BYTE* pEntries = *(BYTE**)((BYTE*)MapObj + 0x2C);
 	*(DWORD*)(pEntries + iIdx * 0x44 + 0x40) |= 0x4000;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x1039f150)
 void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, UMaterial* Mat)
 {
-	guard(UGameEngine::AddLinkerToMasterMap);
+	guardSlow(UGameEngine::AddLinkerToMasterMap);
 	// Ghidra 0x103e0000 (UMaterial overload): resolve outer's linker, add to master map.
 	if (!Mat)
 		return;
@@ -359,13 +359,13 @@ void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, UMaterial* Mat)
 	void** MapVtbl = *(void***)MapObj;
 	typedef void (__thiscall *tAddLinker)(void*, ULinkerLoad*);
 	((tAddLinker)MapVtbl[0x78 / sizeof(void*)])(MapObj, Linker);
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x1039f150)
 void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, UMesh* Mesh)
 {
-	guard(UGameEngine::AddLinkerToMasterMap);
+	guardSlow(UGameEngine::AddLinkerToMasterMap);
 	// Ghidra: identical logic to the UMaterial overload, different parameter type.
 	if (!Mesh)
 		return;
@@ -394,13 +394,13 @@ void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, UMesh* Mesh)
 	void** MapVtbl = *(void***)MapObj;
 	typedef void (__thiscall *tAddLinker)(void*, ULinkerLoad*);
 	((tAddLinker)MapVtbl[0x78 / sizeof(void*)])(MapObj, Linker);
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x1039f150)
 void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, UStaticMesh* Mesh)
 {
-	guard(UGameEngine::AddLinkerToMasterMap);
+	guardSlow(UGameEngine::AddLinkerToMasterMap);
 	// Ghidra: identical logic to the UMesh overload, different parameter type.
 	if (!Mesh)
 		return;
@@ -429,31 +429,31 @@ void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, UStaticMesh* Mesh)
 	void** MapVtbl = *(void***)MapObj;
 	typedef void (__thiscall *tAddLinker)(void*, ULinkerLoad*);
 	((tAddLinker)MapVtbl[0x78 / sizeof(void*)])(MapObj, Linker);
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x103a2d80)
 void UGameEngine::DisplayGameVideo(eGameVideoType VideoType)
 {
-	guard(UGameEngine::DisplayGameVideo);
+	guardSlow(UGameEngine::DisplayGameVideo);
 	// Ghidra 0x103a2d80: get first viewport from Client, close fullscreen mode,
 	// build .bik filename from VideoType (0=Logos, 1=RS_Intro, 2=RS_Outro,
 	// 3=map_Intro, 4=map_Outro), then play via GModMgr.
 	// NOTE: Divergence — GModMgr and UR6ModMgr not declared in this TU; video
 	// playback and GModMgr dispatch omitted.
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x103a0f20)
 void UGameEngine::InitializeMissionDescription(FString& OutDesc)
 {
-	guard(UGameEngine::InitializeMissionDescription);
+	guardSlow(UGameEngine::InitializeMissionDescription);
 	// Ghidra 0x103a0f20: calls GModMgr.IsRavenShield(), builds map INI path
 	// ("..\\MODS\\<mod>\\MAPS\\<map>.INI"), resets GR6MissionDescription, calls
 	// UR6MissionDescription::eventInit.  Falls back to mods list then "..\\MAPS\\".
 	// NOTE: Divergence — GModMgr, GR6MissionDescription and UR6MissionDescription
 	// not declared in this TU; full implementation deferred.
-	unguard;
+	unguardSlow;
 }
 
 
@@ -531,12 +531,12 @@ void UEngine::LoadRandomMenuBackgroundImage(FString)
 IMPL_MATCH("Engine.dll", 0x10393c60)
 int UEngine::CacheArmPatch(FGuid *,DWORD *)
 {
-	guard(UEngine::CacheArmPatch);
+	guardSlow(UEngine::CacheArmPatch);
 	// Ghidra 0x1a5c0: validates ARM copy-protection patch — loads patch data,
 	// calls crypto verification. Very complex with many unresolved FUN_ calls.
 	// TODO: implement UEngine::CacheArmPatch (retail 0x1a5c0: ARM copy-protection patch validation; many unresolved FUN_ calls)
 	return 0;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x10395d70)

@@ -63,10 +63,10 @@ void AR6ClimbableObject::AddMyMarker(AActor * param_1)
 IMPL_MATCH("R6Engine.dll", 0x100162e0)
 void AR6ClimbableObject::CheckForErrors()
 {
-	guard(AR6ClimbableObject::CheckForErrors);
+	guardSlow(AR6ClimbableObject::CheckForErrors);
 	if (!m_eClimbHeight)
 		GWarn->Logf(TEXT("Collision: specify the height of m_eClimbHeight"));
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("R6Engine.dll", 0x10016250)

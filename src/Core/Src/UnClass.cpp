@@ -133,11 +133,11 @@ void UField::Bind()
 IMPL_MATCH("Core.dll", 0x10115260)
 UClass* UField::GetOwnerClass()
 {
-	guard(UField::GetOwnerClass);
+	guardSlow(UField::GetOwnerClass);
 	UObject* Obj;
 	for( Obj=this; Obj && !Obj->IsA(UClass::StaticClass()); Obj=Obj->GetOuter() );
 	return Obj ? (UClass*)Obj : NULL;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Core.dll", 0x10114ff0)
@@ -454,7 +454,7 @@ EExprToken UStruct::SerializeExpr( INT& iCode, FArchive& Ar )
 IMPL_MATCH("Core.dll", 0x1010E0D0)
 UBOOL UStruct::StructCompare( const void* A, const void* B )
 {
-	guard(UStruct::StructCompare);
+	guardSlow(UStruct::StructCompare);
 	for( TFieldIterator<UProperty> It(this); It; ++It )
 	{
 		for( INT i=0; i<It->ArrayDim; i++ )
@@ -464,7 +464,7 @@ UBOOL UStruct::StructCompare( const void* A, const void* B )
 		}
 	}
 	return 1;
-	unguard;
+	unguardSlow;
 }
 
 IMPLEMENT_CLASS(UStruct);

@@ -11,7 +11,7 @@ IMPLEMENT_CLASS(AR6DZoneRandomPoints)
 IMPL_MATCH("R6Engine.dll", 0x1001b830)
 void AR6DZoneRandomPoints::CheckForErrors()
 {
-	guard(AR6DZoneRandomPoints::CheckForErrors);
+	guardSlow(AR6DZoneRandomPoints::CheckForErrors);
 	if (m_aNode.Num() == 0)
 		GWarn->Logf(TEXT("%s don't have any node!"), GetName());
 	for (INT i = 0; i < m_aNode.Num(); i++)
@@ -28,7 +28,7 @@ void AR6DZoneRandomPoints::CheckForErrors()
 		}
 	}
 	AR6DeploymentZone::CheckForErrors(true);
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("R6Engine.dll", 0x1001b7a0)

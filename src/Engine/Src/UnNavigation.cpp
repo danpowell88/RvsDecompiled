@@ -516,7 +516,7 @@ void ALiftCenter::FindBase()
 IMPL_MATCH("Engine.dll", 0x103c4670)
 void ALineOfSightTrigger::TickAuthoritative(FLOAT DeltaTime)
 {
-	guard(ALineOfSightTrigger::TickAuthoritative);
+	guardSlow(ALineOfSightTrigger::TickAuthoritative);
 	// Retail 0xc4670
 	AActor::TickAuthoritative(DeltaTime);
 
@@ -578,7 +578,7 @@ void ALineOfSightTrigger::TickAuthoritative(FLOAT DeltaTime)
 
 	// Always refresh the last-sight timestamp
 	*(FLOAT*)((BYTE*)this + 0x3A0) = Level->TimeSeconds;
-	unguard;
+	unguardSlow;
 }
 
 
@@ -1091,7 +1091,7 @@ void UInteractionMaster::execTravel( FFrame& Stack, RESULT_DECL )
 {
 	// Ghidra 0xb6690 231B. Reads URL string, then sets TravelURL/TravelType/TravelFlag
 	// on the first element of the InteractionList at master+0x30 (via raw offsets).
-	guard(UInteractionMaster::execTravel);
+	guardSlow(UInteractionMaster::execTravel);
 	P_GET_STR(URL);
 	P_FINISH;
 	BYTE* master = *(BYTE**)((BYTE*)this + 0x34);
@@ -1107,7 +1107,7 @@ void UInteractionMaster::execTravel( FFrame& Stack, RESULT_DECL )
 			*(INT*)    (first + 0x150) = 0;    // TravelFlag
 		}
 	}
-	unguard;
+	unguardSlow;
 }
 IMPLEMENT_FUNCTION( UInteractionMaster, INDEX_NONE, execTravel );
 

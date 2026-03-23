@@ -236,12 +236,12 @@ void APlayerController::PreNetReceive()
 IMPL_MATCH("Engine.dll", 0x10427760)
 void APlayerController::CheckHearSound(AActor* SoundMaker, INT SoundId, USound* Sound, FVector SoundLoc, FLOAT Volume, INT Flags)
 {
-	guard(APlayerController::CheckHearSound);
+	guardSlow(APlayerController::CheckHearSound);
 	// Ghidra 0x127760: vtable[0x18c] pre-hook, then dispatch ClientHearSound event
 	typedef void (__thiscall* tPreHook)(APlayerController*);
 	((tPreHook*)((BYTE*)(*(void**)this) + 0x18c))[0](this);
 	eventClientHearSound(SoundMaker, Sound, (BYTE)Volume);
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x10374b00)

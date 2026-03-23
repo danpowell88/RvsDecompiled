@@ -2564,7 +2564,7 @@ INT ULevel::FindSpot( FVector Extent, FVector& Location, INT bCheckActors, AActo
 IMPL_MATCH("Engine.dll", 0x103b8b30)
 INT ULevel::CheckSlice( FVector& Adjusted, FVector Extent, INT& NumIterations, AActor* Actor )
 {
-	guard(ULevel::CheckSlice);
+	guardSlow(ULevel::CheckSlice);
 	NumIterations = 0;
 
 	FCheckResult Hit( 1.f );
@@ -2637,7 +2637,7 @@ INT ULevel::CheckSlice( FVector& Adjusted, FVector Extent, INT& NumIterations, A
 	Adjusted += Nudge2;
 	FCheckResult Hit5( 1.f );
 	return !EncroachingWorldGeometry( Hit5, Adjusted, Extent, 0, LI, Actor );
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x103bad70)
@@ -3335,7 +3335,7 @@ INT ULevel::TickDemoPlayback( FLOAT DeltaSeconds )
 IMPL_MATCH("Engine.dll", 0x103bf5b0)
 void ULevel::UpdateTime( ALevelInfo* Info )
 {
-	guard(ULevel::UpdateTime);
+	guardSlow(ULevel::UpdateTime);
 	appSystemTime(
 		*(INT*)((BYTE*)Info + 0x92c),  // Year
 		*(INT*)((BYTE*)Info + 0x930),  // Month
@@ -3346,13 +3346,13 @@ void ULevel::UpdateTime( ALevelInfo* Info )
 		*(INT*)((BYTE*)Info + 0x944),  // Second
 		*(INT*)((BYTE*)Info + 0x948)   // Millisecond
 	);
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x103c66c0)
 INT ULevel::IsPaused()
 {
-	guard(ULevel::IsPaused);
+	guardSlow(ULevel::IsPaused);
 	ALevelInfo* info = GetLevelInfo();
 	if ( info && *(INT*)((BYTE*)info + 0x4b0) != 0 ) // Pauser != NULL
 	{
@@ -3362,7 +3362,7 @@ INT ULevel::IsPaused()
 			return 1;
 	}
 	return 0;
-	unguard;
+	unguardSlow;
 }
 
 // UPackageMap::Copy: internal (non-exported) function that copies all linker
@@ -4008,7 +4008,7 @@ AZoneInfo* ULevel::GetZoneActor( INT iZone )
 IMPL_MATCH("Engine.dll", 0x103b72c0)
 INT ULevel::MoveActorFirstBlocking( AActor* Actor, INT bIgnorePawns, INT bTest, FCheckResult* FirstHit, FCheckResult& Hit )
 {
-	guard(ULevel::MoveActorFirstBlocking);
+	guardSlow(ULevel::MoveActorFirstBlocking);
 	if ( (*(DWORD*)((BYTE*)Actor + 0xa8) & 0x7000) == 0 )
 		return 0;
 	INT result = 0;
@@ -4046,7 +4046,7 @@ INT ULevel::MoveActorFirstBlocking( AActor* Actor, INT bIgnorePawns, INT bTest, 
 		return result;
 	}
 	return 0;
-	unguard;
+	unguardSlow;
 }
 // Ghidra 0x103c0140; 740 bytes.
 // Drops an actor to the floor using a downward line trace. If the hit surface
@@ -4188,11 +4188,11 @@ void ULevel::UpdateTerrainArrays()
 IMPL_MATCH("Engine.dll", 0x10425bf0)
 void ALevelInfo::execGetAddressURL( FFrame& Stack, RESULT_DECL )
 {
-	guard(ALevelInfo::execGetAddressURL);
+	guardSlow(ALevelInfo::execGetAddressURL);
 	P_FINISH;
 	// Retail always formats "host:port" unconditionally (no default-port check).
 	*(FString*)Result = FString::Printf( TEXT("%s:%i"), *XLevel->URL.Host, XLevel->URL.Port );
-	unguard;
+	unguardSlow;
 }
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execGetAddressURL );
 
@@ -4200,12 +4200,12 @@ IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execGetAddressURL );
 IMPL_MATCH("Engine.dll", 0x10425b60)
 void ALevelInfo::execGetLocalURL( FFrame& Stack, RESULT_DECL )
 {
-	guard(ALevelInfo::execGetLocalURL);
+	guardSlow(ALevelInfo::execGetLocalURL);
 	P_FINISH;
 	// Ghidra 0x125b60: calls FURL::String(XLevel->URL, local_buf) which returns the
 	// full URL string (e.g. "MapName?opt1=val1").  URL.String() is equivalent.
 	*(FString*)Result = XLevel->URL.String();
-	unguard;
+	unguardSlow;
 }
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execGetLocalURL );
 

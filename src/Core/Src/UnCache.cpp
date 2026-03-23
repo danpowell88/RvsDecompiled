@@ -210,9 +210,9 @@ UBOOL FMemCache::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
 IMPL_MATCH("Core.dll", 0x10114200)
 void FMemCache::Status( TCHAR* Msg )
 {
-	guard(FMemCache::Status);
+	guardSlow(FMemCache::Status);
 	appSprintf( Msg, TEXT("Cache: Items=%i Gets=%i Creates=%i"), ItemsTotal, NumGets, NumCreates );
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Core.dll", 0x10113fe0)
@@ -250,7 +250,7 @@ void FMemCache::CreateNewFreeSpace( BYTE* Start, BYTE* End, FCacheItem* Prev, FC
 IMPL_MATCH("Core.dll", 0x10113ec0)
 FMemCache::FCacheItem* FMemCache::MergeWithNext( FCacheItem* First )
 {
-	guard(FMemCache::MergeWithNext);
+	guardSlow(FMemCache::MergeWithNext);
 	check(First);
 	check(First->LinearNext);
 	check(First->Id==0);
@@ -270,7 +270,7 @@ FMemCache::FCacheItem* FMemCache::MergeWithNext( FCacheItem* First )
 	UnusedItems = Second;
 
 	return First;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Core.dll", 0x10113ee0)

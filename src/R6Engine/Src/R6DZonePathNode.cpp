@@ -11,7 +11,7 @@ IMPLEMENT_CLASS(AR6DZonePathNode)
 IMPL_MATCH("R6Engine.dll", 0x1001a350)
 void AR6DZonePathNode::CheckForErrors()
 {
-	guard(AR6DZonePathNode::CheckForErrors);
+	guardSlow(AR6DZonePathNode::CheckForErrors);
 	if (m_pPath)
 	{
 		for (INT i = 0; i < m_pPath->m_aNode.Num(); i++)
@@ -28,7 +28,7 @@ Done:
 	PutOnGround();
 	if (!Base)
 		GWarn->Logf(TEXT("Path node not on valid base."));
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("R6Engine.dll", 0x1001a2d0)

@@ -167,7 +167,7 @@ void AR6ColBox::SetBase(AActor* NewBase, FVector FloorNormal, int bNotifyActor)
 IMPL_MATCH("Engine.dll", 0x10476bf0)
 int AR6ColBox::CanStepUp(FVector vec)
 {
-	guard(AR6ColBox::CanStepUp);
+	guardSlow(AR6ColBox::CanStepUp);
 	// FVector passed as 3 scalar args in Ghidra; only Z component (vec.Z) is used
 	// this+0x15c = owner actor, this+0x394 = collision flags, this+0x23c = CollisionHeight
 	INT* pOwner = *(INT**)((BYTE*)this + 0x15c);
@@ -189,7 +189,7 @@ int AR6ColBox::CanStepUp(FVector vec)
 			return 0;
 	}
 	return 1;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_EMPTY("Body unknown; collision enable/disable logic requires Ghidra analysis")
@@ -227,7 +227,7 @@ void AR6ColBox::GetDestination(FVector &,FRotator &)
 IMPL_MATCH("Engine.dll", 0x10476b20)
 float AR6ColBox::GetMaxStepUp(bool param_1, float param_2)
 {
-	guard(AR6ColBox::GetMaxStepUp);
+	guardSlow(AR6ColBox::GetMaxStepUp);
 	// this+0x15c = owner actor, this+0x394 = collision flags
 	INT* pOwner = *(INT**)((BYTE*)this + 0x15c);
 
@@ -258,7 +258,7 @@ float AR6ColBox::GetMaxStepUp(bool param_1, float param_2)
 		return 0.0f;
 
 	return stepHeight - fVar1;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x104767c0)
@@ -290,7 +290,7 @@ APawn * AR6ColBox::GetPawnOrColBoxOwner() const
 IMPL_MATCH("Engine.dll", 0x104766a0)
 int AR6ColBox::IsBlockedBy(AActor const* param_1) const
 {
-	guard(AR6ColBox::IsBlockedBy);
+	guardSlow(AR6ColBox::IsBlockedBy);
 	// this+0x15c = owner actor, this+0x394 = collision flags byte
 	if ((*(INT*)((BYTE*)this + 0x15c) != 0) && ((*(BYTE*)((BYTE*)this + 0x394) & 1) != 0))
 	{
@@ -300,7 +300,7 @@ int AR6ColBox::IsBlockedBy(AActor const* param_1) const
 		return fn(pOwner, 0);
 	}
 	return 0;
-	unguard;
+	unguardSlow;
 }
 
 
@@ -465,7 +465,7 @@ AR6DecalGroup * AR6DecalManager::FindGroup(eDecalType type)
 IMPL_MATCH("Engine.dll", 0x104781b0)
 int AR6DecalsBase::IsNetRelevantFor(APlayerController* param_1, AActor* param_2, FVector param_3)
 {
-	guard(AR6DecalsBase::IsNetRelevantFor);
+	guardSlow(AR6DecalsBase::IsNetRelevantFor);
 	// param_1 + 0x3d8 = PlayerController's Pawn
 	INT* pPawn = (INT*)*(INT*)((BYTE*)param_1 + 0x3d8);
 	if (pPawn == NULL)
@@ -486,7 +486,7 @@ int AR6DecalsBase::IsNetRelevantFor(APlayerController* param_1, AActor* param_2,
 			return 0;
 	}
 	return 1;
-	unguard;
+	unguardSlow;
 }
 
 

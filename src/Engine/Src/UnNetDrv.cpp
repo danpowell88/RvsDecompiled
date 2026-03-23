@@ -190,10 +190,10 @@ unguard;
 IMPL_MATCH("Engine.dll", 0x1048b810)
 int UNetDriver::InitConnect(FNetworkNotify* Notify, FURL& URL, FString& Error)
 {
-guard(UNetDriver::InitConnect);
+guardSlow(UNetDriver::InitConnect);
 *(FNetworkNotify**)((BYTE*)this + 0x40) = Notify;
 return 1;
-unguard;
+unguardSlow;
 }
 
 // Ghidra 0x1048b810 (15b): shares implementation with InitConnect.
@@ -201,10 +201,10 @@ unguard;
 IMPL_MATCH("Engine.dll", 0x1048b810)
 int UNetDriver::InitListen(FNetworkNotify* Notify, FURL& URL, FString& Error)
 {
-guard(UNetDriver::InitListen);
+guardSlow(UNetDriver::InitListen);
 *(FNetworkNotify**)((BYTE*)this + 0x40) = Notify;
 return 1;
-unguard;
+unguardSlow;
 }
 
 

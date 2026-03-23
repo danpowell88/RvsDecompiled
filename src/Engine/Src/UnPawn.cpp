@@ -36,44 +36,44 @@ IMPLEMENT_CLASS(AAIController);
 IMPL_MATCH("Engine.dll", 0x103e7580)
 void APawn::execReachedDestination( FFrame& Stack, RESULT_DECL )
 {
-guard(APawn::execReachedDestination);
+guardSlow(APawn::execReachedDestination);
 P_GET_OBJECT(AActor,Goal);
 P_FINISH;
 *(DWORD*)Result = Goal ? (DWORD)ReachedDestination(Goal->Location - Location, Goal) : 0;
-unguard;
+unguardSlow;
 }
 IMPLEMENT_FUNCTION( APawn, INDEX_NONE, execReachedDestination );
 
 IMPL_MATCH("Engine.dll", 0x103e5390)
 void APawn::execIsFriend( FFrame& Stack, RESULT_DECL )
 {
-	guard(APawn::execIsFriend);
+	guardSlow(APawn::execIsFriend);
 	P_GET_OBJECT(APawn,Other);
 	P_FINISH;
 	*(DWORD*)Result = IsFriend( Other );
-	unguard;
+	unguardSlow;
 }
 IMPLEMENT_FUNCTION( APawn, INDEX_NONE, execIsFriend );
 
 IMPL_MATCH("Engine.dll", 0x103e5440)
 void APawn::execIsEnemy( FFrame& Stack, RESULT_DECL )
 {
-	guard(APawn::execIsEnemy);
+	guardSlow(APawn::execIsEnemy);
 	P_GET_OBJECT(APawn,Other);
 	P_FINISH;
 	*(DWORD*)Result = IsEnemy( Other );
-	unguard;
+	unguardSlow;
 }
 IMPLEMENT_FUNCTION( APawn, INDEX_NONE, execIsEnemy );
 
 IMPL_MATCH("Engine.dll", 0x103e5500)
 void APawn::execIsNeutral( FFrame& Stack, RESULT_DECL )
 {
-	guard(APawn::execIsNeutral);
+	guardSlow(APawn::execIsNeutral);
 	P_GET_OBJECT(APawn,Other);
 	P_FINISH;
 	*(DWORD*)Result = IsNeutral( Other );
-	unguard;
+	unguardSlow;
 }
 IMPLEMENT_FUNCTION( APawn, INDEX_NONE, execIsNeutral );
 
@@ -365,10 +365,10 @@ IMPLEMENT_FUNCTION( AController, INDEX_NONE, execPollMoveToward );
 IMPL_MATCH("Engine.dll", 0x1038d330)
 void AController::execFinishRotation( FFrame& Stack, RESULT_DECL )
 {
-	guard(AController::execFinishRotation);
+	guardSlow(AController::execFinishRotation);
 	P_FINISH;
 	GetStateFrame()->LatentAction = AI_PollFinishRotation;
-	unguard;
+	unguardSlow;
 }
 IMPLEMENT_FUNCTION( AController, 508, execFinishRotation );
 
@@ -396,12 +396,12 @@ IMPLEMENT_FUNCTION( AController, INDEX_NONE, execPollFinishRotation );
 IMPL_MATCH("Engine.dll", 0x1038cdc0)
 void AController::execWaitForLanding( FFrame& Stack, RESULT_DECL )
 {
-	guard(AController::execWaitForLanding);
+	guardSlow(AController::execWaitForLanding);
 	P_FINISH;
 	*(FLOAT*)((BYTE*)this + 0xdc) = 4.0f;
 	if( Pawn && Pawn->Physics == PHYS_Falling )
 		GetStateFrame()->LatentAction = AI_PollWaitForLanding;
-	unguard;
+	unguardSlow;
 }
 IMPLEMENT_FUNCTION( AController, 527, execWaitForLanding );
 
@@ -428,22 +428,22 @@ IMPLEMENT_FUNCTION( AController, INDEX_NONE, execPollWaitForLanding );
 IMPL_MATCH("Engine.dll", 0x1038e750)
 void AController::execLineOfSightTo( FFrame& Stack, RESULT_DECL )
 {
-	guard(AController::execLineOfSightTo);
+	guardSlow(AController::execLineOfSightTo);
 	P_GET_OBJECT(AActor,Other);
 	P_FINISH;
 	*(DWORD*)Result = LineOfSightTo(Other, 0);
-	unguard;
+	unguardSlow;
 }
 IMPLEMENT_FUNCTION( AController, 514, execLineOfSightTo );
 
 IMPL_MATCH("Engine.dll", 0x1038dbb0)
 void AController::execCanSee( FFrame& Stack, RESULT_DECL )
 {
-	guard(AController::execCanSee);
+	guardSlow(AController::execCanSee);
 	P_GET_OBJECT(APawn,Other);
 	P_FINISH;
 	*(DWORD*)Result = SeePawn(Other, 0);
-	unguard;
+	unguardSlow;
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execCanSee );
 
@@ -585,7 +585,7 @@ IMPLEMENT_FUNCTION( AController, 526, execPickWallAdjust );
 IMPL_MATCH("Engine.dll", 0x1038cce0)
 void AController::execAddController( FFrame& Stack, RESULT_DECL )
 {
-	guard(AController::execAddController);
+	guardSlow(AController::execAddController);
 	P_FINISH;
 	// Insert this controller at the head of the level's controller list.
 	if( XLevel && XLevel->GetLevelInfo() )
@@ -593,14 +593,14 @@ void AController::execAddController( FFrame& Stack, RESULT_DECL )
 		nextController = XLevel->GetLevelInfo()->ControllerList;
 		XLevel->GetLevelInfo()->ControllerList = this;
 	}
-	unguard;
+	unguardSlow;
 }
 IMPLEMENT_FUNCTION( AController, 529, execAddController );
 
 IMPL_MATCH("Engine.dll", 0x1038cd30)
 void AController::execRemoveController( FFrame& Stack, RESULT_DECL )
 {
-	guard(AController::execRemoveController);
+	guardSlow(AController::execRemoveController);
 	P_FINISH;
 	// Remove this controller from the level's controller list.
 	if( XLevel && XLevel->GetLevelInfo() )
@@ -623,14 +623,14 @@ void AController::execRemoveController( FFrame& Stack, RESULT_DECL )
 		}
 		nextController = NULL;
 	}
-	unguard;
+	unguardSlow;
 }
 IMPLEMENT_FUNCTION( AController, 530, execRemoveController );
 
 IMPL_MATCH("Engine.dll", 0x1038f9e0)
 void AController::execPickTarget( FFrame& Stack, RESULT_DECL )
 {
-	guard(AController::execPickTarget);
+	guardSlow(AController::execPickTarget);
 	P_GET_OBJECT(UClass, TargetClass);
 	P_GET_FLOAT_REF(bestAim);
 	P_GET_FLOAT_REF(bestDist);
@@ -740,7 +740,7 @@ void AController::execPickTarget( FFrame& Stack, RESULT_DECL )
 	}
 
 	*(APawn**)Result = bestPawn;
-	unguard;
+	unguardSlow;
 }
 IMPLEMENT_FUNCTION( AController, 531, execPickTarget );
 
@@ -828,21 +828,21 @@ IMPLEMENT_FUNCTION( AController, INDEX_NONE, execEndClimbLadder );
 IMPL_MATCH("Engine.dll", 0x1038d090)
 void AController::execInLatentExecution( FFrame& Stack, RESULT_DECL )
 {
-	guard(AController::execInLatentExecution);
+	guardSlow(AController::execInLatentExecution);
 	P_GET_INT(LatentActionNumber);
 	P_FINISH;
 	*(DWORD*)Result = GetStateFrame() && GetStateFrame()->LatentAction == LatentActionNumber;
-	unguard;
+	unguardSlow;
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execInLatentExecution );
 
 IMPL_MATCH("Engine.dll", 0x1038cc90)
 void AController::execStopWaiting( FFrame& Stack, RESULT_DECL )
 {
-	guard(AController::execStopWaiting);
+	guardSlow(AController::execStopWaiting);
 	P_FINISH;
 	GetStateFrame()->LatentAction = 0;
-	unguard;
+	unguardSlow;
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execStopWaiting );
 
@@ -853,7 +853,7 @@ IMPLEMENT_FUNCTION( AController, INDEX_NONE, execStopWaiting );
 IMPL_MATCH("Engine.dll", 0x103900a0)
 void APlayerController::execFindStairRotation( FFrame& Stack, RESULT_DECL )
 {
-	guard(APlayerController::execFindStairRotation);
+	guardSlow(APlayerController::execFindStairRotation);
 	P_GET_FLOAT(DeltaTime);
 	P_FINISH;
 
@@ -1028,7 +1028,7 @@ void APlayerController::execFindStairRotation( FFrame& Stack, RESULT_DECL )
 	}
 
 	*(INT*)Result = CurrentPitch;
-	unguard;
+	unguardSlow;
 }
 IMPLEMENT_FUNCTION( APlayerController, 524, execFindStairRotation );
 
@@ -1169,7 +1169,7 @@ IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execSetViewTarget );
 IMPL_MATCH("Engine.dll", 0x10425910)
 void APlayerController::execClientTravel( FFrame& Stack, RESULT_DECL )
 {
-	guard(APlayerController::execClientTravel);
+	guardSlow(APlayerController::execClientTravel);
 	P_GET_STR(URL);
 	P_GET_BYTE(TravelType);
 	P_GET_UBOOL(bItems);
@@ -1181,7 +1181,7 @@ void APlayerController::execClientTravel( FFrame& Stack, RESULT_DECL )
 			XLevel->Engine->SetClientTravel(
 				*(UPlayer**)((BYTE*)this + 0x5b4), *URL, bItems, (ETravelType)TravelType );
 	}
-	unguard;
+	unguardSlow;
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execClientTravel );
 
@@ -1990,20 +1990,20 @@ INT APawn::IsNetRelevantFor( APlayerController* RealViewer, AActor* Viewer, FVec
 IMPL_MATCH("Engine.dll", 0x103e5700)
 void APawn::NotifyAnimEnd( INT Channel )
 {
-	guard(APawn::NotifyAnimEnd);
+	guardSlow(APawn::NotifyAnimEnd);
 	if( Controller && Controller->IsProbing(ENGINE_AnimEnd) )
 	{
 		Controller->eventAnimEnd( Channel );
 		return;
 	}
 	eventAnimEnd( Channel );
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x103b7420)
 void APawn::NotifyBump( AActor* Other )
 {
-	guard(APawn::NotifyBump);
+	guardSlow(APawn::NotifyBump);
 	// Ghidra 0x103b7420 (63b): if Other is based on something with a collision
 	// box (Base at +0x15c, m_collisionBox at +0x180), redirect bump to the base.
 	if( Other->Base && Other->Base->m_collisionBox )
@@ -2011,7 +2011,7 @@ void APawn::NotifyBump( AActor* Other )
 	if( Controller && Controller->eventNotifyBump( Other ) != 0 )
 		return;
 	AActor::eventBump( Other );
-	unguard;
+	unguardSlow;
 }
 
 IMPL_DIVERGE("Ghidra 0x103e5280; calls AKConstraint::postKarmaStep then allocates Karma body (FUN_1047c2a0); does not call AActor::PostBeginPlay; permanent: Karma/MeSDK binary-only")
@@ -2111,7 +2111,7 @@ static FLOAT gNetSmoothZ = 0.f;
 IMPL_MATCH("Engine.dll", 0x10378250)
 void APawn::PostNetReceiveLocation()
 {
-	guard(APawn::PostNetReceiveLocation);
+	guardSlow(APawn::PostNetReceiveLocation);
 
 	// Declare all locals up front (MSVC 7.1 requirement).
 	FCheckResult Hit;
@@ -2208,7 +2208,7 @@ void APawn::PostNetReceiveLocation()
 	// Snap to the authoritative smoothed position.
 	XLevel->FarMoveActor(this, FVector(gNetSmoothX, gNetSmoothY, gNetSmoothZ), 0, 1, 1, 0);
 
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x10377ff0)
@@ -2549,7 +2549,7 @@ void APawn::SetZone( INT bTest, INT bForceRefresh )
 IMPL_MATCH("Engine.dll", 0x103e5630)
 INT APawn::ShouldTrace( AActor* SourceActor, DWORD TraceFlags )
 {
-	guard(APawn::ShouldTrace);
+	guardSlow(APawn::ShouldTrace);
 	if (TraceFlags & 0x80000)
 	{
 		// TRACE_ShadowCast: check IsMissionPack + team/player conditions.
@@ -2570,7 +2570,7 @@ INT APawn::ShouldTrace( AActor* SourceActor, DWORD TraceFlags )
 	if ((TraceFlags & 0x2000) && *(INT*)((BYTE*)this + 0x170) != 0 && DrawType == DT_StaticMesh)
 		return 1;
 	return TraceFlags & 1;
-	unguard;
+	unguardSlow;
 }
 
 // APawn::SmoothHitWall is not separately exported in Ghidra (0x103f15c0 is AActor::SmoothHitWall).
@@ -2590,7 +2590,7 @@ void APawn::SmoothHitWall( FVector HitNormal, AActor* HitActor )
 IMPL_MATCH("Engine.dll", 0x103c36c0)
 void APawn::TickSimulated( FLOAT DeltaTime )
 {
-	guard(APawn::TickSimulated);
+	guardSlow(APawn::TickSimulated);
 	Acceleration = Velocity.SafeNormal();
 	if( bInterpolating )
 	{
@@ -2599,13 +2599,13 @@ void APawn::TickSimulated( FLOAT DeltaTime )
 	}
 	moveSmooth( Velocity * DeltaTime );
 	eventTick( DeltaTime );
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x103c3760)
 void APawn::TickSpecial( FLOAT DeltaTime )
 {
-	guard(APawn::TickSpecial);
+	guardSlow(APawn::TickSpecial);
 	// Tick down the flash-bang visual effect timer.
 	if( m_fFlashBangVisualEffectTime > 0.0f )
 		m_fFlashBangVisualEffectTime -= DeltaTime;
@@ -2649,7 +2649,7 @@ void APawn::TickSpecial( FLOAT DeltaTime )
 			}
 		}
 	}
-	unguard;
+	unguardSlow;
 }
 
 IMPL_TODO("Ghidra 0x103E9FF0: animation blend-weight selection blocked by UAnimNotify system — implement after animation notify dispatch is reconstructed")
@@ -4139,7 +4139,7 @@ INT APawn::calcMoveFlags()
 IMPL_MATCH("Engine.dll", 0x103f06e0)
 INT APawn::checkFloor(FVector Dir, FCheckResult& Hit)
 {
-	guard(APawn::checkFloor);
+	guardSlow(APawn::checkFloor);
 	// Trace 33 units in Dir direction from Location.
 	// Ghidra: actor arg is NULL (not this), flags are 0x86 = TRACE_World.
 	FVector End = Location - Dir * 33.f;
@@ -4152,7 +4152,7 @@ INT APawn::checkFloor(FVector Dir, FCheckResult& Hit)
 		return 1;
 	}
 	return 0;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x1041c130)
@@ -5635,7 +5635,7 @@ void APawn::setMoveTimer(FLOAT DeltaTime)
 IMPL_MATCH("Engine.dll", 0x103f3810)
 void APawn::startNewPhysics(FLOAT DeltaTime, INT Iterations)
 {
-	guard(APawn::startNewPhysics);
+	guardSlow(APawn::startNewPhysics);
 	if( DeltaTime < 0.0003f )
 		return;
 	switch( Physics )
@@ -5650,7 +5650,7 @@ void APawn::startNewPhysics(FLOAT DeltaTime, INT Iterations)
 	case PHYS_Karma:        physKarma(DeltaTime); break;
 	case PHYS_KarmaRagDoll: physKarmaRagDoll(DeltaTime); break;
 	}
-	unguard;
+	unguardSlow;
 }
 
 IMPL_DIVERGE("startSwimming: vtable[0x98] MoveActor call uses raw vtable; water-line boundary MoveActor confirmed; velocity blending and cap match Ghidra")

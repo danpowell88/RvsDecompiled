@@ -120,7 +120,7 @@ int AKConstraint::CheckOwnerUpdated()
 // Retail 0x5A410: same replication-queue logic as AActor, but checks Owner,
 // this+0x3C0 (KConstraintActor1) and this+0x3C4 (KConstraintActor2).
 // If any of the three changes network state, queue this actor and return 0.
-guard(AKConstraint::CheckOwnerUpdated);
+guardSlow(AKConstraint::CheckOwnerUpdated);
 struct OwnedActorLink { void* Actor; OwnedActorLink* Prev; };
 BYTE* ctrl = *(BYTE**)((BYTE*)this + 0x328);
 INT stored = *(INT*)(ctrl + 0x100);
@@ -158,7 +158,7 @@ if ( act3  && (*(INT*)((BYTE*)act3  + 0x320) & 1) != stored )
     return 0;
 }
 return 1;
-unguard;
+unguardSlow;
 }
 
 

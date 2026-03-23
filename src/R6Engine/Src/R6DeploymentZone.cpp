@@ -21,7 +21,7 @@ IMPLEMENT_FUNCTION(AR6DeploymentZone, -1, execOrderTerroListFromDistanceTo)
 IMPL_MATCH("R6Engine.dll", 0x10017760)
 void AR6DeploymentZone::CheckForErrors()
 {
-	guard(AR6DeploymentZone::CheckForErrors);
+	guardSlow(AR6DeploymentZone::CheckForErrors);
 	if (!IsA(AR6DZoneRandomPoints::StaticClass()) && !IsA(AR6DZonePath::StaticClass()))
 	{
 		PutOnGround();
@@ -29,13 +29,13 @@ void AR6DeploymentZone::CheckForErrors()
 			GWarn->Logf(TEXT("Deployment zone not on valid base."));
 	}
 	CheckForErrors(true);
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("R6Engine.dll", 0x10017760)
 void AR6DeploymentZone::CheckForErrors(bool bSilent)
 {
-	guard(AR6DeploymentZone::CheckForErrors);
+	guardSlow(AR6DeploymentZone::CheckForErrors);
 
 	// Validate terrorist template chances sum to 100 (or 0 if unused)
 	INT TerroTotal = m_Template[0].m_iChance + m_Template[1].m_iChance + m_Template[2].m_iChance
@@ -78,7 +78,7 @@ void AR6DeploymentZone::CheckForErrors(bool bSilent)
 			appMsgf(0, TEXT("Template min max of HOSTAGE is wrong (min=%d%% max=%d%%) in %s"), m_iMinHostage, m_iMaxHostage, GetName());
 	}
 
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("R6Engine.dll", 0x100178f0)

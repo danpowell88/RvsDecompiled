@@ -270,7 +270,7 @@ void UTexture::CreateMips(int param1, int param2)
 IMPL_MATCH("Engine.dll", 0x1046B0C0)
 int UTexture::Decompress(ETextureFormat TargetFormat)
 {
-	guard(UTexture::Decompress);
+	guardSlow(UTexture::Decompress);
 
 	if (*(BYTE*)((BYTE*)this + 0x58) != 7 || (INT)TargetFormat != 5)
 		return 0;
@@ -372,12 +372,12 @@ int UTexture::Decompress(ETextureFormat TargetFormat)
 	}
 
 	return 1;
-	unguard;
+	unguardSlow;
 }
 IMPL_MATCH("Engine.dll", 0x104691d0)
 int UTexture::DefaultLOD()
 {
-	guard(UTexture::DefaultLOD);
+	guardSlow(UTexture::DefaultLOD);
 	// Retail: 0x1691d0, 130b. Picks the highest-quality mip level the client is
 	// configured to use, clamped by LODSet, MinLODMips and MaxLODMips.
 	// UClient raw offsets: +0x64 = INT LODBias table indexed by LODSet (4 bytes/entry),
@@ -421,7 +421,7 @@ int UTexture::DefaultLOD()
 		}
 	}
 	return 0;
-	unguard;
+	unguardSlow;
 }
 IMPL_MATCH("Engine.dll", 0x10318f10)
 FColor * UTexture::GetColors()
@@ -1044,7 +1044,7 @@ UPalette* UPalette::ReplaceWithExisting()
 IMPL_MATCH("Engine.dll", 0x10469890)
 BYTE UPalette::BestMatch(FColor InColor, int StartIdx)
 {
-	guard(UPalette::BestMatch);
+	guardSlow(UPalette::BestMatch);
 	// Retail: 0x169890, ~70b. Returns the palette index (>= StartIdx) with the
 	// smallest weighted color distance to InColor.
 	// FColor memory layout: [B=byte0, G=byte1, R=byte2, A=byte3] (BGRA).
@@ -1081,13 +1081,13 @@ BYTE UPalette::BestMatch(FColor InColor, int StartIdx)
 		return (BYTE)bestIdx;
 	}
 	return (BYTE)bestIdx;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x10469770)
 void UPalette::FixPalette()
 {
-	guard(UPalette::FixPalette);
+	guardSlow(UPalette::FixPalette);
 	// Ghidra 0x169770: remap a 256-entry BGRA palette to a specific Quake-style
 	// layout; set alpha channel indices from entry number + base offset.
 	DWORD* colData = *(DWORD**)((BYTE*)this + 0x2C); // Colors.Data
@@ -1129,7 +1129,7 @@ void UPalette::FixPalette()
 		((BYTE*)colData)[(i+3) * 4 + 3] = (BYTE)i + 0x13;
 	}
 	((BYTE*)colData)[3] = 0; // first entry alpha = 0
-	unguard;
+	unguardSlow;
 }
 
 
@@ -1320,10 +1320,10 @@ int UTexModifier::MaterialVSize()
 IMPL_MATCH("Engine.dll", 0x10304720)
 FMatrix * UTexModifier::GetMatrix(float)
 {
-	guard(UTexModifier::GetMatrix);
+	guardSlow(UTexModifier::GetMatrix);
 	// Retail: 0x4720 shared null-stub. Base UTexModifier returns NULL; subclasses override.
 	return NULL;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x103c7e10)

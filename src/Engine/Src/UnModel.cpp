@@ -592,14 +592,14 @@ unguard;
 IMPL_MATCH("Engine.dll", 0x10446a50)
 FBox UModel::GetRenderBoundingBox( const AActor* Owner )
 {
-guard(UModel::GetRenderBoundingBox);
+guardSlow(UModel::GetRenderBoundingBox);
 FBox result(0);
 const DWORD* src = (const DWORD*)((const BYTE*)this + 0x2c);
 DWORD* dst = (DWORD*)&result;
 for (INT i = 0; i < 7; i++)
     dst[i] = src[i];
 return result;
-unguard;
+unguardSlow;
 }
 
 // Ghidra: Engine.dll 0x1046cbe0, 148 bytes.
@@ -638,11 +638,11 @@ unguard;
 IMPL_MATCH("Engine.dll", 0x10304990)
 FVector UModel::GetEncroachExtent( AActor* Owner )
 {
-guard(UModel::GetEncroachExtent);
+guardSlow(UModel::GetEncroachExtent);
 FBox box(0);
 (*(FBox*(__thiscall**)(UModel*, AActor*, FBox*))(*((INT*)this) + 0x74))(this, Owner, &box);
 return box.GetExtent();
-unguard;
+unguardSlow;
 }
 
 // Ghidra: Engine.dll 0x1046ccb0, 41 bytes.
@@ -651,11 +651,11 @@ unguard;
 IMPL_MATCH("Engine.dll", 0x1046ccb0)
 FVector UModel::GetEncroachCenter( AActor* Owner )
 {
-guard(UModel::GetEncroachCenter);
+guardSlow(UModel::GetEncroachCenter);
 FBox box(0);
 (*(FBox*(__thiscall**)(UModel*, AActor*, FBox*))(*((INT*)this) + 0x74))(this, Owner, &box);
 return box.GetCenter();
-unguard;
+unguardSlow;
 }
 
 // Ghidra: Engine.dll 0x103cba10, 8 bytes -- always returns 1 (always visible).

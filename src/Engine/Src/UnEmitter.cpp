@@ -790,7 +790,7 @@ int UParticleEmitter::UpdateParticles(float DeltaTime)
 IMPL_MATCH("Engine.dll", 0x103dccd0)
 int UParticleEmitter::RenderParticles(FDynamicActor* param_1, FLevelSceneNode* param_2, TList<FDynamicLight*>* param_3, FRenderInterface* param_4)
 {
-	guard(UParticleEmitter::RenderParticles);
+	guardSlow(UParticleEmitter::RenderParticles);
 	*(DWORD*)((BYTE*)this + 0x2dc) &= ~0x2u;
 	if (*(INT*)((BYTE*)this + 0x2f4) != 0)
 	{
@@ -799,7 +799,7 @@ int UParticleEmitter::RenderParticles(FDynamicActor* param_1, FLevelSceneNode* p
 			*(DWORD*)((BYTE*)rdPtr + 0x34) |= 8u;
 	}
 	return 0;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x103dcb10)

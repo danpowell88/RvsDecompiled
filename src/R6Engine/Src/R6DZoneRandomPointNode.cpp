@@ -11,12 +11,12 @@ IMPLEMENT_CLASS(AR6DZoneRandomPointNode)
 IMPL_MATCH("R6Engine.dll", 0x1001aab0)
 void AR6DZoneRandomPointNode::CheckForErrors()
 {
-	guard(AR6DZoneRandomPointNode::CheckForErrors);
+	guardSlow(AR6DZoneRandomPointNode::CheckForErrors);
 	CopyR6Availability(m_pZone);
 	PutOnGround();
 	if (!Base)
 		GWarn->Logf(TEXT("Random point not on valid base."));
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("R6Engine.dll", 0x1001aa30)

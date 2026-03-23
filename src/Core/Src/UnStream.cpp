@@ -166,7 +166,7 @@ INT FFileStream::Create( INT StreamId, const TCHAR* Filename )
 IMPL_MATCH("Core.dll", 0x1012E260)
 INT FFileStream::CreateStream( const TCHAR* Filename, INT BlockSizeIn, INT NumChunks, void* Buffer, EFileStreamType Type, void* Callback )
 {
-	guard(FFileStream::CreateStream);
+	guardSlow(FFileStream::CreateStream);
 	check( Streams );
 	INT Idx = StreamIndex;
 	FStream& S = Streams[Idx];
@@ -196,7 +196,7 @@ INT FFileStream::CreateStream( const TCHAR* Filename, INT BlockSizeIn, INT NumCh
 	S.Lock = 0;
 	StreamIndex = (StreamIndex + 1) % MaxStreams;
 	return Idx;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Core.dll", 0x0x10149f20)
@@ -233,7 +233,7 @@ INT FFileStream::Destroy( INT StreamId )
 IMPL_MATCH("Core.dll", 0x1012E3C0)
 void FFileStream::DestroyStream( INT StreamId, INT bForce )
 {
-	guard(FFileStream::DestroyStream);
+	guardSlow(FFileStream::DestroyStream);
 	check( Streams );
 	FStream& S = Streams[StreamId];
 
@@ -248,34 +248,34 @@ void FFileStream::DestroyStream( INT StreamId, INT bForce )
 		Destroy( StreamId );
 	}
 	S.Lock = 0;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Core.dll", 0x1012E200)
 void FFileStream::Enter( INT StreamId )
 {
-	guard(FFileStream::Enter);
+	guardSlow(FFileStream::Enter);
 	check( Streams );
 	FStream& S = Streams[StreamId];
 	while( S.Lock )
 		appSleep( 0.0f );
 	S.Lock = 1;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Core.dll", 0x1012E240)
 void FFileStream::Leave( INT StreamId )
 {
-	guard(FFileStream::Leave);
+	guardSlow(FFileStream::Leave);
 	check( Streams );
 	Streams[StreamId].Lock = 0;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Core.dll", 0x1012E4C0)
 INT FFileStream::QueryStream( INT StreamId, INT& OutStatus )
 {
-	guard(FFileStream::QueryStream);
+	guardSlow(FFileStream::QueryStream);
 	check( Streams );
 	FStream& S = Streams[StreamId];
 
@@ -291,7 +291,7 @@ INT FFileStream::QueryStream( INT StreamId, INT& OutStatus )
 
 	S.Lock = 0;
 	return Result;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_TODO("Ogg Vorbis streaming path not linked; vorbisfile.dll/lib required — link vorbisfile SDK to enable cross-platform audio streaming")
@@ -361,7 +361,7 @@ INT FFileStream::Read( INT StreamId, INT NumBytes )
 IMPL_MATCH("Core.dll", 0x1012E450)
 void FFileStream::RequestChunks( INT StreamId, INT NumChunks, void* ChunkInfo )
 {
-	guard(FFileStream::RequestChunks);
+	guardSlow(FFileStream::RequestChunks);
 	check( Streams );
 	FStream& S = Streams[StreamId];
 
@@ -373,7 +373,7 @@ void FFileStream::RequestChunks( INT StreamId, INT NumChunks, void* ChunkInfo )
 	S.Buffer      = ChunkInfo;
 
 	S.Lock = 0;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_EMPTY("compiler-synthesized trivial copy; not a named export in Core.dll")

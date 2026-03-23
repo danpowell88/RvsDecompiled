@@ -34,8 +34,8 @@ FCanvasUtil::FCanvasUtil(UViewport *,FRenderInterface *,int,int)
 IMPL_MATCH("Engine.dll", 0x10416e10)
 FCanvasUtil::~FCanvasUtil()
 {
-	guard(FCanvasUtil::~FCanvasUtil);
-	unguard;
+	guardSlow(FCanvasUtil::~FCanvasUtil);
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x10318cb0)

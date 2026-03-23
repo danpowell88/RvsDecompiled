@@ -739,11 +739,11 @@ IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKWake );
 IMPL_MATCH("Engine.dll", 0x104254d0)
 void AVolume::execEncompasses( FFrame& Stack, RESULT_DECL )
 {
-	guard(AVolume::execEncompasses);
+	guardSlow(AVolume::execEncompasses);
 	P_GET_OBJECT(AActor,Other);
 	P_FINISH;
 	*(DWORD*)Result = Encompasses( Other->Location );
-	unguard;
+	unguardSlow;
 }
 IMPLEMENT_FUNCTION( AVolume, INDEX_NONE, execEncompasses );
 
@@ -752,7 +752,7 @@ IMPLEMENT_FUNCTION( AVolume, INDEX_NONE, execEncompasses );
 IMPL_MATCH("Engine.dll", 0x1042b1e0)
 void AZoneInfo::execZoneActors( FFrame& Stack, RESULT_DECL )
 {
-	guard(AZoneInfo::execZoneActors);
+	guardSlow(AZoneInfo::execZoneActors);
 	P_GET_OBJECT(UClass,BaseClass);
 	P_GET_OBJECT_REF(AActor,Actor);
 	P_FINISH;
@@ -778,7 +778,7 @@ void AZoneInfo::execZoneActors( FFrame& Stack, RESULT_DECL )
 			break;
 		}
 	POST_ITERATOR;
-	unguard;
+	unguardSlow;
 }
 IMPLEMENT_FUNCTION( AZoneInfo, 308, execZoneActors );
 
@@ -787,7 +787,7 @@ IMPLEMENT_FUNCTION( AZoneInfo, 308, execZoneActors );
 IMPL_MATCH("Engine.dll", 0x10424c80)
 void AWarpZoneInfo::execWarp( FFrame& Stack, RESULT_DECL )
 {
-	guard(AWarpZoneInfo::execWarp);
+	guardSlow(AWarpZoneInfo::execWarp);
 	P_GET_VECTOR_REF(Loc);
 	P_GET_VECTOR_REF(Vel);
 	P_GET_ROTATOR_REF(R);
@@ -797,14 +797,14 @@ void AWarpZoneInfo::execWarp( FFrame& Stack, RESULT_DECL )
 	*Loc = Loc->TransformPointBy(WC.Transpose());
 	*Vel = Vel->TransformVectorBy(WC.Transpose());
 	*R   = ((GMath.UnitCoords / *R) * WC.Transpose()).OrthoRotation();
-	unguard;
+	unguardSlow;
 }
 IMPLEMENT_FUNCTION( AWarpZoneInfo, 314, execWarp );
 
 IMPL_MATCH("Engine.dll", 0x10424e90)
 void AWarpZoneInfo::execUnWarp( FFrame& Stack, RESULT_DECL )
 {
-	guard(AWarpZoneInfo::execUnWarp);
+	guardSlow(AWarpZoneInfo::execUnWarp);
 	P_GET_VECTOR_REF(Loc);
 	P_GET_VECTOR_REF(Vel);
 	P_GET_ROTATOR_REF(R);
@@ -814,7 +814,7 @@ void AWarpZoneInfo::execUnWarp( FFrame& Stack, RESULT_DECL )
 	*Loc = Loc->TransformPointBy(WC);
 	*Vel = Vel->TransformVectorBy(WC);
 	*R   = ((GMath.UnitCoords / *R) * WC).OrthoRotation();
-	unguard;
+	unguardSlow;
 }
 IMPLEMENT_FUNCTION( AWarpZoneInfo, 315, execUnWarp );
 
@@ -1242,13 +1242,13 @@ IMPLEMENT_FUNCTION( AStatLogFile, INDEX_NONE, execWatermark );
 IMPL_MATCH("Engine.dll", 0x10476c80)
 void AR6ColBox::execEnableCollision( FFrame& Stack, RESULT_DECL )
 {
-	guard(AR6ColBox::execEnableCollision);
+	guardSlow(AR6ColBox::execEnableCollision);
 	P_GET_UBOOL(bNewCollideActors);
 	P_GET_UBOOL(bNewBlockActors);
 	P_GET_UBOOL(bNewBlockPlayers);
 	P_FINISH;
 	EnableCollision( bNewCollideActors, bNewBlockActors, bNewBlockPlayers );
-	unguard;
+	unguardSlow;
 }
 IMPLEMENT_FUNCTION( AR6ColBox, 1503, execEnableCollision );
 
@@ -1351,7 +1351,7 @@ IMPLEMENT_FUNCTION( AR6eviLTesting, 1356, execNativeRunAllTests );
 IMPL_MATCH("Engine.dll", 0x103b5fd0)
 void UInteraction::execConsoleCommand( FFrame& Stack, RESULT_DECL )
 {
-	guard(UInteraction::execConsoleCommand);
+	guardSlow(UInteraction::execConsoleCommand);
 	P_GET_STR(Command);
 	P_FINISH;
 	UInteractionMaster* master = *(UInteractionMaster**)((BYTE*)this + 0x34);
@@ -1380,7 +1380,7 @@ void UInteraction::execConsoleCommand( FFrame& Stack, RESULT_DECL )
 		}
 	}
 	*(INT*)Result = master->Exec(*Command, ar ? *ar : *GNull);
-	unguard;
+	unguardSlow;
 }
 IMPLEMENT_FUNCTION( UInteraction, INDEX_NONE, execConsoleCommand );
 

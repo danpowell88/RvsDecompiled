@@ -1274,7 +1274,7 @@ DWORD UD3DRenderDevice::GetAvailableVideoMemory()
 IMPL_MATCH("D3DDrv.dll", 0x10009650)
 INT UD3DRenderDevice::SupportsTextureFormat(ETextureFormat Format)
 {
-	guard(UD3DRenderDevice::SupportsTextureFormat);
+	guardSlow(UD3DRenderDevice::SupportsTextureFormat);
 
 	if( !GDirect3D8 )
 		return 0;
@@ -1305,7 +1305,7 @@ INT UD3DRenderDevice::SupportsTextureFormat(ETextureFormat Format)
 
 	return SUCCEEDED(hr) ? 1 : 0;
 
-	unguard;
+	unguardSlow;
 }
 
 /*=============================================================================

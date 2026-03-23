@@ -596,11 +596,11 @@ DWORD STDCALL UObject::Release()
 IMPL_MATCH("Core.dll", 0x1011BB00)
 void UObject::ProcessInternal( FFrame& Stack, void* const Result )
 {
-	guard(UObject::ProcessInternal);
+	guardSlow(UObject::ProcessInternal);
 	// Execute bytecode.
 	while( *Stack.Code != EX_Return )
 		Stack.Step( this, Result );
-	unguard;
+	unguardSlow;
 }
 
 /*-----------------------------------------------------------------------------
@@ -1542,7 +1542,7 @@ void UObject::InitClassDefaultObject( UClass* InClass, INT SetOuter )
 IMPL_MATCH("Core.dll", 0x10137100)
 UFunction* UObject::FindFunction( FName FuncName, INT Global )
 {
-	guard(UObject::FindFunction);
+	guardSlow(UObject::FindFunction);
 	// Search in class hierarchy.
 	for( UStruct* Struct=GetClass(); Struct; Struct=(UStruct*)Struct->SuperField )
 	{
@@ -1551,18 +1551,18 @@ UFunction* UObject::FindFunction( FName FuncName, INT Global )
 				return *It;
 	}
 	return NULL;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Core.dll", 0x10138860)
 UFunction* UObject::FindFunctionChecked( FName FuncName, INT Global )
 {
-	guard(UObject::FindFunctionChecked);
+	guardSlow(UObject::FindFunctionChecked);
 	UFunction* Result = FindFunction( FuncName, Global );
 	if( !Result )
 		appErrorf( TEXT("Failed to find function '%s' in '%s'"), *FuncName, GetFullName() );
 	return Result;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Core.dll", 0x10137090)
@@ -1857,9 +1857,9 @@ void UObject::StaticConstructor()
 IMPL_MATCH("Core.dll", 0x10101D10)
 void UObject::InternalConstructor( void* X )
 {
-	guard(UObject::InternalConstructor);
+	guardSlow(UObject::InternalConstructor);
 	new( (EInternal*)X )UObject;
-	unguard;
+	unguardSlow;
 }
 
 /*-----------------------------------------------------------------------------
@@ -1869,17 +1869,17 @@ void UObject::InternalConstructor( void* X )
 IMPL_MATCH("Core.dll", 0x10101E30)
 void UObject::eventBeginState()
 {
-	guard(eventBeginState);
+	guardSlow(eventBeginState);
 	ProcessEvent( FindFunctionChecked(NAME_BeginState,0), NULL, NULL );
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Core.dll", 0x10101E60)
 void UObject::eventEndState()
 {
-	guard(eventEndState);
+	guardSlow(eventEndState);
 	ProcessEvent( FindFunctionChecked(NAME_EndState,0), NULL, NULL );
-	unguard;
+	unguardSlow;
 }
 
 /*-----------------------------------------------------------------------------

@@ -539,7 +539,7 @@ IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execVideoClose );
 IMPL_MATCH("Engine.dll", 0x1042d710)
 void AHUD::execDraw3DLine( FFrame& Stack, RESULT_DECL )
 {
-	guard(AHUD::execDraw3DLine);
+	guardSlow(AHUD::execDraw3DLine);
 	P_GET_VECTOR(Start);
 	P_GET_VECTOR(End);
 	P_GET_STRUCT(FColor, Color);
@@ -557,7 +557,7 @@ void AHUD::execDraw3DLine( FFrame& Stack, RESULT_DECL )
 			}
 		}
 	}
-	unguardexec;
+	unguardexecSlow;
 }
 IMPLEMENT_FUNCTION( AHUD, INDEX_NONE, execDraw3DLine );
 

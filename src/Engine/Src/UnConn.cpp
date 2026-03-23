@@ -34,8 +34,8 @@ void UClient::UpdateGamma()
 IMPL_MATCH("Engine.dll", 0x103876a0)
 void UClient::UpdateGraphicOptions()
 {
-	guard(UClient::UpdateGraphicOptions);
-	unguard;
+	guardSlow(UClient::UpdateGraphicOptions);
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x10387950)

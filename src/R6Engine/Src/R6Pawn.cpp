@@ -292,7 +292,7 @@ INT AR6Pawn::CheckLineOfSight(AActor* param_1, FVector& param_2, INT param_3,
 IMPL_MATCH("R6Engine.dll", 0x10021e60)
 DWORD AR6Pawn::CheckSeePawn(AR6Pawn* param_1, FVector& param_2, INT param_3)
 {
-	guard(AR6Pawn::CheckSeePawn);
+	guardSlow(AR6Pawn::CheckSeePawn);
 
 	// this+0x4fc = sensor/gadget range object; this+0x6c4 flags (0x800 = extended range)
 	INT pSensor = *(INT*)((BYTE*)this + 0x4fc);
@@ -398,7 +398,7 @@ LAB_sight:
 		}
 	}
 	return 0;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("R6Engine.dll", 0x10025a80)
@@ -3062,7 +3062,7 @@ void AR6Pawn::m_vExecuteLipsSynch(FLOAT DeltaTime)
 IMPL_MATCH("R6Engine.dll", 0x100228f0)
 void AR6Pawn::m_vInitNewLipSynch(USound* pStartSound, USound* pStopSound)
 {
-	guard(AR6Pawn::m_vInitNewLipSynch);
+	guardSlow(AR6Pawn::m_vInitNewLipSynch);
 	if (m_hLipSynchData)
 	{
 		GMalloc->Free((void*)m_hLipSynchData);
@@ -3072,7 +3072,7 @@ void AR6Pawn::m_vInitNewLipSynch(USound* pStartSound, USound* pStopSound)
 	ECLipSynchData* pNew = new ECLipSynchData(MeshInst, pStartSound, pStopSound, (AActor*)this);
 	m_hLipSynchData = (INT)pNew;
 	pNew->m_vStartLipsynch();
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("R6Engine.dll", 0x10025e20)

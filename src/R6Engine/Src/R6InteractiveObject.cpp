@@ -14,7 +14,7 @@ static FLOAT GInteractiveObject_OldNetDamagePercentage;
 IMPL_MATCH("R6Engine.dll", 0x1001c490)
 void AR6InteractiveObject::CheckForErrors()
 {
-	guard(AR6InteractiveObject::CheckForErrors);
+	guardSlow(AR6InteractiveObject::CheckForErrors);
 
 	// Only check actors of type 8 (interactive objects with a StaticMesh)
 	if (((BYTE*)this)[0x2f] == 0x8 && *(int*)((BYTE*)this + 0x170) != 0 &&
@@ -45,7 +45,7 @@ void AR6InteractiveObject::CheckForErrors()
 		}
 	}
 
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("R6Engine.dll", 0x1001c390)

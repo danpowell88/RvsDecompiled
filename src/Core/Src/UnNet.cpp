@@ -168,7 +168,7 @@ UBOOL UPackageMap::SerializeName( FArchive& Ar, FName& Name )
 IMPL_MATCH("Core.dll", 0x1011A280)
 INT UPackageMap::ObjectToIndex( UObject* Object )
 {
-	guard(UPackageMap::ObjectToIndex);
+	guardSlow(UPackageMap::ObjectToIndex);
 	if( Object && Object->_Linker && Object->_LinkerIndex != INDEX_NONE )
 	{
 		INT* Idx = LinkerMap.Find( (UObject*)Object->_Linker );
@@ -176,7 +176,7 @@ INT UPackageMap::ObjectToIndex( UObject* Object )
 			return List(*Idx).ObjectBase + Object->_LinkerIndex;
 	}
 	return INDEX_NONE;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Core.dll", 0x10119EF0)

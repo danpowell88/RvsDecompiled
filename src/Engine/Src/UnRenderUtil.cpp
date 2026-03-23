@@ -1715,7 +1715,7 @@ BYTE FConvexVolume::BoxCheck(FVector Origin, FVector Extent)
 IMPL_MATCH("Engine.dll", 0x10413f90)
 FPoly FConvexVolume::ClipPolygon(FPoly Poly)
 {
-  guard(FConvexVolume::ClipPolygon);
+  guardSlow(FConvexVolume::ClipPolygon);
   for (INT i = 0; i < NumPlanes; i++)
   {
     const FPlane& P = Planes[i];
@@ -1725,14 +1725,14 @@ FPoly FConvexVolume::ClipPolygon(FPoly Poly)
       return FPoly();
   }
   return Poly;
-  unguard;
+  unguardSlow;
 }
 
 // Same as ClipPolygon but uses SplitPrecise for tighter floating-point plane tests.
 IMPL_MATCH("Engine.dll", 0x10414040)
 FPoly FConvexVolume::ClipPolygonPrecise(FPoly Poly)
 {
-  guard(FConvexVolume::ClipPolygonPrecise);
+  guardSlow(FConvexVolume::ClipPolygonPrecise);
   for (INT i = 0; i < NumPlanes; i++)
   {
     const FPlane& P = Planes[i];
@@ -1742,7 +1742,7 @@ FPoly FConvexVolume::ClipPolygonPrecise(FPoly Poly)
       return FPoly();
   }
   return Poly;
-  unguard;
+  unguardSlow;
 }
 
 // --- FDynamicActor ---
@@ -2541,10 +2541,10 @@ void UIndexBuffer::Serialize(FArchive& Ar)
 {
 	// Ghidra 0x110d90 (83b): URenderResource::Serialize, then FUN_1031e600(Ar, this+0x30)
 	// = TArray<unsigned short> serializer (CountBytes + count + per-element ByteOrderSerialize(2)).
-	guard(UIndexBuffer::Serialize);
+	guardSlow(UIndexBuffer::Serialize);
 	URenderResource::Serialize(Ar);
 	Ar << *(TArray<_WORD>*)((BYTE*)this + 0x30);
-	unguard;
+	unguardSlow;
 }
 
 

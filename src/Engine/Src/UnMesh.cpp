@@ -47,7 +47,7 @@ ENGINE_API FArchive& operator<<(FArchive& Ar, FRawIndexBuffer& V);
 IMPL_MATCH("Engine.dll", 0x10355fa0)
 int CBoneDescData::fn_bInitFromLbpFile(const TCHAR* param_1)
 {
-        guard(CBoneDescData::fn_bInitFromLbpFile);
+        guardSlow(CBoneDescData::fn_bInitFromLbpFile);
         FString fileStr;
         if (!appLoadFileToString(fileStr, param_1, GFileManager))
         {
@@ -101,14 +101,14 @@ int CBoneDescData::fn_bInitFromLbpFile(const TCHAR* param_1)
         }
         GLog->Logf(TEXT(""));
         return 1;
-        unguard;
+        unguardSlow;
 }
 
 // DAT_1052ec38 = L" " (space), confirmed from retail Engine.dll binary.
 IMPL_MATCH("Engine.dll", 0x10355c60)
 void CBoneDescData::m_vProcessLbpLine(int param1, int param2, FString& str)
 {
-	guard(CBoneDescData::m_vProcessLbpLine);
+	guardSlow(CBoneDescData::m_vProcessLbpLine);
 	TArray<FString> tokens;
 	// DAT_1052ec38: separator TCHAR* (runtime global; assumed space for LBP format)
 	str.ParseIntoArray(TEXT(" "), &tokens);
@@ -130,7 +130,7 @@ void CBoneDescData::m_vProcessLbpLine(int param1, int param2, FString& str)
 	pfQuat[1] = fZ;
 	pfQuat[2] = fW;
 	pfQuat[3] = fX;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x10355b30)
@@ -205,7 +205,7 @@ int CCompressedLipDescData::fn_bInitFromMemory(BYTE* param_1)
 IMPL_MATCH("Engine.dll", 0x10354f00)
 int CCompressedLipDescData::m_bReadCompressedFileFromMemory(BYTE* param_1)
 {
-	guard(CCompressedLipDescData::m_bReadCompressedFileFromMemory);
+	guardSlow(CCompressedLipDescData::m_bReadCompressedFileFromMemory);
 	appMemcpy((BYTE*)this + 8,    param_1,        4);
 	appMemcpy((BYTE*)this + 0,    param_1 + 4,    4);
 	appMemcpy((BYTE*)this + 4,    param_1 + 8,    4);
@@ -238,7 +238,7 @@ int CCompressedLipDescData::m_bReadCompressedFileFromMemory(BYTE* param_1)
 		iVar4 += 0x10;
 	}
 	return 1;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x10314390)
@@ -909,7 +909,7 @@ void UMesh::Serialize(FArchive& Ar)
 IMPL_MATCH("Engine.dll", 0x103ca620)
 UMeshInstance * UMesh::MeshGetInstance(AActor const * Owner)
 {
-	guard(UMesh::MeshGetInstance);
+	guardSlow(UMesh::MeshGetInstance);
 	if (!Owner)
 		return *(UMeshInstance**)((BYTE*)this + 0x58);
 	if ((*(BYTE*)((BYTE*)Owner + 0xA0) & 0x80))
@@ -943,7 +943,7 @@ UMeshInstance * UMesh::MeshGetInstance(AActor const * Owner)
 		newInst->SetActor(const_cast<AActor*>(Owner));
 	}
 	return newInst;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_TODO("Unexported virtual — not in Engine.dll export table")
@@ -1344,7 +1344,7 @@ MotionChunk * UMeshAnimation::GetMovement(FName Name)
 IMPL_MATCH("Engine.dll", 0x1033a490)
 void UMeshAnimation::InitForDigestion()
 {
-	guard(UMeshAnimation::InitForDigestion);
+	guardSlow(UMeshAnimation::InitForDigestion);
 	if (*(INT*)((BYTE*)this + 0x54) == 0)
 	{
 		// Retail: GMalloc->Malloc(0x2C, "Digest"), then calls FUN_1032b9b0 to init
@@ -1355,7 +1355,7 @@ void UMeshAnimation::InitForDigestion()
 		appMemzero(p, 0x2C);
 		*(DWORD*)((BYTE*)p + 0x28) = 0x3f800000; // 1.0f
 	}
-	unguard;
+	unguardSlow;
 }
 
 
@@ -1539,7 +1539,7 @@ void USkeletalMesh::m_bLoadLbpFile(FString FileName)
 IMPL_MATCH("Engine.dll", 0x10438890)
 int USkeletalMesh::SetAttachAlias(FName param_2, FName param_3, FCoords& param_4)
 {
-	guard(USkeletalMesh::SetAttachAlias);
+	guardSlow(USkeletalMesh::SetAttachAlias);
 	FName none(NAME_None);
 	if (param_2 == none) return 0;
 	if (param_3 == none) return 0;
@@ -1580,7 +1580,7 @@ int USkeletalMesh::SetAttachAlias(FName param_2, FName param_3, FCoords& param_4
 		for (INT iVar3 = 0xc; iVar3 != 0; iVar3--) { *dst = *src; src++; dst++; }
 	}
 	return 1;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_DIVERGE("Karma physics interface callbacks at param_3+0x328+0xf0 use proprietary runtime vtables (slots [2]/[3]); gameplay path is implemented with raw calls, but exact typed integration cannot be made byte-parity-safe")
@@ -2186,9 +2186,9 @@ void USkeletalMesh::ReconstructRawMesh()
 IMPL_MATCH("Engine.dll", 0x104436b0)
 int USkeletalMesh::RenderPreProcess()
 {
-	guard(USkeletalMesh::RenderPreProcess);
+	guardSlow(USkeletalMesh::RenderPreProcess);
 	return 1;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_TODO("Unexported virtual — not in Engine.dll export table")

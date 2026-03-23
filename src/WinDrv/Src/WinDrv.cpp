@@ -142,9 +142,9 @@ void UWindowsClient::Destroy()
 IMPL_MATCH("WinDrv.dll", 0x111016f0)
 void UWindowsClient::ShutdownAfterError()
 {
-	guard(UWindowsClient::ShutdownAfterError);
+	guardSlow(UWindowsClient::ShutdownAfterError);
 	Super::ShutdownAfterError();
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("WinDrv.dll", 0x11101320)
@@ -340,12 +340,12 @@ void UWindowsViewport::Destroy()
 IMPL_MATCH("WinDrv.dll", 0x11102580)
 void UWindowsViewport::ShutdownAfterError()
 {
-	guard(UWindowsViewport::ShutdownAfterError);
+	guardSlow(UWindowsViewport::ShutdownAfterError);
 	if( GViewportHWnd )
 		DestroyWindow( GViewportHWnd );
 	GViewportHWnd = NULL;
 	Super::ShutdownAfterError();
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("WinDrv.dll", 0x111054a0)
@@ -714,7 +714,7 @@ void UWindowsViewport::CheckCD()
 IMPL_MATCH("WinDrv.dll", 0x11102cb0)
 void UWindowsViewport::AcquireKeyboard()
 {
-	guard(UWindowsViewport::AcquireKeyboard);
+	guardSlow(UWindowsViewport::AcquireKeyboard);
 	// Retail always calls ReleaseKeyboard first, then creates a fresh device.
 	ReleaseKeyboard();
 	if (!DirectInput8)
@@ -742,26 +742,26 @@ void UWindowsViewport::AcquireKeyboard()
 	hr = Keyboard->Acquire();
 	if (hr < 0)
 		ReleaseKeyboard();
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("WinDrv.dll", 0x11102d40)
 void UWindowsViewport::ReleaseKeyboard()
 {
-	guard(UWindowsViewport::ReleaseKeyboard);
+	guardSlow(UWindowsViewport::ReleaseKeyboard);
 	if (UWindowsViewport::Keyboard)
 	{
 		UWindowsViewport::Keyboard->Unacquire();
 		UWindowsViewport::Keyboard->Release();
 		UWindowsViewport::Keyboard = NULL;
 	}
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("WinDrv.dll", 0x11102d70)
 INT UWindowsViewport::KeyPressed(INT Key)
 {
-	guard(UWindowsViewport::KeyPressed);
+	guardSlow(UWindowsViewport::KeyPressed);
 	if( UWindowsViewport::Keyboard )
 	{
 		BYTE KeyStates[256];
@@ -770,7 +770,7 @@ INT UWindowsViewport::KeyPressed(INT Key)
 			return (KeyStates[Key] & 0x80) ? 1 : 0;
 	}
 	return 0;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("WinDrv.dll", 0x11104c20)

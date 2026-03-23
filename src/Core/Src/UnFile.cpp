@@ -1765,7 +1765,7 @@ CORE_API FString appGetGMTRef()
 IMPL_MATCH("Core.dll", 0x1012dfd0)
 CORE_API INT appCreateBitmap( const TCHAR* Pattern, INT Width, INT Height, DWORD* Data, FFileManager* FileManager )
 {
-	guard(appCreateBitmap);
+	guardSlow(appCreateBitmap);
 	if( !FileManager || !Data || Width <= 0 || Height <= 0 )
 		return 0;
 
@@ -1833,7 +1833,7 @@ CORE_API INT appCreateBitmap( const TCHAR* Pattern, INT Width, INT Height, DWORD
 
 	delete Ar;
 	return 1;
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Core.dll", 0x10149080)

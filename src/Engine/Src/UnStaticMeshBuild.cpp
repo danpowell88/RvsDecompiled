@@ -414,7 +414,7 @@ void UStaticMesh::Build()
 IMPL_MATCH("Engine.dll", 0x1031C9F0)
 UMaterial * UStaticMesh::GetSkin(AActor* Owner, int SkinIndex)
 {
-	guard(UStaticMesh::GetSkin);
+	guardSlow(UStaticMesh::GetSkin);
 	// Ghidra 0x1c9f0, 69b.
 	// 1. Try Owner->GetSkin(SkinIndex) via vtable[0xa0/4 = 40].
 	// 2. Fallback: Materials TArray at this+0xfc, stride 0xc, UMaterial* at +0.
@@ -436,12 +436,12 @@ UMaterial * UStaticMesh::GetSkin(AActor* Owner, int SkinIndex)
 		pSkin = *(UMaterial**)(r + 0x30);
 	}
 	return pSkin;
-	unguard;
+	unguardSlow;
 }
 IMPL_MATCH("Engine.dll", 0x104478b0)
 FTags * UStaticMesh::GetTag(FString Name)
 {
-	guard(UStaticMesh::GetTag);
+	guardSlow(UStaticMesh::GetTag);
 	// Ghidra 0x1478b0, 85b: linear search of TArray<FTags> at this+0x17c (stride 0x3c).
 	// Each FTags entry has FString TagString at +0x30. Returns pointer to entry or NULL.
 	FArray* tagArr = (FArray*)((BYTE*)this + 0x17c);
@@ -453,7 +453,7 @@ FTags * UStaticMesh::GetTag(FString Name)
 			return (FTags*)entry;
 	}
 	return NULL;
-	unguard;
+	unguardSlow;
 }
 IMPL_MATCH("Engine.dll", 0x10449DE0)
 void UStaticMesh::Serialize(FArchive& Ar)
@@ -796,7 +796,7 @@ void UStaticMeshInstance::AttachProjectorClipped(AActor *,AProjector *)
 IMPL_MATCH("Engine.dll", 0x10448470)
 void UStaticMeshInstance::DetachProjectorClipped(AProjector* param_1)
 {
-	guard(UStaticMeshInstance::DetachProjectorClipped);
+	guardSlow(UStaticMeshInstance::DetachProjectorClipped);
 	// Ghidra 0x148470: search per-instance projector list (FArray at this+0x54, stride 0x28)
 	// for element matching param_1's render info pointer, then remove and clean up.
 	FArray* projArr = (FArray*)((BYTE*)this + 0x54);
@@ -833,7 +833,7 @@ void UStaticMeshInstance::DetachProjectorClipped(AProjector* param_1)
 		typedef void (__thiscall* RemoveFn)(FArray*, INT, INT, INT);
 		((RemoveFn)0x1031fda0)(projArr, idx, 1, 0x28);
 	}
-	unguard;
+	unguardSlow;
 }
 
 // --- FOrientation ---
@@ -980,9 +980,9 @@ FTags& FTags::operator=(const FTags& Other)
 IMPL_MATCH("Engine.dll", 0x10302e20)
 void FTags::Init()
 {
-	guard(FTags::Init);
+	guardSlow(FTags::Init);
 	*(FString*)((BYTE*)this + 0x30) = FString(TEXT("")); // Ghidra: FString at +0x30 = empty
-	unguard;
+	unguardSlow;
 }
 
 
@@ -1092,7 +1092,7 @@ void FRebuildTools::Delete(FString p0) {
 // we call GetString(FString&) at vtable+0x10 (slot 4) for clarity. Net result identical.
 IMPL_MATCH("Engine.dll", 0x103FD9C0)
 void FRebuildTools::Init() {
-	guard(FRebuildTools::Init);
+	guardSlow(FRebuildTools::Init);
 
 	// Step 1: Destroy all existing FRebuildOptions elements and empty the array.
 	// Inlines FUN_1031f140 (57b): loops ~FRebuildOptions() stride 0x2C, then FArray::Empty(0x2C).
@@ -1156,7 +1156,7 @@ void FRebuildTools::Init() {
 		}
 	}
 
-	unguard;
+	unguardSlow;
 }
 
 // ?SetCurrent@FRebuildTools@@QAEXVFString@@@Z
@@ -1185,7 +1185,7 @@ void FRebuildTools::SetCurrent(FString p0) {
 // current->Name.~FString() generates the identical call.
 IMPL_MATCH("Engine.dll", 0x103FD2E0)
 void FRebuildTools::Shutdown() {
-	guard(FRebuildTools::Shutdown);
+	guardSlow(FRebuildTools::Shutdown);
 
 	// Empty the section first (GConfig vtable +0x20; Filename=NULL shown by Ghidra)
 	GConfig->EmptySection(TEXT("Rebuild Configs"), NULL);
@@ -1214,7 +1214,7 @@ void FRebuildTools::Shutdown() {
 		current->Name.~FString();
 		GMalloc->Free(current);
 	}
-	unguard;
+	unguardSlow;
 }
 IMPL_MATCH("Engine.dll", 0x10316200)
 INT FStaticMeshColorStream::GetComponents(FVertexComponent* C) {

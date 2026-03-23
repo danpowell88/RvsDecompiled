@@ -38,9 +38,9 @@ void FOutputDevice::Log( const FString& S )
 IMPL_MATCH("Core.dll", 0x1012EF20)
 void FOutputDevice::Log( enum EName Type, const FString& S )
 {
-	guard(FOutputDevice::Log);
+	guardSlow(FOutputDevice::Log);
 	Serialize( *S, Type );
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Core.dll", 0x0x1012efd0)

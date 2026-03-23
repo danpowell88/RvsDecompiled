@@ -550,7 +550,7 @@ FBox ATerrainInfo::GetSelectedVerticesBounds()
 IMPL_MATCH("Engine.dll", 0x10456F00)
 FColor ATerrainInfo::GetTextureColor(int X, int Y, UTexture* Tex)
 {
-	guard(ATerrainInfo::GetTextureColor);
+	guardSlow(ATerrainInfo::GetTextureColor);
 	// Ghidra 0x156f00: scale (X,Y) to texture coordinates, read RGBA8888 texel.
 	if (!Tex) return FColor(0,0,0,0);
 	INT terrainW = *(INT*)((BYTE*)this + 0x12e0);
@@ -569,12 +569,12 @@ FColor ATerrainInfo::GetTextureColor(int X, int Y, UTexture* Tex)
 		return result;
 	}
 	return FColor(0,0,0,0);
-	unguard;
+	unguardSlow;
 }
 IMPL_MATCH("Engine.dll", 0x10457140)
 FVector ATerrainInfo::GetVertexNormal(int X, int Y)
 {
-	guard(ATerrainInfo::GetVertexNormal);
+	guardSlow(ATerrainInfo::GetVertexNormal);
 	// Ghidra 0x10457140, 428 bytes: accumulate pre-computed normal pairs from vertex
 	// data array at this+0x12F4 (entry = 6 floats = 2 FVector3 half-normals).
 	// Sums contributions from up to 4 adjacent vertices (current, left, upper, diagonal).
@@ -605,7 +605,7 @@ FVector ATerrainInfo::GetVertexNormal(int X, int Y)
 		Safe = FVector(-Safe.X, -Safe.Y, -Safe.Z);
 
 	return Safe;
-	unguard;
+	unguardSlow;
 }
 IMPL_MATCH("Engine.dll", 0x10315640)
 FVector ATerrainInfo::HeightmapToWorld(FVector In)
@@ -830,19 +830,19 @@ UPrimitive* ATerrainInfo::GetPrimitive()
 IMPL_MATCH("Engine.dll", 0x103097f0)
 FTerrainMaterialLayer::FTerrainMaterialLayer()
 {
-	guard(FTerrainMaterialLayer::FTerrainMaterialLayer);
+	guardSlow(FTerrainMaterialLayer::FTerrainMaterialLayer);
 	// Ghidra 0x97f0: FMatrix member at +8 is default-constructed.
 	new ((BYTE*)this + 8) FMatrix();
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x10309800)
 FTerrainMaterialLayer::~FTerrainMaterialLayer()
 {
-	guard(FTerrainMaterialLayer::~FTerrainMaterialLayer);
+	guardSlow(FTerrainMaterialLayer::~FTerrainMaterialLayer);
 	// Ghidra 0x9800: destroy FMatrix member at +8.
 	((FMatrix*)((BYTE*)this + 8))->~FMatrix();
-	unguard;
+	unguardSlow;
 }
 
 IMPL_MATCH("Engine.dll", 0x10309810)
