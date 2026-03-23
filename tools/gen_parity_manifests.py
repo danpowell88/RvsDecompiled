@@ -15,6 +15,12 @@ except ImportError:
     print("ERROR: pip install pefile", file=sys.stderr)
     sys.exit(1)
 
+try:
+    from capstone import Cs, CS_ARCH_X86, CS_MODE_32
+except ImportError:
+    print("ERROR: pip install capstone", file=sys.stderr)
+    sys.exit(1)
+
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RETAIL_DIR = os.path.join(REPO_ROOT, "retail", "system")
 BUILD_BIN = os.path.join(REPO_ROOT, "build-71", "bin")
@@ -68,6 +74,18 @@ def get_func_bytes(pe, raw, base, relocs, rva, size):
         if (fo + i) in relocs:
             result[i] = 0
     return bytes(result)
+
+
+def apply_rel_call_mask(data):
+    """Zero out E8 CALL rel32 and E9 JMP rel32 displacement bytes."""
+    cs = Cs(CS_ARCH_X86, CS_MODE_32)
+    out = bytearray(data)
+    for insn in cs.disasm(bytes(data), 0):
+        raw = insn.bytes
+        if len(raw) == 5 and raw[0] in (0xE8, 0xE9):
+            for i in range(1, 5):
+                out[insn.address + i] = 0
+    return bytes(out)
 
 
 def find_existing_annotations():
@@ -179,7 +197,13 @@ def main():
             rebuilt_bytes = get_func_bytes(
                 rebuilt_pe, rebuilt_raw, rebuilt_base, rebuilt_relocs, rebuilt_rva, size
             )
-            if rebuilt_bytes and retail_bytes == rebuilt_bytes:
+            if rebuilt_bytes is None:
+                continue
+            # Compare with relocation masking (already applied in get_func_bytes),
+            # then also mask E8/E9 relative call/jump displacements.
+            if retail_bytes == rebuilt_bytes:
+                matches.append((name, addr_hex, size, mangled))
+            elif apply_rel_call_mask(retail_bytes) == apply_rel_call_mask(rebuilt_bytes):
                 matches.append((name, addr_hex, size, mangled))
 
         if not matches:

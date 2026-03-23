@@ -7,7 +7,8 @@ this tool:
   1. Reads the retail DLL at the given virtual address.
   2. Gets the function size from the Ghidra exports ("// Size: N bytes").
   3. Finds the compiled function in our built DLL via the MSVC .map file.
-  4. Compares instruction sequences with relocation-entry masking.
+  4. Compares instruction sequences with relocation-entry masking and
+     relative call/jump displacement masking.
   5. Reports PASS / FAIL for each function, grouped by DLL.
   6. Exits non-zero if any FAIL is found (used as a build gate).
 
@@ -205,6 +206,24 @@ def apply_reloc_mask(data: bytearray, base_file_offset: int,
         local = fo - base_file_offset
         if 0 <= local <= len(out) - 4:
             out[local : local + 4] = b"\x00\x00\x00\x00"
+    return out
+
+
+def apply_rel_call_mask(data: bytearray) -> bytearray:
+    """Zero out the 4-byte displacement of E8 CALL rel32 and E9 JMP rel32.
+
+    These relative offsets differ between retail and rebuilt DLLs because
+    the linker places functions at different addresses.  The instruction
+    opcode and structure are identical — only the displacement changes —
+    so masking these bytes lets us verify that the function *logic* matches.
+    """
+    cs = Cs(CS_ARCH_X86, CS_MODE_32)
+    out = bytearray(data)
+    for insn in cs.disasm(bytes(data), 0):
+        raw = insn.bytes
+        if len(raw) == 5 and raw[0] in (0xE8, 0xE9):
+            for i in range(1, 5):
+                out[insn.address + i] = 0
     return out
 
 # ── Ghidra size database ──────────────────────────────────────────────────────
@@ -451,8 +470,16 @@ def compare_function(
     if r_masked == o_masked:
         return True, "exact match (relocation-masked)"
 
+    # Second pass: also mask E8/E9 relative call/jump displacements.
+    # These differ due to linker layout but the instruction logic is identical.
+    r_full = apply_rel_call_mask(r_masked)
+    o_full = apply_rel_call_mask(o_masked)
+
+    if r_full == o_full:
+        return True, "match (relocation + rel-call masked)"
+
     # Find first differing byte for a useful diagnostic
-    for i, (rb, ob) in enumerate(zip(r_masked, o_masked)):
+    for i, (rb, ob) in enumerate(zip(r_full, o_full)):
         if rb != ob:
             # Disassemble around the difference
             cs = Cs(CS_ARCH_X86, CS_MODE_32)
