@@ -12,7 +12,7 @@
 	UExporter.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x0x10111420)
+IMPL_MATCH("Core.dll", 0x10111420)
 UExporter::UExporter()
 :	SupportedClass( NULL )
 ,	TextIndent     ( 0 )
@@ -145,7 +145,7 @@ IMPLEMENT_CLASS(UExporter);
 	UFactory.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x0x10112ab0)
+IMPL_MATCH("Core.dll", 0x10112ab0)
 UFactory::UFactory()
 :	SupportedClass    ( NULL )
 ,	ContextClass      ( NULL )

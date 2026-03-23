@@ -241,7 +241,7 @@ FRange& FRange::operator=( const FRange& R )
 	FRangeVector.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x0x101047e0)
+IMPL_MATCH("Core.dll", 0x101047e0)
 FRangeVector::FRangeVector()
 {
 }

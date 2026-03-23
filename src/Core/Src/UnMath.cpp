@@ -123,7 +123,7 @@ FLOAT FDist( const FVector& V1, const FVector& V2 )
 	FBox.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x0x1012c930)
+IMPL_MATCH("Core.dll", 0x1012c930)
 FBox::FBox( const FVector* Points, INT Count )
 :	Min(0,0,0), Max(0,0,0), IsValid(0)
 {
@@ -135,7 +135,7 @@ FBox::FBox( const FVector* Points, INT Count )
 	FSphere.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x0x1012d1d0)
+IMPL_MATCH("Core.dll", 0x1012d1d0)
 FSphere::FSphere( const FVector* Pts, INT Count )
 :	FPlane(0,0,0,0)
 {
@@ -1166,7 +1166,7 @@ bool FBox::Intersect( const FBox& Other ) const
 	return true;
 }
 
-IMPL_MATCH("Core.dll", 0x0x1010a5d0)
+IMPL_MATCH("Core.dll", 0x1010a5d0)
 FBox FBox::TransformBy( const FMatrix& M ) const
 {
 	FBox Result(0);

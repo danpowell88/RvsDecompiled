@@ -118,7 +118,7 @@ static const TCHAR* ReadToken( const TCHAR* Buffer, TCHAR* Result, INT MaxLen )
 	UProperty base.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x0x10148000)
+IMPL_MATCH("Core.dll", 0x10148000)
 UProperty::UProperty()
 :	ArrayDim          ( 1 )
 ,	ElementSize       ( 0 )
@@ -137,7 +137,7 @@ UProperty::UProperty()
 ,	Unknown4          ( 0 )
 {}
 
-IMPL_MATCH("Core.dll", 0x0x10148000)
+IMPL_MATCH("Core.dll", 0x10148000)
 UProperty::UProperty( ECppProperty, INT InOffset, const TCHAR* InCategory, DWORD InFlags )
 :	ArrayDim          ( 1 )
 ,	ElementSize       ( 0 )
@@ -1178,12 +1178,12 @@ IMPLEMENT_CLASS(UStructProperty);
 	UDelegateProperty.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x0x1010e040)
+IMPL_MATCH("Core.dll", 0x1010e040)
 UDelegateProperty::UDelegateProperty()
 {
 }
 
-IMPL_MATCH("Core.dll", 0x0x1010e040)
+IMPL_MATCH("Core.dll", 0x1010e040)
 UDelegateProperty::UDelegateProperty( ECppProperty, INT InOffset, const TCHAR* InCategory, DWORD InFlags )
 :	UProperty( EC_CppProperty, InOffset, InCategory, InFlags )
 {

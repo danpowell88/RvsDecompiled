@@ -116,7 +116,7 @@ CORE_API FArchive& operator<<( FArchive& Ar, FTime& F )
 	FArchiveCountMem class.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x0x10107cb0)
+IMPL_MATCH("Core.dll", 0x10107cb0)
 FArchiveCountMem::FArchiveCountMem( UObject* Src )
 : Num(0), Max(0)
 {

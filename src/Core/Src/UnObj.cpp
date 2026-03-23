@@ -78,7 +78,7 @@ UObject::UObject( const UObject& Src )
 	unguard;
 }
 
-IMPL_MATCH("Core.dll", 0x0x1013f7d0)
+IMPL_MATCH("Core.dll", 0x1013f7d0)
 UObject::UObject( ENativeConstructor, UClass* InClass, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags )
 :   Index		( INDEX_NONE )
 ,	HashNext	( NULL )
@@ -96,7 +96,7 @@ UObject::UObject( ENativeConstructor, UClass* InClass, const TCHAR* InName, cons
 	unguard;
 }
 
-IMPL_MATCH("Core.dll", 0x0x1013f7d0)
+IMPL_MATCH("Core.dll", 0x1013f7d0)
 UObject::UObject( EStaticConstructor, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags )
 :   Index		( INDEX_NONE )
 ,	HashNext	( NULL )
@@ -722,7 +722,7 @@ const TCHAR* UObject::GetFullName( TCHAR* Str ) const
 	unguard;
 }
 
-IMPL_MATCH("Core.dll", 0x0x101379f0)
+IMPL_MATCH("Core.dll", 0x101379f0)
 const TCHAR* UObject::GetPathName( UObject* StopOuter, TCHAR* Str ) const
 {
 	guard(UObject::GetPathName);
@@ -959,7 +959,7 @@ UObject* UObject::StaticConstructObject( UClass* InClass, UObject* InOuter, FNam
 	unguard;
 }
 
-IMPL_MATCH("Core.dll", 0x0x101371b0)
+IMPL_MATCH("Core.dll", 0x101371b0)
 UObject* UObject::StaticFindObject( UClass* ObjectClass, UObject* InObjectPackage, const TCHAR* OrigInName, INT ExactClass )
 {
 	guard(UObject::StaticFindObject);
@@ -1137,7 +1137,7 @@ void UObject::BeginLoad()
 	unguard;
 }
 
-IMPL_MATCH("Core.dll", 0x0x10139410)
+IMPL_MATCH("Core.dll", 0x10139410)
 void UObject::EndLoad()
 {
 	guard(UObject::EndLoad);
@@ -1901,19 +1901,19 @@ FGuid FGuid::SpecialGUIDArmPatches;
 	FEdLoadError class.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x0x1010e490)
+IMPL_MATCH("Core.dll", 0x1010e490)
 FEdLoadError::FEdLoadError()
 : Type(0), Desc()
 {
 }
 
-IMPL_MATCH("Core.dll", 0x0x1010e490)
+IMPL_MATCH("Core.dll", 0x1010e490)
 FEdLoadError::FEdLoadError( INT InType, TCHAR* InDesc )
 : Type(InType), Desc(InDesc)
 {
 }
 
-IMPL_MATCH("Core.dll", 0x0x1010e490)
+IMPL_MATCH("Core.dll", 0x1010e490)
 FEdLoadError::FEdLoadError( const FEdLoadError& Other )
 : Type(Other.Type), Desc(Other.Desc)
 {
@@ -2136,7 +2136,7 @@ UObject& UObject::operator=( const UObject& Other )
 	UCommandlet stubs.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x0x1013af70)
+IMPL_MATCH("Core.dll", 0x1013af70)
 UCommandlet::UCommandlet( const UCommandlet& Other )
 : UObject( Other )
 , HelpCmd     ( Other.HelpCmd )

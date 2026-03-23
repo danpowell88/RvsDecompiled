@@ -62,7 +62,7 @@ FArchive& operator<<( FArchive& Ar, FLabelEntry& Label )
 	UField.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x0x10114f40)
+IMPL_MATCH("Core.dll", 0x10114f40)
 UField::UField( ENativeConstructor, UClass* InClass, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags, UField* InSuperField )
 :	UObject       ( EC_NativeConstructor, InClass, InName, InPackageName, InFlags )
 ,	SuperField    ( InSuperField )
@@ -70,7 +70,7 @@ UField::UField( ENativeConstructor, UClass* InClass, const TCHAR* InName, const 
 ,	HashNext      ( NULL )
 {}
 
-IMPL_MATCH("Core.dll", 0x0x10114f40)
+IMPL_MATCH("Core.dll", 0x10114f40)
 UField::UField( EStaticConstructor, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags )
 :	UObject       ( EC_StaticConstructor, InName, InPackageName, InFlags )
 ,	SuperField    ( NULL )
@@ -78,7 +78,7 @@ UField::UField( EStaticConstructor, const TCHAR* InName, const TCHAR* InPackageN
 ,	HashNext      ( NULL )
 {}
 
-IMPL_MATCH("Core.dll", 0x0x10114f40)
+IMPL_MATCH("Core.dll", 0x10114f40)
 UField::UField( UField* InSuperField )
 :	SuperField    ( InSuperField )
 ,	Next          ( NULL )
@@ -152,7 +152,7 @@ IMPLEMENT_CLASS(UField);
 	UStruct.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x0x10116310)
+IMPL_MATCH("Core.dll", 0x10116310)
 UStruct::UStruct( ENativeConstructor, INT InSize, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags, UStruct* InSuperStruct )
 :	UField         ( EC_NativeConstructor, UStruct::StaticClass(), InName, InPackageName, InFlags, InSuperStruct )
 ,	ScriptText     ( NULL )
@@ -169,7 +169,7 @@ UStruct::UStruct( ENativeConstructor, INT InSize, const TCHAR* InName, const TCH
 ,	ConstructorLink( NULL )
 {}
 
-IMPL_MATCH("Core.dll", 0x0x10116310)
+IMPL_MATCH("Core.dll", 0x10116310)
 UStruct::UStruct( EStaticConstructor, INT InSize, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags )
 :	UField         ( EC_StaticConstructor, InName, InPackageName, InFlags )
 ,	ScriptText     ( NULL )
@@ -473,7 +473,7 @@ IMPLEMENT_CLASS(UStruct);
 	UFunction.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x0x10116920)
+IMPL_MATCH("Core.dll", 0x10116920)
 UFunction::UFunction( UFunction* InSuperFunction )
 :	UStruct         ( InSuperFunction )
 ,	FunctionFlags   ( 0 )
@@ -563,7 +563,7 @@ IMPLEMENT_CLASS(UFunction);
 	UState.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x0x101163f0)
+IMPL_MATCH("Core.dll", 0x101163f0)
 UState::UState( ENativeConstructor, INT InSize, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags, UState* InSuperState )
 :	UStruct    ( EC_NativeConstructor, InSize, InName, InPackageName, InFlags, InSuperState )
 ,	ProbeMask  ( 0 )
@@ -574,7 +574,7 @@ UState::UState( ENativeConstructor, INT InSize, const TCHAR* InName, const TCHAR
 	appMemzero( VfHash, sizeof(VfHash) );
 }
 
-IMPL_MATCH("Core.dll", 0x0x101163f0)
+IMPL_MATCH("Core.dll", 0x101163f0)
 UState::UState( EStaticConstructor, INT InSize, const TCHAR* InName, const TCHAR* InPackageName, DWORD InFlags )
 :	UStruct    ( EC_StaticConstructor, InSize, InName, InPackageName, InFlags )
 ,	ProbeMask  ( 0 )
@@ -643,7 +643,7 @@ IMPLEMENT_CLASS(UState);
 	UEnum.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x0x1013af40)
+IMPL_MATCH("Core.dll", 0x1013af40)
 UEnum::UEnum( UEnum* InSuperEnum )
 :	UField( InSuperEnum )
 {}
@@ -663,7 +663,7 @@ IMPLEMENT_CLASS(UEnum);
 	UClass.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x0x10118010)
+IMPL_MATCH("Core.dll", 0x10118010)
 UClass::UClass()
 :	ClassFlags        ( 0 )
 ,	ClassUnique       ( 0 )
@@ -673,7 +673,7 @@ UClass::UClass()
 ,	ClassStaticConstructor( NULL )
 {}
 
-IMPL_MATCH("Core.dll", 0x0x10118010)
+IMPL_MATCH("Core.dll", 0x10118010)
 UClass::UClass( UClass* InSuperClass )
 :	UState            ( InSuperClass )
 ,	ClassFlags        ( 0 )
@@ -691,7 +691,7 @@ UClass::UClass( UClass* InSuperClass )
 	}
 }
 
-IMPL_MATCH("Core.dll", 0x0x10118010)
+IMPL_MATCH("Core.dll", 0x10118010)
 UClass::UClass( ENativeConstructor, DWORD InSize, DWORD InClassFlags, UClass* InBaseClass, UClass* InWithinClass, FGuid InGuid, const TCHAR* InNameStr, const TCHAR* InPackageName, const TCHAR* InClassConfigName, DWORD InFlags, void(*InClassConstructor)(void*), void(UObject::*InClassStaticConstructor)() )
 :	UState            ( EC_NativeConstructor, InSize, InNameStr, InPackageName, InFlags, InBaseClass )
 ,	ClassFlags        ( InClassFlags | CLASS_Parsed | CLASS_Compiled )
@@ -706,7 +706,7 @@ UClass::UClass( ENativeConstructor, DWORD InSize, DWORD InClassFlags, UClass* In
 	Defaults.AddZeroed( InSize );
 }
 
-IMPL_MATCH("Core.dll", 0x0x10118010)
+IMPL_MATCH("Core.dll", 0x10118010)
 UClass::UClass( EStaticConstructor, DWORD InSize, DWORD InClassFlags, FGuid InGuid, const TCHAR* InNameStr, const TCHAR* InPackageName, const TCHAR* InClassConfigName, DWORD InFlags, void(*InClassConstructor)(void*), void(UObject::*InClassStaticConstructor)() )
 :	UState            ( EC_StaticConstructor, InSize, InNameStr, InPackageName, InFlags )
 ,	ClassFlags        ( InClassFlags | CLASS_Parsed | CLASS_Compiled )

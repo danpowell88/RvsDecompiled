@@ -1609,7 +1609,7 @@ INT APawn::IsLocallyControlled()
 	return 0;
 }
 
-IMPL_MATCH("Engine.dll", 0x0x103e5370)
+IMPL_MATCH("Engine.dll", 0x103e5370)
 INT APawn::IsFriend( APawn* Other )
 {
 	// Retail RVA=0xE5350: checks (1 << Other->m_iTeam) & m_iFriendlyTeams
@@ -1622,7 +1622,7 @@ INT APawn::IsFriend( APawn* Other )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x0x103e5370)
+IMPL_MATCH("Engine.dll", 0x103e5370)
 INT APawn::IsFriend( INT TeamIndex )
 {
 	// Retail RVA=0xE5370: return m_iFriendlyTeams & (1 << TeamIndex)
@@ -1631,7 +1631,7 @@ INT APawn::IsFriend( INT TeamIndex )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x0x103e5420)
+IMPL_MATCH("Engine.dll", 0x103e5420)
 INT APawn::IsEnemy( APawn* Other )
 {
 	// Retail RVA=0xE5420: checks (1 << Other->m_iTeam) & m_iEnemyTeams
@@ -1644,7 +1644,7 @@ INT APawn::IsEnemy( APawn* Other )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x0x103e54d0)
+IMPL_MATCH("Engine.dll", 0x103e54d0)
 INT APawn::IsNeutral( APawn* Other )
 {
 	// Retail RVA=0xE54D0: not in FriendlyTeams AND not in EnemyTeams for Other's team bit.
@@ -1670,7 +1670,7 @@ FLOAT APawn::GetMaxSpeed()
 	return result;
 }
 
-IMPL_MATCH("Engine.dll", 0x0x103c34e0)
+IMPL_MATCH("Engine.dll", 0x103c34e0)
 INT APawn::CheckOwnerUpdated()
 {
 	guard(APawn::CheckOwnerUpdated);
@@ -3278,7 +3278,7 @@ INT APawn::CanProneWalk(FVector const& TestLocation, FVector const& FeetLocation
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x0x103e5030)
+IMPL_MATCH("Engine.dll", 0x103e5030)
 void APawn::ClearSerpentine()
 {
 	// Retail (21b, RVA 0xE5260): stores 999.0f (0x4479C000) at SerpentineTime (+0x420),
@@ -4060,7 +4060,7 @@ void APawn::UnCrouch(INT bClientSimulation)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x0x1041c1d0)
+IMPL_MATCH("Engine.dll", 0x1041c1d0)
 INT APawn::ValidAnchor()
 {
 	guard(APawn::ValidAnchor);
@@ -4168,7 +4168,7 @@ void APawn::clearPath(ANavigationPoint* Node)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x0x1041c170)
+IMPL_MATCH("Engine.dll", 0x1041c170)
 void APawn::clearPaths()
 {
 	// Retail 0x11C170: walk the level's NavigationPointList and reset pathfinding state
@@ -6238,7 +6238,7 @@ void AController::AdjustFromWall( FVector HitNormal, AActor* HitActor )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x0x104209e0)
+IMPL_MATCH("Engine.dll", 0x104209e0)
 void AController::StartAnimPoll()
 {
 	// Retail RVA 0x1209E0.

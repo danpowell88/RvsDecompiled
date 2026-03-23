@@ -12,7 +12,7 @@
 	FBitWriter.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x0x10113bf0)
+IMPL_MATCH("Core.dll", 0x10113bf0)
 FBitWriter::FBitWriter( INT InMaxBits )
 :	Num( 0 )
 ,	Max( InMaxBits )
@@ -107,7 +107,7 @@ void FBitWriterMark::Pop( FBitWriter& Writer )
 	FBitReader.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x0x10113ce0)
+IMPL_MATCH("Core.dll", 0x10113ce0)
 FBitReader::FBitReader( BYTE* Src, INT CountBits )
 :	Num( CountBits )
 ,	Pos( 0 )

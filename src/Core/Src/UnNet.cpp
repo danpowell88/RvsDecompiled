@@ -65,7 +65,7 @@ FArchive& operator<<( FArchive& Ar, FClassNetCache& Cache )
 	FPackageInfo.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x0x10119fd0)
+IMPL_MATCH("Core.dll", 0x10119fd0)
 FPackageInfo::FPackageInfo( ULinkerLoad* InLinker )
 :	Linker          ( InLinker )
 ,	Parent          ( InLinker ? InLinker->LinkerRoot : NULL )
