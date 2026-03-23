@@ -121,6 +121,8 @@ public:
 	,	ArForEdit		(1)
 	,	ArForClient		(1)
 	,	ArForServer		(1)
+	,	ArUnknown38		(0)
+	,	ArStopper		(INDEX_NONE)
 	{}
 
 	// Status accessors.
@@ -142,8 +144,19 @@ public:
 
 	// Ravenshield additions.
 	INT IsCriticalError();
-	virtual INT AtStopper() { return 0; }
-	virtual void SetStopper( INT InPos ) {}
+	// Ghidra 0x10101430: checks Tell() vs ArStopper.
+	virtual INT AtStopper()
+	{
+		INT Pos = Tell();
+		if( Pos!=INDEX_NONE && ArStopper!=INDEX_NONE && Pos>=ArStopper )
+			return 1;
+		return 0;
+	}
+	// Ghidra 0x10101460: sets ArStopper = InPos.
+	virtual void SetStopper( INT InPos )
+	{
+		ArStopper = InPos;
+	}
 
 	// Friend archivers.
 	friend FArchive& operator<<( FArchive& Ar, ANSICHAR& C )
@@ -199,6 +212,9 @@ public:
 	CORE_API friend FArchive& operator<<( FArchive& Ar, FTime& F );
 protected:
 	// Status variables.
+	// Ghidra retail layout: sizeof(FArchive) = 0x40 = 64 bytes.
+	// Offset 0x04: unknown member — not initialised in default ctor, copied in copy ctor.
+	INT ArPad04;
 	INT ArVer;
 	INT ArNetVer;
 	INT ArLicenseeVer;
@@ -212,6 +228,11 @@ protected:
 	UBOOL ArIsError;
 	// Ravenshield addition: Ghidra 0x10101580 reads this+0x34.
 	UBOOL ArIsCriticalError;
+	// Ghidra retail offset 0x38: unknown, initialised to 0.
+	INT ArUnknown38;
+	// Ghidra retail offset 0x3C: stopper position, initialised to INDEX_NONE (-1).
+	// Used by AtStopper() (0x10101430) and SetStopper() (0x10101460).
+	INT ArStopper;
 };
 
 /*-----------------------------------------------------------------------------

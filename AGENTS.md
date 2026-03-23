@@ -95,73 +95,6 @@ The VS2019_X86 path must be in PATH for `cvtres.exe` to be found by the MSVC 7.1
 
 All DLL targets build in 3-5 minutes. A clean build (no errors) will show just the target names.
 
-## ⚠️ guard()/unguard() Rules — Read Before Writing Any Function
-
-`guard(Name)` expands to `{ static ...; try {` and `unguard` expands to `} catch(char*Err){throw;} catch(...){throw;} }`.
-
-**`unguard;` MUST appear at function body scope, never inside a nested block.**
-
-```cpp
-// ✅ CORRECT — unguard at function scope
-void Foo::Bar() {
-    guard(Foo::Bar);
-    if (condition) {
-        return;  // exits through the try block fine
-    }
-    DoWork();
-    unguard;     // closes the try/catch at function scope
-}
-
-// ✅ ALSO CORRECT — return before unguard (unguard is dead but syntactically valid)
-void Foo::Bar() {
-    guard(Foo::Bar);
-    DoWork();
-    return result;
-    unguard;     // dead code, but compiles fine
-}
-
-// ❌ WRONG — unguard inside if-block causes C2318 "no try block associated with catch"
-void Foo::Bar() {
-    guard(Foo::Bar);
-    if (!ptr) {
-        unguard;   // WRONG: closes try inside the if, remaining code has no try
-        return;
-    }
-    DoWork();
-    unguard;
-}
-```
-
-**Fix for early-return pattern:** invert the condition and wrap the body:
-```cpp
-void Foo::Bar() {
-    guard(Foo::Bar);
-    if (ptr) {       // inverted: only proceed if valid
-        DoWork();
-    }
-    unguard;         // always at function scope
-}
-```
-
-## ⚠️ Git Staging — Agents MUST Use Explicit File Paths
-
-**NEVER use `git add -A` or `git add .`** — this stages ALL modified files including ones modified by other concurrently running agents, creating commit regressions.
-
-**ALWAYS explicitly name the files you changed:**
-```powershell
-# CORRECT: only stage the files you actually modified
-git add src/Engine/Src/UnMesh.cpp src/Engine/Src/UnLevel.cpp
-
-# WRONG: stages everything in the working directory
-git add -A
-git add .
-```
-
-**Why this matters:** Multiple agents may run in parallel and modify different files. If Agent A uses `git add -A`, it will also stage Agent B's in-progress work, committing it prematurely (or with wrong content) under Agent A's commit message. This corrupts the history and can **revert previous good work** if Agent B had already modified a file that Agent A staged at an earlier (worse) state.
-
-The check: before committing, run `git status` and verify only the expected files are staged.
-
-
 
 **Before adding, removing, or changing any parameter**, cross-check the mangled name in the module's `.def` file. Adding or removing even one parameter changes the mangled name and causes a linker error (`LNK2001`).
 
@@ -198,6 +131,11 @@ Function decompilations are in `ghidra/exports/`:
 
 For each DLL there is a `_global.cpp` (decompiled C) and `_global.asm` (raw disassembly) with all exported functions. When the decompiler output is ambiguous, check the `.asm` for ground truth.
 
+**When to use raw exports vs structured reports:**
+- Need the **full decompiled body** of a function → `_global.cpp` / `_unnamed.cpp`
+- Need the **exact instruction bytes** or ambiguous operand encoding → `_global.asm` / `_unnamed.asm`
+- Need **metadata** (size, params, convention, vtable slot, struct offset) → use the JSON reports below instead
+
 Search by address in C decompilation:
 ```powershell
 $content = Get-Content "ghidra\exports\Engine\_global.cpp" -Raw
@@ -210,4 +148,74 @@ Search by address in assembly:
 $content = Get-Content "ghidra\exports\Engine\_global.asm" -Raw
 $idx = $content.IndexOf("; Address: 0x103b4130")
 if ($idx -ge 0) { $content.Substring($idx, [Math]::Min(2000, $content.Length - $idx)) }
+```
+
+## Structured Analysis Reports
+
+Pre-computed analysis data lives in `ghidra/exports/reports/`. Each report type exists per-binary (16 total). These JSON files are the preferred way to look up metadata rather than searching raw .cpp/.asm files.
+
+**Quick decision guide — "I need to…":**
+
+| I need to… | Use this report | Example query |
+|---|---|---|
+| Find small/easy functions to implement next | `{Module}_function_index.json` | Sort by `size`, filter `exported` and not `unnamed` |
+| Check a function's calling convention or param count | `{Module}_function_index.json` | Look up by `addr` or `name` |
+| Validate a class's vtable layout or slot order | `{Module}_vtables.json` | Find class by name, check slot indices |
+| Check `sizeof(ClassName)` or member offsets | `{Module}_structs.json` | Look up struct by name |
+| Find what a function calls (or what calls it) | `{Module}_callgraph.json` | Search `edges` by caller/callee |
+| Find functions with no dependencies (safe to start) | `{Module}_callgraph.json` | Use `leaf_functions` list |
+| Decide which FUN_ helper to resolve first | `blocker_map.json` | Check `top_blockers` — highest impact first |
+| See overall project progress or per-DLL status | `progress_report.json` | Read `summary` or `per_dll` |
+| Look up a function's mangled export name | `{Module}_function_index.json` | Search by `name`, read `mangled` field |
+| Check how many functions a DLL has total | `{Module}_function_index.json` | Read `total_functions` from top-level |
+
+### Function Index (`{Module}_function_index.json`)
+Per-function: address, size (bytes), calling convention, param count, return type, mangled name, exported flag. **Use this to find quick-win functions (sort by size), check calling conventions, or locate unexported helpers.**
+
+```powershell
+# Find all Engine.dll functions smaller than 20 bytes (easy IMPL_MATCH targets)
+python -c "import json; data=json.load(open('ghidra/exports/reports/Engine_function_index.json')); [print(f['addr'],f['size'],f['name']) for f in data['functions'] if f['size']<20 and f['exported'] and not f['unnamed']]"
+```
+
+### Vtable Layouts (`{Module}_vtables.json`)
+Per-class vtable: base address, slot count, method name at each slot offset. **Use this to validate virtual dispatch and check vftable slot assignments.**
+
+```powershell
+# Look up AActor vtable layout in Engine.dll
+python -c "import json; data=json.load(open('ghidra/exports/reports/Engine_vtables.json')); vt=[v for v in data['vtables'] if 'AActor' in v['class']]; [print(v['class'],v['slot_count'],'slots') for v in vt]"
+```
+
+### Struct/Class Layouts (`{Module}_structs.json`)
+Per-struct: name, size, alignment, member offsets and types. **Use this for sizeof() validation and offset arithmetic checks.**
+
+### Call Graph (`{Module}_callgraph.json`)
+Intra-DLL caller→callee edges, leaf functions (no outgoing calls), root functions (no incoming calls). **Use leaf functions as safe starting points for implementation — they have no internal dependencies.**
+
+### FUN_ Blocker Map (`blocker_map.json`)
+Maps every unresolved `FUN_XXXXXXXX` helper to the named functions that depend on it, sorted by impact. **Use this to prioritize which unnamed helpers to identify first.**
+
+```powershell
+# Top 10 blockers (resolving these unblocks the most functions)
+python -c "import json; data=json.load(open('ghidra/exports/reports/blocker_map.json')); [print(b['name'],b['blocks'],'blocked') for b in data['top_blockers'][:10]]"
+```
+
+### Progress Report (`progress_report.json` / `progress_summary.txt`)
+Per-DLL and overall counts of IMPL_MATCH, IMPL_EMPTY, IMPL_TODO, IMPL_DIVERGE annotations vs total Ghidra function count. **Re-generate after implementing functions:**
+
+```powershell
+python tools/gen_progress_report.py
+```
+
+### Regenerating All Analysis
+
+To re-run the full Ghidra analysis pipeline (imports, symbols, exports, vtables, structs, callgraph, function index):
+```powershell
+$env:GHIDRA_HOME = "C:\Users\danpo\Desktop\rvs\tools\ghidra"
+.\tools\run_headless.ps1 -SkipImport   # re-run scripts on existing project
+```
+
+To run just the standalone tools (no Ghidra needed):
+```powershell
+python tools/gen_blocker_map.py
+python tools/gen_progress_report.py
 ```

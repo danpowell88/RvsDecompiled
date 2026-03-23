@@ -23,6 +23,12 @@ def get_project_root():
     script_dir = getSourceFile().getParentFile().getParentFile().getParentFile()
     return script_dir.getAbsolutePath()
 
+def sanitize_filename(name):
+    """Replace characters that are invalid in Windows filenames."""
+    for ch in '<>:"/\\|?*,':
+        name = name.replace(ch, '_')
+    return name
+
 def classify_function(func):
     """Determine which class a function belongs to based on its name."""
     name = func.getName()
@@ -30,7 +36,7 @@ def classify_function(func):
     # MSVC demangled: ClassName::MethodName
     if "::" in name:
         parts = name.split("::")
-        return parts[0]
+        return sanitize_filename(parts[0])
 
     # Thunk functions
     if name.startswith("thunk_"):

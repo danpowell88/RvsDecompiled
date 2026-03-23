@@ -14,13 +14,17 @@
 #define ENGINE_VERSION 430
 
 // Base protocol version to negotiate in network play.
-#define ENGINE_NEGOTIATION_VERSION 400
+// Ravenshield retail uses 600 (Ghidra: FArchive ctor writes 600 to ArNetVer).
+// UT99 original was 400.
+#define ENGINE_NEGOTIATION_VERSION 600
 
 // Prevents incorrect files from being loaded.
 #define PACKAGE_FILE_TAG 0x9E2A83C1
 
 // The current Unrealfile version.
-#define PACKAGE_FILE_VERSION 69
+// Ravenshield retail uses 118 (Ghidra: FArchive ctor writes 0x76 to ArVer).
+// UT99 original was 69.
+#define PACKAGE_FILE_VERSION 118
 
 #if 1 //LVer added by Legend on 4/12/2000
 //
@@ -30,7 +34,9 @@
 // Uses the upper two words of the VersionNum DWORD to encode a licensee-specific
 // version WORD.
 //
-#define PACKAGE_FILE_VERSION_LICENSEE	0x00
+// Ravenshield retail uses 14 (Ghidra: FArchive ctor writes 0x0E).
+// UT99 original was 0.
+#define PACKAGE_FILE_VERSION_LICENSEE	14
 
 #define VERSION_ENGINE_ONLY				0x00
 #endif

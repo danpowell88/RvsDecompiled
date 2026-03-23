@@ -1,0 +1,6 @@
+Metadata-Version: 2.1
+Name: ghidra-stubs
+Version: 11.3
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Typing :: Stubs Only
+License-File: LICENSE

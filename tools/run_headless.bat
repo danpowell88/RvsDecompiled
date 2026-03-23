@@ -1,11 +1,12 @@
 @echo off
-REM ==========================================================================
-REM run_headless.bat - Convenience wrapper for run_headless.ps1
-REM ==========================================================================
-REM Usage:
-REM   tools\run_headless.bat
-REM   tools\run_headless.bat -GhidraHome "C:\Ghidra\ghidra_11.3"
-REM   tools\run_headless.bat -BinaryFilter "Core.dll"
-REM ==========================================================================
+REM Headless Ghidra analysis for Ravenshield decompilation project
+REM Usage: run_headless.bat <command> [args...]
+REM Example: run_headless.bat -import ..\retail\system\Core.dll -postScript ..\ghidra\scripts\batch_import.py
 
-powershell.exe -ExecutionPolicy Bypass -File "%~dp0run_headless.ps1" %*
+set JAVA_HOME=C:\Users\danpo\Desktop\rvs\tools\..\tools\jdk
+set PATH=%JAVA_HOME%\bin;%PATH%
+set PROJECT_DIR=%~dp0..\ghidra\project
+set PROJECT_NAME=RavenShield
+
+cd /d "%~dp0..\tools\ghidra"
+call support\analyzeHeadless.bat "%PROJECT_DIR%" "%PROJECT_NAME%" %*

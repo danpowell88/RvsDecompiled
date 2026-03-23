@@ -199,6 +199,54 @@ foreach ($Binary in $TargetBinaries) {
             -log "$ReportsDir\${BinaryName}_asm.log"
     }
 
+    # Step 7: Export vtable layouts
+    if (-not $SkipExport) {
+        Write-Host "  Exporting vtables..."
+        & $AnalyzeHeadless `
+            $GhidraProject "RavenShield" `
+            -process $Binary `
+            -noanalysis `
+            -postScript "$GhidraScripts\export_vtables.py" `
+            -scriptPath $GhidraScripts `
+            -log "$ReportsDir\${BinaryName}_vtables.log"
+    }
+
+    # Step 8: Export struct layouts
+    if (-not $SkipExport) {
+        Write-Host "  Exporting struct layouts..."
+        & $AnalyzeHeadless `
+            $GhidraProject "RavenShield" `
+            -process $Binary `
+            -noanalysis `
+            -postScript "$GhidraScripts\export_structs.py" `
+            -scriptPath $GhidraScripts `
+            -log "$ReportsDir\${BinaryName}_structs.log"
+    }
+
+    # Step 9: Export function index
+    if (-not $SkipExport) {
+        Write-Host "  Exporting function index..."
+        & $AnalyzeHeadless `
+            $GhidraProject "RavenShield" `
+            -process $Binary `
+            -noanalysis `
+            -postScript "$GhidraScripts\export_function_index.py" `
+            -scriptPath $GhidraScripts `
+            -log "$ReportsDir\${BinaryName}_funcindex.log"
+    }
+
+    # Step 10: Export call graph
+    if (-not $SkipExport) {
+        Write-Host "  Exporting call graph..."
+        & $AnalyzeHeadless `
+            $GhidraProject "RavenShield" `
+            -process $Binary `
+            -noanalysis `
+            -postScript "$GhidraScripts\export_callgraph.py" `
+            -scriptPath $GhidraScripts `
+            -log "$ReportsDir\${BinaryName}_callgraph.log"
+    }
+
     $Results += [PSCustomObject]@{ Binary=$Binary; Status="OK" }
     Write-Host "  Done." -ForegroundColor Green
 }
@@ -213,6 +261,16 @@ Write-Host "--- Aggregating cross-reference matrix ---" -ForegroundColor Yellow
     -postScript "$GhidraScripts\cross_reference.py" "aggregate" `
     -scriptPath $GhidraScripts `
     -log "$ReportsDir\cross_reference_aggregate.log"
+
+# --- Step 12: Standalone analysis tools (no Ghidra needed) ---
+Write-Host ""
+Write-Host "--- Running standalone analysis tools ---" -ForegroundColor Yellow
+
+Write-Host "  Generating FUN_ blocker map..."
+& python "$ProjectRoot\tools\gen_blocker_map.py"
+
+Write-Host "  Generating progress report..."
+& python "$ProjectRoot\tools\gen_progress_report.py"
 
 # --- Summary ---
 $Elapsed = (Get-Date) - $StartTime
