@@ -93,6 +93,21 @@ DLL_MAP = {
     "r6weapons":    {"retail": "R6Weapons.dll",     "built": "R6Weapons.dll",
                      "ghidra": "R6Weapons/_global.cpp",
                      "base":   0x10000000},
+    "d3ddrv":       {"retail": "D3DDrv.dll",        "built": "D3DDrv.dll",
+                     "ghidra": "D3DDrv/_global.cpp",
+                     "base":   0x10000000},
+    "dareaudio":    {"retail": "DareAudio.dll",     "built": "DareAudio.dll",
+                     "ghidra": "DareAudio/_global.cpp",
+                     "base":   0x10000000},
+    "r6gameservice":{"retail": "R6GameService.dll", "built": "R6GameService.dll",
+                     "ghidra": "R6GameService/_global.cpp",
+                     "base":   0x10000000},
+    "windrv":       {"retail": "WinDrv.dll",        "built": "WinDrv.dll",
+                     "ghidra": "WinDrv/_global.cpp",
+                     "base":   0x11100000},
+    "window":       {"retail": "Window.dll",        "built": "Window.dll",
+                     "ghidra": "Window/_global.cpp",
+                     "base":   0x11000000},
 }
 
 # ── Undname helper ────────────────────────────────────────────────────────────

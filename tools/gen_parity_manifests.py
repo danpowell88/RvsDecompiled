@@ -22,14 +22,19 @@ GHIDRA_REPORTS = os.path.join(REPO_ROOT, "ghidra", "exports", "reports")
 SRC_DIR = os.path.join(REPO_ROOT, "src")
 
 DLL_CONFIGS = [
-    ("Core.dll",        "Core",        "Core"),
-    ("Engine.dll",      "Engine",      "Engine"),
-    ("R6Engine.dll",    "R6Engine",    "R6Engine"),
-    ("R6Game.dll",      "R6Game",      "R6Game"),
-    ("R6Weapons.dll",   "R6Weapons",   "R6Weapons"),
-    ("Fire.dll",        "Fire",        "Fire"),
-    ("IpDrv.dll",       "IpDrv",       "IpDrv"),
-    ("R6Abstract.dll",  "R6Abstract",  "R6Abstract"),
+    ("Core.dll",        "Core",             "Core"),
+    ("Engine.dll",      "Engine",           "Engine"),
+    ("R6Engine.dll",    "R6Engine",         "R6Engine"),
+    ("R6Game.dll",      "R6Game",           "R6Game"),
+    ("R6Weapons.dll",   "R6Weapons",        "R6Weapons"),
+    ("Fire.dll",        "Fire",             "Fire"),
+    ("IpDrv.dll",       "IpDrv",            "IpDrv"),
+    ("R6Abstract.dll",  "R6Abstract",       "R6Abstract"),
+    ("D3DDrv.dll",      "D3DDrv",           "D3DDrv"),
+    ("DareAudio.dll",   "DareAudio",        "DareAudio"),
+    ("R6GameService.dll","R6GameService",   "R6GameService"),
+    ("WinDrv.dll",      "WinDrv",           "WinDrv"),
+    ("Window.dll",      "Window",           "Window"),
 ]
 
 
