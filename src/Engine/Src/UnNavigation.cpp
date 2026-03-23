@@ -817,8 +817,13 @@ IMPL_EMPTY("pawn base no-op — subclass overrides")
 void ANavigationPoint::CheckSymmetry(ANavigationPoint* Other) {}
 IMPL_EMPTY("pawn base no-op — subclass overrides")
 void ANavigationPoint::PostaddReachSpecs(APawn* Scout) {}
-IMPL_TODO("pawn base no-op — subclass overrides - retail has 68B at 0x103d6170")
-void ANavigationPoint::SetVolumes(const TArray<AVolume*>& Volumes) {}
+IMPL_MATCH("Engine.dll", 0x103d6170)
+void ANavigationPoint::SetVolumes(const TArray<AVolume*>& Volumes)
+{
+	guard(ANavigationPoint::SetVolumes);
+	AActor::SetVolumes(Volumes);
+	unguard;
+}
 IMPL_MATCH("Engine.dll", 0x103983d0)
 void ANavigationPoint::CheckForErrors()
 {

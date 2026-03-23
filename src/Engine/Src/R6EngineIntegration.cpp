@@ -575,7 +575,7 @@ void AR6eviLTesting::evilTestUpdateSystem()
 
 
 // --- UR6AbstractGameManager ---
-IMPL_TODO("Ghidra 0x1030e7c0: base-class stub; body is empty (FString param cleanup only). Derived class in R6GameService.dll overrides. - retail has 73B at 0x1030e7c0")
+IMPL_MATCH("Engine.dll", 0x1030e7c0)
 void UR6AbstractGameManager::StartJoinServer(FString,FString,int)
 {
 	guard(UR6AbstractGameManager::StartJoinServer);
@@ -610,7 +610,7 @@ void UR6AbstractGameManager::SetGSCreateUbiServer(int)
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x1030e770: base-class stub; body is empty (FString param cleanup only). Derived class in R6GameService.dll overrides. - retail has 73B at 0x1030e770")
+IMPL_MATCH("Engine.dll", 0x1030e770)
 void UR6AbstractGameManager::LaunchListenSrv(FString,FString)
 {
 	guard(UR6AbstractGameManager::LaunchListenSrv);

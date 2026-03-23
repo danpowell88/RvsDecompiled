@@ -118,11 +118,12 @@ return 1;
 unguard;
 }
 
-IMPL_TODO("NullDrv — headless renderer; retail body is also empty - retail has 54B at 0x1036c950")
+IMPL_MATCH("Engine.dll", 0x1036c950)
 INT UNullRenderDevice::SetRes( UViewport* Viewport, INT NewX, INT NewY, INT NewColorBytes )
 {
 guard(UNullRenderDevice::SetRes);
-return 0;
+verify( Viewport->ResizeViewport( BLIT_Direct3D, NewX, NewY ) );
+return 1;
 unguard;
 }
 
