@@ -28,6 +28,37 @@ struct MdtBaseConstraint;
 class MotionChunk;
 class UDemoRecDriver;
 class FSpriteParticleVertex;
+
+// FRange / FRangeVector — needed by AEmitter member declarations.
+// Guarded with _INC_FRANGE to match EngineDecls.h.
+#ifndef _INC_FRANGE
+#define _INC_FRANGE
+class CORE_API FRange
+{
+public:
+	FLOAT Min;
+	FLOAT Max;
+	FRange();
+	FRange( FLOAT InVal );
+	FRange( FLOAT InMin, FLOAT InMax );
+	FLOAT GetRand() const;
+	FLOAT GetSRand() const;
+	FLOAT GetCenter() const;
+	FLOAT GetMax() const;
+	FLOAT Size() const;
+	INT IsZero() const;
+};
+class CORE_API FRangeVector
+{
+public:
+	FRange X;
+	FRange Y;
+	FRange Z;
+	FRangeVector();
+	FVector GetRand() const;
+	FVector GetSRand() const;
+};
+#endif
 #ifndef EDECALTYPE_DEFINED
 #define EDECALTYPE_DEFINED
 enum eDecalType {
@@ -2508,6 +2539,15 @@ class ENGINE_API AVolume : public ABrush
 {
 public:
 	DECLARE_CLASS(AVolume,ABrush,0,Engine)
+
+	// Ghidra operator= at 0x10335270: ABrush ends at 0x3F0, AVolume adds 28 bytes.
+	INT               LocationPriority;     // 0x3F0
+	class AActor*     AssociatedActor;      // 0x3F4
+	class ADecorationList* DecoList;        // 0x3F8
+	FName             AssociatedActorTag;   // 0x3FC
+	FStringNoInit     LocationName;         // 0x400
+	// sizeof(AVolume) = 0x40C
+
 	DECLARE_FUNCTION(execEncompasses)
 	// Auto-generated method declarations
 	virtual void SetVolumes(TArray<AVolume *> const &);
@@ -5313,6 +5353,26 @@ class ENGINE_API AEmitter : public AActor
 {
 public:
 	DECLARE_CLASS(AEmitter,AActor,0,Engine)
+
+	// Ghidra operator= at 0x103342d0 (361 bytes). AActor ends at 0x394.
+	BITFIELD    AutoDestroy : 1;                // 0x394 bit 0
+	BITFIELD    AutoReset : 1;                  // 0x394 bit 1
+	BITFIELD    DisableFogging : 1;             // 0x394 bit 2
+	TArray<class UParticleEmitter*> Emitters;   // 0x398 (12 bytes)
+	FRangeVector GlobalOffsetRange;             // 0x3A4 (24 bytes)
+	FRange      TimeTillResetRange;             // 0x3BC (8 bytes)
+	INT         Initialized;                    // 0x3C4
+	BITFIELD    ActorForcesEnabled : 1;         // 0x3C8 bit 0
+	BITFIELD    UseParticleProjectors : 1;      // bit 1
+	BITFIELD    DeleteParticleEmitters : 1;     // bit 2
+	FLOAT       EmitterRadius;                  // 0x3CC
+	FLOAT       EmitterHeight;                  // 0x3D0
+	FLOAT       TimeTillReset;                  // 0x3D4
+	class UParticleMaterial* ParticleMaterial;  // 0x3D8
+	FBox        BoundingBox;                    // 0x3DC (28 bytes)
+	FVector     GlobalOffset;                   // 0x3F8 (12 bytes)
+	// sizeof(AEmitter) = 0x404
+
 	DECLARE_FUNCTION(execKill)
 	// Auto-generated method declarations
 	virtual void Spawned();

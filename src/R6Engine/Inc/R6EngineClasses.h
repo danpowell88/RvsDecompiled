@@ -98,9 +98,9 @@ struct stBodyPart
 #endif
 
 // FRange — Core struct (Min/Max float range), exported from Core.dll.
-// Definition from CoreClasses.h; only data layout needed for member sizing.
-#ifndef _FRANGE_DEFINED
-#define _FRANGE_DEFINED
+// Full definition now in EngineClasses.h; this guard ensures no redefinition.
+#ifndef _INC_FRANGE
+#define _INC_FRANGE
 struct FRange
 {
 	FLOAT Min;
