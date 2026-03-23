@@ -12,7 +12,7 @@
 	FRange.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x10104520)
+IMPL_MATCH("Core.dll", 0x101094b0)
 FRange::FRange()
 :	Min( 0.f )
 ,	Max( 0.f )
@@ -241,7 +241,7 @@ FRange& FRange::operator=( const FRange& R )
 	FRangeVector.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x101047B0)
+IMPL_MATCH("Core.dll", 0x0x101047e0)
 FRangeVector::FRangeVector()
 {
 }

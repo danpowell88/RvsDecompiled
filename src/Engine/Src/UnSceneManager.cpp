@@ -1184,7 +1184,7 @@ IMPL_MATCH("Engine.dll", 0x10316710)
 ASceneManager * FMatineeTools::GetCurrent() { return CurrentScene; }
 
 // ?SetCurrent@FMatineeTools@@QAEPAVASceneManager@@PAVUEngine@@PAVULevel@@PAV2@@Z
-IMPL_MATCH("Engine.dll", 0x103c9f60)
+IMPL_MATCH("Engine.dll", 0x103ca220)
 ASceneManager * FMatineeTools::SetCurrent(UEngine * Engine, ULevel * Level, ASceneManager * Scene)
 {
 	CurrentScene = Scene;
@@ -1208,7 +1208,7 @@ ASceneManager * FMatineeTools::SetCurrent(UEngine * Engine, ULevel * Level, ASce
 }
 
 // ?SetCurrent@FMatineeTools@@QAEPAVASceneManager@@PAVUEngine@@PAVULevel@@VFString@@@Z
-IMPL_MATCH("Engine.dll", 0x103c9f60)
+IMPL_MATCH("Engine.dll", 0x103ca220)
 ASceneManager * FMatineeTools::SetCurrent(UEngine * Engine, ULevel * Level, FString Name)
 {
 	for (INT i = 0; i < Level->Actors.Num(); i++)

@@ -1291,7 +1291,7 @@ unguard;
 // DIVERGENCE: retail calls FBitReader copy-ctor then sets vtable + individual fields
 //             (offsets 0x54-0x6e).  We memcpy the whole object; FBitReader internals
 //             that reference allocated memory may alias incorrectly at runtime.
-IMPL_MATCH("Engine.dll", 0x1036fa90)
+IMPL_MATCH("Engine.dll", 0x1047f6b0)
 FInBunch::FInBunch(const FInBunch& Other) : FBitReader() { appMemcpy(this, &Other, sizeof(*this)); }
 // DIVERGENCE: retail calls FBitReader(nullptr, 0) then sets vtable, Connection (0x5c),
 //             BunchIndex (0x58=0), TimeoutTime (0x38=10000).  We zero Pad instead.
@@ -1311,13 +1311,13 @@ FArchive& FInBunch::operator<<(FName& N) { return *this; }
 // We call FBitWriter(0) as base initializer and then zero only the FOutBunch-specific
 // extra fields (Pad[128]).  Do NOT appMemzero(this) — that would destroy the vtable
 // and the TArray buffer state set by the FBitWriter base ctor.
-IMPL_MATCH("Engine.dll", 0x1036f960)
+IMPL_MATCH("Engine.dll", 0x1047f820)
 FOutBunch::FOutBunch() : FBitWriter(0) { appMemzero(Pad, sizeof(Pad)); }
 // DIVERGENCE: retail calls FBitWriter copy-ctor then sets vtable + individual fields
 //             (offsets 0x54-0x7a).  FBitWriter(0) initialises base; appMemcpy copies
 //             the entire Other over this (including vtable = same FOutBunch vftable).
 //             aliasing of TArray::Data is accepted (same caveat as FInBunch above).
-IMPL_MATCH("Engine.dll", 0x1047f800)
+IMPL_MATCH("Engine.dll", 0x1047f820)
 FOutBunch::FOutBunch(const FOutBunch& Other) : FBitWriter(0) { appMemcpy(this, &Other, sizeof(*this)); }
 // DIVERGENCE: retail calls FBitWriter(connection->MaxPacket*8-81), sets Channel (0x58),
 //             ChIndex (0x68), ChSequence (0x6c), flags (0x78-0x7a), validates assertions.

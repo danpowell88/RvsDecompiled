@@ -15,7 +15,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- FCanvasUtil ---
-IMPL_MATCH("Engine.dll", 0x10318c10)
+IMPL_MATCH("Engine.dll", 0x10416a90)
 FCanvasUtil::FCanvasUtil(FCanvasUtil const &Other)
 {
 	// Ghidra 0x18c10: vtable set by compiler; same copy regions as operator= (0x18cb0):
@@ -24,7 +24,7 @@ FCanvasUtil::FCanvasUtil(FCanvasUtil const &Other)
 	appMemcpy((BYTE*)this + 0x94, (const BYTE*)&Other + 0x94, 0xC14);
 }
 
-IMPL_MATCH("Engine.dll", 0x10318c10)
+IMPL_MATCH("Engine.dll", 0x10416a90)
 FCanvasUtil::FCanvasUtil(UViewport *,FRenderInterface *,int,int)
 {
 	guard(FCanvasUtil::FCanvasUtil);
@@ -310,7 +310,7 @@ int UCanvas::_DrawString(UFont *Font, int XL, int YL, const TCHAR* Text, FPlane 
 	typedef int (__thiscall* DrawStrFn)(UCanvas*, UFont*, int, int, const TCHAR*, FPlane, int, int, int);
 	return ((DrawStrFn)0x1038ac40)(this, Font, XL, YL, Text, Color, CR, RenderStyle, DrawExtraLine);
 }
-IMPL_MATCH("Engine.dll", 0x1038ac40)
+IMPL_MATCH("Engine.dll", 0x1038cac0)
 void UCanvas::WrappedDrawString(ERenderStyle InStyle, INT& XL, INT& YL, UFont* Font, INT bCenter, const TCHAR* Text)
 {
 	// Ghidra 0x8cac0, 11B. Simply forwards to WrappedPrint.
@@ -370,7 +370,7 @@ FCanvasVertex::FCanvasVertex(FVector InPoint, FColor InColor, float InU, float I
 {
 }
 
-IMPL_MATCH("Engine.dll", 0x10303810)
+IMPL_MATCH("Engine.dll", 0x10303850)
 FCanvasVertex::FCanvasVertex()
 {
 }

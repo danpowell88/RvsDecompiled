@@ -35,7 +35,7 @@ FAnimMeshVertexStream::FAnimMeshVertexStream(FAnimMeshVertexStream const &Other)
 	appMemcpy((BYTE*)this + 0x14, (const BYTE*)&Other + 0x14, 0x18); // 6 DWORDs
 }
 
-IMPL_MATCH("Engine.dll", 0x1032b0e0)
+IMPL_MATCH("Engine.dll", 0x1032b170)
 FAnimMeshVertexStream::FAnimMeshVertexStream()
 {
 	new ((BYTE*)this + 0x08) TArray<FStreamVert32>();
@@ -131,7 +131,7 @@ FBspVertexStream::FBspVertexStream(FBspVertexStream const &Other)
 	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x0C); // 3 DWORDs
 }
 
-IMPL_MATCH("Engine.dll", 0x10327860)
+IMPL_MATCH("Engine.dll", 0x103278f0)
 FBspVertexStream::FBspVertexStream()
 {
 	// Initialize TArray<FBspVertex> at +4 to empty
@@ -297,7 +297,7 @@ FLevelSceneNode * FLevelSceneNode::GetLevelSceneNode()
 
 
 // --- FLightMap ---
-IMPL_MATCH("Engine.dll", 0x1033c910)
+IMPL_MATCH("Engine.dll", 0x10410c60)
 FLightMap::FLightMap(FLightMap const &Other)
 {
 	// Ghidra 0x3c910: vtable set by compiler; 34 DWORDs at +4..+8B; TArray<FLightMapSample52> at +0x8C; TArray<FLOAT> at +0x98
@@ -323,7 +323,7 @@ FLightMap::FLightMap(ULevel *Level,int USize,int VSize)
 	*(INT*)((BYTE*)this + 0x24) = 0;
 }
 
-IMPL_MATCH("Engine.dll", 0x1033c6a0)
+IMPL_MATCH("Engine.dll", 0x10410c60)
 FLightMap::FLightMap()
 {
 	new ((BYTE*)this + 0x28) FMatrix();
@@ -421,7 +421,7 @@ int FLightMap::GetWidth()
 
 
 // --- FLightMapTexture ---
-IMPL_MATCH("Engine.dll", 0x10320e50)
+IMPL_MATCH("Engine.dll", 0x10410bd0)
 FLightMapTexture::FLightMapTexture(FLightMapTexture const &Other)
 {
 	// Ghidra 0x20e50 (117b): vtable set by compiler; copy DWORD at +4; copy TArray<FLOAT> at +8;
@@ -445,7 +445,7 @@ FLightMapTexture::FLightMapTexture(ULevel* Level)
 	*(DWORD*)((BYTE*)this + 0x68) = 0;
 }
 
-IMPL_MATCH("Engine.dll", 0x103279b0)
+IMPL_MATCH("Engine.dll", 0x10410bd0)
 FLightMapTexture::FLightMapTexture()
 {
 	// Ghidra 0x279b0 (78b): init TArray<FLOAT> at +8, init FStaticLightMapTexture at +0x14
@@ -550,7 +550,7 @@ int FLightMapTexture::GetWidth()
 
 
 // --- FLineBatcher ---
-IMPL_MATCH("Engine.dll", 0x10327320)
+IMPL_MATCH("Engine.dll", 0x10417240)
 FLineBatcher::FLineBatcher(FLineBatcher const &Other)
 {
 	// Ghidra 0x27320: vtable set by compiler; TArray<FLineVertex> at +4 (stride 0x10); 5 DWORDs at +10..+20
@@ -558,7 +558,7 @@ FLineBatcher::FLineBatcher(FLineBatcher const &Other)
 	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x14); // 5 DWORDs
 }
 
-IMPL_MATCH("Engine.dll", 0x10327320)
+IMPL_MATCH("Engine.dll", 0x10417240)
 FLineBatcher::FLineBatcher(FRenderInterface *,int,int)
 {
 	// Initialize TArray<FLineVertex> at +4 to empty so dtor is safe
@@ -754,7 +754,7 @@ int FLineBatcher::GetStride()
 
 
 // --- FRaw32BitIndexBuffer ---
-IMPL_MATCH("Engine.dll", 0x103209a0)
+IMPL_MATCH("Engine.dll", 0x10416fc0)
 FRaw32BitIndexBuffer::FRaw32BitIndexBuffer(FRaw32BitIndexBuffer const &Other)
 {
 	// Ghidra 0x209a0: vtable set by compiler; TArray<FLOAT> at +4 (stride 4); 3 DWORDs at +10..+18
@@ -762,7 +762,7 @@ FRaw32BitIndexBuffer::FRaw32BitIndexBuffer(FRaw32BitIndexBuffer const &Other)
 	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x0C); // 3 DWORDs
 }
 
-IMPL_MATCH("Engine.dll", 0x103209a0)
+IMPL_MATCH("Engine.dll", 0x10416fc0)
 FRaw32BitIndexBuffer::FRaw32BitIndexBuffer()
 {
 	// Initialize TArray<FLOAT> at +4 to empty
@@ -815,7 +815,7 @@ return *(INT*)(Pad + 4) << 2;
 
 
 // --- FRawColorStream ---
-IMPL_MATCH("Engine.dll", 0x10327570)
+IMPL_MATCH("Engine.dll", 0x10417fd0)
 FRawColorStream::FRawColorStream(FRawColorStream const &Other)
 {
 	// Ghidra 0x27570: vtable set by compiler; TArray<FLOAT> at +4 (stride 4); 3 DWORDs at +10..+18
@@ -823,7 +823,7 @@ FRawColorStream::FRawColorStream(FRawColorStream const &Other)
 	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x0C); // 3 DWORDs
 }
 
-IMPL_MATCH("Engine.dll", 0x10327570)
+IMPL_MATCH("Engine.dll", 0x10417fd0)
 FRawColorStream::FRawColorStream()
 {
 	// Initialize TArray<FLOAT> at +4 to empty
@@ -898,7 +898,7 @@ int FRawIndexBuffer::Stripify()
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x10318d80)
+IMPL_MATCH("Engine.dll", 0x10416810)
 FRawIndexBuffer::FRawIndexBuffer(FRawIndexBuffer const &Other)
 {
 	// Ghidra 0x18d80: vtable set by compiler; TArray<_WORD> at +4 (stride 2); 3 DWORDs at +10..+18
@@ -906,7 +906,7 @@ FRawIndexBuffer::FRawIndexBuffer(FRawIndexBuffer const &Other)
 	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x0C); // 3 DWORDs
 }
 
-IMPL_MATCH("Engine.dll", 0x10318d80)
+IMPL_MATCH("Engine.dll", 0x10416810)
 FRawIndexBuffer::FRawIndexBuffer()
 {
 	// Initialize TArray<_WORD> at +4 to empty
@@ -978,7 +978,7 @@ FSkinVertexStream::FSkinVertexStream(FSkinVertexStream const &Other)
 	new ((BYTE*)this + 0x20) TArray<FStreamVert32>(*(const TArray<FStreamVert32>*)((const BYTE*)&Other + 0x20));
 }
 
-IMPL_MATCH("Engine.dll", 0x1032b700)
+IMPL_MATCH("Engine.dll", 0x1032b7d0)
 FSkinVertexStream::FSkinVertexStream()
 {
 	// Initialize TArray<FStreamVert32> at +0x20 to empty
@@ -1072,7 +1072,7 @@ int FSkinVertexStream::GetStride()
 
 
 // --- FStaticLightMapTexture ---
-IMPL_MATCH("Engine.dll", 0x10320cf0)
+IMPL_MATCH("Engine.dll", 0x10327960)
 FStaticLightMapTexture::FStaticLightMapTexture(FStaticLightMapTexture const &Other)
 {
 	// Ghidra 0x20cf0: vtable set by compiler; copy-construct 2 TLazyArray<BYTE> at +4 and +0x1C (stride 0x18);
@@ -1296,14 +1296,14 @@ int FStaticMeshVertexStream::GetStride()
 
 
 // --- FStaticTexture ---
-IMPL_MATCH("Engine.dll", 0x10320b50)
+IMPL_MATCH("Engine.dll", 0x1046a9a0)
 FStaticTexture::FStaticTexture(FStaticTexture const &Other)
 {
 	// Ghidra 0x20b50: vtable set by compiler; scalar copy of 4 DWORDs at +4..+10. Shares address with FStaticCubemap.
 	appMemcpy((BYTE*)this + 0x04, (const BYTE*)&Other + 0x04, 0x10);
 }
 
-IMPL_MATCH("Engine.dll", 0x10320b50)
+IMPL_MATCH("Engine.dll", 0x1046a9a0)
 FStaticTexture::FStaticTexture(UTexture* Texture)
 {
 	// Ghidra 0x16a9a0: store texture pointer, compute CacheId, set initial revision.
@@ -1657,7 +1657,7 @@ BYTE FConvexVolume::SphereCheck(FSphere Sphere)
 	return Result;
 }
 
-IMPL_MATCH("Engine.dll", 0x10303750)
+IMPL_MATCH("Engine.dll", 0x10414360)
 FConvexVolume::FConvexVolume(const FConvexVolume& Other)
 {
 	// Ghidra 0x3750: 32 FPlane copy ctors (FPlane is POD) + copy NumPlanes/FVectors/pad/FMatrix.
@@ -1753,7 +1753,7 @@ IMPL_DIVERGE("Ghidra 0x104038b0 (11290b): FRenderInterface vtable has only 3 dec
 void FDynamicActor::Render(FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
 {
 }
-IMPL_MATCH("Engine.dll", 0x103135d0)
+IMPL_MATCH("Engine.dll", 0x103ffb70)
 FDynamicActor::FDynamicActor(const FDynamicActor& Other)
 {
 	// Ghidra 0x135d0 (135b): no vtable; flat copy of 0x80 bytes (same as operator= at 0x13660)
@@ -1968,7 +1968,7 @@ FColor FDynamicLight::SampleLight(FVector Point, FVector Normal)
 	return FColor(*(FPlane*)((BYTE*)this + 0x04) * Intensity);
 }
 
-IMPL_MATCH("Engine.dll", 0x10313540)
+IMPL_MATCH("Engine.dll", 0x1040ff20)
 FDynamicLight::FDynamicLight(FDynamicLight const& Other)
 {
 	// Ghidra 0x13540 (100b): FPlane copy ctor at +4, copies 10 DWORDs +0x14..+0x38.
@@ -2135,7 +2135,7 @@ FLineVertex::FLineVertex(FVector InPoint, FColor InColor)
 {
 }
 
-IMPL_MATCH("Engine.dll", 0x10303810)
+IMPL_MATCH("Engine.dll", 0x10303820)
 FLineVertex::FLineVertex()
 {
 	// Ghidra 0x3810: calls FVector::FVector((FVector*)this) then returns.
@@ -2153,14 +2153,14 @@ FLineVertex& FLineVertex::operator=(const FLineVertex& Other)
 
 
 // --- FStaticCubemap ---
-IMPL_MATCH("Engine.dll", 0x10318eb0)
+IMPL_MATCH("Engine.dll", 0x1046a9f0)
 FStaticCubemap::FStaticCubemap(FStaticCubemap const &Other)
 {
 	// Ghidra 0x18eb0: vtable set by compiler; scalar copy of 4 DWORDs at +4..+10
 	appMemcpy((BYTE*)this + 0x04, (const BYTE*)&Other + 0x04, 0x10);
 }
 
-IMPL_MATCH("Engine.dll", 0x10318eb0)
+IMPL_MATCH("Engine.dll", 0x1046a9f0)
 FStaticCubemap::FStaticCubemap(UCubemap* Cubemap)
 {
 	// Ghidra 0x16a9f0: store cubemap pointer, compute CacheId, set initial revision.
@@ -2304,7 +2304,7 @@ void FTempLineBatcher::Render(FRenderInterface* RI, INT Flags)
 	Batcher.Flush(0);
 }
 
-IMPL_MATCH("Engine.dll", 0x103273a0)
+IMPL_MATCH("Engine.dll", 0x10327490)
 FTempLineBatcher::FTempLineBatcher(FTempLineBatcher const &Other)
 {
 	// Ghidra 0x27490: no vtable; TArray<FVector>@+0, TArray<FVector>@+0xC, TArray<FLOAT>@+0x18, TArray<FBox>@+0x24, TArray<FLOAT>@+0x30
@@ -2315,7 +2315,7 @@ FTempLineBatcher::FTempLineBatcher(FTempLineBatcher const &Other)
 	new ((BYTE*)this + 0x30) TArray<FLOAT>(*(const TArray<FLOAT>*)((const BYTE*)&Other + 0x30));
 }
 
-IMPL_MATCH("Engine.dll", 0x103273a0)
+IMPL_MATCH("Engine.dll", 0x10327490)
 FTempLineBatcher::FTempLineBatcher()
 {
 	// Initialize all 5 TArrays to empty

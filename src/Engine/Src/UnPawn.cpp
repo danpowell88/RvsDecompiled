@@ -1609,7 +1609,7 @@ INT APawn::IsLocallyControlled()
 	return 0;
 }
 
-IMPL_MATCH("Engine.dll", 0xE5350)
+IMPL_MATCH("Engine.dll", 0x0x103e5370)
 INT APawn::IsFriend( APawn* Other )
 {
 	// Retail RVA=0xE5350: checks (1 << Other->m_iTeam) & m_iFriendlyTeams
@@ -1622,7 +1622,7 @@ INT APawn::IsFriend( APawn* Other )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xE5370)
+IMPL_MATCH("Engine.dll", 0x0x103e5370)
 INT APawn::IsFriend( INT TeamIndex )
 {
 	// Retail RVA=0xE5370: return m_iFriendlyTeams & (1 << TeamIndex)
@@ -1631,7 +1631,7 @@ INT APawn::IsFriend( INT TeamIndex )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xE5420)
+IMPL_MATCH("Engine.dll", 0x0x103e5420)
 INT APawn::IsEnemy( APawn* Other )
 {
 	// Retail RVA=0xE5420: checks (1 << Other->m_iTeam) & m_iEnemyTeams
@@ -1644,7 +1644,7 @@ INT APawn::IsEnemy( APawn* Other )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xE54D0)
+IMPL_MATCH("Engine.dll", 0x0x103e54d0)
 INT APawn::IsNeutral( APawn* Other )
 {
 	// Retail RVA=0xE54D0: not in FriendlyTeams AND not in EnemyTeams for Other's team bit.
@@ -1670,7 +1670,7 @@ FLOAT APawn::GetMaxSpeed()
 	return result;
 }
 
-IMPL_MATCH("Engine.dll", 0xC34E0)
+IMPL_MATCH("Engine.dll", 0x0x103c34e0)
 INT APawn::CheckOwnerUpdated()
 {
 	guard(APawn::CheckOwnerUpdated);
@@ -1845,7 +1845,7 @@ INT APawn::HurtByVolume( AActor* V )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x79000)
+IMPL_MATCH("Engine.dll", 0x10379000)
 INT APawn::IsBlockedBy( const AActor* Other ) const
 {
 	// Retail (21b+tail, RVA 0x79000): if bit 17 of [Other+0xA8] is set, not blocked.
@@ -2765,7 +2765,7 @@ INT APawn::actorReachable( AActor* Goal, INT bKnowVisible, INT bNoAnchorCheck )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xee4b0)
+IMPL_MATCH("Engine.dll", 0x103ee4b0)
 void APawn::calcVelocity( FVector AccelDir, FLOAT DeltaTime, FLOAT MaxSpeed, FLOAT Friction, INT bFluid, INT bBraking, INT bBuoyant )
 {
 	guard(APawn::calcVelocity);
@@ -2804,7 +2804,7 @@ void APawn::calcVelocity( FVector AccelDir, FLOAT DeltaTime, FLOAT MaxSpeed, FLO
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xe7650)
+IMPL_MATCH("Engine.dll", 0x103e7650)
 INT APawn::moveToward( const FVector& Dest, AActor* GoalActor )
 {
 	guard(APawn::moveToward);
@@ -2860,7 +2860,7 @@ INT APawn::moveToward( const FVector& Dest, AActor* GoalActor )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xf5350)
+IMPL_MATCH("Engine.dll", 0x103f5350)
 void APawn::performPhysics( FLOAT DeltaSeconds )
 {
 	guard(APawn::performPhysics);
@@ -2921,7 +2921,7 @@ void APawn::performPhysics( FLOAT DeltaSeconds )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xf6410)
+IMPL_MATCH("Engine.dll", 0x103f6410)
 void APawn::physFalling( FLOAT DeltaTime, INT Iterations )
 {
 	guard(APawn::physFalling);
@@ -2989,7 +2989,7 @@ void APawn::physFalling( FLOAT DeltaTime, INT Iterations )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xf4810)
+IMPL_MATCH("Engine.dll", 0x103f4810)
 void APawn::physLadder( FLOAT DeltaTime, INT Iterations )
 {
 	guard(APawn::physLadder);
@@ -3021,7 +3021,7 @@ void APawn::physLadder( FLOAT DeltaTime, INT Iterations )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xf1920)
+IMPL_MATCH("Engine.dll", 0x103f1920)
 void APawn::physicsRotation( FLOAT DeltaTime, FVector OldVelocity )
 {
 	guard(APawn::physicsRotation);
@@ -3278,7 +3278,7 @@ INT APawn::CanProneWalk(FVector const& TestLocation, FVector const& FeetLocation
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xE5260)
+IMPL_MATCH("Engine.dll", 0x0x103e5030)
 void APawn::ClearSerpentine()
 {
 	// Retail (21b, RVA 0xE5260): stores 999.0f (0x4479C000) at SerpentineTime (+0x420),
@@ -3384,7 +3384,7 @@ ETestMoveResult APawn::FindJumpUp(FVector Dest)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0xf2090)
+IMPL_MATCH("Engine.dll", 0x103f2090)
 FVector APawn::NewFallVelocity( FVector OldVelocity, FVector OldAcceleration, FLOAT DeltaTime )
 {
 	guard(APawn::NewFallVelocity);
@@ -4060,7 +4060,7 @@ void APawn::UnCrouch(INT bClientSimulation)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x11C1D0)
+IMPL_MATCH("Engine.dll", 0x0x1041c1d0)
 INT APawn::ValidAnchor()
 {
 	guard(APawn::ValidAnchor);
@@ -4168,7 +4168,7 @@ void APawn::clearPath(ANavigationPoint* Node)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x11C170)
+IMPL_MATCH("Engine.dll", 0x0x1041c170)
 void APawn::clearPaths()
 {
 	// Retail 0x11C170: walk the level's NavigationPointList and reset pathfinding state
@@ -6238,7 +6238,7 @@ void AController::AdjustFromWall( FVector HitNormal, AActor* HitActor )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x1209E0)
+IMPL_MATCH("Engine.dll", 0x0x104209e0)
 void AController::StartAnimPoll()
 {
 	// Retail RVA 0x1209E0.

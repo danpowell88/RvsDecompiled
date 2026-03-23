@@ -133,7 +133,7 @@ void CBoneDescData::m_vProcessLbpLine(int param1, int param2, FString& str)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x1032b030)
+IMPL_MATCH("Engine.dll", 0x10355b30)
 CBoneDescData::CBoneDescData(CBoneDescData const & Other)
 {
 	// Ghidra 0x2b030, 93B. Copy 2 DWORDs, deep-copy TArray<FString>, copy FString, copy DWORD.

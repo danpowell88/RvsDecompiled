@@ -914,9 +914,9 @@ void UGameEngine::FixUpLevel()
 
 IMPL_MATCH("Engine.dll", 0x10301ac0)
 FRotatorF::FRotatorF(FRotator R) : Pitch((FLOAT)R.Pitch), Yaw((FLOAT)R.Yaw), Roll((FLOAT)R.Roll) {}
-IMPL_MATCH("Engine.dll", 0x10301aa0)
+IMPL_MATCH("Engine.dll", 0x10301ac0)
 FRotatorF::FRotatorF(float InPitch, float InYaw, float InRoll) : Pitch(InPitch), Yaw(InYaw), Roll(InRoll) {}
-IMPL_MATCH("Engine.dll", 0x10301a90)
+IMPL_MATCH("Engine.dll", 0x10301ac0)
 FRotatorF::FRotatorF() {}
 IMPL_MATCH("Engine.dll", 0x10301ae0)
 FRotator FRotatorF::Rotator() { return FRotator(appRound(Pitch), appRound(Yaw), appRound(Roll)); }
@@ -1157,7 +1157,7 @@ FURL::FURL(FURL* Base, const TCHAR* TextURL, ETravelType Type) {
 	}
 }
 
-IMPL_MATCH("Engine.dll", 0x10471950)
+IMPL_MATCH("Engine.dll", 0x10471a30)
 FURL::FURL(const TCHAR* Filename) {
 	Protocol = DefaultProtocol;
 	Host     = DefaultHost;

@@ -189,7 +189,7 @@ new ((BYTE*)this + 0x18) TArray<FKCylinderElem>(*(const TArray<FKCylinderElem>*)
 new ((BYTE*)this + 0x24) TArray<FKConvexElem>(*(const TArray<FKConvexElem>*)((const BYTE*)&Other + 0x24));
 }
 
-IMPL_MATCH("Engine.dll", 0x1033caf0)
+IMPL_MATCH("Engine.dll", 0x1033cc00)
 FKAggregateGeom::FKAggregateGeom()
 {
 // Ghidra 0x3caf0: calls FArray::FArray (TArray default ctor) at +0,+0xC,+0x18,+0x24.
@@ -244,7 +244,7 @@ return Counts[1] + Counts[4] + Counts[7] + Counts[10];
 
 
 // --- FKBoxElem ---
-IMPL_MATCH("Engine.dll", 0x10304ab0)
+IMPL_MATCH("Engine.dll", 0x10304ad0)
 FKBoxElem::FKBoxElem(float InSize)
 {
 // Ghidra 0x4ab0: FMatrix::FMatrix(this) + set TM+0x40/0x44/0x48 = InSize.
@@ -263,7 +263,7 @@ Y = InY;
 Z = InZ;
 }
 
-IMPL_MATCH("Engine.dll", 0x10304a60)
+IMPL_MATCH("Engine.dll", 0x10304ad0)
 FKBoxElem::FKBoxElem()
 {
 // Ghidra 0x4a60: FMatrix::FMatrix(this) only; shared stub with FKCylinderElem/FKSphereElem default ctors.
@@ -296,7 +296,7 @@ new ((BYTE*)this + 0x40) TArray<FVector>(*(const TArray<FVector>*)((const BYTE*)
 new ((BYTE*)this + 0x4C) TArray<INT>(*(const TArray<INT>*)((const BYTE*)&Other + 0x4C));
 }
 
-IMPL_MATCH("Engine.dll", 0x10327c20)
+IMPL_MATCH("Engine.dll", 0x10327ce0)
 FKConvexElem::FKConvexElem()
 {
 // Ghidra 0x27c20: FMatrix::FMatrix(this) + FArray::FArray at +0x40 + FArray::FArray at +0x4C.
@@ -337,7 +337,7 @@ Radius = InRadius;
 Length = InLength;
 }
 
-IMPL_MATCH("Engine.dll", 0x10304a60)
+IMPL_MATCH("Engine.dll", 0x10304b20)
 FKCylinderElem::FKCylinderElem()
 {
 // Ghidra 0x4a60: FMatrix::FMatrix(this) only; shared stub with FKBoxElem/FKSphereElem default ctors.
@@ -367,7 +367,7 @@ FKSphereElem::FKSphereElem(float InRadius)
 Radius = InRadius;
 }
 
-IMPL_MATCH("Engine.dll", 0x10304a60)
+IMPL_MATCH("Engine.dll", 0x10304a70)
 FKSphereElem::FKSphereElem()
 {
 // Ghidra 0x4a60: FMatrix::FMatrix(this) only; shared stub with FKBoxElem/FKCylinderElem default ctors.

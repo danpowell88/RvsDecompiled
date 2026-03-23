@@ -116,7 +116,7 @@ CORE_API FArchive& operator<<( FArchive& Ar, FTime& F )
 	FArchiveCountMem class.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x10107BF0)
+IMPL_MATCH("Core.dll", 0x0x10107cb0)
 FArchiveCountMem::FArchiveCountMem( UObject* Src )
 : Num(0), Max(0)
 {
@@ -168,7 +168,7 @@ FArchiveCountMem& FArchiveCountMem::operator=( const FArchiveCountMem& Other )
 	FArchiveDummySave class.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x10108550)
+IMPL_MATCH("Core.dll", 0x101085b0)
 FArchiveDummySave::FArchiveDummySave()
 {
 	ArIsSaving = 1;

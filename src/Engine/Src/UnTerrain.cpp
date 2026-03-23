@@ -1299,7 +1299,7 @@ INT UTerrainSector::PassShouldRenderTriangle(INT, INT, INT, INT, INT) { return 1
 // ?IsSectorAll@UTerrainSector@@QAEHHE@Z  Ghidra at ~0x107bae30 (336 bytes).
 // Gets the alpha texture for the layer, computes texel range for this sector,
 // then checks that every texel matches 'value'. Returns 1 (true) on empty range.
-IMPL_MATCH("Engine.dll", 0x107bae30)
+IMPL_MATCH("Engine.dll", 0x10458c30)
 INT UTerrainSector::IsSectorAll(INT layerIdx, BYTE value)
 {
 	// Alpha map pointer: TerrainInfo + 0x3AC + layerIdx * 0x78

@@ -36,7 +36,7 @@ void UTerrainBrush::MouseMove(float,float)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x10315690)
+IMPL_MATCH("Engine.dll", 0x104650a0)
 UTerrainBrush::UTerrainBrush(UTerrainBrush const &Other)
 {
 	// Ghidra 0x15690: vtable set by compiler; FString placement new at +4 and +10; 19 DWORDs at +1C..+64
@@ -145,7 +145,7 @@ FBox UTerrainBrush::GetRect()
 
 
 // --- UTerrainBrushColor ---
-IMPL_MATCH("Engine.dll", 0x10315980)
+IMPL_MATCH("Engine.dll", 0x10465330)
 UTerrainBrushColor::UTerrainBrushColor(UTerrainBrushColor const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -154,7 +154,7 @@ UTerrainBrushColor::UTerrainBrushColor(UTerrainBrushColor const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_MATCH("Engine.dll", 0x10315980)
+IMPL_MATCH("Engine.dll", 0x10465330)
 UTerrainBrushColor::UTerrainBrushColor()
 {
 	new ((BYTE*)this + 0x04) FString();
@@ -185,7 +185,7 @@ void UTerrainBrushColor::Execute(int)
 
 
 // --- UTerrainBrushEdgeTurn ---
-IMPL_MATCH("Engine.dll", 0x10315e20)
+IMPL_MATCH("Engine.dll", 0x10465900)
 UTerrainBrushEdgeTurn::UTerrainBrushEdgeTurn(UTerrainBrushEdgeTurn const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -194,7 +194,7 @@ UTerrainBrushEdgeTurn::UTerrainBrushEdgeTurn(UTerrainBrushEdgeTurn const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_MATCH("Engine.dll", 0x10315e20)
+IMPL_MATCH("Engine.dll", 0x10465900)
 UTerrainBrushEdgeTurn::UTerrainBrushEdgeTurn()
 {
 	new ((BYTE*)this + 0x04) FString();
@@ -241,7 +241,7 @@ FBox UTerrainBrushEdgeTurn::GetRect()
 
 
 // --- UTerrainBrushFlatten ---
-IMPL_MATCH("Engine.dll", 0x10315b00)
+IMPL_MATCH("Engine.dll", 0x104654b0)
 UTerrainBrushFlatten::UTerrainBrushFlatten(UTerrainBrushFlatten const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -250,7 +250,7 @@ UTerrainBrushFlatten::UTerrainBrushFlatten(UTerrainBrushFlatten const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_MATCH("Engine.dll", 0x10315b00)
+IMPL_MATCH("Engine.dll", 0x104654b0)
 UTerrainBrushFlatten::UTerrainBrushFlatten()
 {
 	new ((BYTE*)this + 0x04) FString();
@@ -281,7 +281,7 @@ void UTerrainBrushFlatten::Execute(int)
 
 
 // --- UTerrainBrushNoise ---
-IMPL_MATCH("Engine.dll", 0x10315a80)
+IMPL_MATCH("Engine.dll", 0x10465430)
 UTerrainBrushNoise::UTerrainBrushNoise(UTerrainBrushNoise const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -290,7 +290,7 @@ UTerrainBrushNoise::UTerrainBrushNoise(UTerrainBrushNoise const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_MATCH("Engine.dll", 0x10315a80)
+IMPL_MATCH("Engine.dll", 0x10465430)
 UTerrainBrushNoise::UTerrainBrushNoise()
 {
 	new ((BYTE*)this + 0x04) FString();
@@ -321,7 +321,7 @@ void UTerrainBrushNoise::Execute(int)
 
 
 // --- UTerrainBrushPaint ---
-IMPL_MATCH("Engine.dll", 0x10315900)
+IMPL_MATCH("Engine.dll", 0x104652b0)
 UTerrainBrushPaint::UTerrainBrushPaint(UTerrainBrushPaint const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -330,7 +330,7 @@ UTerrainBrushPaint::UTerrainBrushPaint(UTerrainBrushPaint const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_MATCH("Engine.dll", 0x10315900)
+IMPL_MATCH("Engine.dll", 0x104652b0)
 UTerrainBrushPaint::UTerrainBrushPaint()
 {
 	new ((BYTE*)this + 0x04) FString();
@@ -368,7 +368,7 @@ void UTerrainBrushPlanningPaint::MouseButtonDown(UViewport *)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x10315ea0)
+IMPL_MATCH("Engine.dll", 0x10465990)
 UTerrainBrushPlanningPaint::UTerrainBrushPlanningPaint(UTerrainBrushPlanningPaint const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -377,7 +377,7 @@ UTerrainBrushPlanningPaint::UTerrainBrushPlanningPaint(UTerrainBrushPlanningPain
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_MATCH("Engine.dll", 0x10315ea0)
+IMPL_MATCH("Engine.dll", 0x10465990)
 UTerrainBrushPlanningPaint::UTerrainBrushPlanningPaint()
 {
 	new ((BYTE*)this + 0x04) FString();
@@ -422,7 +422,7 @@ void UTerrainBrushSelect::MouseMove(float,float)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x10315d20)
+IMPL_MATCH("Engine.dll", 0x104656e0)
 UTerrainBrushSelect::UTerrainBrushSelect(UTerrainBrushSelect const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -431,7 +431,7 @@ UTerrainBrushSelect::UTerrainBrushSelect(UTerrainBrushSelect const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_MATCH("Engine.dll", 0x10315d20)
+IMPL_MATCH("Engine.dll", 0x104656e0)
 UTerrainBrushSelect::UTerrainBrushSelect()
 {
 	new ((BYTE*)this + 0x04) FString();
@@ -471,7 +471,7 @@ FBox UTerrainBrushSelect::GetRect()
 
 
 // --- UTerrainBrushSmooth ---
-IMPL_MATCH("Engine.dll", 0x10315a00)
+IMPL_MATCH("Engine.dll", 0x104653b0)
 UTerrainBrushSmooth::UTerrainBrushSmooth(UTerrainBrushSmooth const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -480,7 +480,7 @@ UTerrainBrushSmooth::UTerrainBrushSmooth(UTerrainBrushSmooth const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_MATCH("Engine.dll", 0x10315a00)
+IMPL_MATCH("Engine.dll", 0x104653b0)
 UTerrainBrushSmooth::UTerrainBrushSmooth()
 {
 	new ((BYTE*)this + 0x04) FString();
@@ -518,7 +518,7 @@ void UTerrainBrushTexPan::MouseMove(float,float)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x10315ba0)
+IMPL_MATCH("Engine.dll", 0x10465530)
 UTerrainBrushTexPan::UTerrainBrushTexPan(UTerrainBrushTexPan const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -527,7 +527,7 @@ UTerrainBrushTexPan::UTerrainBrushTexPan(UTerrainBrushTexPan const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_MATCH("Engine.dll", 0x10315ba0)
+IMPL_MATCH("Engine.dll", 0x10465530)
 UTerrainBrushTexPan::UTerrainBrushTexPan()
 {
 	new ((BYTE*)this + 0x04) FString();
@@ -558,7 +558,7 @@ void UTerrainBrushTexRotate::MouseMove(float,float)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x10315c20)
+IMPL_MATCH("Engine.dll", 0x104655c0)
 UTerrainBrushTexRotate::UTerrainBrushTexRotate(UTerrainBrushTexRotate const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -567,7 +567,7 @@ UTerrainBrushTexRotate::UTerrainBrushTexRotate(UTerrainBrushTexRotate const &Oth
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_MATCH("Engine.dll", 0x10315c20)
+IMPL_MATCH("Engine.dll", 0x104655c0)
 UTerrainBrushTexRotate::UTerrainBrushTexRotate()
 {
 	new ((BYTE*)this + 0x04) FString();
@@ -598,7 +598,7 @@ void UTerrainBrushTexScale::MouseMove(float,float)
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x10315ca0)
+IMPL_MATCH("Engine.dll", 0x10465650)
 UTerrainBrushTexScale::UTerrainBrushTexScale(UTerrainBrushTexScale const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -607,7 +607,7 @@ UTerrainBrushTexScale::UTerrainBrushTexScale(UTerrainBrushTexScale const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_MATCH("Engine.dll", 0x10315ca0)
+IMPL_MATCH("Engine.dll", 0x10465650)
 UTerrainBrushTexScale::UTerrainBrushTexScale()
 {
 	new ((BYTE*)this + 0x04) FString();
@@ -631,7 +631,7 @@ UTerrainBrushTexScale& UTerrainBrushTexScale::operator=(const UTerrainBrushTexSc
 
 
 // --- UTerrainBrushVertexEdit ---
-IMPL_MATCH("Engine.dll", 0x10315880)
+IMPL_MATCH("Engine.dll", 0x10465220)
 UTerrainBrushVertexEdit::UTerrainBrushVertexEdit(UTerrainBrushVertexEdit const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -640,7 +640,7 @@ UTerrainBrushVertexEdit::UTerrainBrushVertexEdit(UTerrainBrushVertexEdit const &
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_MATCH("Engine.dll", 0x10315880)
+IMPL_MATCH("Engine.dll", 0x10465220)
 UTerrainBrushVertexEdit::UTerrainBrushVertexEdit()
 {
 	new ((BYTE*)this + 0x04) FString();
@@ -664,7 +664,7 @@ UTerrainBrushVertexEdit& UTerrainBrushVertexEdit::operator=(const UTerrainBrushV
 
 
 // --- UTerrainBrushVisibility ---
-IMPL_MATCH("Engine.dll", 0x10315da0)
+IMPL_MATCH("Engine.dll", 0x10465870)
 UTerrainBrushVisibility::UTerrainBrushVisibility(UTerrainBrushVisibility const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -673,7 +673,7 @@ UTerrainBrushVisibility::UTerrainBrushVisibility(UTerrainBrushVisibility const &
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_MATCH("Engine.dll", 0x10315da0)
+IMPL_MATCH("Engine.dll", 0x10465870)
 UTerrainBrushVisibility::UTerrainBrushVisibility()
 {
 	new ((BYTE*)this + 0x04) FString();

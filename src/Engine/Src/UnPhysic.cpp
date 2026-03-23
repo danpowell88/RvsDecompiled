@@ -500,7 +500,7 @@ void AZoneInfo::PostEditChange()
 
 
 // --- FZoneProperties ---
-IMPL_MATCH("Engine.dll", 0x10302ac0)
+IMPL_MATCH("Engine.dll", 0x10318b40)
 FZoneProperties::FZoneProperties(const FZoneProperties& Other)
 {
 	// Ghidra 0x2ac0: shares address with operator=; 18 DWORDs flat copy (no vtable)

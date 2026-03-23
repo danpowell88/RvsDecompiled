@@ -18,7 +18,7 @@ inline void  operator delete(void*, void*) noexcept {}
 // Ghidra: both assert IsChildOf, resolve transient package, then call
 // UObject::StaticConstructObject(cls, outer, name, flags, NULL, GError, 0).
 // FName is 4 bytes (INDEX only) in this SDK; *(FName*)&name is safe.
-IMPL_MATCH("Engine.dll", 0x103c89f0)
+IMPL_MATCH("Engine.dll", 0x1030aea0)
 static UObject* FUN_103c89f0(UClass* cls, UObject* outer, DWORD name, DWORD flags)
 {
 	if (!cls->IsChildOf(UTexEnvMap::StaticClass()))
@@ -29,7 +29,7 @@ static UObject* FUN_103c89f0(UClass* cls, UObject* outer, DWORD name, DWORD flag
 	return UObject::StaticConstructObject(cls, outer, *(FName*)&name, flags,
 	                                      NULL, GError, 0);
 }
-IMPL_MATCH("Engine.dll", 0x10386790)
+IMPL_MATCH("Engine.dll", 0x1030a170)
 static UObject* FUN_10386790(UClass* cls, UObject* outer, DWORD name, DWORD flags)
 {
 	if (!cls->IsChildOf(UShader::StaticClass()))
@@ -617,7 +617,7 @@ void UTexture::Clear(DWORD ClearFlags)
 		}
 	}
 }
-IMPL_MATCH("Engine.dll", 0x10469470)
+IMPL_MATCH("Engine.dll", 0x1046a570)
 void UTexture::Clear(FColor InColor)
 {
 	// Ghidra 0x169470, 108B. TEXF_RGBA8 (5) only: fill all pixels with InColor.
@@ -731,7 +731,7 @@ FMipmap::FMipmap(FMipmap const & Other)
 	*(DWORD*)((BYTE*)this + 0x18) = *(const DWORD*)((const BYTE*)&Other + 0x18); // SavedPos
 }
 
-IMPL_MATCH("Engine.dll", 0x10320a10)
+IMPL_MATCH("Engine.dll", 0x10327730)
 FMipmap::FMipmap(BYTE InUBits, BYTE InVBits)
 {
 	// Ghidra 0x20a10, 89B. Computes W=1<<UBits, H=1<<VBits, allocates W*H bytes.
@@ -754,7 +754,7 @@ FMipmap::FMipmap(BYTE InUBits, BYTE InVBits)
 	*(INT*)  ((BYTE*)this + 0x24) = Count;
 }
 
-IMPL_MATCH("Engine.dll", 0x10320a70)
+IMPL_MATCH("Engine.dll", 0x10327730)
 FMipmap::FMipmap(BYTE InUBits, BYTE InVBits, int InCount)
 {
 	// Ghidra 0x20a70, 88B. Like (BYTE,BYTE) but uses explicit byte count instead of W*H.
@@ -774,7 +774,7 @@ FMipmap::FMipmap(BYTE InUBits, BYTE InVBits, int InCount)
 	*(INT*)  ((BYTE*)this + 0x24) = InCount;
 }
 
-IMPL_MATCH("Engine.dll", 0x103209e0)
+IMPL_MATCH("Engine.dll", 0x10327730)
 FMipmap::FMipmap()
 {
 	// Ghidra 0x209e0: calls FArray::FArray(this+0x1c,0,1), zeros SavedAr/Pos, sets vtable.
@@ -832,7 +832,7 @@ FMipmapBase::FMipmapBase(BYTE InUBits, BYTE InVBits)
 	*(INT*)  ((BYTE*)this + 0x08) = 1 << (InVBits & 0x1F);
 }
 
-IMPL_MATCH("Engine.dll", 0x10503248)
+IMPL_MATCH("Engine.dll", 0x10304260)
 FMipmapBase::FMipmapBase()
 {
 	// Ghidra 0x203248: merged entry — body is empty (zero-initialisation from callsite).
@@ -1337,7 +1337,7 @@ int UTexModifier::GetValidated()
 
 
 // --- UTexOscillator ---
-IMPL_MATCH("Engine.dll", 0x10304720)
+IMPL_MATCH("Engine.dll", 0x103c8010)
 FMatrix * UTexOscillator::GetMatrix(float)
 {
 	// No guard/unguard — retail is a bare null stub; compiler deduplicates 4 identical copies
@@ -1346,7 +1346,7 @@ FMatrix * UTexOscillator::GetMatrix(float)
 
 
 // --- UTexPanner ---
-IMPL_MATCH("Engine.dll", 0x10304720)
+IMPL_MATCH("Engine.dll", 0x103c7e30)
 FMatrix * UTexPanner::GetMatrix(float)
 {
 	return NULL;
@@ -1368,7 +1368,7 @@ void UTexRotator::PostLoad()
 	}
 }
 
-IMPL_MATCH("Engine.dll", 0x10304720)
+IMPL_MATCH("Engine.dll", 0x103c84a0)
 FMatrix * UTexRotator::GetMatrix(float)
 {
 	return NULL;
@@ -1376,7 +1376,7 @@ FMatrix * UTexRotator::GetMatrix(float)
 
 
 // --- UTexScaler ---
-IMPL_MATCH("Engine.dll", 0x10304720)
+IMPL_MATCH("Engine.dll", 0x103c7f30)
 FMatrix * UTexScaler::GetMatrix(float)
 {
 	return NULL;

@@ -1460,7 +1460,7 @@ void UTcpNetDriver::TickDispatch(FLOAT DeltaTime)
 	UTcpipConnection implementation.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("IpDrv.dll", 0x107066f0)
+IMPL_MATCH("IpDrv.dll", 0x10707090)
 UTcpipConnection::UTcpipConnection(UINT InSocket, UNetDriver* InDriver,
     struct sockaddr_in InRemoteAddr, EConnectionState InState,
     INT InOpenedLocally, const FURL& InURL)

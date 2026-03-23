@@ -586,7 +586,7 @@ Super::Destroy();
 unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x10484200)
+IMPL_MATCH("Engine.dll", 0x10484540)
 void UNetConnection::Serialize(FArchive& Ar)
 {
 guard(UNetConnection::Serialize);

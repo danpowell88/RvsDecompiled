@@ -206,7 +206,7 @@ WINDOW_API BOOL (WINAPI* SHGetSpecialFolderPathWX)( HWND hwndOwner, LPTSTR lpszP
 	FDelegate copy constructor (declared but not inline in Window.h).
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Window.dll", 0x11001300)
+IMPL_MATCH("Window.dll", 0x11001330)
 FDelegate::FDelegate(const FDelegate& Other)
 : TargetObject(Other.TargetObject)
 , TargetInvoke(Other.TargetInvoke)

@@ -12,7 +12,7 @@
 	FObjectExport / FObjectImport constructors.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x101287C0)
+IMPL_MATCH("Core.dll", 0x0x101287e0)
 FObjectExport::FObjectExport()
 :	ClassIndex   ( 0 )
 ,	SuperIndex   ( 0 )
@@ -87,7 +87,7 @@ FPackageFileSummary::FPackageFileSummary()
 	ULinker.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x1010FF20)
+IMPL_MATCH("Core.dll", 0x0x10129540)
 ULinker::ULinker( UObject* InRoot, const TCHAR* InFilename )
 :	LinkerRoot    ( InRoot )
 ,	Success       ( 0 )

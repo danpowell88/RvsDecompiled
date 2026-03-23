@@ -2848,7 +2848,7 @@ INT ULevel::SinglePointCheck( FCheckResult& Hit, AActor* SourceActor, FVector Lo
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x103b7460)
+IMPL_MATCH("Engine.dll", 0x103b75f0)
 INT ULevel::SinglePointCheck( FCheckResult& Hit, FVector Location, FVector Extent, DWORD ExtraNodeFlags, ALevelInfo* Level, INT bActors )
 {
 	guard(ULevel::SinglePointCheck);
@@ -4661,10 +4661,10 @@ FPointRegion& FPointRegion::operator=(const FPointRegion& Other)
 }
 
 // ??0FPointRegion@@QAE@XZ
-IMPL_MATCH("Engine.dll", 0x10301a90)
+IMPL_MATCH("Engine.dll", 0x103029a0)
 FPointRegion::FPointRegion() : Zone(NULL), iLeaf(0), ZoneNumber(0) {}
 // ??0FPointRegion@@QAE@PAVAZoneInfo@@@Z
-IMPL_MATCH("Engine.dll", 0x10302980)
+IMPL_MATCH("Engine.dll", 0x103029a0)
 FPointRegion::FPointRegion(AZoneInfo* InZone) : Zone(InZone), iLeaf(INDEX_NONE), ZoneNumber(0) {}
 // ??0FPointRegion@@QAE@PAVAZoneInfo@@HE@Z
 IMPL_MATCH("Engine.dll", 0x103029a0)

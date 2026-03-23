@@ -31,13 +31,13 @@ FStaticMeshCollisionNode& FStaticMeshCollisionNode::operator=(const FStaticMeshC
 
 
 // --- FStaticMeshCollisionTriangle ---
-IMPL_MATCH("Engine.dll", 0x10316460)
+IMPL_MATCH("Engine.dll", 0x10316490)
 FStaticMeshCollisionTriangle::FStaticMeshCollisionTriangle(FStaticMeshCollisionTriangle const & Other)
 {
 	appMemcpy(_Data, Other._Data, 84); // 21 dwords: 4 FPlanes + 5 extra dwords
 }
 
-IMPL_MATCH("Engine.dll", 0x10316460)
+IMPL_MATCH("Engine.dll", 0x10316490)
 FStaticMeshCollisionTriangle::FStaticMeshCollisionTriangle()
 {
 	// Ghidra: constructs 4 FPlanes (all empty default ctors)
@@ -73,7 +73,7 @@ FStaticMeshMaterial& FStaticMeshMaterial::operator=(const FStaticMeshMaterial& O
 
 
 // --- FStaticMeshSection ---
-IMPL_MATCH("Engine.dll", 0x1032bfb0)
+IMPL_MATCH("Engine.dll", 0x103162c0)
 FStaticMeshSection::FStaticMeshSection()
 {
 	*(DWORD*)((BYTE*)this + 0x00) = 0;       // +0x00
@@ -122,7 +122,7 @@ FStaticMeshUV& FStaticMeshUV::operator=(const FStaticMeshUV& Other)
 
 
 // --- FStaticMeshUVStream ---
-IMPL_MATCH("Engine.dll", 0x1032c070)
+IMPL_MATCH("Engine.dll", 0x1032c110)
 FStaticMeshUVStream::FStaticMeshUVStream(FStaticMeshUVStream const &Other)
 {
 	// Ghidra 0x2c110: vtable set by compiler; TArray<FStaticMeshUV> at +4 (stride 8); 4 DWORDs at +10..+1c
@@ -130,7 +130,7 @@ FStaticMeshUVStream::FStaticMeshUVStream(FStaticMeshUVStream const &Other)
 	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x10); // 4 DWORDs
 }
 
-IMPL_MATCH("Engine.dll", 0x1032c070)
+IMPL_MATCH("Engine.dll", 0x1032c110)
 FStaticMeshUVStream::FStaticMeshUVStream()
 {
 	// Initialize TArray<FStaticMeshUV> at +4 to empty
@@ -173,7 +173,7 @@ FStaticMeshVertex& FStaticMeshVertex::operator=(const FStaticMeshVertex& Other)
 
 
 // --- FStaticMeshVertexStream ---
-IMPL_MATCH("Engine.dll", 0x1032bf00)
+IMPL_MATCH("Engine.dll", 0x1032bf90)
 FStaticMeshVertexStream::FStaticMeshVertexStream(FStaticMeshVertexStream const &Other)
 {
 	// Ghidra 0x2bf90: vtable set by compiler; TArray<FStaticMeshVertex> at +4 (stride 0x18); 3 DWORDs at +10..+18
@@ -181,7 +181,7 @@ FStaticMeshVertexStream::FStaticMeshVertexStream(FStaticMeshVertexStream const &
 	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x0C); // 3 DWORDs
 }
 
-IMPL_MATCH("Engine.dll", 0x1032bf00)
+IMPL_MATCH("Engine.dll", 0x1032bf90)
 FStaticMeshVertexStream::FStaticMeshVertexStream()
 {
 	// Initialize TArray<FStaticMeshVertex> at +4 to empty

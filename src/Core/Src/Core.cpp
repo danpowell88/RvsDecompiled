@@ -248,7 +248,7 @@ void FArray::Remove( INT Index, INT Count, INT ElementSize )
 	FArray::Realloc.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x10130760)
+IMPL_MATCH("Core.dll", 0x1012f2c0)
 void FArray::Realloc( INT ElementSize )
 {
 	guardSlow(FArray::Realloc);

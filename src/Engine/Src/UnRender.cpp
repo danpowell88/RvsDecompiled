@@ -586,7 +586,7 @@ FSceneNode::FSceneNode(FSceneNode * p0)
 }
 
 // ??0FSceneNode@@QAE@ABV0@@Z
-IMPL_MATCH("Engine.dll", 0x10313300)
+IMPL_MATCH("Engine.dll", 0x103fdd40)
 FSceneNode::FSceneNode(FSceneNode const & p0)
 {
 	appMemcpy(((BYTE*)this) + 4, ((const BYTE*)&p0) + 4, 0x1B4);
@@ -596,7 +596,7 @@ FSceneNode::FSceneNode(FSceneNode const & p0)
 // Ghidra 0x103fdc60: FMatrix/FVector default ctors are trivially no-ops; retail only
 // stores Viewport at +4 and zeroes +8 and +0xc.  Matrices at +0x10..+0x1b0 are left
 // uninitialised (callers always write before read).
-IMPL_MATCH("Engine.dll", 0x103fdc60)
+IMPL_MATCH("Engine.dll", 0x103fdd40)
 FSceneNode::FSceneNode(UViewport * Viewport)
 {
 	*(UViewport**)(((BYTE*)this) + 0x04) = Viewport;
@@ -677,7 +677,7 @@ FLevelSceneNode& FLevelSceneNode::operator=(const FLevelSceneNode& Other)
 // =============================================================================
 // UVertexStream class implementations.
 // =============================================================================
-IMPL_MATCH("Engine.dll", 0x10302210)
+IMPL_MATCH("Engine.dll", 0x103022b0)
 UVertexStreamBase::UVertexStreamBase(INT InElementSize, DWORD InFlags, DWORD InType)
 : ElementSize(InElementSize), StreamFlags(InFlags), StreamType(InType) {}
 IMPL_MATCH("Engine.dll", 0x10302260)
@@ -703,14 +703,14 @@ void UVertexStreamBase::SetPolyFlags(DWORD Flags) {
 // three stream fields, then FArray::FArray for Data.  Body-based init matches
 // that sequence; the only ordering difference (Data init is a member-init, so
 // it happens before the body per the C++ standard) has no observable effect.
-IMPL_MATCH("Engine.dll", 0x10326280)
+IMPL_MATCH("Engine.dll", 0x10326430)
 UVertexBuffer::UVertexBuffer()
 {
 	ElementSize = 0x2C;
 	StreamFlags = 0;
 	StreamType  = 4;
 }
-IMPL_MATCH("Engine.dll", 0x103262e0)
+IMPL_MATCH("Engine.dll", 0x10326430)
 UVertexBuffer::UVertexBuffer(DWORD InFlags)
 : UVertexStreamBase(0x2C, InFlags, 0) {}
 // Ghidra 0x10326340: URenderResource::Serialize, stream-header fields (Ver>=75),
@@ -759,14 +759,14 @@ void* UVertexBuffer::GetData() { return Data.GetData(); }
 IMPL_MATCH("Engine.dll", 0x10302470)
 INT UVertexBuffer::GetDataSize() { return Data.Num() * 0x2C; }
 
-IMPL_MATCH("Engine.dll", 0x10326880)
+IMPL_MATCH("Engine.dll", 0x10326a10)
 UVertexStreamCOLOR::UVertexStreamCOLOR()
 {
 	ElementSize = 4;
 	StreamFlags = 0;
 	StreamType  = 2;
 }
-IMPL_MATCH("Engine.dll", 0x103268e0)
+IMPL_MATCH("Engine.dll", 0x10326a10)
 UVertexStreamCOLOR::UVertexStreamCOLOR(DWORD InFlags)
 : UVertexStreamBase(4, InFlags, 2) {}
 // Ghidra 0x10326950: URenderResource::Serialize, stream-header fields (Ver>=75),
@@ -816,14 +816,14 @@ void* UVertexStreamCOLOR::GetData() { return Data.GetData(); }
 IMPL_MATCH("Engine.dll", 0x10302510)
 INT UVertexStreamCOLOR::GetDataSize() { return Data.Num() * 4; }
 
-IMPL_MATCH("Engine.dll", 0x10326ea0)
+IMPL_MATCH("Engine.dll", 0x10327030)
 UVertexStreamPosNormTex::UVertexStreamPosNormTex()
 {
 	ElementSize = 0x28;
 	StreamFlags = 0;
 	StreamType  = 5;
 }
-IMPL_MATCH("Engine.dll", 0x10326f00)
+IMPL_MATCH("Engine.dll", 0x10327030)
 UVertexStreamPosNormTex::UVertexStreamPosNormTex(DWORD InFlags)
 : UVertexStreamBase(0x28, InFlags, 5) {}
 // Ghidra 0x10326f70: URenderResource::Serialize, stream-header fields (Ver>=75),
@@ -869,14 +869,14 @@ void* UVertexStreamPosNormTex::GetData() { return Data.GetData(); }
 IMPL_MATCH("Engine.dll", 0x10302650)
 INT UVertexStreamPosNormTex::GetDataSize() { return Data.Num() * 0x28; }
 
-IMPL_MATCH("Engine.dll", 0x10326b90)
+IMPL_MATCH("Engine.dll", 0x10326d20)
 UVertexStreamUV::UVertexStreamUV()
 {
 	ElementSize = 8;
 	StreamFlags = 0;
 	StreamType  = 3;
 }
-IMPL_MATCH("Engine.dll", 0x10326bf0)
+IMPL_MATCH("Engine.dll", 0x10326d20)
 UVertexStreamUV::UVertexStreamUV(DWORD InFlags)
 : UVertexStreamBase(8, InFlags, 3) {}
 // Ghidra 0x10326c60: URenderResource::Serialize, stream-header fields (Ver>=75),
@@ -922,14 +922,14 @@ void* UVertexStreamUV::GetData() { return Data.GetData(); }
 IMPL_MATCH("Engine.dll", 0x10302560)
 INT UVertexStreamUV::GetDataSize() { return Data.Num() * 8; }
 
-IMPL_MATCH("Engine.dll", 0x103265b0)
+IMPL_MATCH("Engine.dll", 0x10326740)
 UVertexStreamVECTOR::UVertexStreamVECTOR()
 {
 	ElementSize = 0xC;
 	StreamFlags = 0;
 	StreamType  = 1;
 }
-IMPL_MATCH("Engine.dll", 0x10326610)
+IMPL_MATCH("Engine.dll", 0x10326740)
 UVertexStreamVECTOR::UVertexStreamVECTOR(DWORD InFlags)
 : UVertexStreamBase(0xC, InFlags, 1) {}
 // Ghidra 0x10326680: URenderResource::Serialize, stream-header fields (Ver>=75),
@@ -991,9 +991,9 @@ FColor::FColor(const FPlane& P)
 // ============================================================================
 // FDbgVectorInfo
 // ============================================================================
-IMPL_MATCH("Engine.dll", 0x103029c0)
+IMPL_MATCH("Engine.dll", 0x10302a00)
 FDbgVectorInfo::FDbgVectorInfo() { appMemzero(this, sizeof(*this)); }
-IMPL_MATCH("Engine.dll", 0x103029c0)
+IMPL_MATCH("Engine.dll", 0x10302a00)
 FDbgVectorInfo::FDbgVectorInfo(const FDbgVectorInfo& Other) { appMemcpy(this, &Other, sizeof(*this)); }
 IMPL_EMPTY("trivial destructor; no heap resources to free")
 FDbgVectorInfo::~FDbgVectorInfo() {}
@@ -1009,9 +1009,9 @@ FDbgVectorInfo& FDbgVectorInfo::operator=(const FDbgVectorInfo& Other)
 // ============================================================================
 // FRenderInterface
 // ============================================================================
-IMPL_MATCH("Engine.dll", 0x10303240)
+IMPL_MATCH("Engine.dll", 0x10303260)
 FRenderInterface::FRenderInterface() { appMemzero(RIPad, sizeof(RIPad)); }
-IMPL_MATCH("Engine.dll", 0x10303240)
+IMPL_MATCH("Engine.dll", 0x10303260)
 FRenderInterface::FRenderInterface(const FRenderInterface& Other) { appMemcpy(this, &Other, sizeof(*this)); }
 // Ghidra 0x103032b0: copies 9 DWORDs from +4 to +0x24 (skips vtable at +0).
 IMPL_MATCH("Engine.dll", 0x103032b0)
@@ -1040,21 +1040,21 @@ IMPL_EMPTY("body unanalyzed; view/projection matrices not updated")
 void FCameraSceneNode::UpdateMatrices() {}
 
 // FMirrorSceneNode
-IMPL_MATCH("Engine.dll", 0x103139c0)
+IMPL_MATCH("Engine.dll", 0x103fe7b0)
 FMirrorSceneNode::FMirrorSceneNode(FLevelSceneNode* Parent, FPlane Mirror, INT a, INT b)
 	: FSceneNode((FSceneNode*)Parent) { appMemzero(Pad2, sizeof(Pad2)); }
 IMPL_MATCH("Engine.dll", 0x10301a90)
 FMirrorSceneNode* FMirrorSceneNode::GetMirrorSceneNode() { return this; }
 
 // FSkySceneNode
-IMPL_MATCH("Engine.dll", 0x10313980)
+IMPL_MATCH("Engine.dll", 0x10401240)
 FSkySceneNode::FSkySceneNode(FLevelSceneNode* Parent, INT Zone)
 	: FSceneNode((FSceneNode*)Parent) { appMemzero(Pad2, sizeof(Pad2)); }
 IMPL_MATCH("Engine.dll", 0x10301a90)
 FSkySceneNode* FSkySceneNode::GetSkySceneNode() { return this; }
 
 // FWarpZoneSceneNode
-IMPL_MATCH("Engine.dll", 0x10313a60)
+IMPL_MATCH("Engine.dll", 0x103fe860)
 FWarpZoneSceneNode::FWarpZoneSceneNode(FLevelSceneNode* Parent, AWarpZoneInfo*)
 	: FSceneNode((FSceneNode*)Parent) { appMemzero(Pad2, sizeof(Pad2)); }
 IMPL_MATCH("Engine.dll", 0x10301a90)

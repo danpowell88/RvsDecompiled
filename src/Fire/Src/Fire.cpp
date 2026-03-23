@@ -288,7 +288,7 @@ void UFractalTexture::PostLoad()
 	UTexture::PostLoad();
 }
 
-IMPL_MATCH("Fire.dll", 0x10506b20)
+IMPL_MATCH("Fire.dll", 0x1050a5d0)
 void UFractalTexture::PostEditChange()
 {
 	// Ghidra: PostEditChange at 0x6b20 is empty in the retail binary.
@@ -331,7 +331,7 @@ void UFireTexture::Init( INT InUSize, INT InVSize )
 	UFractalTexture::Init( InUSize, InVSize );
 }
 
-IMPL_MATCH("Fire.dll", 0x105050f0)
+IMPL_MATCH("Fire.dll", 0x10506c80)
 void UFireTexture::ConstantTimeTick()
 {
 	// Ghidra at 0x50f0: calls RedrawSparks() then PostDrawSparks().
@@ -339,7 +339,7 @@ void UFireTexture::ConstantTimeTick()
 	PostDrawSparks();
 }
 
-IMPL_MATCH("Fire.dll", 0x10502440)
+IMPL_MATCH("Fire.dll", 0x10506eb0)
 void UFireTexture::Click( DWORD Flags, FLOAT X, FLOAT Y )
 {
 	// Ghidra at 0x2440: calls FirePaint with the click coordinates.
@@ -398,7 +398,7 @@ void UFireTexture::TempDrawSpark( INT X, INT Y, INT H )
 	}
 }
 
-IMPL_MATCH("Fire.dll", 0x10506830)
+IMPL_MATCH("Fire.dll", 0x105037d0)
 void UFireTexture::FirePaint( INT X, INT Y, DWORD C )
 {
 	// Ghidra at 0x6830: if flag bit 0 set, calls AddSpark.
@@ -551,7 +551,7 @@ void UFireTexture::MoveSparkXY( FSpark* S, signed char DX, signed char DY )
 	}
 }
 
-IMPL_MATCH("Fire.dll", 0x10502490)
+IMPL_MATCH("Fire.dll", 0x10503580)
 void UFireTexture::CloseSpark( INT X, INT Y )
 {
 	// Ghidra at 0x2490: searches for the nearest spark of matching type
@@ -587,7 +587,7 @@ void UFireTexture::CloseSpark( INT X, INT Y )
 	}
 }
 
-IMPL_MATCH("Fire.dll", 0x105026d0)
+IMPL_MATCH("Fire.dll", 0x105035d0)
 void UFireTexture::DeleteSparks( INT X, INT Y, INT Z )
 {
 	// Ghidra at 0x26d0: removes sparks within distance Z of (X,Y).
@@ -610,7 +610,7 @@ void UFireTexture::DeleteSparks( INT X, INT Y, INT Z )
 	}
 }
 
-IMPL_MATCH("Fire.dll", 0x10506840)
+IMPL_MATCH("Fire.dll", 0x10503970)
 void UFireTexture::DrawFlashRamp( LineSeg Seg, BYTE A, BYTE B )
 {
 	// Ghidra at 0x6840: draws a line with ramping brightness.
@@ -619,7 +619,7 @@ void UFireTexture::DrawFlashRamp( LineSeg Seg, BYTE A, BYTE B )
 		(INT)Seg.Y1 + (INT)(signed char)Seg.Y2, A );
 }
 
-IMPL_MATCH("Fire.dll", 0x105068a0)
+IMPL_MATCH("Fire.dll", 0x10503650)
 void UFireTexture::DrawSparkLine( INT X1, INT Y1, INT X2, INT Y2, INT H )
 {
 	// Ghidra at 0x68a0: Bresenham-style line drawing using TempDrawSpark.
@@ -1697,7 +1697,7 @@ void UWaterTexture::PostLoad()
 	UFractalTexture::PostLoad();
 }
 
-IMPL_MATCH("Fire.dll", 0x10506970)
+IMPL_MATCH("Fire.dll", 0x105025f0)
 void UWaterTexture::Destroy()
 {
 	// Ghidra at 0x6970: frees the SourceFields buffer.
@@ -1760,7 +1760,7 @@ void UWaterTexture::AddDrop( INT X, INT Y )
 	BYTE_AT(this, 0xec) = BYTE_AT(this, 0xec) + 1;
 }
 
-IMPL_MATCH("Fire.dll", 0x105027f0)
+IMPL_MATCH("Fire.dll", 0x10506770)
 void UWaterTexture::DeleteDrops( INT X, INT Y, INT Z )
 {
 	// Ghidra at 0x27f0: removes drops near (X,Y) within distance Z.
@@ -2213,7 +2213,7 @@ void UWaveTexture::Init( INT InUSize, INT InVSize )
 	UWaterTexture::Init( InUSize, InVSize );
 }
 
-IMPL_MATCH("Fire.dll", 0x10502780)
+IMPL_MATCH("Fire.dll", 0x105073d0)
 void UWaveTexture::ConstantTimeTick()
 {
 	// Ghidra at 0x2780: calls WaterRedrawDrops, CalculateWater, SetWaveLight.
@@ -2250,7 +2250,7 @@ void UFluidTexture::Init( INT InUSize, INT InVSize )
 	UWaterTexture::Init( InUSize, InVSize );
 }
 
-IMPL_MATCH("Fire.dll", 0x105027a0)
+IMPL_MATCH("Fire.dll", 0x10508760)
 void UFluidTexture::ConstantTimeTick()
 {
 	// Ghidra at 0x27a0: calls WaterRedrawDrops, CalculateFluid.
@@ -2364,7 +2364,7 @@ void UIceTexture::Init( INT InUSize, INT InVSize )
 	UFractalTexture::Init( InUSize, InVSize );
 }
 
-IMPL_MATCH("Fire.dll", 0x105027c0)
+IMPL_MATCH("Fire.dll", 0x10509ce0)
 void UIceTexture::ConstantTimeTick()
 {
 	// Ghidra at 0x27c0: calls RenderIce.
@@ -2386,7 +2386,7 @@ void UIceTexture::Tick( FLOAT DeltaTime )
 	}
 }
 
-IMPL_MATCH("Fire.dll", 0x10502420)
+IMPL_MATCH("Fire.dll", 0x10502ac0)
 void UIceTexture::Click( DWORD Flags, FLOAT X, FLOAT Y )
 {
 	// Ghidra at 0x2420: confirmed empty.
@@ -2411,7 +2411,7 @@ void UIceTexture::Destroy()
 	UTexture::Destroy();
 }
 
-IMPL_MATCH("Fire.dll", 0x105089e0)
+IMPL_MATCH("Fire.dll", 0x10501570)
 void UIceTexture::MoveIcePosition( FLOAT Delta )
 {
 	// Ghidra at 0x89e0: updates UPosition/VPosition floats based on
@@ -2586,7 +2586,7 @@ void UWetTexture::Init( INT InUSize, INT InVSize )
 	UFractalTexture::Init( InUSize, InVSize );
 }
 
-IMPL_MATCH("Fire.dll", 0x105027b0)
+IMPL_MATCH("Fire.dll", 0x10508850)
 void UWetTexture::ConstantTimeTick()
 {
 	// Ghidra at 0x27b0: calls ApplyWetTexture.

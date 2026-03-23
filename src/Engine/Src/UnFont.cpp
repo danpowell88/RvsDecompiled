@@ -24,7 +24,7 @@ FFontCharacter& FFontCharacter::operator=(const FFontCharacter& Other)
 
 
 // --- FFontPage ---
-IMPL_MATCH("Engine.dll", 0x103277e0)
+IMPL_MATCH("Engine.dll", 0x10327800)
 FFontPage::FFontPage(FFontPage const &Other)
 {
 	// Ghidra 0x27800: no vtable; 2 DWORDs at +0,+4; TArray<FLineVertex> at +8 (stride 0x10)

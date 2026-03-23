@@ -117,12 +117,12 @@ static FLOAT LinearToDb(FLOAT v)
 Constructors / Destructor / Assignment.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("DareAudio.dll", 0x10001b20)
+IMPL_MATCH("DareAudio.dll", 0x10006450)
 UDareAudioSubsystem::UDareAudioSubsystem()
 {
 }
 
-IMPL_MATCH("DareAudio.dll", 0x10001b20)
+IMPL_MATCH("DareAudio.dll", 0x10006450)
 UDareAudioSubsystem::UDareAudioSubsystem(const UDareAudioSubsystem& Other)
 : UAudioSubsystem(Other)
 {
@@ -356,7 +356,7 @@ void UDareAudioSubsystem::Update(FSceneNode* SceneNode)
 Sound registration.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("DareAudio.dll", 0x1ff0)
+IMPL_MATCH("DareAudio.dll", 0x10001ff0)
 void UDareAudioSubsystem::RegisterSound(USound* Sound)
 {
 	guard(UDareAudioSubsystem::RegisterSound);
@@ -469,7 +469,7 @@ break;
 Music.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("DareAudio.dll", 0x10001160)
+IMPL_MATCH("DareAudio.dll", 0x100020a0)
 UBOOL UDareAudioSubsystem::PlayMusic(USound* Music, INT SongSection)
 {
 if (!m_bInitialized || !Music) return 0;
@@ -510,7 +510,7 @@ req->Slot  = SLOT_Music;
 return 1;
 }
 
-IMPL_MATCH("DareAudio.dll", 0x10001160)
+IMPL_MATCH("DareAudio.dll", 0x100020a0)
 UBOOL UDareAudioSubsystem::PlayMusic(FString MusicName, FLOAT FadeInTime)
 {
 if (!m_bInitialized) return 0;
@@ -527,7 +527,7 @@ F_INT(this, 0x58) = 1;
 return 1;
 }
 
-IMPL_MATCH("DareAudio.dll", 0x10001170)
+IMPL_MATCH("DareAudio.dll", 0x10002170)
 UBOOL UDareAudioSubsystem::StopMusic(USound* Music)
 {
 if (!m_bInitialized) return 0;
@@ -537,7 +537,7 @@ F_INT(this, 0x58) = 0;
 return 1;
 }
 
-IMPL_MATCH("DareAudio.dll", 0x10001170)
+IMPL_MATCH("DareAudio.dll", 0x10002170)
 UBOOL UDareAudioSubsystem::StopMusic(INT SongSection, FLOAT FadeOutTime)
 {
 if (!m_bInitialized) return 0;
@@ -546,7 +546,7 @@ F_INT(this, 0x58) = 0;
 return 1;
 }
 
-IMPL_MATCH("DareAudio.dll", 0x10001180)
+IMPL_MATCH("DareAudio.dll", 0x10005c90)
 UBOOL UDareAudioSubsystem::StopAllMusic(FLOAT FadeOutTime)
 {
 if (!m_bInitialized) return 0;
@@ -555,7 +555,7 @@ F_INT(this, 0x58) = 0;
 return 1;
 }
 
-IMPL_MATCH("DareAudio.dll", 0x10001180)
+IMPL_MATCH("DareAudio.dll", 0x10005c90)
 void UDareAudioSubsystem::StopAllMusic()
 {
 if (!m_bInitialized) return;
@@ -678,7 +678,7 @@ BMAP_COUNT(this) = dst;
 Sound queries.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("DareAudio.dll", 0x100011e0)
+IMPL_MATCH("DareAudio.dll", 0x10002230)
 FLOAT UDareAudioSubsystem::GetDuration(USound* Sound)
 {
 if (!m_bInitialized || !Sound) return 0.0f;
@@ -1148,7 +1148,7 @@ SREQ_COUNT(this) = dst;
 Private helpers.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("DareAudio.dll", 0x100011e0)
+IMPL_MATCH("DareAudio.dll", 0x10002230)
 FLOAT UDareAudioSubsystem::GetDuration(DWORD SoundHandle)
 {
 return 0.0f;

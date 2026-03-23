@@ -39,7 +39,7 @@ FClassNetCache::FClassNetCache()
 	unguard;
 }
 
-IMPL_MATCH("Core.dll", 0x1011a580)
+IMPL_MATCH("Core.dll", 0x1011ab10)
 FClassNetCache::FClassNetCache( UClass* InClass )
 :	FieldsBase        ( 0 )
 ,	Super             ( NULL )
@@ -65,7 +65,7 @@ FArchive& operator<<( FArchive& Ar, FClassNetCache& Cache )
 	FPackageInfo.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x1010BC50)
+IMPL_MATCH("Core.dll", 0x0x10119fd0)
 FPackageInfo::FPackageInfo( ULinkerLoad* InLinker )
 :	Linker          ( InLinker )
 ,	Parent          ( InLinker ? InLinker->LinkerRoot : NULL )

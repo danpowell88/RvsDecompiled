@@ -3913,7 +3913,7 @@ void AActor::SetVolumes( const TArray<AVolume*>& NewVolumes )
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x103bb5a0)
+IMPL_MATCH("Engine.dll", 0x103bb740)
 void AActor::SetVolumes()
 {
 	guard(AActor::SetVolumes_void);

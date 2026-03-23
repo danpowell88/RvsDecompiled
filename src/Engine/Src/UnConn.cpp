@@ -277,7 +277,7 @@ int UPlayer::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 // ============================================================================
 
 // ??0UPackageMapLevel@@QAE@PAVUNetConnection@@@Z
-IMPL_MATCH("Engine.dll", 0x1036f880)
+IMPL_MATCH("Engine.dll", 0x1036f8c0)
 UPackageMapLevel::UPackageMapLevel(UNetConnection*) {}
 
 // --- Moved from EngineStubs.cpp ---

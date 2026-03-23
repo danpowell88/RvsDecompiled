@@ -123,7 +123,7 @@ FLOAT FDist( const FVector& V1, const FVector& V2 )
 	FBox.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x10104E00)
+IMPL_MATCH("Core.dll", 0x0x1012c930)
 FBox::FBox( const FVector* Points, INT Count )
 :	Min(0,0,0), Max(0,0,0), IsValid(0)
 {
@@ -135,7 +135,7 @@ FBox::FBox( const FVector* Points, INT Count )
 	FSphere.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x10103E30)
+IMPL_MATCH("Core.dll", 0x0x1012d1d0)
 FSphere::FSphere( const FVector* Pts, INT Count )
 :	FPlane(0,0,0,0)
 {
@@ -1030,7 +1030,7 @@ FPlane FPlane::operator*=( FLOAT Scale )           { X*=Scale; Y*=Scale; Z*=Scal
 IMPL_MATCH("Core.dll", 0x10103db0)
 FPlane FPlane::operator/=( FLOAT Scale )           { FLOAT RScale = 1.0f/Scale; X*=RScale; Y*=RScale; Z*=RScale; W*=RScale; return *this; }
 
-IMPL_MATCH("Core.dll", 0x10107800)
+IMPL_MATCH("Core.dll", 0x1010a6e0)
 FPlane FPlane::TransformBy( const FCoords& Coords ) const
 {
 	return FPlane( *this | Coords.XAxis, *this | Coords.YAxis, *this | Coords.ZAxis, W - (*this | Coords.Origin) );
@@ -1058,7 +1058,7 @@ FPlane FPlane::TransformByUsingAdjointT( const FMatrix& M, const FMatrix& TA ) c
 	);
 }
 
-IMPL_MATCH("Core.dll", 0x10107760)
+IMPL_MATCH("Core.dll", 0x101078d0)
 FPlane FPlane::TransformPlaneByOrtho( const FMatrix& M ) const
 {
 	return TransformBy( M );
@@ -1166,7 +1166,7 @@ bool FBox::Intersect( const FBox& Other ) const
 	return true;
 }
 
-IMPL_MATCH("Core.dll", 0x1010A440)
+IMPL_MATCH("Core.dll", 0x0x1010a5d0)
 FBox FBox::TransformBy( const FMatrix& M ) const
 {
 	FBox Result(0);

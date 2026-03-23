@@ -199,7 +199,7 @@ INT FFileStream::CreateStream( const TCHAR* Filename, INT BlockSizeIn, INT NumCh
 	unguard;
 }
 
-IMPL_MATCH("Core.dll", 0x1012F1A0)
+IMPL_MATCH("Core.dll", 0x0x10149f20)
 INT FFileStream::Destroy( INT StreamId )
 {
 	guard(FFileStream::Destroy_Stream);
@@ -386,7 +386,7 @@ FFileStream& FFileStream::operator=( const FFileStream& Other )
 	FString constructors and methods.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x1010B1A0)
+IMPL_MATCH("Core.dll", 0x0x101369d0)
 FString::FString( BYTE Arg, INT Digits )
 : TArray<TCHAR>()
 {
@@ -397,7 +397,7 @@ FString::FString( BYTE Arg, INT Digits )
 	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
 }
 
-IMPL_MATCH("Core.dll", 0x1010B210)
+IMPL_MATCH("Core.dll", 0x0x101369d0)
 FString::FString( SBYTE Arg, INT Digits )
 : TArray<TCHAR>()
 {
@@ -408,7 +408,7 @@ FString::FString( SBYTE Arg, INT Digits )
 	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
 }
 
-IMPL_MATCH("Core.dll", 0x1010B690)
+IMPL_MATCH("Core.dll", 0x0x101369d0)
 FString::FString( _WORD Arg, INT Digits )
 : TArray<TCHAR>()
 {
@@ -419,7 +419,7 @@ FString::FString( _WORD Arg, INT Digits )
 	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
 }
 
-IMPL_MATCH("Core.dll", 0x101316B0)
+IMPL_MATCH("Core.dll", 0x0x101369d0)
 FString::FString( SWORD Arg, INT Digits )
 : TArray<TCHAR>()
 {
@@ -430,7 +430,7 @@ FString::FString( SWORD Arg, INT Digits )
 	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
 }
 
-IMPL_MATCH("Core.dll", 0x101316C0)
+IMPL_MATCH("Core.dll", 0x0x101369d0)
 FString::FString( INT Arg, INT Digits )
 : TArray<TCHAR>()
 {
@@ -441,7 +441,7 @@ FString::FString( INT Arg, INT Digits )
 	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
 }
 
-IMPL_MATCH("Core.dll", 0x101316D0)
+IMPL_MATCH("Core.dll", 0x0x101369d0)
 FString::FString( DWORD Arg, INT Digits )
 : TArray<TCHAR>()
 {
@@ -452,7 +452,7 @@ FString::FString( DWORD Arg, INT Digits )
 	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
 }
 
-IMPL_MATCH("Core.dll", 0x101316E0)
+IMPL_MATCH("Core.dll", 0x0x101369d0)
 FString::FString( FLOAT Arg, INT Digits, INT RightDigits, UBOOL LeadZero )
 : TArray<TCHAR>()
 {
@@ -463,7 +463,7 @@ FString::FString( FLOAT Arg, INT Digits, INT RightDigits, UBOOL LeadZero )
 	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
 }
 
-IMPL_MATCH("Core.dll", 0x101316F0)
+IMPL_MATCH("Core.dll", 0x0x101369d0)
 FString::FString( DOUBLE Arg, INT Digits, INT RightDigits, INT LeadZero )
 : TArray<TCHAR>()
 {

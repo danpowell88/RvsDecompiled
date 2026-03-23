@@ -18,7 +18,7 @@ inline void  operator delete(void*, void*) noexcept {}
 ENGINE_API FPlane FGetHSV(BYTE H, BYTE S, BYTE V);
 
 // --- FStatGraphLine ---
-IMPL_MATCH("Engine.dll", 0x1032c410)
+IMPL_MATCH("Engine.dll", 0x10445b60)
 FStatGraphLine::FStatGraphLine(FStatGraphLine const &Other)
 {
 	// Ghidra 0x2c410: no vtable; DWORD at +0; TArray<FLOAT> at +4; 2 DWORDs at +10; FString at +18; 4 DWORDs at +24..+30

@@ -45,7 +45,7 @@ void USound::PostLoad()
 	// NOTE: Divergence — FUN_1037ef65() cleanup helper skipped (not identified).
 }
 
-IMPL_MATCH("Engine.dll", 0x1037ef65)
+IMPL_MATCH("Engine.dll", 0x1037ef80)
 void USound::PS2Convert()
 {
 	guard(USound::PS2Convert);
@@ -55,7 +55,7 @@ void USound::PS2Convert()
 	unguard;
 }
 
-IMPL_MATCH("Engine.dll", 0x10321190)
+IMPL_MATCH("Engine.dll", 0x103212d0)
 USound::USound(const TCHAR* InName, INT InFlags)
 {
 	guard(USound::USound);
@@ -361,7 +361,7 @@ void FWaveModInfo::Reduce16to8()
 // ============================================================================
 // FSoundData
 // ============================================================================
-IMPL_MATCH("Engine.dll", 0x10321030)
+IMPL_MATCH("Engine.dll", 0x10321080)
 FSoundData::FSoundData(USound*) { appMemzero(this, sizeof(*this)); }
 IMPL_EMPTY("Ghidra VA 0x10321070 (RVA 0x21070) confirms retail body is trivial (5 bytes)")
 FSoundData::~FSoundData() {}

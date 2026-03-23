@@ -11,7 +11,7 @@
 	FOutputDevice base class implementation.
 -----------------------------------------------------------------------------*/
 
-IMPL_MATCH("Core.dll", 0x1012EE70)
+IMPL_MATCH("Core.dll", 0x0x1012ef20)
 void FOutputDevice::Log( const TCHAR* S )
 {
 	guard(FOutputDevice::Log);
@@ -19,7 +19,7 @@ void FOutputDevice::Log( const TCHAR* S )
 	unguard;
 }
 
-IMPL_MATCH("Core.dll", 0x1012EEA0)
+IMPL_MATCH("Core.dll", 0x0x1012ef20)
 void FOutputDevice::Log( enum EName Type, const TCHAR* S )
 {
 	guard(FOutputDevice::Log);
@@ -27,7 +27,7 @@ void FOutputDevice::Log( enum EName Type, const TCHAR* S )
 	unguard;
 }
 
-IMPL_MATCH("Core.dll", 0x1012EED0)
+IMPL_MATCH("Core.dll", 0x0x1012ef20)
 void FOutputDevice::Log( const FString& S )
 {
 	guard(FOutputDevice::Log);
@@ -43,7 +43,7 @@ void FOutputDevice::Log( enum EName Type, const FString& S )
 	unguard;
 }
 
-IMPL_MATCH("Core.dll", 0x1012EF70)
+IMPL_MATCH("Core.dll", 0x0x1012efd0)
 void FOutputDevice::Logf( const TCHAR* Fmt, ... )
 {
 	TCHAR TempStr[4096];
@@ -109,7 +109,7 @@ void FNullOutError::Serialize( const TCHAR* V, EName Event )
 	unguard;
 }
 
-IMPL_MATCH("Core.dll", 0x10101260)
+IMPL_MATCH("Core.dll", 0x10108540)
 FThrowOut::FThrowOut() {}
 IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10108540 size 9 bytes")
 FThrowOut::FThrowOut( const FThrowOut& ) {}

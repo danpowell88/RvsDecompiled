@@ -880,14 +880,14 @@ int FOrientation::operator!=(FOrientation const & Other) const
 
 
 // --- FRebuildOptions ---
-IMPL_MATCH("Engine.dll", 0x10301cf0)
+IMPL_MATCH("Engine.dll", 0x103fd260)
 FRebuildOptions::FRebuildOptions(FRebuildOptions const & Other)
 	: Name(Other.Name)
 {
 	appMemcpy(Options, Other.Options, sizeof(Options));
 }
 
-IMPL_MATCH("Engine.dll", 0x10301cf0)
+IMPL_MATCH("Engine.dll", 0x103fd260)
 FRebuildOptions::FRebuildOptions()
 {
 	Options[0] = 2;    // 0x0C
@@ -953,7 +953,7 @@ FTags::FTags(FTags const &Other)
 	new ((BYTE*)this + 0x30) FString(*(const FString*)((const BYTE*)&Other + 0x30));
 }
 
-IMPL_MATCH("Engine.dll", 0x10302ea0)
+IMPL_MATCH("Engine.dll", 0x10302ed0)
 FTags::FTags()
 {
 	// Zero first 0x30 bytes;initialize owned FString at +0x30 to empty
