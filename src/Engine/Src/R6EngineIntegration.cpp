@@ -104,7 +104,7 @@ return Ptr;
 
 
 // --- AR6ActionSpot ---
-IMPL_EMPTY("AR6ActionSpot has no special editor geometry; retail body is guard/unguard only")
+IMPL_TODO("AR6ActionSpot has no special editor geometry; retail body is guard/unguard only - retail has 1559B at 0x10475e60")
 void AR6ActionSpot::RenderEditorInfo(FLevelSceneNode *,FRenderInterface *,FDynamicActor *)
 {
 	guard(AR6ActionSpot::RenderEditorInfo);
@@ -194,7 +194,7 @@ int AR6ColBox::CanStepUp(FVector vec)
 	unguardSlow;
 }
 
-IMPL_EMPTY("Body unknown; collision enable/disable logic requires Ghidra analysis")
+IMPL_TODO("Body unknown; collision enable/disable logic requires Ghidra analysis - retail has 531B at 0x10476890")
 void AR6ColBox::EnableCollision(int,int,int)
 {
 	guard(AR6ColBox::EnableCollision);
@@ -219,7 +219,7 @@ void AR6ColBox::GetColBoxLocationFromOwner(FVector& result, float height)
 	unguard;
 }
 
-IMPL_EMPTY("Body unknown; output parameters not populated without Ghidra analysis")
+IMPL_TODO("Body unknown; output parameters not populated without Ghidra analysis - retail has 205B at 0x104765d0")
 void AR6ColBox::GetDestination(FVector &,FRotator &)
 {
 	guard(AR6ColBox::GetDestination);
@@ -321,14 +321,14 @@ void AR6DecalGroup::KillDecal(AR6Decal *)
 	unguard;
 }
 
-IMPL_EMPTY("Body unknown; post-destroy decal cleanup requires Ghidra analysis")
+IMPL_TODO("Body unknown; post-destroy decal cleanup requires Ghidra analysis - retail has 190B at 0x10476eb0")
 void AR6DecalGroup::PostScriptDestroyed()
 {
 	guard(AR6DecalGroup::PostScriptDestroyed);
 	unguard;
 }
 
-IMPL_EMPTY("Body unknown; decal group activation logic requires Ghidra analysis")
+IMPL_TODO("Body unknown; decal group activation logic requires Ghidra analysis - retail has 614B at 0x10477280")
 void AR6DecalGroup::ActivateGroup()
 {
 	guard(AR6DecalGroup::ActivateGroup);
@@ -410,7 +410,7 @@ int AR6DecalGroup::AddDecal(FVector* param_1, FRotator* param_2, UTexture* param
 
 
 // --- AR6DecalManager ---
-IMPL_EMPTY("Body unknown; decal manager spawn initialization requires Ghidra analysis")
+IMPL_TODO("Body unknown; decal manager spawn initialization requires Ghidra analysis - retail has 1192B at 0x10477c70")
 void AR6DecalManager::Spawned()
 {
 	guard(AR6DecalManager::Spawned);
@@ -527,7 +527,7 @@ void AR6RainbowStartInfo::TransferFile(FArchive& Ar)
 
 
 // --- AR6TeamStartInfo ---
-IMPL_EMPTY("Body unknown; team serialization field layout requires Ghidra analysis")
+IMPL_TODO("Body unknown; team serialization field layout requires Ghidra analysis - retail has 225B at 0x1037ec20")
 void AR6TeamStartInfo::TransferFile(FArchive &,int)
 {
 	guard(AR6TeamStartInfo::TransferFile);
@@ -536,21 +536,21 @@ void AR6TeamStartInfo::TransferFile(FArchive &,int)
 
 
 // --- AR6WallHit ---
-IMPL_EMPTY("Body unknown; wall-hit visual effect spawning requires Ghidra analysis")
+IMPL_TODO("Body unknown; wall-hit visual effect spawning requires Ghidra analysis - retail has 1007B at 0x104782a0")
 void AR6WallHit::SpawnEffects()
 {
 	guard(AR6WallHit::SpawnEffects);
 	unguard;
 }
 
-IMPL_EMPTY("Body unknown; wall-hit sound spawning requires Ghidra analysis")
+IMPL_TODO("Body unknown; wall-hit sound spawning requires Ghidra analysis - retail has 81B at 0x10478150")
 void AR6WallHit::SpawnSound()
 {
 	guard(AR6WallHit::SpawnSound);
 	unguard;
 }
 
-IMPL_EMPTY("Body unknown; wall-hit post-begin-play initialization requires Ghidra analysis")
+IMPL_TODO("Body unknown; wall-hit post-begin-play initialization requires Ghidra analysis - retail has 119B at 0x10478220")
 void AR6WallHit::PostBeginPlay()
 {
 	guard(AR6WallHit::PostBeginPlay);
@@ -559,14 +559,14 @@ void AR6WallHit::PostBeginPlay()
 
 
 // --- AR6eviLTesting ---
-IMPL_EMPTY("Debug/testing function; ATS test body requires Ghidra analysis")
+IMPL_TODO("Debug/testing function; ATS test body requires Ghidra analysis - retail has 359B at 0x10478c90")
 void AR6eviLTesting::eviLTestATS()
 {
 	guard(AR6eviLTesting::eviLTestATS);
 	unguard;
 }
 
-IMPL_EMPTY("Debug/testing function; update-system test body requires Ghidra analysis")
+IMPL_TODO("Debug/testing function; update-system test body requires Ghidra analysis - retail has 234B at 0x10478b70")
 void AR6eviLTesting::evilTestUpdateSystem()
 {
 	guard(AR6eviLTesting::evilTestUpdateSystem);
@@ -575,7 +575,7 @@ void AR6eviLTesting::evilTestUpdateSystem()
 
 
 // --- UR6AbstractGameManager ---
-IMPL_EMPTY("Ghidra 0x1030e7c0: base-class stub; body is empty (FString param cleanup only). Derived class in R6GameService.dll overrides.")
+IMPL_TODO("Ghidra 0x1030e7c0: base-class stub; body is empty (FString param cleanup only). Derived class in R6GameService.dll overrides. - retail has 73B at 0x1030e7c0")
 void UR6AbstractGameManager::StartJoinServer(FString,FString,int)
 {
 	guard(UR6AbstractGameManager::StartJoinServer);
@@ -610,7 +610,7 @@ void UR6AbstractGameManager::SetGSCreateUbiServer(int)
 	unguard;
 }
 
-IMPL_EMPTY("Ghidra 0x1030e770: base-class stub; body is empty (FString param cleanup only). Derived class in R6GameService.dll overrides.")
+IMPL_TODO("Ghidra 0x1030e770: base-class stub; body is empty (FString param cleanup only). Derived class in R6GameService.dll overrides. - retail has 73B at 0x1030e770")
 void UR6AbstractGameManager::LaunchListenSrv(FString,FString)
 {
 	guard(UR6AbstractGameManager::LaunchListenSrv);

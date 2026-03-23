@@ -1430,11 +1430,11 @@ void ECLipSynchData::m_vStartLipsynch()
 }
 
 // ?m_vStopLipsynch@ECLipSynchData@@QAEXXZ
-IMPL_EMPTY("lip sync stop no-op")
+IMPL_TODO("lip sync stop no-op - retail has 64B at 0x10355150")
 void ECLipSynchData::m_vStopLipsynch() {}
 
 // ?m_vUpdateBonesCompressed@ECLipSynchData@@QAEXH@Z
-IMPL_EMPTY("compressed bone update no-op")
+IMPL_TODO("compressed bone update no-op - retail has 1277B at 0x10355630")
 void ECLipSynchData::m_vUpdateBonesCompressed(int p0) {}
 
 // ?m_vUpdateBonesCompressed_BoneView@ECLipSynchData@@QAEXH@Z
@@ -1442,16 +1442,16 @@ IMPL_EMPTY("bone-view compressed update no-op")
 void ECLipSynchData::m_vUpdateBonesCompressed_BoneView(int p0) {}
 
 // ?m_vUpdateBonesCompressed_PhonemsSeq@ECLipSynchData@@QAEXH@Z
-IMPL_EMPTY("phonemes-sequence compressed update no-op")
+IMPL_TODO("phonemes-sequence compressed update no-op - retail has 999B at 0x10355190")
 void ECLipSynchData::m_vUpdateBonesCompressed_PhonemsSeq(int p0) {}
 
 // ?m_vUpdateLipSynch@ECLipSynchData@@QAEXM@Z
-IMPL_EMPTY("lip sync per-frame update no-op")
+IMPL_TODO("lip sync per-frame update no-op - retail has 424B at 0x10355df0")
 void ECLipSynchData::m_vUpdateLipSynch(float p0) {}
 // ?GetSamples@FMatineeTools@@QAEXPAVASceneManager@@PAVUMatAction@@PAV?$TArray@VFVector@@@@@Z
-IMPL_EMPTY("path samples collection no-op")
+IMPL_TODO("path samples collection no-op - retail has 514B at 0x103ca330")
 void FMatineeTools::GetSamples(ASceneManager * p0, UMatAction * p1, TArray<FVector> * p2) {}
 
 // ?Init@FMatineeTools@@QAEXXZ
-IMPL_EMPTY("FMatineeTools initialization no-op")
+IMPL_TODO("FMatineeTools initialization no-op - retail has 713B at 0x103c9c60")
 void FMatineeTools::Init() {}

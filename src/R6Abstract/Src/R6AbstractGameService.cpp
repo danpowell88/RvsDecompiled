@@ -22,7 +22,7 @@ IMPL_EMPTY("retail: empty")
 void UR6AbstractGameService::ServerRoundFinish() {}
 IMPL_EMPTY("retail: empty")
 void UR6AbstractGameService::SubmitMatchResult() {}
-IMPL_EMPTY("retail: empty")
+IMPL_MATCH("R6Abstract.dll", 0x10002d40)
 void UR6AbstractGameService::UnInitializeGSClientSPW() {}
 
 IMPL_EMPTY("retail: empty")
@@ -45,7 +45,7 @@ IMPL_EMPTY("retail: empty")
 INT UR6AbstractGameService::IsServerJoined()          { return 0; } // retail: empty
 IMPL_EMPTY("retail: empty")
 INT UR6AbstractGameService::MSCLientLeaveServer()     { return 0; } // retail: empty
-IMPL_EMPTY("retail: empty")
+IMPL_MATCH("R6Abstract.dll", 0x10002cf0)
 INT UR6AbstractGameService::SetGSClientComInterface() { return 0; } // retail: empty
 
 IMPL_EMPTY("retail: empty")
@@ -68,27 +68,27 @@ IMPL_EMPTY("retail: empty")
 void UR6AbstractGameService::SetLoginRegServer(BYTE) {}
 IMPL_EMPTY("retail: empty")
 void UR6AbstractGameService::SetOwnSvrPort(INT) {}
-IMPL_EMPTY("retail: empty")
+IMPL_MATCH("R6Abstract.dll", 0x10002d20)
 void UR6AbstractGameService::SetRegServerLoginRequest(BYTE) {}
 IMPL_EMPTY("retail: empty")
 BYTE UR6AbstractGameService::GetGSGameState()     { return 0; } // retail: empty
-IMPL_EMPTY("retail: empty")
+IMPL_MATCH("R6Abstract.dll", 0x10002ce0)
 BYTE UR6AbstractGameService::GetLoginRegServer()  { return 0; } // retail: empty
 
-IMPL_EMPTY("retail: empty")
+IMPL_TODO("retail: empty - retail has 13B at 0x10002d00")
 void UR6AbstractGameService::CDKeyDisconnecUser(FString) {}
-IMPL_EMPTY("retail: empty")
+IMPL_MATCH("R6Abstract.dll", 0x100028d0)
 void UR6AbstractGameService::GameServiceManager(INT, INT, INT, INT) {}
 IMPL_EMPTY("retail: empty")
 void UR6AbstractGameService::MasterServerManager(AR6AbstractGameInfo*, ALevelInfo*) {}
-IMPL_EMPTY("retail: empty")
+IMPL_MATCH("R6Abstract.dll", 0x10002d30)
 void UR6AbstractGameService::ProcessLoginMasterSrv(INT, FLOAT*) {}
-IMPL_EMPTY("retail: empty")
+IMPL_TODO("retail: empty - retail has 13B at 0x10002d10")
 void UR6AbstractGameService::ProcessUbiComJoinServer(INT, INT, FString, FLOAT*) {}
-IMPL_EMPTY("retail: empty")
+IMPL_TODO("retail: empty - retail has 34B at 0x10002d50")
 FString UR6AbstractGameService::GetAuthID(INT) { return TEXT(""); }
 
-IMPL_EMPTY("exec thunk for intentionally empty native")
+IMPL_TODO("exec thunk for intentionally empty native - retail has 107B at 0x10003420")
 void UR6AbstractGameService::execNativeSubmitMatchResult(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;

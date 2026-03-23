@@ -68,7 +68,7 @@ INT AR6Door::PrunePaths()
 	unguard;
 }
 
-IMPL_EMPTY("FLineBatcher drawing stub; Ghidra confirms drawing-only body")
+IMPL_TODO("FLineBatcher drawing stub; Ghidra confirms drawing-only body - retail has 6773B at 0x1001d880")
 void AR6Door::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
 	guard(AR6Door::RenderEditorInfo);

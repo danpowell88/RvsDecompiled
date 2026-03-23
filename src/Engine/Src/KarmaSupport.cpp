@@ -63,12 +63,12 @@ guard(AKConstraint::physKarma);
 unguard;
 }
 
-IMPL_EMPTY("Ghidra 0x176d60: retail body is empty (shared stub for many no-op virtuals)")
+IMPL_MATCH("Engine.dll", 0x10476d60)
 void AKConstraint::postKarmaStep()
 {
 }
 
-IMPL_EMPTY("Ghidra 0x1651d0: retail body is empty (shared stub for many no-op virtuals)")
+IMPL_MATCH("Engine.dll", 0x104651d0)
 void AKConstraint::preKarmaStep(float)
 {
 }

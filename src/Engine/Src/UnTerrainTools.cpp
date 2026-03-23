@@ -123,7 +123,7 @@ int UTerrainBrush::BeginPainting(UTexture** param_1, ATerrainInfo** param_2)
 	unguard;
 }
 
-IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
+IMPL_TODO("Editor terrain tool — not needed for runtime gameplay - retail has 107B at 0x10465af0")
 void UTerrainBrush::EndPainting(UTexture *,ATerrainInfo *)
 {
 	guard(UTerrainBrush::EndPainting);
@@ -176,7 +176,7 @@ UTerrainBrushColor& UTerrainBrushColor::operator=(const UTerrainBrushColor& Othe
 	return *this;
 }
 
-IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
+IMPL_TODO("Editor terrain tool — not needed for runtime gameplay - retail has 180B at 0x10465b90")
 void UTerrainBrushColor::Execute(int)
 {
 	guardSlow(UTerrainBrushColor::Execute);
@@ -216,7 +216,7 @@ UTerrainBrushEdgeTurn& UTerrainBrushEdgeTurn::operator=(const UTerrainBrushEdgeT
 	return *this;
 }
 
-IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
+IMPL_TODO("Editor terrain tool — not needed for runtime gameplay - retail has 176B at 0x104664e0")
 void UTerrainBrushEdgeTurn::Execute(int)
 {
 	guardSlow(UTerrainBrushEdgeTurn::Execute);
@@ -274,7 +274,7 @@ UTerrainBrushFlatten& UTerrainBrushFlatten::operator=(const UTerrainBrushFlatten
 	return *this;
 }
 
-IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
+IMPL_TODO("Editor terrain tool — not needed for runtime gameplay - retail has 158B at 0x104670a0")
 void UTerrainBrushFlatten::Execute(int)
 {
 	guardSlow(UTerrainBrushFlatten::Execute);
@@ -314,7 +314,7 @@ UTerrainBrushNoise& UTerrainBrushNoise::operator=(const UTerrainBrushNoise& Othe
 	return *this;
 }
 
-IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
+IMPL_TODO("Editor terrain tool — not needed for runtime gameplay - retail has 585B at 0x10466e20")
 void UTerrainBrushNoise::Execute(int)
 {
 	guardSlow(UTerrainBrushNoise::Execute);
@@ -354,7 +354,7 @@ UTerrainBrushPaint& UTerrainBrushPaint::operator=(const UTerrainBrushPaint& Othe
 	return *this;
 }
 
-IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
+IMPL_TODO("Editor terrain tool — not needed for runtime gameplay - retail has 489B at 0x10466bf0")
 void UTerrainBrushPaint::Execute(int)
 {
 	guardSlow(UTerrainBrushPaint::Execute);
@@ -401,7 +401,7 @@ UTerrainBrushPlanningPaint& UTerrainBrushPlanningPaint::operator=(const UTerrain
 	return *this;
 }
 
-IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
+IMPL_TODO("Editor terrain tool — not needed for runtime gameplay - retail has 117B at 0x10466210")
 void UTerrainBrushPlanningPaint::Execute(int)
 {
 	guardSlow(UTerrainBrushPlanningPaint::Execute);
@@ -410,14 +410,14 @@ void UTerrainBrushPlanningPaint::Execute(int)
 
 
 // --- UTerrainBrushSelect ---
-IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
+IMPL_TODO("Editor terrain tool — not needed for runtime gameplay - retail has 85B at 0x10466390")
 void UTerrainBrushSelect::MouseButtonDown(UViewport *)
 {
 	guardSlow(UTerrainBrushSelect::MouseButtonDown);
 	unguardSlow;
 }
 
-IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
+IMPL_TODO("Editor terrain tool — not needed for runtime gameplay - retail has 30B at 0x104657a0")
 void UTerrainBrushSelect::MouseMove(float,float)
 {
 	guard(UTerrainBrushSelect::MouseMove);
@@ -455,7 +455,7 @@ UTerrainBrushSelect& UTerrainBrushSelect::operator=(const UTerrainBrushSelect& O
 	return *this;
 }
 
-IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
+IMPL_TODO("Editor terrain tool — not needed for runtime gameplay - retail has 89B at 0x10465fc0")
 void UTerrainBrushSelect::Execute(int)
 {
 	guardSlow(UTerrainBrushSelect::Execute);
@@ -506,7 +506,7 @@ UTerrainBrushSmooth& UTerrainBrushSmooth::operator=(const UTerrainBrushSmooth& O
 	return *this;
 }
 
-IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
+IMPL_TODO("Editor terrain tool — not needed for runtime gameplay - retail has 1415B at 0x10467560")
 void UTerrainBrushSmooth::Execute(int)
 {
 	guardSlow(UTerrainBrushSmooth::Execute);
@@ -515,7 +515,7 @@ void UTerrainBrushSmooth::Execute(int)
 
 
 // --- UTerrainBrushTexPan ---
-IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
+IMPL_TODO("Editor terrain tool — not needed for runtime gameplay - retail has 194B at 0x10465c80")
 void UTerrainBrushTexPan::MouseMove(float,float)
 {
 	guardSlow(UTerrainBrushTexPan::MouseMove);
@@ -555,7 +555,7 @@ UTerrainBrushTexPan& UTerrainBrushTexPan::operator=(const UTerrainBrushTexPan& O
 
 
 // --- UTerrainBrushTexRotate ---
-IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
+IMPL_TODO("Editor terrain tool — not needed for runtime gameplay - retail has 258B at 0x10465d80")
 void UTerrainBrushTexRotate::MouseMove(float,float)
 {
 	guardSlow(UTerrainBrushTexRotate::MouseMove);
@@ -595,7 +595,7 @@ UTerrainBrushTexRotate& UTerrainBrushTexRotate::operator=(const UTerrainBrushTex
 
 
 // --- UTerrainBrushTexScale ---
-IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
+IMPL_TODO("Editor terrain tool — not needed for runtime gameplay - retail has 194B at 0x10465ec0")
 void UTerrainBrushTexScale::MouseMove(float,float)
 {
 	guardSlow(UTerrainBrushTexScale::MouseMove);
@@ -699,7 +699,7 @@ UTerrainBrushVisibility& UTerrainBrushVisibility::operator=(const UTerrainBrushV
 	return *this;
 }
 
-IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
+IMPL_TODO("Editor terrain tool — not needed for runtime gameplay - retail has 176B at 0x104663f0")
 void UTerrainBrushVisibility::Execute(int)
 {
 	guardSlow(UTerrainBrushVisibility::Execute);

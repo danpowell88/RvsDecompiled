@@ -16,7 +16,7 @@ inline void  operator delete(void*, void*) noexcept {}
 extern ENGINE_API UEngine* g_pEngine;
 
 // --- ACamera ---
-IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
+IMPL_TODO("virtual base no-op — rendering subclass overrides - retail has 267B at 0x1040d350")
 void ACamera::RenderEditorInfo(FLevelSceneNode *,FRenderInterface *,FDynamicActor *)
 {
 	guard(ACamera::RenderEditorInfo);
@@ -48,7 +48,7 @@ void UCameraEffect::PreRender(UViewport *,FRenderInterface *)
 
 
 // --- UCameraOverlay ---
-IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
+IMPL_TODO("virtual base no-op — rendering subclass overrides - retail has 245B at 0x10386590")
 void UCameraOverlay::PostRender(UViewport *,FRenderInterface *)
 {
 	guard(UCameraOverlay::PostRender);
@@ -57,14 +57,14 @@ void UCameraOverlay::PostRender(UViewport *,FRenderInterface *)
 
 
 // --- UMotionBlur ---
-IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
+IMPL_TODO("virtual base no-op — rendering subclass overrides - retail has 1301B at 0x10386950")
 void UMotionBlur::PostRender(UViewport *,FRenderInterface *)
 {
 	guard(UMotionBlur::PostRender);
 	unguard;
 }
 
-IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
+IMPL_TODO("virtual base no-op — rendering subclass overrides - retail has 386B at 0x103863d0")
 void UMotionBlur::PreRender(UViewport *,FRenderInterface *)
 {
 	guard(UMotionBlur::PreRender);
@@ -93,21 +93,21 @@ void UMotionBlur::Destroy()
 
 
 // --- UViewport ---
-IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
+IMPL_TODO("virtual base no-op — rendering subclass overrides - retail has 109B at 0x10385500")
 void UViewport::PushHit(HHitProxy const &,int)
 {
 	guard(UViewport::PushHit);
 	unguard;
 }
 
-IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
+IMPL_TODO("virtual base no-op — rendering subclass overrides - retail has 100B at 0x1032a2d0")
 void UViewport::RefreshAll()
 {
 	guard(UViewport::RefreshAll);
 	unguard;
 }
 
-IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
+IMPL_TODO("virtual base no-op — rendering subclass overrides - retail has 92B at 0x10312970")
 void UViewport::LockOnActor(AActor *)
 {
 	guard(UViewport::LockOnActor);
@@ -203,7 +203,7 @@ int UViewport::MultiShot()
 	return 0;
 }
 
-IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
+IMPL_TODO("virtual base no-op — rendering subclass overrides - retail has 170B at 0x103855a0")
 void UViewport::PopHit(int)
 {
 	guard(UViewport::PopHit);
@@ -218,14 +218,14 @@ void UViewport::ChangeInputSet(BYTE bReset)
 		*(DWORD*)((BYTE*)this + 0x80) = *(DWORD*)((BYTE*)this + 0x84);
 }
 
-IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
+IMPL_TODO("virtual base no-op — rendering subclass overrides - retail has 953B at 0x10384100")
 void UViewport::ExecProfile(const TCHAR*,int,FOutputDevice &)
 {
 	guard(UViewport::ExecProfile);
 	unguard;
 }
 
-IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
+IMPL_TODO("virtual base no-op — rendering subclass overrides - retail has 203B at 0x10382fa0")
 void UViewport::ExecuteHits(FHitCause const &,BYTE*,int,TCHAR*,FColor *,AActor * *)
 {
 	guard(UViewport::ExecuteHits);
@@ -1702,7 +1702,7 @@ FRebuildTools::~FRebuildTools() {}
 // Function body requires fresh Ghidra analysis or retail binary access to reconstruct.
 IMPL_TODO("Ghidra 0x10385B90 (approx, from export table): UViewport::Exec body not recovered by Ghidra export_cpp.py — catch block confirmed at 0x103854DD; needs fresh binary analysis to reconstruct command dispatch")
 INT UViewport::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
-IMPL_EMPTY("body unanalyzed; no output device dispatch implemented")
+IMPL_TODO("body unanalyzed; no output device dispatch implemented - retail has 136B at 0x10382e10")
 void UViewport::Serialize( const TCHAR* Data, EName Event ) {}
 IMPL_MATCH("Engine.dll", 0x10385bc0)
 void UViewport::Destroy() { Super::Destroy(); }
@@ -1713,7 +1713,7 @@ void UViewport::Serialize( FArchive& Ar )
 	Super::Serialize( Ar );
 	unguard;
 }
-IMPL_EMPTY("body unanalyzed; no input polling implemented")
+IMPL_TODO("body unanalyzed; no input polling implemented - retail has 152B at 0x10382ed0")
 void UViewport::ReadInput( FLOAT DeltaSeconds ) {}
 IMPL_MATCH("Engine.dll", 0x10383480)
 INT UViewport::Lock( BYTE* HitData, INT* HitSize )
@@ -1722,9 +1722,9 @@ INT UViewport::Lock( BYTE* HitData, INT* HitSize )
 	return 0;
 	unguard;
 }
-IMPL_EMPTY("body unanalyzed; no render device unlock implemented")
+IMPL_TODO("body unanalyzed; no render device unlock implemented - retail has 179B at 0x10382c80")
 void UViewport::Unlock() {}
-IMPL_EMPTY("body unanalyzed; no frame present implemented")
+IMPL_TODO("body unanalyzed; no frame present implemented - retail has 42B at 0x10382d70")
 void UViewport::Present() {}
 IMPL_MATCH("Engine.dll", 0x103832b0)
 INT UViewport::SetDrag( INT NewDrag )
@@ -1737,11 +1737,11 @@ IMPL_EMPTY("Ghidra VA 0x10414310 (RVA 0x114310) confirms retail body is trivial 
 void* UViewport::GetServer() { return NULL; }
 IMPL_EMPTY("body unanalyzed; render device selection not implemented")
 void UViewport::TryRenderDevice( const TCHAR* ClassName, INT NewX, INT NewY, INT NewColorBytes ) {}
-IMPL_EMPTY("body unanalyzed; macro file execution not implemented")
+IMPL_TODO("body unanalyzed; macro file execution not implemented - retail has 327B at 0x10383f80")
 void UViewport::ExecMacro( const TCHAR* Filename, FOutputDevice& Ar ) {}
 IMPL_MATCH("Engine.dll", 0x10312960)
 UClient* UViewport::GetOuterUClient() const { return (UClient*)GetOuter(); }
-IMPL_EMPTY("body unanalyzed; input subsystem initialization not implemented")
+IMPL_TODO("body unanalyzed; input subsystem initialization not implemented - retail has 29B at 0x10382dd0")
 void UViewport::InitInput() {}
 IMPL_MATCH("Engine.dll", 0x103129f0)
 INT UViewport::IsOrtho()
@@ -1781,7 +1781,7 @@ INT UViewport::IsWire()
 	return 0;
 	unguard;
 }
-IMPL_EMPTY("body unanalyzed; screenshot capture not implemented")
+IMPL_TODO("body unanalyzed; screenshot capture not implemented - retail has 1922B at 0x103835e0")
 void UViewport::ScreenShot() {}
 IMPL_MATCH("Engine.dll", 0x103129d0)
 BYTE* UViewport::_Screen( INT X, INT Y )

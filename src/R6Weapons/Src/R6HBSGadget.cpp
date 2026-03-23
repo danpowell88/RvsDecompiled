@@ -16,7 +16,7 @@ INT AR6HBSGadget::GetHeartBeatStatus()
 	return *(DWORD*)((BYTE*)this + 0x62c) & 1;
 }
 
-IMPL_EMPTY("exec binding; ToggleHeartBeatProperties has no native implementation")
+IMPL_TODO("exec binding; ToggleHeartBeatProperties has no native implementation - retail has 231B at 0x10003a90")
 void AR6HBSGadget::execToggleHeartBeatProperties(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;

@@ -1026,17 +1026,17 @@ FRenderInterface& FRenderInterface::operator=(const FRenderInterface& Other)
 // ============================================================================
 
 // FActorSceneNode
-IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
+IMPL_TODO("virtual base no-op — rendering subclass overrides - retail has 1501B at 0x10408010")
 void FActorSceneNode::Render(FRenderInterface*) {}
 IMPL_MATCH("Engine.dll", 0x10301a90)
 FActorSceneNode* FActorSceneNode::GetActorSceneNode() { return this; }
 
 // FCameraSceneNode
-IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
+IMPL_TODO("virtual base no-op — rendering subclass overrides - retail has 4987B at 0x10406ba0")
 void FCameraSceneNode::Render(FRenderInterface*) {}
 IMPL_MATCH("Engine.dll", 0x10301a90)
 FCameraSceneNode* FCameraSceneNode::GetCameraSceneNode() { return this; }
-IMPL_EMPTY("body unanalyzed; view/projection matrices not updated")
+IMPL_TODO("body unanalyzed; view/projection matrices not updated - retail has 1862B at 0x103feb50")
 void FCameraSceneNode::UpdateMatrices() {}
 
 // FMirrorSceneNode
@@ -1183,7 +1183,7 @@ FConvexVolume FLevelSceneNode::GetViewFrustum()
 
 // FLightMapSceneNode
 extern ENGINE_API FRebuildTools GRebuildTools;
-IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
+IMPL_TODO("virtual base no-op — rendering subclass overrides - retail has 185B at 0x103d0df0")
 void FLightMapSceneNode::Render(FRenderInterface*) {}
 IMPL_MATCH("Engine.dll", 0x103d0dc0)
 INT FLightMapSceneNode::FilterActor(AActor* Actor)
@@ -1304,21 +1304,21 @@ IMPL_EMPTY("virtual base no-op — subclass handles hit events")
 void FHitObserver::Click(const FHitCause& Cause, const HHitProxy& Hit) {}
 
 // ?AVIStart@@YAXPBGPAVUEngine@@H@Z
-IMPL_EMPTY("body unanalyzed; AVI recording start not implemented")
+IMPL_TODO("body unanalyzed; AVI recording start not implemented - retail has 708B at 0x10354740")
 void AVIStart(const TCHAR* p0, UEngine * p1, int p2) {}
 
 // ?AVIStop@@YAXXZ
-IMPL_EMPTY("body unanalyzed; AVI recording stop not implemented")
+IMPL_TODO("body unanalyzed; AVI recording stop not implemented - retail has 107B at 0x103546d0")
 void AVIStop() {}
 
 // ?AVITakeShot@@YAXPAVUEngine@@@Z
-IMPL_EMPTY("body unanalyzed; AVI frame capture not implemented")
+IMPL_TODO("body unanalyzed; AVI frame capture not implemented - retail has 297B at 0x10354a10")
 void AVITakeShot(UEngine * p0) {}
 
 // ?DrawSprite@@YAXPAVAActor@@VFVector@@PAVUMaterial@@PAVFLevelSceneNode@@PAVFRenderInterface@@@Z
-IMPL_EMPTY("body unanalyzed; sprite draw (actor overload) not implemented")
+IMPL_TODO("body unanalyzed; sprite draw (actor overload) not implemented - retail has 1954B at 0x10402750")
 void DrawSprite(AActor * p0, FVector p1, UMaterial * p2, FLevelSceneNode * p3, FRenderInterface * p4) {}
 
 // ?DrawSprite@@YAXMVFVector@@0PAVUMaterial@@VFPlane@@EPAVFCameraSceneNode@@PAVFRenderInterface@@MHH@Z
-IMPL_EMPTY("body unanalyzed; sprite draw (scale/camera overload) not implemented")
+IMPL_TODO("body unanalyzed; sprite draw (scale/camera overload) not implemented - retail has 1954B at 0x10402750")
 void DrawSprite(float p0, FVector p1, FVector p2, UMaterial * p3, FPlane p4, BYTE p5, FCameraSceneNode * p6, FRenderInterface * p7, float p8, int p9, int p10) {}

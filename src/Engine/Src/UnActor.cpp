@@ -4920,7 +4920,7 @@ UPrimitive* ABrush::GetPrimitive()
 }
 IMPL_MATCH("Engine.dll", 0x10398180)
 void ABrush::CheckForErrors() { Super::CheckForErrors(); }
-IMPL_EMPTY("Retail body is also empty — confirmed no-op")
+IMPL_TODO("Retail body is also empty — confirmed no-op - retail has 320B at 0x10307d30")
 void ABrush::CopyPosRotScaleFrom(ABrush* Other) {}
 IMPL_MATCH("Engine.dll", 0x10371110)
 void ABrush::InitPosRotScale()

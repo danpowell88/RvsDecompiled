@@ -119,13 +119,13 @@ void AProjector::PostEditChange()
 	Attach();
 }
 
-IMPL_EMPTY("PostEditLoad — Ghidra shows retail body is empty (shared stub at 0x176d60)")
+IMPL_TODO("PostEditLoad — Ghidra shows retail body is empty (shared stub at 0x176d60) - retail has 26B at 0x10306040")
 void AProjector::PostEditLoad()
 {
 	// Retail: 0x176d60 (shared empty stub)
 }
 
-IMPL_EMPTY("PostEditMove — Ghidra shows retail body is empty (shared stub at 0x176d60)")
+IMPL_TODO("PostEditMove — Ghidra shows retail body is empty (shared stub at 0x176d60) - retail has 51B at 0x10306060")
 void AProjector::PostEditMove()
 {
 	// Retail: 0x176d60 (shared empty stub)

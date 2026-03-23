@@ -781,7 +781,7 @@ void UActorChannel::Destroy()
 	unguard;
 }
 
-IMPL_EMPTY("Ghidra VA 0x103705A0 (RVA 0x705A0) confirms retail body is trivial (4 bytes)")
+IMPL_MATCH("Engine.dll", 0x103705a0)
 AActor* UActorChannel::GetActor()
 {
 // Ghidra (4B): Actor at offset 0x6C

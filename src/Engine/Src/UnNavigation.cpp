@@ -817,7 +817,7 @@ IMPL_EMPTY("pawn base no-op — subclass overrides")
 void ANavigationPoint::CheckSymmetry(ANavigationPoint* Other) {}
 IMPL_EMPTY("pawn base no-op — subclass overrides")
 void ANavigationPoint::PostaddReachSpecs(APawn* Scout) {}
-IMPL_EMPTY("pawn base no-op — subclass overrides")
+IMPL_TODO("pawn base no-op — subclass overrides - retail has 68B at 0x103d6170")
 void ANavigationPoint::SetVolumes(const TArray<AVolume*>& Volumes) {}
 IMPL_MATCH("Engine.dll", 0x103983d0)
 void ANavigationPoint::CheckForErrors()
@@ -864,9 +864,9 @@ INT ANavigationPoint::ProscribedPathTo(ANavigationPoint* Nav)
 	return 0;
 	unguard;
 }
-IMPL_EMPTY("pawn base no-op — subclass overrides")
+IMPL_TODO("pawn base no-op — subclass overrides - retail has 957B at 0x103d71f0")
 void ANavigationPoint::addReachSpecs(APawn* Scout, INT bOnlyChanged) {}
-IMPL_EMPTY("pawn base no-op — subclass overrides")
+IMPL_MATCH("Engine.dll", 0x104651e0)
 void ANavigationPoint::SetupForcedPath(APawn* Scout, UReachSpec* Spec) {}
 IMPL_MATCH("Engine.dll", 0x103d6940)
 void ANavigationPoint::ClearPaths()
@@ -881,7 +881,7 @@ void ANavigationPoint::ClearPaths()
 	((TArray<UReachSpec*>*)((BYTE*)this + 0x3D8))->Empty();
 	unguard;
 }
-IMPL_EMPTY("pawn base no-op — subclass overrides")
+IMPL_TODO("pawn base no-op — subclass overrides - retail has 491B at 0x103d6af0")
 void ANavigationPoint::FindBase() {}
 IMPL_MATCH("Engine.dll", 0x103D8930)
 INT ANavigationPoint::PrunePaths()

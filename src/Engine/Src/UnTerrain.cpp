@@ -16,28 +16,28 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- ATerrainInfo ---
-IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
+IMPL_TODO("terrain editor tool — not needed for runtime gameplay - retail has 802B at 0x10460de0")
 void ATerrainInfo::SetupSectors()
 {
 	guard(ATerrainInfo::SetupSectors);
 	unguard;
 }
 
-IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
+IMPL_TODO("terrain editor tool — not needed for runtime gameplay - retail has 121B at 0x1045cea0")
 void ATerrainInfo::SoftDeselect()
 {
 	guard(ATerrainInfo::SoftDeselect);
 	unguard;
 }
 
-IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
+IMPL_TODO("terrain editor tool — not needed for runtime gameplay - retail has 252B at 0x10461220")
 void ATerrainInfo::UpdateFromSelectedVertices()
 {
 	guard(ATerrainInfo::UpdateFromSelectedVertices);
 	unguard;
 }
 
-IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
+IMPL_TODO("terrain editor tool — not needed for runtime gameplay - retail has 163B at 0x10461760")
 void ATerrainInfo::ResetMove()
 {
 	guard(ATerrainInfo::ResetMove);
@@ -63,14 +63,14 @@ void ATerrainInfo::PostEditChange()
 	unguard;
 }
 
-IMPL_EMPTY("virtual base no-op — subclass overrides")
+IMPL_TODO("virtual base no-op — subclass overrides - retail has 810B at 0x10459b10")
 void ATerrainInfo::PostLoad()
 {
 	guard(ATerrainInfo::PostLoad);
 	unguard;
 }
 
-IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
+IMPL_TODO("terrain editor tool — not needed for runtime gameplay - retail has 416B at 0x10459710")
 void ATerrainInfo::PrecomputeLayerWeights()
 {
 	guard(ATerrainInfo::PrecomputeLayerWeights);
@@ -78,7 +78,7 @@ void ATerrainInfo::PrecomputeLayerWeights()
 }
 
 // (merged from earlier occurrence)
-IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
+IMPL_TODO("terrain editor tool — not needed for runtime gameplay - retail has 1286B at 0x10457610")
 void ATerrainInfo::SoftSelect(float,float)
 {
 	guard(ATerrainInfo::SoftSelect);
@@ -100,19 +100,19 @@ void ATerrainInfo::Update(float Dt, int X1, int Y1, int X2, int Y2, int Flags)
 		CombineLayerWeights();
 	unguard;
 }
-IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
+IMPL_TODO("terrain editor tool — not needed for runtime gameplay - retail has 2268B at 0x1045d780")
 void ATerrainInfo::UpdateDecorations(int)
 {
 	guard(ATerrainInfo::UpdateDecorations);
 	unguard;
 }
-IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
+IMPL_TODO("terrain editor tool — not needed for runtime gameplay - retail has 163B at 0x10460710")
 void ATerrainInfo::UpdateTriangles(int,int,int,int,int)
 {
 	guard(ATerrainInfo::UpdateTriangles);
 	unguard;
 }
-IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
+IMPL_TODO("terrain editor tool — not needed for runtime gameplay - retail has 1465B at 0x10459e90")
 void ATerrainInfo::UpdateVertices(float,int,int,int,int)
 {
 	guard(ATerrainInfo::UpdateVertices);
@@ -124,13 +124,13 @@ FVector ATerrainInfo::WorldToHeightmap(FVector In)
 	// Retail: 29b. ECX=this+0x1330 (heightmap FCoords), call FVector::TransformPointBy.
 	return In.TransformPointBy(*(FCoords*)((BYTE*)this + 0x1330));
 }
-IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
+IMPL_TODO("terrain editor tool — not needed for runtime gameplay - retail has 8875B at 0x10461840")
 void ATerrainInfo::Render(FLevelSceneNode *,FRenderInterface *,FVisibilityInterface *)
 {
 	guard(ATerrainInfo::Render);
 	unguard;
 }
-IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
+IMPL_TODO("terrain editor tool — not needed for runtime gameplay - retail has 2971B at 0x1045ea70")
 void ATerrainInfo::RenderDecorations(FLevelSceneNode *,FRenderInterface *,FVisibilityInterface *)
 {
 	guard(ATerrainInfo::RenderDecorations);
@@ -179,7 +179,7 @@ int ATerrainInfo::SelectVertexX(int X, int Y)
 	*(INT*) (base + idx + 0x10)   = 0;
 	return 1;
 }
-IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
+IMPL_TODO("terrain editor tool — not needed for runtime gameplay - retail has 421B at 0x1045cf50")
 void ATerrainInfo::SelectVerticesInBox(FBox &)
 {
 	guard(ATerrainInfo::SelectVerticesInBox);
@@ -211,7 +211,7 @@ void ATerrainInfo::SetHeightmap(int X, int Y, _WORD Value)
 	_WORD* heightData = (_WORD*)*(BYTE**)(mipsData + 0x1C); // FMipmapBase[0].DataPtr
 	heightData[idx] = Value;
 }
-IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
+IMPL_TODO("terrain editor tool — not needed for runtime gameplay - retail has 174B at 0x104568c0")
 void ATerrainInfo::SetLayerAlpha(float,float,int,BYTE,UTexture *)
 {
 	guard(ATerrainInfo::SetLayerAlpha);
@@ -246,7 +246,7 @@ void ATerrainInfo::SetQuadVisibilityBitmap(int X, int Y, int Value)
 	if (Value) data[idx >> 5] |=  bit_mask;
 	else       data[idx >> 5] &= ~bit_mask;
 }
-IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
+IMPL_TODO("terrain editor tool — not needed for runtime gameplay - retail has 124B at 0x10456f80")
 void ATerrainInfo::SetTextureColor(int,int,UTexture *,FColor &)
 {
 	guard(ATerrainInfo::SetTextureColor);
@@ -273,7 +273,7 @@ int ATerrainInfo::LineCheckWithQuad(int,int,FCheckResult &,FVector,FVector,FVect
 	return 1;
 	unguard;
 }
-IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
+IMPL_TODO("terrain editor tool — not needed for runtime gameplay - retail has 227B at 0x10461640")
 void ATerrainInfo::MoveVertices(float)
 {
 	guard(ATerrainInfo::MoveVertices);
@@ -328,7 +328,7 @@ void ATerrainInfo::CalcCoords()
 
 	*(FCoords*)((BYTE*)this + 0x1330) = HeightmapToWorld->Inverse();
 }
-IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
+IMPL_TODO("terrain editor tool — not needed for runtime gameplay - retail has 573B at 0x104572f0")
 void ATerrainInfo::CalcLayerTexCoords()
 {
 	guard(ATerrainInfo::CalcLayerTexCoords);
@@ -346,13 +346,13 @@ void ATerrainInfo::CheckComputeDataOnLoad()
 	}
 	unguard;
 }
-IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
+IMPL_TODO("terrain editor tool — not needed for runtime gameplay - retail has 479B at 0x104598e0")
 void ATerrainInfo::CombineLayerWeights()
 {
 	guard(ATerrainInfo::CombineLayerWeights);
 	unguard;
 }
-IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
+IMPL_TODO("terrain editor tool — not needed for runtime gameplay - retail has 250B at 0x1045cd70")
 void ATerrainInfo::ConvertHeightmapFormat()
 {
 	guard(ATerrainInfo::ConvertHeightmapFormat);
@@ -968,14 +968,14 @@ FTerrainTools::~FTerrainTools()
 	unguard;
 }
 
-IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
+IMPL_TODO("terrain editor tool — not needed for runtime gameplay - retail has 456B at 0x104669f0")
 void FTerrainTools::AdjustAlignedActors()
 {
 	guard(FTerrainTools::AdjustAlignedActors);
 	unguard;
 }
 
-IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
+IMPL_TODO("terrain editor tool — not needed for runtime gameplay - retail has 746B at 0x104666d0")
 void FTerrainTools::FindActorsToAlign()
 {
 	guard(FTerrainTools::FindActorsToAlign);
@@ -1074,7 +1074,7 @@ int FTerrainTools::GetStrength()
 	return *(INT*)&Pad[0x84];
 }
 
-IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
+IMPL_TODO("terrain editor tool — not needed for runtime gameplay - retail has 738B at 0x10467240")
 void FTerrainTools::Init()
 {
 	guard(FTerrainTools::Init);
@@ -1156,7 +1156,7 @@ INT UTerrainPrimitive::PointCheck(FCheckResult& Result, AActor* Owner, FVector L
 	return Info->PointCheck(Result, Location, Extent, 0);
 	unguard;
 }
-IMPL_EMPTY("virtual base no-op — subclass overrides")
+IMPL_TODO("virtual base no-op — subclass overrides - retail has 2241B at 0x10464050")
 void UTerrainPrimitive::Illuminate(AActor*, INT) {}
 IMPL_MATCH("Engine.dll", 0x10456620)
 FBox UTerrainPrimitive::GetRenderBoundingBox(const AActor* Owner, INT /*bDetailed*/)
@@ -1285,11 +1285,11 @@ void UTerrainSector::Serialize(FArchive& Ar)
 
 	unguard;
 }
-IMPL_EMPTY("virtual base no-op — subclass overrides")
+IMPL_TODO("virtual base no-op — subclass overrides - retail has 63B at 0x104564e0")
 void UTerrainSector::PostLoad() {}
-IMPL_EMPTY("virtual base no-op — subclass overrides")
+IMPL_TODO("virtual base no-op — subclass overrides - retail has 870B at 0x10459390")
 void UTerrainSector::StaticLight(INT) {}
-IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
+IMPL_TODO("terrain editor tool — not needed for runtime gameplay - retail has 3351B at 0x1045f9b0")
 void UTerrainSector::GenerateTriangles() {}
 // Ghidra at 0x156550. Returns linear index in the global heightmap grid.
 IMPL_MATCH("Engine.dll", 0x10456550)
@@ -1342,5 +1342,5 @@ INT UTerrainSector::IsSectorAll(INT layerIdx, BYTE value)
 }
 IMPL_TODO("Ghidra 0x10458D70: terrain texel alpha triangle check blocked by terrain sector texel/alpha buffer layout not yet reconstructed")
 INT UTerrainSector::IsTriangleAll(INT, INT, INT, INT, INT, BYTE) { return 0; }
-IMPL_EMPTY("virtual base no-op — subclass overrides")
+IMPL_TODO("virtual base no-op — subclass overrides - retail has 1235B at 0x10463b40")
 void UTerrainSector::AttachProjector(AProjector*, FProjectorRenderInfo*) {}

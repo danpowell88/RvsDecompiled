@@ -1447,7 +1447,7 @@ void AReplicationInfo::ChangeDrawingSurface(ER6SwitchSurface Surface, INT Param)
 	PunkBuster export.
 -----------------------------------------------------------------------------*/
 
-IMPL_EMPTY("PunkBuster export stub; body intentionally empty")
+IMPL_MATCH("Engine.dll", 0x1047d670)
 extern "C" ENGINE_API void pb_Export() {}
 
 /*-----------------------------------------------------------------------------

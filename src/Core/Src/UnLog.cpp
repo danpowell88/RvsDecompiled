@@ -173,7 +173,7 @@ void FFeedbackContext::MapCheck_Show()
 {
 }
 
-IMPL_EMPTY("Ghidra 0x10101320: 1-byte trivial no-op (shared stub)")
+IMPL_MATCH("Core.dll", 0x10101320)
 void FFeedbackContext::MapCheck_ShowConditionally()
 {
 }

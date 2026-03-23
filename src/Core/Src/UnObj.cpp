@@ -549,7 +549,7 @@ void UObject::LanguageChange()
 	unguard;
 }
 
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10136AB0 size 8 bytes")
+IMPL_MATCH("Core.dll", 0x10136ab0)
 INT UObject::GetPropertiesSize()
 {
 	guard(UObject::GetPropertiesSize);
@@ -1276,7 +1276,7 @@ UObject* UObject::GetIndexedObject( INT Index )
 	return NULL;
 }
 
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10101DB0 size 10 bytes")
+IMPL_MATCH("Core.dll", 0x10101db0)
 INT UObject::GetObjectHash( FName ObjName, INT Outer )
 {
 	return (ObjName.GetIndex() ^ Outer) & (ARRAY_COUNT(GObjHash)-1);

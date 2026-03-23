@@ -237,14 +237,14 @@ int AEmitter::Tick(float DeltaTime, ELevelTick TickType)
 	unguard;
 }
 
-IMPL_EMPTY("emitter render no-op; render path not yet implemented")
+IMPL_TODO("emitter render no-op; render path not yet implemented - retail has 436B at 0x103dfb70")
 void AEmitter::Render(FDynamicActor *,FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
 {
 	guard(AEmitter::Render);
 	unguard;
 }
 
-IMPL_EMPTY("emitter editor info render no-op")
+IMPL_TODO("emitter editor info render no-op - retail has 127B at 0x10406510")
 void AEmitter::RenderEditorInfo(FLevelSceneNode *,FRenderInterface *,FDynamicActor *)
 {
 	guard(AEmitter::RenderEditorInfo);
@@ -316,7 +316,7 @@ int AEmitter::CheckForProjectors()
 	unguard;
 }
 
-IMPL_EMPTY("emitter initialize no-op")
+IMPL_TODO("emitter initialize no-op - retail has 304B at 0x103dfd60")
 void AEmitter::Initialize()
 {
 	guard(AEmitter::Initialize);
@@ -325,14 +325,14 @@ void AEmitter::Initialize()
 
 
 // --- UBeamEmitter ---
-IMPL_EMPTY("beam particle spawn no-op")
+IMPL_TODO("beam particle spawn no-op - retail has 3132B at 0x10380c80")
 void UBeamEmitter::SpawnParticle(int,float,int,int,FVector const &)
 {
 	guard(UBeamEmitter::SpawnParticle);
 	unguard;
 }
 
-IMPL_EMPTY("beam actor hit-list update no-op")
+IMPL_TODO("beam actor hit-list update no-op - retail has 224B at 0x10380ba0")
 void UBeamEmitter::UpdateActorHitList()
 {
 	guard(UBeamEmitter::UpdateActorHitList);
@@ -481,7 +481,7 @@ int UBeamEmitter::RenderParticles(FDynamicActor* param_1, FLevelSceneNode* param
 	unguard;
 }
 
-IMPL_EMPTY("beam emitter scale no-op")
+IMPL_TODO("beam emitter scale no-op - retail has 174B at 0x10380a00")
 void UBeamEmitter::Scale(float)
 {
 	guard(UBeamEmitter::Scale);
@@ -515,7 +515,7 @@ void UBeamEmitter::CleanUp()
 	unguard;
 }
 
-IMPL_EMPTY("beam emitter initialize no-op")
+IMPL_TODO("beam emitter initialize no-op - retail has 200B at 0x10380900")
 void UBeamEmitter::Initialize(int)
 {
 	guard(UBeamEmitter::Initialize);
@@ -568,7 +568,7 @@ void UMeshEmitter::PostEditChange()
 	unguard;
 }
 
-IMPL_EMPTY("mesh emitter initialize no-op")
+IMPL_TODO("mesh emitter initialize no-op - retail has 272B at 0x103cac50")
 void UMeshEmitter::Initialize(int)
 {
 	guard(UMeshEmitter::Initialize);
@@ -577,14 +577,14 @@ void UMeshEmitter::Initialize(int)
 
 
 // --- UParticleEmitter ---
-IMPL_EMPTY("individual particle spawn no-op")
+IMPL_TODO("individual particle spawn no-op - retail has 155B at 0x103dce60")
 void UParticleEmitter::SpawnIndividualParticles(int)
 {
 	guard(UParticleEmitter::SpawnIndividualParticles);
 	unguard;
 }
 
-IMPL_EMPTY("particle spawn no-op")
+IMPL_TODO("particle spawn no-op - retail has 2417B at 0x103dd190")
 void UParticleEmitter::SpawnParticle(int,float,int,int,FVector const &)
 {
 	guard(UParticleEmitter::SpawnParticle);
@@ -829,7 +829,7 @@ void UParticleEmitter::Reset()
 	unguard;
 }
 
-IMPL_EMPTY("particle emitter scale no-op")
+IMPL_TODO("particle emitter scale no-op - retail has 177B at 0x103dcbe0")
 void UParticleEmitter::Scale(float)
 {
 	guard(UParticleEmitter::Scale);
@@ -898,14 +898,14 @@ void UParticleEmitter::Destroy()
 	unguard;
 }
 
-IMPL_EMPTY("actor force handling no-op")
+IMPL_TODO("actor force handling no-op - retail has 547B at 0x103df070")
 void UParticleEmitter::HandleActorForce(AActor *,float)
 {
 	guard(UParticleEmitter::HandleActorForce);
 	unguard;
 }
 
-IMPL_EMPTY("particle emitter initialize no-op")
+IMPL_TODO("particle emitter initialize no-op - retail has 167B at 0x103dd000")
 void UParticleEmitter::Initialize(int)
 {
 	guard(UParticleEmitter::Initialize);
@@ -914,7 +914,7 @@ void UParticleEmitter::Initialize(int)
 
 
 // --- USparkEmitter ---
-IMPL_EMPTY("spark particle spawn no-op")
+IMPL_TODO("spark particle spawn no-op - retail has 227B at 0x104434f0")
 void USparkEmitter::SpawnParticle(int,float,int,int,FVector const &)
 {
 	guard(USparkEmitter::SpawnParticle);
@@ -993,7 +993,7 @@ void USparkEmitter::CleanUp()
 	unguard;
 }
 
-IMPL_EMPTY("spark emitter initialize no-op")
+IMPL_TODO("spark emitter initialize no-op - retail has 155B at 0x10443390")
 void USparkEmitter::Initialize(int)
 {
 	guard(USparkEmitter::Initialize);
@@ -1079,7 +1079,7 @@ int USpriteEmitter::FillVertexBuffer(FSpriteParticleVertex* param_1, FLevelScene
 	unguard;
 }
 
-IMPL_EMPTY("sprite emitter initialize no-op")
+IMPL_TODO("sprite emitter initialize no-op - retail has 108B at 0x10443e30")
 void USpriteEmitter::Initialize(int)
 {
 	guard(USpriteEmitter::Initialize);

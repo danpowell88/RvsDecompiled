@@ -317,7 +317,7 @@ INT AR6DeploymentZone::IsPointInZone(FVector const & Point)
 	unguard;
 }
 
-IMPL_EMPTY("FLineBatcher drawing stub; Ghidra confirms drawing-only body")
+IMPL_TODO("FLineBatcher drawing stub; Ghidra confirms drawing-only body - retail has 986B at 0x10017350")
 void AR6DeploymentZone::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
 	guard(AR6DeploymentZone::RenderEditorInfo);

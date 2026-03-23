@@ -651,7 +651,7 @@ void UObject::execDynamicCast( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_DynamicCast, execDynamicCast );
 
 // 0x2F — EX_Iterator.
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x1011BA30 size 3 bytes")
+IMPL_MATCH("Core.dll", 0x1011ba30)
 void UObject::execIterator( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execIterator);

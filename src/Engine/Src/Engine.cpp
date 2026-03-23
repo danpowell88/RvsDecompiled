@@ -58,19 +58,19 @@ void UPrimitive::Serialize( FArchive& Ar )
 	UObject::Serialize( Ar );
 	Ar << BoundingBox << BoundingSphere;
 }
-IMPL_EMPTY("Base UPrimitive has no geometry — always returns 'no collision'")
+IMPL_TODO("Base UPrimitive has no geometry — always returns 'no collision' - retail has 563B at 0x103f7910")
 INT UPrimitive::PointCheck( FCheckResult& Result, AActor* Owner, FVector Location, FVector Extent, DWORD ExtraNodeFlags )
 { return 0; }
-IMPL_EMPTY("Base UPrimitive has no geometry — always returns 'no collision'")
+IMPL_TODO("Base UPrimitive has no geometry — always returns 'no collision' - retail has 1685B at 0x103f7b80")
 INT UPrimitive::LineCheck( FCheckResult& Result, AActor* Owner, FVector End, FVector Start, FVector Extent, DWORD ExtraNodeFlags, DWORD ExtraFlags )
 { return 0; }
-IMPL_EMPTY("Base UPrimitive has no geometry — returns degenerate box")
+IMPL_TODO("Base UPrimitive has no geometry — returns degenerate box - retail has 185B at 0x103f7640")
 FBox UPrimitive::GetRenderBoundingBox( const AActor* Owner )
 { return FBox(0); }
-IMPL_EMPTY("Base UPrimitive has no geometry — returns degenerate sphere")
+IMPL_TODO("Base UPrimitive has no geometry — returns degenerate sphere - retail has 170B at 0x103f7800")
 FSphere UPrimitive::GetRenderBoundingSphere( const AActor* Owner )
 { return FSphere(0); }
-IMPL_EMPTY("Base UPrimitive has no geometry — returns degenerate box")
+IMPL_TODO("Base UPrimitive has no geometry — returns degenerate box - retail has 223B at 0x103f7530")
 FBox UPrimitive::GetCollisionBoundingBox( const AActor* Owner ) const
 { return FBox(0); }
 IMPL_EMPTY("Base UPrimitive has no geometry — cylinder collision handled by derived classes")

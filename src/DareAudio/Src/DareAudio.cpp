@@ -186,7 +186,7 @@ UDareAudioSubsystem& UDareAudioSubsystem::operator=(const UDareAudioSubsystem& O
 UObject interface.
 -----------------------------------------------------------------------------*/
 
-IMPL_EMPTY("Ghidra confirms empty at 0x10001d40; shares address with PostEditChange, ordinals 41+66")
+IMPL_MATCH("DareAudio.dll", 0x10001d40)
 void UDareAudioSubsystem::StaticConstructor()
 {
 }

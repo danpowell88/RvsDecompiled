@@ -171,7 +171,7 @@ void UProperty::Serialize( FArchive& Ar )
 	unguard;
 }
 
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10143930 size 3 bytes")
+IMPL_MATCH("Core.dll", 0x10143930)
 void UProperty::Link( FArchive& Ar, UProperty* Prev )
 {
 	guard(UProperty::Link);
@@ -1053,15 +1053,15 @@ UBOOL UMapProperty::Identical( const void* A, const void* B ) const
 	return 1;
 }
 
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10145280 size 3 bytes")
+IMPL_MATCH("Core.dll", 0x10145280)
 void UMapProperty::SerializeItem( FArchive& Ar, void* Value ) const {}
 IMPL_MATCH("Core.dll", 0x101452A0)
 void UMapProperty::ExportCppItem( FOutputDevice& Out ) const {}
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10145370 size 3 bytes")
+IMPL_MATCH("Core.dll", 0x10145370)
 void UMapProperty::ExportTextItem( TCHAR* ValueStr, BYTE* PropertyValue, BYTE* DefaultValue, INT PortFlags ) const { *ValueStr = 0; }
 IMPL_MATCH("Core.dll", 0x10145380)
 const TCHAR* UMapProperty::ImportText( const TCHAR* Buffer, BYTE* Data, INT PortFlags ) const { return Buffer; }
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10145390 size 3 bytes")
+IMPL_MATCH("Core.dll", 0x10145390)
 void UMapProperty::CopySingleValue( void* Dest, void* Src ) const {}
 
 IMPLEMENT_CLASS(UMapProperty);
@@ -1270,7 +1270,7 @@ void UDelegateProperty::ExportTextItem( TCHAR* ValueStr, BYTE* PropertyValue, BY
 	unguard;
 }
 
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10143E10 size 7 bytes")
+IMPL_MATCH("Core.dll", 0x10143e10)
 const TCHAR* UDelegateProperty::ImportText( const TCHAR* Buffer, BYTE* Data, INT PortFlags ) const
 {
 	guard(UDelegateProperty::ImportText);
@@ -1496,11 +1496,11 @@ IMPL_MATCH("Core.dll", 0x101450C0)
 void UArrayProperty::AddCppProperty( UProperty* Property ) { Inner = Property; }
 
 // UMapProperty.
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10145280 size 3 bytes")
+IMPL_MATCH("Core.dll", 0x10145280)
 void UMapProperty::SerializeItem( FArchive& Ar, void* Value, INT MaxReadBytes ) const { UProperty::SerializeItem( Ar, Value ); }
 IMPL_MATCH("Core.dll", 0x101452A0)
 void UMapProperty::ExportCppItem( FOutputDevice& Out, INT Indent ) const { Out.Log( TEXT("/* Map */") ); }
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10145390 size 3 bytes")
+IMPL_MATCH("Core.dll", 0x10145390)
 void UMapProperty::CopySingleValue( void* Dest, void* Src, UObject* SuperObject ) const { CopySingleValue( Dest, Src ); }
 IMPL_MATCH("Core.dll", 0x101453a0)
 void UMapProperty::DestroyValue( void* Dest ) const {}
@@ -1529,11 +1529,11 @@ IMPL_MATCH("Core.dll", 0x10145CA0)
 UBOOL UIntProperty::NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const { return UProperty::NetSerializeItem( Ar, Map, Data ); }
 IMPL_MATCH("Core.dll", 0x101444E0)
 UBOOL UObjectProperty::NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const { return UProperty::NetSerializeItem( Ar, Map, Data ); }
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10144D60 size 8 bytes")
+IMPL_MATCH("Core.dll", 0x10144d60)
 UBOOL UArrayProperty::NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const { return UProperty::NetSerializeItem( Ar, Map, Data ); }
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10144840 size 8 bytes")
+IMPL_MATCH("Core.dll", 0x10144840)
 UBOOL UFixedArrayProperty::NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const { return UProperty::NetSerializeItem( Ar, Map, Data ); }
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10145290 size 8 bytes")
+IMPL_MATCH("Core.dll", 0x10145290)
 UBOOL UMapProperty::NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const { return UProperty::NetSerializeItem( Ar, Map, Data ); }
 IMPL_MATCH("Core.dll", 0x10148170)
 UBOOL UStructProperty::NetSerializeItem( FArchive& Ar, UPackageMap* Map, void* Data ) const { return UProperty::NetSerializeItem( Ar, Map, Data ); }

@@ -8,7 +8,7 @@ IMPLEMENT_CLASS(AR6CoverSpot)
 
 // --- AR6CoverSpot ---
 
-IMPL_EMPTY("FLineBatcher drawing stub; Ghidra confirms drawing-only body")
+IMPL_TODO("FLineBatcher drawing stub; Ghidra confirms drawing-only body - retail has 575B at 0x10016890")
 void AR6CoverSpot::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
 	guard(AR6CoverSpot::RenderEditorInfo);

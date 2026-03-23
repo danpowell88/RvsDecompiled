@@ -4688,11 +4688,11 @@ void ALevelInfo::SetZone(INT ZoneNumber, INT ZoneBitField)
 	*(DWORD*)((BYTE*)this + 0x22C) = 0xFFFFFFFF;
 	*(DWORD*)((BYTE*)this + 0x230) = 0;
 }
-IMPL_EMPTY("base no-op — subclass implements")
+IMPL_TODO("base no-op — subclass implements - retail has 191B at 0x1037ed40")
 void ALevelInfo::PostNetReceive() {}
-IMPL_EMPTY("base no-op — subclass implements")
+IMPL_TODO("base no-op — subclass implements - retail has 75B at 0x10378190")
 void ALevelInfo::PreNetReceive() {}
-IMPL_EMPTY("base no-op — subclass implements")
+IMPL_TODO("base no-op — subclass implements - retail has 202B at 0x103976b0")
 void ALevelInfo::CheckForErrors() {}
 IMPL_DIVERGE("Ghidra 0x103756b0: DAT_10656444 is ALevelInfo::PrivateStaticClass ClassFlags (CLASS_NativeReplication=0x800); assumed always set (correct for gameplay). Property caches use function-local statics instead of fixed data-segment globals at 0x106669e8-fc. Functionally equivalent.")
 INT* ALevelInfo::GetOptimizedRepList( BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan )
@@ -4914,7 +4914,7 @@ INT ALevelInfo::IsSoundAudibleFromZone(INT Zone1, INT Zone2)
     DWORD hi   = (DWORD)hiMask & Zones[Zone1 * 2 + 1];
     return (lo | hi) ? 1 : 0;
 }
-IMPL_EMPTY("base no-op — subclass implements")
+IMPL_TODO("base no-op — subclass implements - retail has 260B at 0x1037dd20")
 void AGameReplicationInfo::PostNetReceive() {}
 IMPL_MATCH("Engine.dll", 0x10376620)
 INT* AGameReplicationInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
@@ -5152,7 +5152,7 @@ INT* AGameReplicationInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* R
 	return Ptr;
 	unguard;
 }
-IMPL_EMPTY("base no-op — subclass implements")
+IMPL_TODO("base no-op — subclass implements - retail has 348B at 0x1037db90")
 void APlayerReplicationInfo::PostNetReceive() {}
 IMPL_MATCH("Engine.dll", 0x103759a0)
 INT* APlayerReplicationInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)

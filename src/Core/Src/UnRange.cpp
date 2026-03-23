@@ -286,7 +286,7 @@ FVector FRangeVector::GetSRand() const
 	return FVector( X.GetSRand(), Y.GetSRand(), Z.GetSRand() );
 }
 
-IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10104DF0 size 10 bytes")
+IMPL_MATCH("Core.dll", 0x10104df0)
 FRange& FRangeVector::Component( INT Index )
 {
 	switch( Index )

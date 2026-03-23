@@ -22,7 +22,7 @@ guard(URenderDevice::StartVideo);
 unguard;
 }
 
-IMPL_EMPTY("NullDrv — headless renderer; retail body is also empty")
+IMPL_TODO("NullDrv — headless renderer; retail body is also empty - retail has 424B at 0x10382a10")
 void URenderDevice::StaticConstructor()
 {
 guard(URenderDevice::StaticConstructor);
@@ -36,7 +36,7 @@ guard(URenderDevice::StopVideo);
 unguard;
 }
 
-IMPL_EMPTY("NullDrv — headless renderer; retail body is also empty")
+IMPL_MATCH("Engine.dll", 0x103033a0)
 int URenderDevice::OpenVideo(UCanvas *,char *,char *,int)
 {
 guard(URenderDevice::OpenVideo);
@@ -65,7 +65,7 @@ guard(URenderDevice::DisplayVideo);
 unguard;
 }
 
-IMPL_EMPTY("NullDrv — headless renderer; retail body is also empty")
+IMPL_MATCH("Engine.dll", 0x103033b0)
 void URenderDevice::Draw3DLine(FVector,FVector,FColor,UTexture *,float,float,float,float)
 {
 guard(URenderDevice::Draw3DLine);
@@ -110,7 +110,7 @@ return 0;
 unguard;
 }
 
-IMPL_EMPTY("NullDrv — headless renderer; retail body is also empty")
+IMPL_TODO("NullDrv — headless renderer; retail body is also empty - retail has 41B at 0x1036c9f0")
 INT UNullRenderDevice::Init()
 {
 guard(UNullRenderDevice::Init);
@@ -118,7 +118,7 @@ return 1;
 unguard;
 }
 
-IMPL_EMPTY("NullDrv — headless renderer; retail body is also empty")
+IMPL_TODO("NullDrv — headless renderer; retail body is also empty - retail has 54B at 0x1036c950")
 INT UNullRenderDevice::SetRes( UViewport* Viewport, INT NewX, INT NewY, INT NewColorBytes )
 {
 guard(UNullRenderDevice::SetRes);
@@ -182,7 +182,7 @@ guard(UNullRenderDevice::RestoreGamma);
 unguard;
 }
 
-IMPL_EMPTY("NullDrv — headless renderer; retail body is also empty")
+IMPL_MATCH("Engine.dll", 0x1036c9a0)
 FRenderInterface* UNullRenderDevice::Lock( UViewport* Viewport, BYTE* HitData, INT* HitSize )
 {
 guard(UNullRenderDevice::Lock);
@@ -190,7 +190,7 @@ return NULL;
 unguard;
 }
 
-IMPL_EMPTY("NullDrv — headless renderer; retail body is also empty")
+IMPL_MATCH("Engine.dll", 0x1036c9b0)
 FRenderCaps* UNullRenderDevice::GetRenderCaps()
 {
 guard(UNullRenderDevice::GetRenderCaps);
@@ -209,6 +209,6 @@ unguard;
 // --- Moved from EngineStubs.cpp ---
 IMPL_EMPTY("NullDrv — headless renderer; retail body is also empty")
 void UNullRenderDevice::SetEmulationMode(EHardwareEmulationMode) {}
-IMPL_EMPTY("NullDrv — headless renderer; retail body is also empty")
+IMPL_MATCH("Engine.dll", 0x10487ce0)
 INT UNullRenderDevice::SupportsTextureFormat(ETextureFormat) { return 1; }
 
