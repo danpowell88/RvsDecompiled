@@ -2067,26 +2067,23 @@ public:
 	virtual void NetDirty(class UProperty*);
 
 	// Virtual methods — AActor
+	// Vtable slot order verified against Ghidra retail AActor vtable.
+	// UObject overrides (no new slots — override existing UObject positions):
 	virtual INT IsPendingKill();
 	virtual INT IsPendingDelete();
+	// AActor-new virtuals (slots 25–96, order must match retail vtable):
 	virtual INT * GetOptimizedRepList(BYTE *, struct FPropertyRetirement *, INT *, class UPackageMap *, class UActorChannel *);
-	virtual class APawn * GetPawnOrColBoxOwner() const;
-	virtual class APawn * GetPlayerPawn() const;
-	virtual INT PlayerControlled();
+	virtual class APawn * GetPlayerPawn() const;                               // slot 26
+	virtual class APawn * GetPawnOrColBoxOwner() const;                        // slot 27
 	virtual INT IsBlockedBy(class AActor const *) const;
 	virtual FLOAT GetNetPriority(class AActor *, FLOAT, FLOAT);
 	virtual FLOAT WorldLightRadius() const;
 	virtual INT Tick(FLOAT, enum ELevelTick);
-	virtual void BoundProjectileVelocity();
-	virtual void PostBeginPlay();
-	virtual void PostEditLoad();
-	virtual void PostEditMove();
-	virtual void PostPath();
-	virtual void PostRaytrace();
-	virtual void PostScriptDestroyed();
-	virtual void PrePath();
-	virtual void PreRaytrace();
-	virtual void Spawned();
+	virtual void PostEditMove();                                               // slot 32
+	virtual void PostEditLoad();                                               // slot 33
+	virtual void PreRaytrace();                                                // slot 34
+	virtual void PostRaytrace();                                               // slot 35
+	virtual void Spawned();                                                    // slot 36
 	virtual void PreNetReceive();
 	virtual void PostNetReceive();
 	virtual void PostNetReceiveLocation();
@@ -2096,6 +2093,7 @@ public:
 	virtual class FMatrix LocalToWorld() const;
 	virtual class FMatrix WorldToLocal() const;
 	virtual void UpdateColBox(class FVector &, INT, INT, INT);
+	virtual void PostScriptDestroyed();                                        // slot 46
 	virtual INT ShouldTrace(class AActor *, DWORD);
 	virtual class UPrimitive * GetPrimitive();
 	virtual void BeginTouch(class AActor *);
@@ -2111,16 +2109,18 @@ public:
 	virtual INT CheckOwnerUpdated();
 	virtual void TickAuthoritative(FLOAT);
 	virtual void TickSimulated(FLOAT);
-	virtual void AddMyMarker(class AActor *);
-	virtual void TickSpecial(FLOAT);
+	virtual void TickSpecial(FLOAT);                                           // slot 62
+	virtual INT PlayerControlled();                                            // slot 63
 	virtual INT IsNetRelevantFor(class APlayerController *, class AActor *, class FVector);
 	virtual void RenderEditorInfo(class FLevelSceneNode *, class FRenderInterface *, class FDynamicActor *);
 	virtual void RenderEditorSelected(class FLevelSceneNode *, class FRenderInterface *, class FDynamicActor *);
-	virtual void SetZone(INT, INT);
+	virtual void SetZone(INT, INT);                                            // slot 67
 	virtual void SetVolumes(class TArray<class AVolume *> const &);
 	virtual void SetVolumes();
+	virtual void PostBeginPlay();                                              // slot 70
 	virtual void setPhysics(BYTE, class AActor *, class FVector);
 	virtual void performPhysics(FLOAT);
+	virtual void BoundProjectileVelocity();                                    // slot 73
 	virtual void processHitWall(class FVector, class AActor *);
 	virtual void processLanded(class FVector, class AActor *, FLOAT, INT);
 	virtual void physFalling(FLOAT, INT);
@@ -2132,14 +2132,17 @@ public:
 	virtual void preKarmaStep(FLOAT);
 	virtual void postKarmaStep();
 	virtual INT KMP2DynKarmaInterface(INT, class FVector, class FRotator, class AActor *);
+	virtual void AddMyMarker(class AActor *);                                  // slot 85
 	virtual class AActor * AssociatedLevelGeometry();
 	virtual INT HasAssociatedLevelGeometry(class AActor *);
 	virtual void PlayAnim(INT, class FName, FLOAT, FLOAT, INT, INT, INT);
-	virtual INT IsRelevantToPawnHeartBeat(class APawn *);
-	virtual INT IsRelevantToPawnHeatVision(class APawn *);
-	virtual INT IsRelevantToPawnRadar(class APawn *);
+	virtual INT IsRelevantToPawnRadar(class APawn *);                          // slot 89
+	virtual INT IsRelevantToPawnHeatVision(class APawn *);                     // slot 90
+	virtual INT IsRelevantToPawnHeartBeat(class APawn *);                      // slot 91
 	virtual INT TickThisFrame(FLOAT);
 	virtual void CheckForErrors();
+	virtual void PrePath();                                                    // slot 94
+	virtual void PostPath();                                                   // slot 95
 	virtual class AActor * GetProjectorBase();
 
 	// Native C++ methods

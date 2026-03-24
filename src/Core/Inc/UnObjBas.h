@@ -512,7 +512,6 @@ public:
 	virtual void PostLoad();
 	virtual void Destroy();
 	virtual void Serialize(class FArchive &);
-	virtual INT IsPendingDelete();
 	virtual INT IsPendingKill();
 	virtual enum EGotoState GotoState(class FName);
 	virtual INT GotoLabel(class FName);
@@ -523,6 +522,7 @@ public:
 	virtual INT ScriptConsoleExec(TCHAR const *, class FOutputDevice &, class UObject *);
 	virtual void Register();
 	virtual void LanguageChange();
+	virtual INT IsPendingDelete();
 	virtual INT GetPropertiesSize();
 	virtual void NetDirty(class UProperty *);
 
