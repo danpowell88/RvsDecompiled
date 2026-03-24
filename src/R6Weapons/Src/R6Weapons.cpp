@@ -40,7 +40,7 @@ DWORD g_net_old_bit7      = 0;
 
 IMPLEMENT_CLASS(AR6Weapons)
 
-IMPL_MATCH("R6Weapons.dll", 0x10003f40)
+IMPL_TODO("Ghidra R6Weapons.dll 0x10003f40: 179-byte function with Super::ProcessState + Cast<AR6Pawn>(member+0x140) + vtable call at 0x188; needs Cast and ShowWeaponParticles dispatch")
 void AR6Weapons::ProcessState(FLOAT DeltaTime)
 {
 	guard(AR6Weapons::ProcessState);
@@ -95,7 +95,7 @@ void AR6Weapons::PostNetReceive()
 	unguard;
 }
 
-IMPL_MATCH("R6Weapons.dll", 0x10004030)
+IMPL_TODO("Ghidra R6Weapons.dll 0x10004030: 690-byte function with Super::TickAuthoritative + accuracy/particles update logic; needs full decompilation")
 void AR6Weapons::TickAuthoritative(FLOAT DeltaTime)
 {
 	guard(AR6Weapons::TickAuthoritative);
@@ -117,7 +117,7 @@ void AR6Weapons::ShowWeaponParticles(AR6Pawn* param_1, AR6PlayerController* para
 	// vtable[0x22] (byte offset 0x88) on a particle emitter: activate/trigger
 	typedef void (__thiscall* PFNTRIGGER)(void*, INT);
 
-	if (*(INT*)((BYTE*)this + 0x398) < 1)   // pending particle count < 1
+	if (*(INT*)((BYTE*)this + 0x398) <= 0)   // pending particle count <= 0
 	{
 		// No shots pending — hide the muzzle-flash emitter
 		INT sfx = *(INT*)((BYTE*)this + 0x5a0);                       // AR6SFX at this+0x5a0
@@ -449,7 +449,19 @@ FLOAT AR6Weapons::GetMovingModifier(FLOAT DeltaTime, FLOAT DeltaFrame)
 IMPL_MATCH("R6Weapons.dll", 0x100039e0)
 bool AR6Weapons::WeaponIsNotFiring()
 {
+	guard(AR6Weapons::WeaponIsNotFiring);
+	// Walk the state hierarchy looking for "NormalFire" state.
+	// If the weapon is currently in (or inherits from) NormalFire, it IS firing.
+	UState* state = StateFrame->StateNode;
+	while (state)
+	{
+		FName NormalFireName(TEXT("NormalFire"), FNAME_Find);
+		if (state->Name == NormalFireName)
+			return false;
+		state = (UState*)state->SuperField;
+	}
 	return true;
+	unguard;
 }
 
 IMPL_MATCH("R6Weapons.dll", 0x100011c0)

@@ -455,7 +455,7 @@ BYTE UInput::GetKey( const TCHAR* KeyName )
 	// Returns the key index (0-254) whose binding string matches KeyName,
 	// or 0 if not found. Retail exits on first match or after 255 slots.
 	BYTE found = 0;
-	for (BYTE i = 0; i != 0xFF && found == 0; i++)
+	for (BYTE i = 0; i < 0xFF && found == 0; i++)
 	{
 		FString& binding = *(FString*)((BYTE*)this + i * 0xC + 0x2B0);
 		if (appStricmp(KeyName, *binding) == 0)

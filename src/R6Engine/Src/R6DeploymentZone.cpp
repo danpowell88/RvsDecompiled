@@ -383,8 +383,10 @@ void AR6DeploymentZone::execFindRandomPointInArea(FFrame& Stack, RESULT_DECL)
 IMPL_MATCH("R6Engine.dll", 0x10017010)
 void AR6DeploymentZone::execFirstInit(FFrame& Stack, RESULT_DECL)
 {
+	guard(AR6DeploymentZone::execFirstInit);
 	P_FINISH;
 	FirstInit();
+	unguard;
 }
 
 IMPL_MATCH("R6Engine.dll", 0x10018670)
@@ -425,8 +427,10 @@ void AR6DeploymentZone::execGetClosestHostage(FFrame& Stack, RESULT_DECL)
 IMPL_MATCH("R6Engine.dll", 0x100189c0)
 void AR6DeploymentZone::execHaveHostage(FFrame& Stack, RESULT_DECL)
 {
+	guard(AR6DeploymentZone::execHaveHostage);
 	P_FINISH;
 	*(DWORD*)Result = HaveHostage();
+	unguard;
 }
 
 IMPL_MATCH("R6Engine.dll", 0x10018920)

@@ -187,20 +187,18 @@ guard(UNullRenderDevice::RestoreGamma);
 unguard;
 }
 
+// Ghidra 0x1036c9a0: 9 bytes, no SEH — returns pointer to embedded FRenderInterface at this+0xC8
 IMPL_MATCH("Engine.dll", 0x1036c9a0)
 FRenderInterface* UNullRenderDevice::Lock( UViewport* Viewport, BYTE* HitData, INT* HitSize )
 {
-guard(UNullRenderDevice::Lock);
-return NULL;
-unguard;
+	return (FRenderInterface*)((BYTE*)this + 0xC8);
 }
 
+// Ghidra 0x1036c9b0: 7 bytes, no SEH — returns pointer to embedded FRenderCaps at this+0x104
 IMPL_MATCH("Engine.dll", 0x1036c9b0)
 FRenderCaps* UNullRenderDevice::GetRenderCaps()
 {
-guard(UNullRenderDevice::GetRenderCaps);
-return NULL;
-unguard;
+	return (FRenderCaps*)((BYTE*)this + 0x104);
 }
 
 IMPL_EMPTY("NullDrv — headless renderer; retail body is also empty")

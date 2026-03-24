@@ -1092,10 +1092,12 @@ IMPL_MATCH("Engine.dll", 0x1045d6c0)
 int UTerrainMaterial::HasFallback()
 {
 	guard(UTerrainMaterial::HasFallback);
-	// Ghidra 0x15d6c0: if bit 0 of this+0x34 is clear, check TArray<UObject*> at this+0x60;
+	// Ghidra 0x15d6c0: if bit 0 of this+0x34 is set, return 0 immediately;
+	// otherwise check TArray<UObject*> at this+0x60;
 	// if non-empty and first element IsA UShader, call HasFallback() on it via vtable[0x22].
 	// Returns 0 if flag set, array empty, not a UShader, or shader reports no fallback.
-	if ((*(BYTE*)((BYTE*)this + 0x34) & 1) == 0)
+	if (*(BYTE*)((BYTE*)this + 0x34) & 1)
+		return 0;
 	{
 		FArray* arr = (FArray*)((BYTE*)this + 0x60);
 		if (arr->Num() != 0)

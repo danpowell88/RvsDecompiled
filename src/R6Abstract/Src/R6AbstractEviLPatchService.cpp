@@ -23,11 +23,13 @@ void UR6AbstractEviLPatchService::SetFunctionPtr(DWORD (CDECL* Func)(void))
 IMPL_MATCH("R6Abstract.dll", 0x10003780)
 void UR6AbstractEviLPatchService::execGetState(FFrame& Stack, RESULT_DECL)
 {
+	guard(UR6AbstractEviLPatchService::execGetState);
 	P_FINISH;
 	if (GEviLPatchCallback != NULL)
 		*(DWORD*)Result = GEviLPatchCallback();
 	else
 		*(DWORD*)Result = 0;
+	unguard;
 }
 
 /*-----------------------------------------------------------------------------

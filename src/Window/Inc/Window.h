@@ -616,6 +616,7 @@ public FCommandTarget
 	BOOL m_bShow;
 	WPARAM LastwParam;	
 	LPARAM LastlParam;
+	INT _R6Pad38; // Ravenshield addition at WWindow+0x38; initialized to 0 in retail ctor (0x1100ae80)
 
 	// Static.
 	static INT              ModalCount;
@@ -737,6 +738,7 @@ public FCommandTarget
 	,	OwnerWindow			( InOwnerWindow )
 	,	NotifyHook			( 0 )
 	,   Snoop               ( NULL )
+	,	_R6Pad38			( 0 )
 	{}
 #if WIN_OBJ
 	void Destroy()
@@ -809,7 +811,7 @@ public FCommandTarget
 		::GetCursorPos( Mouse );
 		return ScreenToClient( Mouse );
 	}
-	void Show( UBOOL Show )
+	virtual void Show( UBOOL Show )
 	{
 		guard(WWindow::Show);
 		m_bShow = Show;

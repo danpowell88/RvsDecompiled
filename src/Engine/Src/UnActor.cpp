@@ -3555,7 +3555,14 @@ void AActor::PlayAnim( INT Channel, FName SequenceName, FLOAT Rate, FLOAT TweenT
 {
 	guard(AActor::PlayAnim);
 	if( !Mesh )
+	{
+		// Retail 0x10420c94: if actor is not hidden, log a no-mesh warning.
+		// This non-trivial null branch forces the compiler to emit JNZ (skip over
+		// this block when Mesh exists) matching retail's branch layout.
+		if( !bHidden )
+			debugf( TEXT("PlayAnim: %s has no Mesh"), GetName() );
 		return;
+	}
 	Mesh->MeshGetInstance( this );
 	if( MeshInstance )
 		MeshInstance->PlayAnim( Channel, SequenceName, Rate, TweenTime, bLooping, bOverride, bRestart );

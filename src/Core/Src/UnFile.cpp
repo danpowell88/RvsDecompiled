@@ -213,7 +213,7 @@ CORE_API void appRequestExit( UBOOL Force )
 	if( Force )
 	{
 		// Force immediate exit.
-		ExitProcess( 0 );
+		ExitProcess( 1 );
 	}
 	else
 	{
