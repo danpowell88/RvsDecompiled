@@ -52,10 +52,9 @@ IMPL_MATCH("R6Weapons.dll", 0x10003c30)
 INT AR6Weapons::IsBlockedBy(AActor const* Other) const
 {
 	guard(AR6Weapons::IsBlockedBy);
-	// Ghidra 0x3c30: if Other has bTrailerSameRotation (bit 17 of flags DWORD at +0xa8), don't block.
-	// DIVERGENCE: bTrailerSameRotation is the reconstructed name for 0xa8 & 0x20000 in this engine layout;
-	// the actual R6 usage is as a "pass-through" collision flag.
-	if (Other->bTrailerSameRotation)
+	// Ghidra 0x10003c30: tests DWORD[2] of AActor bitfield at +0xa8.
+	// bit 17 (0x20000) = m_bPawnGoThrough — actors pawns can pass through don't block weapons.
+	if (Other->m_bPawnGoThrough)
 		return 0;
 	return Super::IsBlockedBy(Other);
 	unguard;

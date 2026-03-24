@@ -13,23 +13,18 @@ IMPLEMENT_FUNCTION(AR6Bullet, -1, execBulletGoesThroughSurface)
 IMPL_MATCH("R6Weapons.dll", 0x10001000)
 INT AR6Bullet::IsBlockedBy(AActor const* Other) const
 {
-	// Ghidra 0x1000: bullets only collide with level geometry and actors with the
-	// 0x2000 flag (bit 13 of flags DWORD at +0xa8, reconstructed as bOnlyOwnerSee).
-	// DIVERGENCE: bOnlyOwnerSee is the field name per the reconstructed header at that
-	// bit position; the actual R6 usage is a "blockable-by-bullet" marker flag.
+	// Ghidra 0x10001000: tests DWORD[2] of AActor bitfield at +0xa8.
+	// bit 13 (0x2000) = bBlockActors, bit 18 (0x40000) = m_bBulletGoThrough.
 	ALevelInfo* pLevel = Level;
-	if (Other != (AActor*)pLevel && !Other->bOnlyOwnerSee)
+	if (Other != (AActor*)pLevel && !Other->bBlockActors)
 		return 0;
 	if (!m_bIsGrenade)
 	{
-		// Non-grenades don't block with actors that have the 0x40000 flag
-		// (bit 18 at +0xa8, reconstructed as bTrailerPrePivot).
-		if (Other->bTrailerPrePivot)
+		if (Other->m_bBulletGoThrough)
 			return 0;
 	}
-	else if (Other->bOnlyOwnerSee)
+	else if (Other->bBlockActors)
 	{
-		// Grenades are always blocked by bOnlyOwnerSee actors (world geometry).
 		return 1;
 	}
 	return Super::IsBlockedBy(Other);
