@@ -378,7 +378,7 @@ void FWaveModInfo::Reduce16to8()
 // ============================================================================
 IMPL_MATCH("Engine.dll", 0x10321080)
 FSoundData::FSoundData(USound*) { appMemzero(this, sizeof(*this)); }
-IMPL_TODO("Ghidra VA 0x10321070 (RVA 0x21070) confirms retail body is trivial (5 bytes) - retail has 85B at 0x103801c0")
+IMPL_MATCH("Engine.dll", 0x10321070)
 FSoundData::~FSoundData() {}
 IMPL_MATCH("Engine.dll", 0x103801c0)
 void FSoundData::Load() {}

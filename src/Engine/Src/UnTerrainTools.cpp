@@ -416,11 +416,11 @@ void UTerrainBrushSelect::MouseButtonDown(UViewport *)
 	unguardSlow;
 }
 
-IMPL_TODO("Editor terrain tool — not needed for runtime gameplay - retail has 30B at 0x104657a0")
+IMPL_MATCH("Engine.dll", 0x104657a0)
 void UTerrainBrushSelect::MouseMove(float,float)
 {
-	guard(UTerrainBrushSelect::MouseMove);
-	unguard;
+	// Retail: 30B. Copy global brush position into this+0x48.
+	*(FVector*)((BYTE*)this + 0x48) = GCurrentBrushPos;
 }
 
 IMPL_MATCH("Engine.dll", 0x104656e0)

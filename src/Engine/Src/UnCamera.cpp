@@ -1723,8 +1723,19 @@ INT UViewport::Lock( BYTE* HitData, INT* HitSize )
 }
 IMPL_TODO("body unanalyzed; no render device unlock implemented - retail has 179B at 0x10382c80")
 void UViewport::Unlock() {}
-IMPL_TODO("body unanalyzed; no frame present implemented - retail has 42B at 0x10382d70")
-void UViewport::Present() {}
+IMPL_MATCH("Engine.dll", 0x10382d70)
+void UViewport::Present()
+{
+	// Retail: 42B. Present frame via render device, then copy timestamp.
+	// RenDev at this+0x8c, vtable slot 0x8c = URenderDevice::Present(UViewport*)
+	typedef void (__thiscall *FnPresent)(void*, UViewport*);
+	void* renDev = *(void**)((BYTE*)this + 0x8c);
+	((FnPresent)*(DWORD*)(*(DWORD*)renDev + 0x8c))(renDev, this);
+	// Copy CurrentTime (double at +0x154) to LastUpdateTime (double at +0x98)
+	*(DOUBLE*)((BYTE*)this + 0x98) = *(DOUBLE*)((BYTE*)this + 0x154);
+	// Clear frame counter at +0xa0
+	*(INT*)((BYTE*)this + 0xa0) = 0;
+}
 IMPL_MATCH("Engine.dll", 0x103832b0)
 INT UViewport::SetDrag( INT NewDrag )
 {
@@ -1740,8 +1751,15 @@ IMPL_TODO("body unanalyzed; macro file execution not implemented - retail has 32
 void UViewport::ExecMacro( const TCHAR* Filename, FOutputDevice& Ar ) {}
 IMPL_MATCH("Engine.dll", 0x10312960)
 UClient* UViewport::GetOuterUClient() const { return (UClient*)GetOuter(); }
-IMPL_TODO("body unanalyzed; input subsystem initialization not implemented - retail has 29B at 0x10382dd0")
-void UViewport::InitInput() {}
+IMPL_MATCH("Engine.dll", 0x10382dd0)
+void UViewport::InitInput()
+{
+	// Retail: 29B. Init both UInput subsystems, passing this viewport.
+	UInput* DefaultInput = *(UInput**)((BYTE*)this + 0x84);
+	DefaultInput->Init(this);
+	UInput* SecondaryInput = *(UInput**)((BYTE*)this + 0x88);
+	SecondaryInput->Init(this);
+}
 IMPL_MATCH("Engine.dll", 0x103129f0)
 INT UViewport::IsOrtho()
 {

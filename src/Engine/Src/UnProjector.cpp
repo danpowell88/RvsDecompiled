@@ -118,16 +118,22 @@ void AProjector::PostEditChange()
 	Attach();
 }
 
-IMPL_TODO("PostEditLoad — Ghidra shows retail body is empty (shared stub at 0x176d60) - retail has 26B at 0x10306040")
+IMPL_MATCH("Engine.dll", 0x10306040)
 void AProjector::PostEditLoad()
 {
-	// Retail: 0x176d60 (shared empty stub)
+	// Retail: 26B. Reset zone and reattach after loading.
+	SetZone(0, 0);
+	Attach();
 }
 
-IMPL_TODO("PostEditMove — Ghidra shows retail body is empty (shared stub at 0x176d60) - retail has 51B at 0x10306060")
+IMPL_MATCH("Engine.dll", 0x10306060)
 void AProjector::PostEditMove()
 {
-	// Retail: 0x176d60 (shared empty stub)
+	if (OldLocation != Location)
+	{
+		Detach(1);
+		Attach();
+	}
 }
 
 IMPL_MATCH("Engine.dll", 0x103fb7f0)

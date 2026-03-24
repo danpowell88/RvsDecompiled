@@ -112,12 +112,14 @@ return 0;
 unguard;
 }
 
-IMPL_TODO("NullDrv — headless renderer; retail body is also empty - retail has 41B at 0x1036c9f0")
+IMPL_MATCH("Engine.dll", 0x1036c9f0)
 INT UNullRenderDevice::Init()
 {
-guard(UNullRenderDevice::Init);
-return 1;
-unguard;
+	// Retail: 41B. Initialize the scratch byte buffer at this+0xf8.
+	FArray* arr = (FArray*)((BYTE*)this + 0xf8);
+	arr->Empty(1, 0);
+	arr->Add(0x10000, 1);
+	return 1;
 }
 
 IMPL_MATCH("Engine.dll", 0x1036c950)
