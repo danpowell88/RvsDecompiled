@@ -24,9 +24,12 @@ if(SOURCE_COUNT GREATER 0)
         ${ENGINE_SRC_DIR}/Inc
     )
     target_link_libraries(Engine Core_Dep MeSDK)
-    # Allow duplicate symbol definitions from compiler-generated virtual destructors
-    # across multiple translation units that include the same class definitions.
-    target_link_options(Engine PRIVATE /FORCE:MULTIPLE)
+    # Force linker to retain internal helper thunks needed for parity checking.
+    # These functions have no callers in our source yet but must survive /OPT:REF.
+    target_link_options(Engine PRIVATE
+        "/include:?FUN_103012b0@@YAPAXK@Z"
+        "/include:?FUN_103012d0@@YAXPAX@Z"
+    )
     add_impl_verification(Engine ${ENGINE_SRC_DIR}/Src)
 else()
     message(STATUS "Engine: no source files yet — skipping")

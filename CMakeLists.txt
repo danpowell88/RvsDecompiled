@@ -108,6 +108,20 @@ else()
 endif()
 add_definitions(-D_UNICODE -DUNICODE -D_CRT_SECURE_NO_WARNINGS -D_CRT_NON_CONFORMING_SWPRINTFS)
 
+# --- Global linker flags ---
+# /NOLOGO           Suppress banner
+# /FORCE:UNRESOLVED Retail Core.def exports __FUNC_NAME__ statics that MSVC 7.1
+#                   cannot export via .def (Static storage class); null addresses OK.
+# /FORCE:MULTIPLE   Header-defined virtual stubs compiled into multiple .obj files;
+#                   MSVC 7.1 COMDAT folding doesn't always deduplicate them.
+# /MAP              Generate .map files needed by verify_byte_parity.py to locate
+#                   non-exported functions.
+if(MSVC)
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /NOLOGO /FORCE:UNRESOLVED /FORCE:MULTIPLE /MAP")
+    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /NOLOGO /FORCE:UNRESOLVED /FORCE:MULTIPLE /MAP")
+    set(CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS} /NOLOGO /SUBSYSTEM:WINDOWS")
+endif()
+
 # --- Global include directories ---
 # Available to all modules: reconstructed Unreal headers + era-correct platform SDKs.
 # All game headers are local (src/Core/Inc, src/Engine/Inc, etc.).

@@ -48,6 +48,33 @@ IMPLEMENT_CLASS(UGlobalTempObjects);
 IMPLEMENT_CLASS(AR6eviLTesting);
 
 /*-----------------------------------------------------------------------------
+	GMalloc dispatch wrappers.
+	The retail compiler outlined the GMalloc->Malloc / GMalloc->Free virtual
+	dispatch into shared thunks at the start of Engine.dll's .text section.
+	Every Engine function that allocates or frees memory dispatches through
+	these tiny helpers rather than inlining the vtable call.
+	Ghidra: addresses 0x103012b0 (Malloc, 22B) and 0x103012d0 (Free, 18B).
+-----------------------------------------------------------------------------*/
+
+// GMalloc->Malloc(Size, Tag) wrapper — called from 50+ Engine functions.
+// Force linker to retain these thunks (/OPT:REF would strip uncalled functions).
+#pragma comment(linker, "/include:?FUN_103012b0@@YAPAXK@Z")
+#pragma comment(linker, "/include:?FUN_103012d0@@YAXPAX@Z")
+
+IMPL_MATCH("Engine.dll", 0x103012b0)
+void* FUN_103012b0(DWORD Size)
+{
+	return GMalloc->Malloc(Size, TEXT(""));
+}
+
+// GMalloc->Free(Ptr) wrapper — called from 120+ Engine functions.
+IMPL_MATCH("Engine.dll", 0x103012d0)
+void FUN_103012d0(void* Ptr)
+{
+	GMalloc->Free(Ptr);
+}
+
+/*-----------------------------------------------------------------------------
 	UPrimitive virtual function stubs.
 	The vtable requires definitions for all declared virtuals.
 -----------------------------------------------------------------------------*/

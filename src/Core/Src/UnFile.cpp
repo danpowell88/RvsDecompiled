@@ -818,7 +818,7 @@ CORE_API void appMemset( void* Dest, INT C, INT Count )
 }
 
 #ifndef DEFINED_appMemcpy
-IMPL_DIVERGE("not found in Core.dll Ghidra exports; likely inlined or provided as platform assembly; wrapped in #ifndef DEFINED_appMemcpy guard")
+IMPL_TODO("Core.dll 0x10101000: 479-byte MMX-optimized memcpy with CPU feature detection, computed jump dispatch, and three size-based code paths. Needs inline asm to match.")
 CORE_API void appMemcpy( void* Dest, const void* Src, INT Count )
 {
 	memcpy( Dest, Src, Count );
@@ -826,7 +826,7 @@ CORE_API void appMemcpy( void* Dest, const void* Src, INT Count )
 #endif
 
 #ifndef DEFINED_appMemzero
-IMPL_DIVERGE("not found in Core.dll Ghidra exports; likely inlined or provided as platform assembly; wrapped in #ifndef DEFINED_appMemzero guard")
+IMPL_TODO("Core.dll: platform-specific assembly implementation like appMemcpy; needs inline asm to match retail")
 CORE_API void appMemzero( void* Dest, INT Count )
 {
 	memset( Dest, 0, Count );

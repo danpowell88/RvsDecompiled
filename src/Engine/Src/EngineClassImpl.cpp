@@ -180,6 +180,7 @@ IMPLEMENT_CLASS(UTerrainSector);
 IMPLEMENT_CLASS(UI3DL2Listener);
 IMPLEMENT_CLASS(USoundGen);
 IMPLEMENT_CLASS(UServerCommandlet);
+IMPLEMENT_CLASS(UWindowConsole);
 IMPLEMENT_CLASS(UR6FileManager);
 IMPLEMENT_CLASS(UR6GameColors);
 IMPLEMENT_CLASS(UR6GameMenuCom);
@@ -226,8 +227,10 @@ IMPLEMENT_CLASS(AWarpZoneInfo);
 IMPLEMENT_CLASS(AWarpZoneMarker);
 
 // RVS-specific actor subclasses
+IMPLEMENT_CLASS(ABroadcastHandler);
 IMPLEMENT_CLASS(AR6AbstractCircumstantialActionQuery);
 IMPLEMENT_CLASS(AR6AbstractClimbableObj);
+IMPLEMENT_CLASS(AR6AbstractHostageMgr);
 IMPLEMENT_CLASS(AR6ActionPointAbstract);
 IMPLEMENT_CLASS(AR6ActionSpot);
 IMPLEMENT_CLASS(AR6ColBox);
@@ -243,6 +246,11 @@ IMPLEMENT_CLASS(AR6RainbowStartInfo);
 IMPLEMENT_CLASS(AR6StartGameInfo);
 IMPLEMENT_CLASS(AR6TeamStartInfo);
 IMPLEMENT_CLASS(AR6WallHit);
+IMPLEMENT_CLASS(UR6MissionObjectiveBase);
+
+// BSP data classes (declared in UnModel.h, included via EnginePrivate.h)
+// UBspNodes, UBspSurfs, UVectors, UVerts — header not reachable from here
+// URenderIterator — header not reachable from here
 
 /*-----------------------------------------------------------------------------
 	Exec function implementations and IMPLEMENT_FUNCTION registrations.
