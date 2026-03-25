@@ -20,6 +20,12 @@ if(SOURCE_COUNT GREATER 0)
     )
     target_link_libraries(R6GameService Core_Dep Engine_Dep ${R6ABSTRACT_BUILT_LIB})
     add_dependencies(R6GameService R6Abstract)
+    target_link_options(R6GameService PRIVATE
+        "/include:?FUN_10006350@@YGPAXK@Z"
+        "/include:?FUN_10006370@@YGPAXPAXK@Z"
+        "/include:?FUN_10006390@@YAXPAX@Z"
+        "/include:?FUN_10059130@@YAXXZ"
+    )
     add_impl_verification(R6GameService ${R6GAMESERVICE_SRC_DIR}/Src)
 else()
     message(STATUS "R6GameService: no source files yet — skipping")

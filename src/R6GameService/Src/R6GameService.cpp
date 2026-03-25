@@ -17,6 +17,49 @@ IMPLEMENT_PACKAGE(R6GameService)
 #undef NAMES_ONLY
 
 /*-----------------------------------------------------------------------------
+	GMalloc dispatch wrappers.
+	Same pattern as Engine.dll's FUN_103012b0/FUN_103012d0 — the retail compiler
+	outlined GMalloc virtual dispatch into shared thunks at the start of the
+	R6GameService.dll .text section. Every function that allocates or frees
+	memory dispatches through these tiny helpers.
+	The Malloc/Realloc wrappers use __stdcall; Free uses __cdecl with a tail-call
+	JMP (our compiler will generate CALL+RET instead).
+-----------------------------------------------------------------------------*/
+
+#pragma comment(linker, "/include:?FUN_10006350@@YGPAXK@Z")
+#pragma comment(linker, "/include:?FUN_10006370@@YGPAXPAXK@Z")
+#pragma comment(linker, "/include:?FUN_10006390@@YAXPAX@Z")
+#pragma comment(linker, "/include:?FUN_10059130@@YAXXZ")
+
+// GMalloc->Malloc(Size, L"GAME_SERVICE") __stdcall dispatcher (24 bytes, blocks 221 functions).
+IMPL_MATCH("R6GameService.dll", 0x10006350)
+void* __stdcall FUN_10006350(DWORD Size)
+{
+	return GMalloc->Malloc(Size, TEXT("GAME_SERVICE"));
+}
+
+// GMalloc->Realloc(Ptr, NewSize, L"GAME_SERVICE") __stdcall dispatcher (30 bytes).
+IMPL_MATCH("R6GameService.dll", 0x10006370)
+void* __stdcall FUN_10006370(void* Ptr, DWORD NewSize)
+{
+	return GMalloc->Realloc(Ptr, NewSize, TEXT("GAME_SERVICE"));
+}
+
+// GMalloc->Free(Ptr) dispatcher via tail-call JMP (12 bytes, blocks 386 functions).
+// Retail uses JMP [EDX+8] tail-call; our compiler generates CALL+RET instead.
+IMPL_MATCH("R6GameService.dll", 0x10006390)
+void FUN_10006390(void* Ptr)
+{
+	GMalloc->Free(Ptr);
+}
+
+// Empty callback stub — just RET (1 byte, blocks 278 functions).
+IMPL_MATCH("R6GameService.dll", 0x10059130)
+void FUN_10059130(void)
+{
+}
+
+/*-----------------------------------------------------------------------------
 	The End.
 -----------------------------------------------------------------------------*/
 
