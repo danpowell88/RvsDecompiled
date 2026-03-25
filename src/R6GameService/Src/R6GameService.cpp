@@ -28,7 +28,7 @@ IMPLEMENT_PACKAGE(R6GameService)
 
 #pragma comment(linker, "/include:?FUN_10006350@@YGPAXK@Z")
 #pragma comment(linker, "/include:?FUN_10006370@@YGPAXPAXK@Z")
-#pragma comment(linker, "/include:?FUN_10006390@@YAXPAX@Z")
+#pragma comment(linker, "/include:?FUN_10006390@@YGXPAX@Z")
 #pragma comment(linker, "/include:?FUN_10059130@@YAXXZ")
 
 // GMalloc->Malloc(Size, L"GAME_SERVICE") __stdcall dispatcher (24 bytes, blocks 221 functions).
@@ -46,9 +46,10 @@ void* __stdcall FUN_10006370(void* Ptr, DWORD NewSize)
 }
 
 // GMalloc->Free(Ptr) dispatcher via tail-call JMP (12 bytes, blocks 386 functions).
-// Retail uses JMP [EDX+8] tail-call; our compiler generates CALL+RET instead.
+// Retail uses JMP [EDX+8] tail-call making it __stdcall from caller's perspective;
+// our compiler generates CALL + RET 4 instead, but calling convention matches.
 IMPL_MATCH("R6GameService.dll", 0x10006390)
-void FUN_10006390(void* Ptr)
+void __stdcall FUN_10006390(void* Ptr)
 {
 	GMalloc->Free(Ptr);
 }

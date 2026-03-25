@@ -23,8 +23,10 @@ if(SOURCE_COUNT GREATER 0)
     target_link_options(R6GameService PRIVATE
         "/include:?FUN_10006350@@YGPAXK@Z"
         "/include:?FUN_10006370@@YGPAXPAXK@Z"
-        "/include:?FUN_10006390@@YAXPAX@Z"
+        "/include:?FUN_10006390@@YGXPAX@Z"
         "/include:?FUN_10059130@@YAXXZ"
+        "/include:?FUN_10041530@@YIXPAX@Z"
+        "/include:?FUN_10059140@@YIXPAX@Z"
     )
     add_impl_verification(R6GameService ${R6GAMESERVICE_SRC_DIR}/Src)
 else()
