@@ -91,7 +91,7 @@ def apply_rel_call_mask(data):
 def find_existing_annotations():
     """Return set of (dll_lower, addr_hex_lower) for all existing IMPL_MATCH."""
     annotated = set()
-    for ext in ("*.cpp", "*.h", "*.parity"):
+    for ext in ("*.cpp", "*.h"):
         for f in glob.glob(os.path.join(SRC_DIR, "**", ext), recursive=True):
             try:
                 content = open(f, encoding="utf-8", errors="replace").read()
