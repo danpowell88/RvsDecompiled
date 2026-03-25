@@ -41,12 +41,10 @@ tools/toolchain/
 tools/extlibs/
 tools/umodel/
 tools/vgmstream/
+tools/jdk/
 
 # --- Extracted game content (large binary assets, local use only) ---
-content/textures/
-content/sounds/
-content/animations/
-content/staticmeshes/
+content/
 
 # --- Blog build output ---
 blog/node_modules/
